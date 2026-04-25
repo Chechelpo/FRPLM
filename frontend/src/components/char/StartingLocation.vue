@@ -2,9 +2,9 @@
 import {onMounted, ref} from "vue";
 import SimpleList from "@/components/utils/list/SimpleList.vue";
 import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue";
-import {Character} from "@/entities/chars/Characters";
-import {World} from "@/entities/space/World";
-import {CommonFields} from "@/entities/CommonFields";
+import {Character} from "@/domain/entities/chars/Characters";
+import {World} from "@/domain/entities/space/World";
+import {CommonFields} from "@/utils/CommonFields";
 import {fetch_all} from "@/utils/EntityFetch";
 import {ControllerType} from "@/config/ControllerType";
 

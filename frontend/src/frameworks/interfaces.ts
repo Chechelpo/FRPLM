@@ -8,10 +8,3 @@ export interface BackendObject{
 export interface NamedObject extends BackendObject {
     name: string;
 }
-/** @deprecated */
-export interface LLM_connection{
-    id: number;
-    name: string;
-    url: string;
-    type: string;
-}

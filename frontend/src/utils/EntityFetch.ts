@@ -1,9 +1,9 @@
 //import { setGlobalError } from "@/services/GlobalError";
-import {EntityABS} from "@/entities/EntityABS";
-import {DataRecord, DTO, KeyRecord} from "@/types/DTOs/DTOs";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {DataRecord, DTO, KeyRecord} from "@/types/DTOs";
 import {log_error} from "@/services/ErrorHandler";
 import {ControllerType} from "@/config/ControllerType";
-import {QueryAction} from "@/types/queries";
+import {QueryAction} from "@/frameworks/entities/queries";
 
 const BASE:string ="http://localhost:8080/api";
 const API_BASE: string = "api";

@@ -1,9 +1,9 @@
 import {Component} from "vue";
 import NumberInput from "@/components/utils/entity_editors/fields/numeric/NumberInput.vue";
 import BooleanToggle from "@/components/utils/entity_editors/fields/bool/BooleanToggle.vue";
-import {EntityABS} from "@/entities/EntityABS";
-import {DataRecord, EntityField, EntityFieldValue, KeyRecord, Primitives} from "@/types/DTOs/DTOs";
-import {FieldInfo, FieldTypes, FormatTypes} from "@/types/FieldMetadata";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {DataRecord, EntityField, EntityFieldValue, KeyRecord, Primitives} from "@/types/DTOs";
+import {FieldInfo, FieldTypes, FormatTypes} from "@/frameworks/entities/FieldMetadata";
 import SearchBar from "@/components/utils/SearchBar.vue";
 import LongTextBox from "@/components/utils/entity_editors/fields/textboxes/LongTextBox.vue";
 import ShortTextBox from "@/components/utils/entity_editors/fields/textboxes/ShortTextBox.vue";

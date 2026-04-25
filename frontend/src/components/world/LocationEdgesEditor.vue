@@ -3,8 +3,8 @@
 import {onMounted, ref, watch} from "vue";
 import SimpleList from "@/components/utils/list/SimpleList.vue";
 import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue";
-import {LocationEdge} from "@/entities/space/LocationEdge";
-import {Location} from "@/entities/space/Location";
+import {LocationEdge} from "@/domain/entities/space/LocationEdge";
+import {Location} from "@/domain/entities/space/Location";
 
 const props = defineModel<{
   parentLocation : Location,

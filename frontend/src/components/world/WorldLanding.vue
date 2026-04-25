@@ -2,8 +2,8 @@
 
 import {onMounted, ref} from "vue";
 import List from "@/components/utils/list/List.vue";
-import {goToEdit} from "@/router";
-import {World, WorldData, WorldKey} from "@/entities/space/World";
+import {goToEdit} from "@/app/router";
+import {World, WorldData, WorldKey} from "@/domain/entities/space/World";
 import {create_Entity, fetch_all} from "@/utils/EntityFetch";
 import {ControllerType} from "@/config/ControllerType";
 

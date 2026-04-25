@@ -1,6 +1,6 @@
-import {EntityABS, EntityField} from "@/entities/EntityABS";
+import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
 import {ControllerType} from "@/config/ControllerType";
-import {CommonFields} from "@/entities/CommonFields";
+import {CommonFields} from "@/utils/CommonFields";
 
 export enum ActivationStrategy {
     /** Always active per message (this doesn't mean it will appear, It's still bound by probabilities) */

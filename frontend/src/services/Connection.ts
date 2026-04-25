@@ -1,4 +1,4 @@
-import type { LLM_connection } from "@/types/DTOs/DTOs";
+import type { LLM_connection } from "@/types/DTOs";
 
 export async function fetchAllConnections(): Promise<LLM_connection[]> {
     const r = await fetch("/api/llm/get/all");

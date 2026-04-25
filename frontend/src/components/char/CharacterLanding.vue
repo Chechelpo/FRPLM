@@ -7,9 +7,9 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import {fetch_all} from "@/utils/EntityFetch";
-import {Character, CharacterData, CharacterKey} from "@/entities/chars/Characters";
+import {Character, CharacterData, CharacterKey} from "@/domain/entities/chars/Characters";
 import {ControllerType} from "@/config/ControllerType";
-import {EntityABS} from "@/entities/EntityABS";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
 
 /* data */
 const characters = ref<Character[]>([]);

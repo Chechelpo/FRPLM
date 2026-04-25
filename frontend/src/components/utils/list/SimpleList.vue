@@ -1,7 +1,7 @@
 <script setup lang="ts" generic = "Key extends KeyRecord, Data extends DataRecord, T extends EntityABS<Key,Data>">
 import {computed, onMounted, onUnmounted, ref, watch} from "vue";
-import {DataRecord, EntityABS, KeyRecord} from "@/entities/EntityABS";
-import {CommonFields} from "@/entities/CommonFields";
+import {DataRecord, EntityABS, KeyRecord} from "@/frameworks/entities/EntityABS";
+import {CommonFields} from "@/utils/CommonFields";
 
 /* ----------------------------- Props & Emits ----------------------------- */
 const props = defineProps<{

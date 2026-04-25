@@ -1,10 +1,10 @@
-import {EntityABS} from "@/entities/EntityABS";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
 import {ControllerType} from "@/config/ControllerType";
-import {WorldKey} from "@/entities/space/World";
+import {WorldKey} from "@/domain/entities/space/World";
 import {QueryEntities} from "@/utils/EntityFetch";
-import {QueryActionType} from "@/types/queries";
-import {EntityField} from "@/types/DTOs/DTOs";
-import {CommonFields} from "@/entities/CommonFields";
+import {QueryActionType} from "@/frameworks/entities/queries";
+import {EntityField} from "@/types/DTOs";
+import {CommonFields} from "@/utils/CommonFields";
 
 export type LocationKey = {worldID?: number, id?: number}
 export type LocationData = {

@@ -4,7 +4,7 @@
   ">
 import {ref, onMounted, computed, toRef} from "vue";
 import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue";
-import {EntityABS} from "@/entities/EntityABS";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
 
 const entity = defineModel<Ent>(
     "entity",

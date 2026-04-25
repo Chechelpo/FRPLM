@@ -1,9 +1,9 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Character DTOs
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import type {BackendObject, NamedObject} from "@/types/interfaces";
+import type {BackendObject, NamedObject} from "@/frameworks/interfaces";
 import {ControllerType} from "@/config/ControllerType";
-import {CommonFields} from "@/entities/CommonFields";
+import {CommonFields} from "@/utils/CommonFields";
 
 export type Primitives = string | number | boolean | null;
 export type KeyRecord = Record<string, Primitives>;

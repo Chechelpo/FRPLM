@@ -4,8 +4,8 @@ import AvatarEditor from "@/components/utils/entity_editors/self-assembling/Avat
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import LocationEdgesEditor from "@/components/world/LocationEdgesEditor.vue";
-import {World, WorldData, WorldKey} from "@/entities/space/World";
-import {Location, LocationData, LocationKey} from "@/entities/space/Location";
+import {World, WorldData, WorldKey} from "@/domain/entities/space/World";
+import {Location, LocationData, LocationKey} from "@/domain/entities/space/Location";
 import {create_Entity, fetchOne} from "@/utils/EntityFetch";
 import {ControllerType} from "@/config/ControllerType";
 

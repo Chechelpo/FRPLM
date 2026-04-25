@@ -4,7 +4,7 @@ import EmptyView from "@/components/layout/EmptyView.vue";
 import ConnectionView from "@/components/connections/ConnectionView.vue";
 import WorldLanding from "@/components/world/WorldLanding.vue";
 import {ControllerType} from "@/config/ControllerType";
-import {EntityABS} from "@/entities/EntityABS";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
 import WorldEdit from "@/components/world/WorldEdit.vue";
 
 export function route_to(type:ControllerType): string {

@@ -1,6 +1,6 @@
-import {EntityABS, EntityField} from "@/entities/EntityABS";
+import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
 import {ControllerType} from "@/config/ControllerType";
-import {CommonFields} from "@/entities/CommonFields";
+import {CommonFields} from "@/utils/CommonFields";
 
 export type LorebookKey = {id:number}
 export type LorebookData = {name:string}

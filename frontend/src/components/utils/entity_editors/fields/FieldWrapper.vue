@@ -8,11 +8,11 @@ Field Wrapper vue component
     generic = "Key extends KeyRecord, Data extends DataRecord"
 >
 
-import {EntityABS} from "@/entities/EntityABS";
-import {DataRecord, EntityField, KeyRecord, Primitives} from "@/types/DTOs/DTOs";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {DataRecord, EntityField, KeyRecord, Primitives} from "@/types/DTOs";
 import {computed, ref} from "vue";
 import {getEditorForField} from "@/components/utils/entity_editors/field";
-import {FieldTypes, PlaceHolder} from "@/types/FieldMetadata";
+import {FieldTypes, PlaceHolder} from "@/frameworks/entities/FieldMetadata";
 
 const props = defineProps<{
   fieldName:EntityField<Key, Data>;

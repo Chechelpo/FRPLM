@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
-import {Character_DTO, World_DTO} from "@/types/DTOs/DTOs";
+import {Character_DTO, World_DTO} from "@/types/DTOs";
 import {getWorlds} from "@/services/world";
 import SimpleList from "@/components/utils/list/SimpleList.vue";
 

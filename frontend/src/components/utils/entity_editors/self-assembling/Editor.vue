@@ -4,7 +4,7 @@
     Data extends DataRecord,
     Ent extends EntityABS<Keys, Data>
   ">
-import {KeyRecord, DataRecord, EntityABS} from "@/entities/EntityABS";
+import {KeyRecord, DataRecord, EntityABS} from "@/frameworks/entities/EntityABS";
 import FieldWrapper from "@/components/utils/entity_editors/fields/FieldWrapper.vue";
 import {onMounted} from "vue";
 

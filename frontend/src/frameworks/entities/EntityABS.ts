@@ -1,8 +1,8 @@
 import { API_BASE } from "@/config";
-import { FieldInfo } from "@/types/FieldMetadata";
+import { FieldInfo } from "@/frameworks/entities/FieldMetadata";
 import {fetchApi, getEntityController, UpdateEntityField} from "@/utils/EntityFetch";
-import {DTO} from "@/types/DTOs/DTOs";
-import {CommonFields} from "@/entities/CommonFields";
+import {DTO} from "@/types/DTOs";
+import {CommonFields} from "@/utils/CommonFields";
 import {ControllerType} from "@/config/ControllerType";
 import {Equatable, ValueComparable} from "@/types/Equatable";
 

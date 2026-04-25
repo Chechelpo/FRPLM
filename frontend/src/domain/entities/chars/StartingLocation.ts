@@ -1,11 +1,11 @@
-import {EntityABS} from "@/entities/EntityABS";
-import {FieldInfo} from "@/types/FieldMetadata";
-import {Character} from "@/entities/chars/Characters";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {FieldInfo} from "@/frameworks/entities/FieldMetadata";
+import {Character} from "@/domain/entities/chars/Characters";
 import {filterWithAttribute} from "@/utils/filters";
 import {fetch_all} from "@/utils/EntityFetch";
-import {DataRecord, EntityField, KeyRecord} from "@/types/DTOs/DTOs";
+import {DataRecord, EntityField, KeyRecord} from "@/types/DTOs";
 import {ControllerType} from "@/config/ControllerType";
-import {CommonFields} from "@/entities/CommonFields";
+import {CommonFields} from "@/utils/CommonFields";
 
 interface StartingLocationKeys extends KeyRecord{
     worldID: number;

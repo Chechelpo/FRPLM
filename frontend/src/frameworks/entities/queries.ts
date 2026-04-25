@@ -1,4 +1,4 @@
-import {DataRecord, EntityField, EntityFieldValue, KeyRecord} from "@/types/DTOs/DTOs";
+import {DataRecord, EntityField, EntityFieldValue, KeyRecord} from "@/types/DTOs";
 
 export interface QueryAction<Keys extends KeyRecord, Data extends DataRecord>{
     fieldName: EntityField<Keys,Data>,

@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
-import {route_to} from "@/router";
+import {route_to} from "@/app/router";
 import {ControllerType} from "@/config/ControllerType";
 </script>
 

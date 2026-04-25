@@ -1,5 +1,5 @@
-import {EntityABS} from "@/entities/EntityABS";
-import {DataRecord, KeyRecord} from "@/types/DTOs/DTOs";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {DataRecord, KeyRecord} from "@/types/DTOs";
 
 export function filterWithAttribute<
     Data extends DataRecord,

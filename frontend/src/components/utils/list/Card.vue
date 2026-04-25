@@ -4,9 +4,9 @@ EntityType extends EntityABS<any, Data>
 ">
 import {onMounted, ref} from "vue";
 import AvatarDisplay from "@/components/utils/img/AvatarDisplay.vue";
-import {EntityABS} from "@/entities/EntityABS";
-import {DataRecord, KeyRecord} from "@/types/DTOs/DTOs";
-import {CommonFields} from "@/entities/CommonFields";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {DataRecord, KeyRecord} from "@/types/DTOs";
+import {CommonFields} from "@/utils/CommonFields";
 
 const props = defineProps<{
   character: EntityType

@@ -7,9 +7,9 @@ import {computed, ref} from "vue";
 
 import SearchBar from "@/components/utils/SearchBar.vue";
 import Card from "@/components/utils/list/Card.vue";
-import {EntityABS} from "@/entities/EntityABS";
-import {CommonFields} from "@/entities/CommonFields";
-import {DataRecord, KeyRecord} from "@/types/DTOs/DTOs";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {CommonFields} from "@/utils/CommonFields";
+import {DataRecord, KeyRecord} from "@/types/DTOs";
 
 const elements = defineModel<Ent[]>("elements", {required: true});
 const hasDescription: boolean = elements.value.length > 0 ? elements.value[0].hasAttribute(CommonFields.DESCRIPTION) : false;

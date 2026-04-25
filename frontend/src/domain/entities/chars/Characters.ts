@@ -1,7 +1,7 @@
-import {EntityABS, EntityField} from "@/entities/EntityABS";
+import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
 import {create_Entity, fetch_all, fetchOne} from "@/utils/EntityFetch";
 import {ControllerType} from "@/config/ControllerType";
-import {CommonFields} from "@/entities/CommonFields";
+import {CommonFields} from "@/utils/CommonFields";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {

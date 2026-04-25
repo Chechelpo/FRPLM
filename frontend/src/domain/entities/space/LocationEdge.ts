@@ -1,12 +1,12 @@
-import {EntityABS} from "@/entities/EntityABS";
+import {EntityABS} from "@/frameworks/entities/EntityABS";
 import {ControllerType} from "@/config/ControllerType";
-import {LocationKey} from "@/entities/space/Location";
+import {LocationKey} from "@/domain/entities/space/Location";
 import {QueryEntities} from "@/utils/EntityFetch";
-import {QueryActionType} from "@/types/queries";
+import {QueryActionType} from "@/frameworks/entities/queries";
 import {CustomSet} from "@/utils/CustomSet";
 import {set} from "@vueuse/core";
-import {CommonFields} from "@/entities/CommonFields";
-import {EntityField} from "@/types/DTOs/DTOs";
+import {CommonFields} from "@/utils/CommonFields";
+import {EntityField} from "@/types/DTOs";
 
 export type EdgeKey = {world_id:number, location1_id:number, location2_id:number}
 export type EdgeData = {
