@@ -1,6 +1,8 @@
 # Demo document
 A no-compromises LLM frontend framework specifically designed for long-term sessions with a focus on a world rather than characters. 
 
+**WARNING** WIP project, only public for recruiters to see.
+
 ## About Lorebooks
 Lorebooks are logical groupings of entries. They contain only metadata as to how the entries are scanned in generation. Following are the fields we use:
 ### Lorebook Fields
