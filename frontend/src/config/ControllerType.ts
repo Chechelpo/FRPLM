@@ -1,0 +1,15 @@
+/* Must reference and be equal to chechelpo.demo.config.controllers.ControllerConfig*/
+export enum ControllerType{
+    // Chars controllers
+    CHARACTERS = "characters",
+    STARTING_LOCATIONS = "startingLocations",
+
+    //Lorebooks
+    ENTRY = "entries",
+    LOREBOOKS = "lorebooks",
+
+    //Space controllers
+    WORLDS = "worlds",
+    LOCATIONS = "locations",
+    EDGES = "edges",
+}

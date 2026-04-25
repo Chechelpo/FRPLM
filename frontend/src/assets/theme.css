@@ -1,0 +1,15 @@
+:root {
+    /* Use RGB triplets so Tailwind can apply opacity */
+    --c-surface: 28 25 23;        /* stone-900-ish */
+    --c-surface-2: 41 37 36;      /* stone-800-ish */
+    --c-border: 41 37 36;
+    --c-fg: 231 229 228;          /* stone-200-ish */
+    --c-muted: 168 162 158;       /* stone-400-ish */
+
+    --c-accent: 245 158 11;       /* amber-500-ish */
+    --c-accent-2: 180 83 9;       /* amber-700-ish */
+
+    /* Interaction tokens */
+    --c-surface-hover: 49 46 43;  /* hover surface */
+    --c-border-hover: 251 191 36; /* amber-400-ish */
+}
