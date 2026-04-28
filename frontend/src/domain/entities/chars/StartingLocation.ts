@@ -4,7 +4,7 @@ import {Character} from "@/domain/entities/chars/Characters";
 import {filterWithAttribute} from "@/utils/filters";
 import {fetch_all} from "@/utils/EntityFetch";
 import {DataRecord, EntityField, KeyRecord} from "@/types/DTOs";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 
 interface StartingLocationKeys extends KeyRecord{
@@ -17,8 +17,8 @@ interface StartingLocationData extends DataRecord {
 }
 
 export class StartingLocation extends EntityABS<StartingLocationKeys, StartingLocationData> {
-    getEntityType(): ControllerType {
-        return ControllerType.STARTING_LOCATIONS;
+    getEntityType(): EntityTypes {
+        return EntityTypes.STARTING_LOCATIONS;
     }
 
     getIterationArr(): EntityField<StartingLocationKeys, StartingLocationData>[] {
@@ -30,7 +30,7 @@ export class StartingLocation extends EntityABS<StartingLocationKeys, StartingLo
         return filterWithAttribute(
             "characterID",
             character.get("id"),
-            await fetch_all<StartingLocationKeys,StartingLocationData, StartingLocation>(ControllerType.STARTING_LOCATIONS, this),
+            await fetch_all<StartingLocationKeys,StartingLocationData, StartingLocation>(EntityTypes.STARTING_LOCATIONS, this),
         )
     }
 

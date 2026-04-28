@@ -1,18 +1,18 @@
 import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
 import {create_Entity, fetch_all, fetchOne} from "@/utils/EntityFetch";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {
     name?: string,
-    lorebook_id: number
+    lorebook_id?: number
 };
 
 export class Character extends EntityABS<CharacterKey, CharacterData> {
-    private static readonly type:ControllerType = ControllerType.CHARACTERS;
+    private static readonly type:EntityTypes = EntityTypes.CHARACTERS;
 
-    getEntityType(): ControllerType {
+    getEntityType(): EntityTypes {
         return Character.type;
     }
 

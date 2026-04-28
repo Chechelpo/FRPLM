@@ -4,10 +4,13 @@
 package chechelpo.demo.jooq.generated;
 
 
+import chechelpo.demo.jooq.generated.tables.CharacterTags;
 import chechelpo.demo.jooq.generated.tables.Characters;
 import chechelpo.demo.jooq.generated.tables.ComfyUi;
 import chechelpo.demo.jooq.generated.tables.Connection;
 import chechelpo.demo.jooq.generated.tables.Entry;
+import chechelpo.demo.jooq.generated.tables.EntryCondition;
+import chechelpo.demo.jooq.generated.tables.EntryConditionGroup;
 import chechelpo.demo.jooq.generated.tables.EntryKeywords;
 import chechelpo.demo.jooq.generated.tables.EntryOutlet;
 import chechelpo.demo.jooq.generated.tables.Extension;
@@ -15,6 +18,7 @@ import chechelpo.demo.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.demo.jooq.generated.tables.Keyword;
 import chechelpo.demo.jooq.generated.tables.LlmGen;
 import chechelpo.demo.jooq.generated.tables.LocationNeighbors;
+import chechelpo.demo.jooq.generated.tables.LocationTags;
 import chechelpo.demo.jooq.generated.tables.Locations;
 import chechelpo.demo.jooq.generated.tables.Lorebooks;
 import chechelpo.demo.jooq.generated.tables.MainPrompt;
@@ -24,6 +28,7 @@ import chechelpo.demo.jooq.generated.tables.PromptTemplate;
 import chechelpo.demo.jooq.generated.tables.Responses;
 import chechelpo.demo.jooq.generated.tables.Sessions;
 import chechelpo.demo.jooq.generated.tables.StartingLocations;
+import chechelpo.demo.jooq.generated.tables.Tags;
 import chechelpo.demo.jooq.generated.tables.Worlds;
 
 import java.util.Arrays;
@@ -48,6 +53,11 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
+     * The table <code>PUBLIC.CHARACTER_TAGS</code>.
+     */
+    public final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
+
+    /**
      * The table <code>PUBLIC.CHARACTERS</code>.
      */
     public final Characters CHARACTERS = Characters.CHARACTERS;
@@ -66,6 +76,16 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.ENTRY</code>.
      */
     public final Entry ENTRY = Entry.ENTRY;
+
+    /**
+     * The table <code>PUBLIC.ENTRY_CONDITION</code>.
+     */
+    public final EntryCondition ENTRY_CONDITION = EntryCondition.ENTRY_CONDITION;
+
+    /**
+     * The table <code>PUBLIC.ENTRY_CONDITION_GROUP</code>.
+     */
+    public final EntryConditionGroup ENTRY_CONDITION_GROUP = EntryConditionGroup.ENTRY_CONDITION_GROUP;
 
     /**
      * The table <code>PUBLIC.ENTRY_KEYWORDS</code>.
@@ -101,6 +121,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.LOCATION_NEIGHBORS</code>.
      */
     public final LocationNeighbors LOCATION_NEIGHBORS = LocationNeighbors.LOCATION_NEIGHBORS;
+
+    /**
+     * The table <code>PUBLIC.LOCATION_TAGS</code>.
+     */
+    public final LocationTags LOCATION_TAGS = LocationTags.LOCATION_TAGS;
 
     /**
      * The table <code>PUBLIC.LOCATIONS</code>.
@@ -148,6 +173,11 @@ public class Public extends SchemaImpl {
     public final StartingLocations STARTING_LOCATIONS = StartingLocations.STARTING_LOCATIONS;
 
     /**
+     * The table <code>PUBLIC.TAGS</code>.
+     */
+    public final Tags TAGS = Tags.TAGS;
+
+    /**
      * The table <code>PUBLIC.WORLDS</code>.
      */
     public final Worlds WORLDS = Worlds.WORLDS;
@@ -168,10 +198,13 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            CharacterTags.CHARACTER_TAGS,
             Characters.CHARACTERS,
             ComfyUi.COMFY_UI,
             Connection.CONNECTION,
             Entry.ENTRY,
+            EntryCondition.ENTRY_CONDITION,
+            EntryConditionGroup.ENTRY_CONDITION_GROUP,
             EntryKeywords.ENTRY_KEYWORDS,
             EntryOutlet.ENTRY_OUTLET,
             Extension.EXTENSION,
@@ -179,6 +212,7 @@ public class Public extends SchemaImpl {
             Keyword.KEYWORD,
             LlmGen.LLM_GEN,
             LocationNeighbors.LOCATION_NEIGHBORS,
+            LocationTags.LOCATION_TAGS,
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
             MainPrompt.MAIN_PROMPT,
@@ -188,6 +222,7 @@ public class Public extends SchemaImpl {
             Responses.RESPONSES,
             Sessions.SESSIONS,
             StartingLocations.STARTING_LOCATIONS,
+            Tags.TAGS,
             Worlds.WORLDS
         );
     }

@@ -1,5 +1,5 @@
 import {EntityABS} from "@/frameworks/entities/EntityABS";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {WorldKey} from "@/domain/entities/space/World";
 import {QueryEntities} from "@/utils/EntityFetch";
 import {QueryActionType} from "@/frameworks/entities/queries";
@@ -13,8 +13,8 @@ export type LocationData = {
     lorebook_id: number,
 }
 export class Location extends EntityABS<LocationKey,LocationData> {
-    getEntityType(): ControllerType {
-        return ControllerType.LOCATIONS;
+    getEntityType(): EntityTypes {
+        return EntityTypes.LOCATIONS;
     }
 
     getIterationArr(): EntityField<LocationKey, LocationData>[] {
@@ -28,7 +28,7 @@ export class Location extends EntityABS<LocationKey,LocationData> {
                 action:QueryActionType.EQUALS,
                 value:key.id
             }],
-            ControllerType.LOCATIONS,
+            EntityTypes.LOCATIONS,
             this
         )
     }

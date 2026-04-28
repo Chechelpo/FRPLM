@@ -8,10 +8,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public final class EntryStore extends ABSEntityStore<EntryRecord> {
 
-    protected EntryStore(@NotNull DSLContext ctx) {
+    EntryStore(@NotNull DSLContext ctx) {
         super(ctx, Entry.ENTRY, EntityTypes.Types.ENTRIES);
+    }
+
+    @NotNull List<EntryRecord> getOfLorebook(Integer LorebookID){
+        return this.ctx.selectFrom(Entry.ENTRY)
+                .where(Entry.ENTRY.LOREBOOK_ID.eq(LorebookID))
+                .fetch();
     }
 }

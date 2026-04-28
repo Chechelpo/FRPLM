@@ -22,39 +22,73 @@ public sealed abstract class Constraints<T> permits BoolConstraints, FloatConstr
 
     protected void violationMessage(@Nullable TableField<?, ?> field, Object value){
         assert field != null;
-        System.err.println("Field " + field.getName() + " violated constraint with value: " + value);
+        System.err.println("Field " + field.getName() + " violated constraint with value: " + value + " expected " + fieldType);
     }
     /**
      * @param field to get the name from
      * @param value the value you want to check
      * @return true if it violates constraints
      */
-    public boolean violatesConstraints(@Nullable TableField<?, ?> field, Object value){
-        switch (this.fieldType){
+    public boolean violatesConstraints(@Nullable TableField<?, ?> field, Object value) {
+        // Null is always a violation (assuming columns are non-nullable)
+        if (value == null) {
+            violationMessage(field, value);
+            return true;
+        }
+
+        switch (this.fieldType) {
             case BOOLEAN:
-                if (!(value instanceof Boolean)){
+                if (value instanceof Boolean) {
+                    return false;
+                }
+                // Try to parse as boolean from string
+                if (value instanceof String) {
+                    String s = (String) value;
+                    if ("true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
+                        return false;
+                    }
+                }
+                violationMessage(field, value);
+                return true;
+
+            case SHORT:
+            case BYTE:
+            case LONG:
+            case INTEGER:
+                // Already a numeric type? Accept it.
+                if (value instanceof Number) {
+                    return false;
+                }
+                // Try to parse the string representation as a long
+                try {
+                    Long.parseLong(value.toString());
+                    return false; // parse succeeded
+                } catch (NumberFormatException e) {
                     violationMessage(field, value);
                     return true;
                 }
-                break;
-            case SHORT, BYTE, LONG, INTEGER:
-                if (!(value instanceof Integer || value instanceof Long || value instanceof Byte || value instanceof Short)){
-                    violationMessage(field, value);
-                    return true;
-                }
-                break;
+
             case STRING:
-                if (!(value instanceof String || value instanceof Character)){
+                if (value instanceof String || value instanceof Character) {
+                    return false;
+                }
+                violationMessage(field, value);
+                return true;
+
+            case FLOAT:
+            case DOUBLE:
+                // Already a floating-point numeric type? Accept it.
+                if (value instanceof Float || value instanceof Double) {
+                    return false;
+                }
+                // Try to parse as double
+                try {
+                    Double.parseDouble(value.toString());
+                    return false; // parse succeeded
+                } catch (NumberFormatException e) {
                     violationMessage(field, value);
                     return true;
                 }
-                break;
-            case FLOAT, DOUBLE:
-                if (!(value instanceof Float || value instanceof Double)){
-                    violationMessage(field, value);
-                    return true;
-                }
-                break;
         }
 
         return false;

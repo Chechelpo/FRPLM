@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import List from "@/components/utils/list/List.vue";
-import AvatarEditor from "@/components/utils/entity_editors/self-assembling/AvatarEditor.vue";
 
 import {onMounted, ref} from "vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
@@ -8,8 +7,9 @@ import StartingLocation from "@/components/char/StartingLocation.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import {fetch_all} from "@/utils/EntityFetch";
 import {Character, CharacterData, CharacterKey} from "@/domain/entities/chars/Characters";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {EntityABS} from "@/frameworks/entities/EntityABS";
+import CharacterEditor from "@/components/char/CharacterEditor.vue";
 
 /* data */
 const characters = ref<Character[]>([]);
@@ -32,7 +32,7 @@ async function onEdit(character: Character) {
 }
 
 onMounted(async () => {
-  characters.value = await fetch_all<CharacterKey, CharacterData, Character>(ControllerType.CHARACTERS, Character);
+  characters.value = await fetch_all<CharacterKey, CharacterData, Character>(EntityTypes.CHARACTERS, Character);
   editCharacter.value = null;
   console.log(characters);
 });
@@ -54,12 +54,11 @@ onMounted(async () => {
           storage-key="Character_edit:inner"
       >
         <template #left>
-          <div class = "text-2xl w-fit h-fit"> General information editor </div>
-          <AvatarEditor
-              v-if="editCharacter"
-              v-model:entity="editCharacter"
-          >
-          </AvatarEditor>
+          <div> General information editor </div>
+          <CharacterEditor
+          v-if = 'editCharacter'
+          :edit-character='editCharacter as Character'
+          ></CharacterEditor>
         </template>
         <template #right>
           <Expandable title="StartingLocations">

@@ -135,11 +135,6 @@ public abstract class ABSEntityController<
             Map<String, Object> key,
             Map<String, Object> payload
     ) {
-        public EntityDTO {
-            key = key == null ? Map.of() : Map.copyOf(key);
-            payload = payload == null ? Map.of() : Map.copyOf(payload);
-        }
-
         public static Builder builder() {
             return new Builder();
         }
@@ -178,7 +173,8 @@ public abstract class ABSEntityController<
         return dtos;
     }
 
-    protected EntityDTO wrapEntity(@NotNull R record){
+    protected @Nullable EntityDTO wrapEntity(@Nullable R record){
+        if (record == null) return null;
         EntityDTO.Builder builder = new EntityDTO.Builder().type(this.type.getEntityType());
         for (Map.Entry<TableField<R,?>, String> entry : to_name.entrySet()){
             //log.info("{} -> {}", entry.getKey(),entry.getValue());
@@ -195,7 +191,7 @@ public abstract class ABSEntityController<
             }
         }
         EntityDTO entity = builder.build();
-        log.info("Entity {}", entity);
+        log.debug("Entity {} \n {}", entity.type, entity);
         return entity;
     }
 
@@ -248,7 +244,7 @@ public abstract class ABSEntityController<
     )
     protected ResponseEntity<EntityDTO[]> getAll(@RequestBody(required = false) Map<String, Object> query) {
         if (query == null) {
-            log.info("Query {}", Arrays.stream(wrapEntities(service.getAll())).toArray());
+            log.info("Query {}", (Object) wrapEntities(service.getAll()));
             return ResponseEntity.ok(
                     wrapEntities(service.getAll())
             );
@@ -289,10 +285,14 @@ public abstract class ABSEntityController<
             value = ENTITY_PATH,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    protected ResponseEntity<EntityDTO> create(@RequestParam Map<String, Object> params, @RequestBody Map<String, Object> body) throws URISyntaxException {
-        HashMap<String, Object> allParams = new HashMap<>(params.size() + body.size());
+    protected ResponseEntity<EntityDTO> create(
+            @RequestParam Map<String, Object> params,
+            @RequestBody(required = false) Map<String, Object> body) throws URISyntaxException
+    {
+        int paramSize = body == null ? params.size() : params.size() + body.size();
+        HashMap<String, Object> allParams = new HashMap<>(paramSize);
         allParams.putAll(params);
-        allParams.putAll(body);
+        if (body != null) allParams.putAll(body);
         log.debug("Creating new entity with params: \n {}", allParams);
 
         R record = service.createAndGet(extractPayload(allParams));

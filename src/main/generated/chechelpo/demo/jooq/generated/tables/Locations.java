@@ -7,8 +7,10 @@ package chechelpo.demo.jooq.generated.tables;
 import chechelpo.demo.jooq.generated.Keys;
 import chechelpo.demo.jooq.generated.Public;
 import chechelpo.demo.jooq.generated.tables.LocationNeighbors.LocationNeighborsPath;
+import chechelpo.demo.jooq.generated.tables.LocationTags.LocationTagsPath;
 import chechelpo.demo.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.demo.jooq.generated.tables.StartingLocations.StartingLocationsPath;
+import chechelpo.demo.jooq.generated.tables.Tags.TagsPath;
 import chechelpo.demo.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.demo.jooq.generated.tables.records.LocationsRecord;
 
@@ -190,6 +192,19 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _lorebooks;
     }
 
+    private transient LocationTagsPath _locationTags;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.LOCATION_TAGS</code> table
+     */
+    public LocationTagsPath locationTags() {
+        if (_locationTags == null)
+            _locationTags = new LocationTagsPath(this, null, Keys.CONSTRAINT_506A.getInverseKey());
+
+        return _locationTags;
+    }
+
     private transient LocationNeighborsPath _constraint_5df;
 
     /**
@@ -229,6 +244,14 @@ public class Locations extends TableImpl<LocationsRecord> {
             _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08.getInverseKey());
 
         return _startingLocations;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>PUBLIC.TAGS</code>
+     * table
+     */
+    public TagsPath tags() {
+        return locationTags().tags();
     }
 
     @Override

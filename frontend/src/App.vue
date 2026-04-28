@@ -3,7 +3,7 @@
     <header class="app-header">
       <nav class="nav-links" aria-label="Main navigation">
         <div>
-          <RouterLink :to="route_to(ControllerType.CHARACTERS)" class="nav-icon" aria-label="Characters">
+          <RouterLink :to="route_to(EntityTypes.CHARACTERS)" class="nav-icon" aria-label="Characters">
             <img src="/header/Characters.png" alt="Characters" />
           </RouterLink>
         </div>
@@ -15,7 +15,7 @@
         </div>
 
         <div>
-          <RouterLink :to="route_to(ControllerType.WORLDS)" class="nav-icon" aria-label="Worlds">
+          <RouterLink :to="route_to(EntityTypes.WORLDS)" class="nav-icon" aria-label="Worlds">
             <img src="/header/globe.png" alt="Worlds" />
           </RouterLink>
         </div>
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
 import {route_to} from "@/app/router";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 </script>
 
 <style scoped>

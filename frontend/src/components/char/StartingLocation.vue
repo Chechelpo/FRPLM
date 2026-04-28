@@ -6,7 +6,7 @@ import {Character} from "@/domain/entities/chars/Characters";
 import {World} from "@/domain/entities/space/World";
 import {CommonFields} from "@/utils/CommonFields";
 import {fetch_all} from "@/utils/EntityFetch";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 
 const props = defineModel<{
   character: Character;
@@ -72,7 +72,7 @@ async function onSelectLocation(location: Location) {
 
 
 onMounted(async () => {
-  worlds.value = await fetch_all(ControllerType.WORLDS, World);
+  worlds.value = await fetch_all(EntityTypes.WORLDS, World);
 });
 </script>
 

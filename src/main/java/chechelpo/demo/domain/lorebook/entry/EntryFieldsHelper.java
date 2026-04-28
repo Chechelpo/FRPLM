@@ -26,6 +26,7 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
             EntryController controller
     ) {
         super(store, service, controller);
+        // Key
         register_field(
                 "lorebook_id",
                 Entry.ENTRY.LOREBOOK_ID,
@@ -52,7 +53,7 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
                         .build()
         );
 
-
+        // Data
         register_field(
                 CommonFields.NAME.getFieldName(),
                 Entry.ENTRY.NAME,
@@ -70,7 +71,6 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
                         )
                         .build()
         );
-
         register_field(
                 "content",
                 Entry.ENTRY.CONTENT,
@@ -88,6 +88,7 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
                         .build()
         );
 
+        // Injection requirements
         register_field(
                 "probability",
                 Entry.ENTRY.PROBABILITY,
@@ -106,17 +107,94 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
         );
 
         register_field(
-                "strategy",
-                Entry.ENTRY.STRATEGY,
+                "outlet",
+                Entry.ENTRY.OUTLET,
                 FieldInfo.stringField()
+                        .setConstraints(
+                                StringConstraints.builder()
+                                        .setMaxLength(255)
+                                        .build()
+                        )
+                        .build()
+        );
+        register_field(
+                "delay",
+                Entry.ENTRY.DELAY,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
+                                .setMin(0L)
+                                .build()
+                        )
+                        .build()
+        );
+        register_field(
+                "cooldown",
+                Entry.ENTRY.COOLDOWN,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
+                                .setMin(0L)
+                                .build()
+                        )
+                        .build()
+        );
+        register_field(
+                "stick_through",
+                Entry.ENTRY.STICK_THROUGH,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
+                                .setMin(0L)
+                                .build()
+                        )
                         .build()
         );
 
+        // Injection Options
+        register_field(
+                "injection_order",
+                Entry.ENTRY.INJECTION_ORDER,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .build()
+        );
 
+        //Activation strategy
+        register_field(
+                "strategy",
+                Entry.ENTRY.STRATEGY,
+                FieldInfo.numberField(FieldType.SHORT)
+                        .setConstraints(NumberConstraints.builder(FieldType.SHORT)
+                                .build()
+                        )
+                        .build()
+        );
+        register_field(
+                "embed_text",
+                Entry.ENTRY.EMBED_TEXT,
+                FieldInfo.stringField()
+                        .build()
+        );
+        register_field(
+                "prevent_further_recursion",
+                Entry.ENTRY.PREVENT_FURTHER_RECURSION,
+                FieldInfo.booleanField()
+                        .build()
+        );
+        register_field(
+                "non_recursable",
+                Entry.ENTRY.NON_RECURSABLE,
+                FieldInfo.booleanField()
+                        .build()
+        );
+        register_field(
+                "delay_until_recursion",
+                Entry.ENTRY.DELAY_UNTIL_RECURSION,
+                FieldInfo.booleanField()
+                        .build()
+        );
         register_field(
                 "scan_depth",
                 Entry.ENTRY.SCAN_DEPTH,
-                FieldInfo.numberField(FieldType.SHORT).build()
+                FieldInfo.numberField(FieldType.SHORT)
+                        .build()
         );
     }
 }

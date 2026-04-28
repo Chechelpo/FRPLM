@@ -4,10 +4,13 @@
 package chechelpo.demo.jooq.generated;
 
 
+import chechelpo.demo.jooq.generated.tables.CharacterTags;
 import chechelpo.demo.jooq.generated.tables.Characters;
 import chechelpo.demo.jooq.generated.tables.ComfyUi;
 import chechelpo.demo.jooq.generated.tables.Connection;
 import chechelpo.demo.jooq.generated.tables.Entry;
+import chechelpo.demo.jooq.generated.tables.EntryCondition;
+import chechelpo.demo.jooq.generated.tables.EntryConditionGroup;
 import chechelpo.demo.jooq.generated.tables.EntryKeywords;
 import chechelpo.demo.jooq.generated.tables.EntryOutlet;
 import chechelpo.demo.jooq.generated.tables.Extension;
@@ -15,6 +18,7 @@ import chechelpo.demo.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.demo.jooq.generated.tables.Keyword;
 import chechelpo.demo.jooq.generated.tables.LlmGen;
 import chechelpo.demo.jooq.generated.tables.LocationNeighbors;
+import chechelpo.demo.jooq.generated.tables.LocationTags;
 import chechelpo.demo.jooq.generated.tables.Locations;
 import chechelpo.demo.jooq.generated.tables.Lorebooks;
 import chechelpo.demo.jooq.generated.tables.MainPrompt;
@@ -24,6 +28,7 @@ import chechelpo.demo.jooq.generated.tables.PromptTemplate;
 import chechelpo.demo.jooq.generated.tables.Responses;
 import chechelpo.demo.jooq.generated.tables.Sessions;
 import chechelpo.demo.jooq.generated.tables.StartingLocations;
+import chechelpo.demo.jooq.generated.tables.Tags;
 import chechelpo.demo.jooq.generated.tables.Worlds;
 
 
@@ -32,6 +37,11 @@ import chechelpo.demo.jooq.generated.tables.Worlds;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * The table <code>PUBLIC.CHARACTER_TAGS</code>.
+     */
+    public static final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
 
     /**
      * The table <code>PUBLIC.CHARACTERS</code>.
@@ -52,6 +62,16 @@ public class Tables {
      * The table <code>PUBLIC.ENTRY</code>.
      */
     public static final Entry ENTRY = Entry.ENTRY;
+
+    /**
+     * The table <code>PUBLIC.ENTRY_CONDITION</code>.
+     */
+    public static final EntryCondition ENTRY_CONDITION = EntryCondition.ENTRY_CONDITION;
+
+    /**
+     * The table <code>PUBLIC.ENTRY_CONDITION_GROUP</code>.
+     */
+    public static final EntryConditionGroup ENTRY_CONDITION_GROUP = EntryConditionGroup.ENTRY_CONDITION_GROUP;
 
     /**
      * The table <code>PUBLIC.ENTRY_KEYWORDS</code>.
@@ -87,6 +107,11 @@ public class Tables {
      * The table <code>PUBLIC.LOCATION_NEIGHBORS</code>.
      */
     public static final LocationNeighbors LOCATION_NEIGHBORS = LocationNeighbors.LOCATION_NEIGHBORS;
+
+    /**
+     * The table <code>PUBLIC.LOCATION_TAGS</code>.
+     */
+    public static final LocationTags LOCATION_TAGS = LocationTags.LOCATION_TAGS;
 
     /**
      * The table <code>PUBLIC.LOCATIONS</code>.
@@ -132,6 +157,11 @@ public class Tables {
      * The table <code>PUBLIC.STARTING_LOCATIONS</code>.
      */
     public static final StartingLocations STARTING_LOCATIONS = StartingLocations.STARTING_LOCATIONS;
+
+    /**
+     * The table <code>PUBLIC.TAGS</code>.
+     */
+    public static final Tags TAGS = Tags.TAGS;
 
     /**
      * The table <code>PUBLIC.WORLDS</code>.

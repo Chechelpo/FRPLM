@@ -14,8 +14,8 @@ import java.util.Set;
 
 import static org.jooq.impl.DSL.trueCondition;
 
-public class QueryObject<R extends TableRecord<R>> {
-    private Map<TableField<R, ?>, FieldQuery<R,?>> queries = new HashMap<>();
+public final class QueryObject<R extends TableRecord<R>> {
+    private final Map<TableField<R, ?>, FieldQuery<R,?>> queries = new HashMap<>();
     public QueryObject() {}
 
     public <T> void addQuery(@NotNull TableField<R, T> field, @NotNull String operatorName ,@NotNull T value){
@@ -55,7 +55,7 @@ public class QueryObject<R extends TableRecord<R>> {
 
     }
 
-    private class FieldQuery <R extends TableRecord<R>, T>{
+    private static class FieldQuery <R extends TableRecord<R>, T>{
         private final TableField<R,T> field;
         private final ComparisonOperator operator;
         private final T value;

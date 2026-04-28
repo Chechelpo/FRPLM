@@ -145,87 +145,101 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     */
+    public void setInjectionOrder(Short value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     */
+    public Short getInjectionOrder() {
+        return (Short) get(9);
+    }
+
+    /**
      * Setter for <code>PUBLIC.ENTRY.STRATEGY</code>.
      */
     public void setStrategy(Short value) {
-        set(9, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.STRATEGY</code>.
      */
     public Short getStrategy() {
-        return (Short) get(9);
+        return (Short) get(10);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.EMBED_TEXT</code>.
      */
     public void setEmbedText(String value) {
-        set(10, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.EMBED_TEXT</code>.
      */
     public String getEmbedText() {
-        return (String) get(10);
+        return (String) get(11);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.PREVENT_FURTHER_RECURSION</code>.
      */
     public void setPreventFurtherRecursion(Boolean value) {
-        set(11, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.PREVENT_FURTHER_RECURSION</code>.
      */
     public Boolean getPreventFurtherRecursion() {
-        return (Boolean) get(11);
+        return (Boolean) get(12);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.NON_RECURSABLE</code>.
      */
     public void setNonRecursable(Boolean value) {
-        set(12, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.NON_RECURSABLE</code>.
      */
     public Boolean getNonRecursable() {
-        return (Boolean) get(12);
+        return (Boolean) get(13);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.DELAY_UNTIL_RECURSION</code>.
      */
     public void setDelayUntilRecursion(Boolean value) {
-        set(13, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.DELAY_UNTIL_RECURSION</code>.
      */
     public Boolean getDelayUntilRecursion() {
-        return (Boolean) get(13);
+        return (Boolean) get(14);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.SCAN_DEPTH</code>.
      */
     public void setScanDepth(Short value) {
-        set(14, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.SCAN_DEPTH</code>.
      */
     public Short getScanDepth() {
-        return (Short) get(14);
+        return (Short) get(15);
     }
 
     // -------------------------------------------------------------------------
@@ -251,7 +265,7 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     /**
      * Create a detached, initialised EntryRecord
      */
-    public EntryRecord(Integer lorebookId, Integer entryId, String name, String content, Short probability, String outlet, Integer delay, Integer cooldown, Integer stickThrough, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
+    public EntryRecord(Integer lorebookId, Integer entryId, String name, String content, Short probability, String outlet, Integer delay, Integer cooldown, Integer stickThrough, Short injectionOrder, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
         super(Entry.ENTRY);
 
         setLorebookId(lorebookId);
@@ -263,6 +277,7 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
         setDelay(delay);
         setCooldown(cooldown);
         setStickThrough(stickThrough);
+        setInjectionOrder(injectionOrder);
         setStrategy(strategy);
         setEmbedText(embedText);
         setPreventFurtherRecursion(preventFurtherRecursion);

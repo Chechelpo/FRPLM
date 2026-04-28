@@ -2,7 +2,7 @@
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import {DataRecord, DTO, KeyRecord} from "@/types/DTOs";
 import {log_error} from "@/services/ErrorHandler";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {QueryAction} from "@/frameworks/entities/queries";
 
 const BASE:string ="http://localhost:8080/api";
@@ -11,14 +11,14 @@ const API_BASE: string = "api";
 const ENTITY_SUFFIX:string = "entity";
 const QUERY_SUFFIX:string = "query";
 
-export function getEntityController(object_type:ControllerType): URL{
+export function getEntityController(object_type:EntityTypes): URL{
     return new URL(`${API_BASE}/${object_type}`, BASE);
 }
-function getQueryPath(object_type:ControllerType): URL {
+function getQueryPath(object_type:EntityTypes): URL {
     return new URL(`${API_BASE}/${object_type}/${QUERY_SUFFIX}`, BASE)
 }
 
-function getPathWithIDParams<Key extends KeyRecord>(object_type:ControllerType, key:Key | null): URL {
+function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key:Key | null): URL {
     const url = new URL(`${API_BASE}/${object_type}/${ENTITY_SUFFIX}`, BASE);
     if (key == null) return url;
 
@@ -38,8 +38,8 @@ export async function fetch_all<
     Data extends DataRecord,
     T extends EntityABS<Key,Data>
 >(
-    object_type: ControllerType,
-    ctor: new (dto: DTO, object_type:ControllerType) => T
+    object_type: EntityTypes,
+    ctor: new (dto: DTO, object_type:EntityTypes) => T
     ): Promise<T[]>{
     console.log(getEntityController(object_type));
     console.log(getQueryPath(object_type));
@@ -60,8 +60,8 @@ export async function fetchOne<
     T extends EntityABS<Key, Data>
 >(
     key:Key,
-    object_type:ControllerType,
-    ctor: new (dto: DTO, object_type:ControllerType) => T
+    object_type:EntityTypes,
+    ctor: new (dto: DTO, object_type:EntityTypes) => T
 ): Promise<T>{
     const response = await fetchApi(
         getPathWithIDParams<Key>(object_type,key).toString(),
@@ -80,8 +80,8 @@ export async function create_Entity<
 >(
     initial_key: Key | null,
     initial_data: Data | null,
-    object_type: ControllerType,
-    ctor: new (dto: DTO, object_type:ControllerType) => T
+    object_type: EntityTypes,
+    ctor: new (dto: DTO, object_type:EntityTypes) => T
     ): Promise<T>{
     console.log(initial_data);
     const response = await fetchApi(
@@ -104,7 +104,7 @@ export async function UpdateEntityField<
     key: Key,
     field:Field,
     value: Data[Field],
-    object_type:ControllerType,
+    object_type:EntityTypes,
 ): Promise<boolean>
 {
     console.log(`Updating ${String(field)} of [${object_type}], key:`, Object.entries(key), `new value:`, value);
@@ -125,8 +125,8 @@ export async function QueryEntities<
     T extends EntityABS<Key, Data>
 >(
     queries:QueryAction<Key,Data>[],
-    object_type:ControllerType,
-    ctor: new (dto: DTO, object_type:ControllerType) => T
+    object_type:EntityTypes,
+    ctor: new (dto: DTO, object_type:EntityTypes) => T
 ): Promise<T[]>{
     const response = await fetchApi(
         getEntityController(object_type).toString(),
@@ -145,7 +145,6 @@ export async function fetchApi(
     input: RequestInfo,
     init?: RequestInit
 ): Promise<Response> {
-
     const res = await fetch(input, init);
 
     if (!res.ok) {

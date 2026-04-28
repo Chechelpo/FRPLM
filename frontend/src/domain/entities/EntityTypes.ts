@@ -1,5 +1,5 @@
 /* Must reference and be equal to chechelpo.demo.config.controllers.ControllerConfig*/
-export enum ControllerType{
+export enum EntityTypes{
     // Chars controllers
     CHARACTERS = "characters",
     STARTING_LOCATIONS = "startingLocations",

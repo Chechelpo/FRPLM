@@ -6,10 +6,13 @@ package chechelpo.demo.jooq.generated.tables;
 
 import chechelpo.demo.jooq.generated.Keys;
 import chechelpo.demo.jooq.generated.Public;
+import chechelpo.demo.jooq.generated.tables.Entry.EntryPath;
 import chechelpo.demo.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import chechelpo.demo.jooq.generated.tables.records.KeywordRecord;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -142,6 +145,11 @@ public class Keyword extends TableImpl<KeywordRecord> {
         return Keys.CONSTRAINT_F;
     }
 
+    @Override
+    public List<UniqueKey<KeywordRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.CONSTRAINT_FA);
+    }
+
     private transient EntryKeywordsPath _entryKeywords;
 
     /**
@@ -150,9 +158,17 @@ public class Keyword extends TableImpl<KeywordRecord> {
      */
     public EntryKeywordsPath entryKeywords() {
         if (_entryKeywords == null)
-            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_50.getInverseKey());
+            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_500.getInverseKey());
 
         return _entryKeywords;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>PUBLIC.ENTRY</code>
+     * table
+     */
+    public EntryPath entry() {
+        return entryKeywords().entry();
     }
 
     @Override

@@ -78,7 +78,7 @@ public abstract class ABSEntityService<
                 }
             }
         }
-        if (payload != null) {
+        if (payload != null && !payload.isEmpty()) {
             for (Map.Entry<TableField<Record, ?>, Object> entry : payload.values().entrySet()) {
                 if (constraints.containsKey(entry.getKey())
                         &&

@@ -7,7 +7,7 @@ import LocationEdgesEditor from "@/components/world/LocationEdgesEditor.vue";
 import {World, WorldData, WorldKey} from "@/domain/entities/space/World";
 import {Location, LocationData, LocationKey} from "@/domain/entities/space/Location";
 import {create_Entity, fetchOne} from "@/utils/EntityFetch";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 
 const props = defineProps<{
   id:number
@@ -25,7 +25,7 @@ async function onCreate() { //Create location of a world
   locationToEdit.value = await create_Entity<LocationKey,LocationData,Location>(
       {worldID:props.value.world.get('id')},
       {name: name},
-      ControllerType.LOCATIONS,
+      EntityTypes.LOCATIONS,
       Location
   );
   locations.value.push(locationToEdit.value);
@@ -38,7 +38,7 @@ async function onEdit(location: Location) {
 
 onMounted(async () => {
   if (!props.id) console.error("No ID found for editor")
-  world.value = await fetchOne<WorldKey, WorldData, World>({id:props.id}, ControllerType.WORLDS, World)
+  world.value = await fetchOne<WorldKey, WorldData, World>({id:props.id}, EntityTypes.WORLDS, World)
   if (!world.value) console.error("No world")
   locations.value = await Location.getLocationsOfWorld(world.value.key)
 })

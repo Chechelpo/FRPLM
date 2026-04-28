@@ -6,8 +6,10 @@ package chechelpo.demo.jooq.generated.tables;
 
 import chechelpo.demo.jooq.generated.Keys;
 import chechelpo.demo.jooq.generated.Public;
+import chechelpo.demo.jooq.generated.tables.EntryConditionGroup.EntryConditionGroupPath;
 import chechelpo.demo.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import chechelpo.demo.jooq.generated.tables.EntryOutlet.EntryOutletPath;
+import chechelpo.demo.jooq.generated.tables.Keyword.KeywordPath;
 import chechelpo.demo.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.demo.jooq.generated.tables.records.EntryRecord;
 
@@ -102,6 +104,11 @@ public class Entry extends TableImpl<EntryRecord> {
      * The column <code>PUBLIC.ENTRY.STICK_THROUGH</code>.
      */
     public final TableField<EntryRecord, Integer> STICK_THROUGH = createField(DSL.name("STICK_THROUGH"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     */
+    public final TableField<EntryRecord, Short> INJECTION_ORDER = createField(DSL.name("INJECTION_ORDER"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.STRATEGY</code>.
@@ -230,7 +237,7 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public EntryKeywordsPath entryKeywords() {
         if (_entryKeywords == null)
-            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_5.getInverseKey());
+            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_50.getInverseKey());
 
         return _entryKeywords;
     }
@@ -246,6 +253,27 @@ public class Entry extends TableImpl<EntryRecord> {
             _entryOutlet = new EntryOutletPath(this, null, Keys.CONSTRAINT_6.getInverseKey());
 
         return _entryOutlet;
+    }
+
+    private transient EntryConditionGroupPath _entryConditionGroup;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.ENTRY_CONDITION_GROUP</code> table
+     */
+    public EntryConditionGroupPath entryConditionGroup() {
+        if (_entryConditionGroup == null)
+            _entryConditionGroup = new EntryConditionGroupPath(this, null, Keys.CONSTRAINT_D1.getInverseKey());
+
+        return _entryConditionGroup;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.KEYWORD</code> table
+     */
+    public KeywordPath keyword() {
+        return entryKeywords().keyword();
     }
 
     @Override

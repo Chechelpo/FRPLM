@@ -6,9 +6,11 @@ package chechelpo.demo.jooq.generated.tables;
 
 import chechelpo.demo.jooq.generated.Keys;
 import chechelpo.demo.jooq.generated.Public;
+import chechelpo.demo.jooq.generated.tables.CharacterTags.CharacterTagsPath;
 import chechelpo.demo.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.demo.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.demo.jooq.generated.tables.StartingLocations.StartingLocationsPath;
+import chechelpo.demo.jooq.generated.tables.Tags.TagsPath;
 import chechelpo.demo.jooq.generated.tables.records.CharactersRecord;
 
 import java.time.LocalDateTime;
@@ -192,6 +194,19 @@ public class Characters extends TableImpl<CharactersRecord> {
         return _sessions;
     }
 
+    private transient CharacterTagsPath _characterTags;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CHARACTER_TAGS</code> table
+     */
+    public CharacterTagsPath characterTags() {
+        if (_characterTags == null)
+            _characterTags = new CharacterTagsPath(this, null, Keys.CONSTRAINT_9510.getInverseKey());
+
+        return _characterTags;
+    }
+
     private transient StartingLocationsPath _startingLocations;
 
     /**
@@ -203,6 +218,14 @@ public class Characters extends TableImpl<CharactersRecord> {
             _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B0.getInverseKey());
 
         return _startingLocations;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>PUBLIC.TAGS</code>
+     * table
+     */
+    public TagsPath tags() {
+        return characterTags().tags();
     }
 
     @Override

@@ -1,6 +1,9 @@
 import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
+import {fetchApi} from "@/utils/EntityFetch";
+import {API_BASE} from "@/config";
+import {DTO} from "@/types/DTOs";
 
 export enum ActivationStrategy {
     /** Always active per message (this doesn't mean it will appear, It's still bound by probabilities) */
@@ -11,27 +14,52 @@ export enum ActivationStrategy {
     EMBEDDING = 2,
 }
 
-export type EntryKey = {lorebook_id:number, entry_id: number}
-export type EntryData = {
-    name: string,
-    content:string,
-    probability: number,
-
-    strategy: number,
-    embedding_text: string | null,
-
-    outlet_id: number;
-    scan_depth: number
+export type EntryKey = {
+    lorebook_id:number,
+    entry_id?: number // If its initialized its always there
 }
+export type EntryData = {
+    name: string | null;
+    content: string | null;
+
+    // Injection requirements
+    probability: number | null;
+    outlet: string | null;
+    delay: number;
+    cooldown: number;
+    stick_through: number;
+
+    // Injection options
+    injection_order: number | null;
+
+    // Activation strategy
+    strategy: ActivationStrategy | number | null;
+    embed_text: string | null;
+    prevent_further_recursion: boolean;
+    non_recursable: boolean;
+    delay_until_recursion: boolean;
+    scan_depth: number | null;
+};
 
 export class Entry extends EntityABS<EntryKey, EntryData>{
-    getEntityType(): ControllerType {
-        return ControllerType.ENTRY;
+    getEntityType(): EntityTypes {
+        return EntityTypes.ENTRY;
     }
 
 
     getIterationArr(): EntityField<EntryKey, EntryData>[] { //This isn't as important, the entry editor must be special
         return [CommonFields.NAME];
     }
-
+    //Workaround until query works
+    static async ofLorebook(lorebookID:number): Promise<Entry[]> {
+        const response = await fetchApi(
+            `${API_BASE}/${EntityTypes.ENTRY}/entity/${lorebookID}`,
+            {
+                method:"GET",
+            }
+        )
+        const dtos = await response.json() as DTO[];
+        const entries: Entry[] = dtos.map(dto => new Entry(dto, EntityTypes.ENTRY));
+        return entries;
+    }
 }

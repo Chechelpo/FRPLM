@@ -1,5 +1,5 @@
 import {EntityABS} from "@/frameworks/entities/EntityABS";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {LocationKey} from "@/domain/entities/space/Location";
 import {QueryEntities} from "@/utils/EntityFetch";
 import {QueryActionType} from "@/frameworks/entities/queries";
@@ -15,8 +15,8 @@ export type EdgeData = {
 }
 
 export class LocationEdge extends EntityABS<EdgeKey, EdgeData>{
-    getEntityType(): ControllerType {
-        return ControllerType.EDGES;
+    getEntityType(): EntityTypes {
+        return EntityTypes.EDGES;
     }
 
     getIterationArr(): EntityField<EdgeKey, EdgeData>[] {

@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Signals an illegal file state. Ex.: a file called avatar.png that is not readable.
  */
-public class IllegalFileState extends DomainException {
+public final class IllegalFileState extends DomainException {
     public IllegalFileState(String message) {
         super(message, Severity.SYSTEM, HttpStatus.INTERNAL_SERVER_ERROR);
     }

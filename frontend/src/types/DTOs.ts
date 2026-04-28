@@ -2,7 +2,7 @@
 // Character DTOs
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import type {BackendObject, NamedObject} from "@/frameworks/interfaces";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 
 export type Primitives = string | number | boolean | null;
@@ -20,7 +20,7 @@ export type EntityPackage<key extends KeyRecord, data extends DataRecord> = {
 }
 /** MUST MATCH BACKEND'S ENTITY_DTO */
 export interface DTO {
-    type: ControllerType;
+    type: EntityTypes;
     key: Record<string, Primitives>;
     payload: Record<string, Primitives>;
 }

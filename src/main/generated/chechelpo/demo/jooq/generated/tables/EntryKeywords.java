@@ -30,6 +30,7 @@ import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
+import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
@@ -139,8 +140,13 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
     }
 
     @Override
+    public UniqueKey<EntryKeywordsRecord> getPrimaryKey() {
+        return Keys.CONSTRAINT_5;
+    }
+
+    @Override
     public List<ForeignKey<EntryKeywordsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_5, Keys.CONSTRAINT_50);
+        return Arrays.asList(Keys.CONSTRAINT_50, Keys.CONSTRAINT_500);
     }
 
     private transient EntryPath _entry;
@@ -150,7 +156,7 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
      */
     public EntryPath entry() {
         if (_entry == null)
-            _entry = new EntryPath(this, Keys.CONSTRAINT_5, null);
+            _entry = new EntryPath(this, Keys.CONSTRAINT_50, null);
 
         return _entry;
     }
@@ -162,7 +168,7 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
      */
     public KeywordPath keyword() {
         if (_keyword == null)
-            _keyword = new KeywordPath(this, Keys.CONSTRAINT_50, null);
+            _keyword = new KeywordPath(this, Keys.CONSTRAINT_500, null);
 
         return _keyword;
     }

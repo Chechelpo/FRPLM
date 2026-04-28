@@ -64,9 +64,9 @@ CREATE TABLE ENTRY_KEYWORDS
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CREATE TABLE TAGS
 (
-    id    INT                 NOT NULL GENERATED ALWAYS AS IDENTITY,
+    id    INT                 NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name  VARCHAR(255) UNIQUE NOT NULL,
-    color CHAR(7)             NOT NULL,
+    color CHAR(7)             NOT NULL
 );
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -240,7 +240,7 @@ CREATE TABLE CHARACTER_TAGS
 
     PRIMARY KEY (tag_id, char_id),
     FOREIGN KEY (tag_id) REFERENCES TAGS (id) ON DELETE CASCADE,
-    FOREIGN KEY (char_id) REFERENCES CHARACTERS (id) ON DELETE CASCADE,
+    FOREIGN KEY (char_id) REFERENCES CHARACTERS (id) ON DELETE CASCADE
 );
 
 CREATE TABLE LOCATION_TAGS

@@ -4,7 +4,7 @@ import chechelpo.demo.exceptions.DomainException;
 import chechelpo.demo.exceptions.Severity;
 import org.springframework.http.HttpStatus;
 
-public class UnsupportedAction extends DomainException {
+public final class UnsupportedAction extends DomainException {
     public UnsupportedAction(String message) {
         super(message, Severity.EXPECTED, HttpStatus.FORBIDDEN);
     }

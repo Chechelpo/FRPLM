@@ -3,7 +3,7 @@ import { FieldInfo } from "@/frameworks/entities/FieldMetadata";
 import {fetchApi, getEntityController, UpdateEntityField} from "@/utils/EntityFetch";
 import {DTO} from "@/types/DTOs";
 import {CommonFields} from "@/utils/CommonFields";
-import {ControllerType} from "@/config/ControllerType";
+import {EntityTypes} from "@/domain/entities/EntityTypes";
 import {Equatable, ValueComparable} from "@/types/Equatable";
 
 /** JSON-safe primitives typically received from backend SQL row payloads */
@@ -18,14 +18,14 @@ export type EntityField<keys extends KeyRecord, data extends DataRecord> =  keyo
 export type EntityFieldsMap<keys extends KeyRecord, data extends DataRecord> = Map<EntityField<keys,data>, FieldInfo>
 
 export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> implements ValueComparable {
-    private static registered:Set<ControllerType> = new Set;
-    protected static fields:Map<ControllerType, EntityFieldsMap<any,any>> = new Map;
+    private static registered:Set<EntityTypes> = new Set;
+    protected static fields:Map<EntityTypes, EntityFieldsMap<any,any>> = new Map;
 
-    public static registerType(type:ControllerType): void {
+    public static registerType(type:EntityTypes): void {
         if (this.registered.has(type)) throw new Error(`Duplicate entity handler ${type}`)
         this.registered.add(type)
     }
-    public static getFields(type:ControllerType) : Map<string, FieldInfo> {
+    public static getFields(type:EntityTypes) : Map<string, FieldInfo> {
         const fields = this.fields.get(type);
 
         if (!fields) {
@@ -37,7 +37,7 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
 
     static async initialise(): Promise<void> {
         if (this.fields.size != 0) return;
-        for (const type of Object.values(ControllerType)) {
+        for (const type of Object.values(EntityTypes)) {
 
             const response = await fetchApi(
                 `${getEntityController(type)}/fields`,
@@ -62,7 +62,7 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
     /** Other attributes. Must not collide with KeyMap */
     public dataMap: Data;
 
-    public constructor(dto:DTO, expected_type?: ControllerType) {
+    public constructor(dto:DTO, expected_type?: EntityTypes) {
         console.log(dto)
         if (dto.type !== expected_type)
             throw new Error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`);
@@ -76,7 +76,7 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
     }
 
     /** Method used for avoiding duplication of entity type string */
-    abstract getEntityType(): ControllerType;
+    abstract getEntityType(): EntityTypes;
     abstract getIterationArr():EntityField<Key, Data>[];
     public getFields(): EntityFieldsMap<Key, Data> {
         return EntityABS.getFields(this.getEntityType())
