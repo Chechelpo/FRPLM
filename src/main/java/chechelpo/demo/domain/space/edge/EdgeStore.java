@@ -2,8 +2,8 @@ package chechelpo.demo.domain.space.edge;
 
 import chechelpo.demo.config.controllers.EntityTypes;
 import chechelpo.demo.frameworks.entities.microservices.ABSEntityStore;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
+import chechelpo.demo.frameworks.entities.microservices.EntityKey;
+import chechelpo.demo.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.demo.jooq.generated.tables.records.LocationNeighborsRecord;
 
 import org.jetbrains.annotations.NotNull;

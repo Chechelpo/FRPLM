@@ -17,26 +17,35 @@ public final class EntityTypes {
     // Chars controllers
     private static final String CHARACTERS_str         = "characters";
     private static final String STARTING_LOCATIONS_str = "startingLocations";
+    public static final String CHARACTER_TAGS_str     = "characterTags";
 
     // Lorebooks
     private static final String LOREBOOKS_str          = "lorebooks";
     private static final String ENTRIES_str            = "entries";
 
+    //Tags
+    private static final String TAGS_str              = "tags";
 
     // Space controllers
     private static final String WORLDS_str             = "worlds";
     private static final String LOCATIONS_str          = "locations";
     private static final String EDGES_str              = "edges";
 
-    //I know the following is stupid, and you'll need to refactor each one if something changes but bootstrap forces me into it
+    // I know the following variables are stupid, and you'll need to refactor each one if something changes, but bootstrap forces me into it
+    // Sorry, future me.
+    // Times rewritten : 2
 
     // Chars controllers
     public static final String CHARACTERS_URL         = BASE + "/" + CHARACTERS_str;
     public static final String STARTING_LOCATIONS_URL = BASE + "/" + STARTING_LOCATIONS_str;
+    public static final String CHARACTER_TAGS_URL     = BASE + "/" + CHARACTER_TAGS_str;
 
     // Lorebooks controllers
     public static final String LOREBOOKS_URL          = BASE + "/" + LOREBOOKS_str;
-    public static final String ENTRIES_URL           = BASE + "/" + ENTRIES_str;
+    public static final String ENTRIES_URL            = BASE + "/" + ENTRIES_str;
+
+    //Tags
+    public static final String TAGS_URL               = BASE + "/" + TAGS_str;
 
     // Space controllers
     public static final String WORLDS_URL             = BASE + "/" + WORLDS_str;
@@ -48,9 +57,12 @@ public final class EntityTypes {
     public enum Types {
         CHARACTER(CHARACTERS_str),
         STARTING_LOCATIONS(STARTING_LOCATIONS_str),
+        CHARACTER_TAGS(CHARACTER_TAGS_str),
 
         LOREBOOKS(LOREBOOKS_str),
         ENTRIES(ENTRIES_str),
+
+        TAGS(TAGS_str),
 
         WORLDS(WORLDS_str),
         LOCATIONS(LOCATIONS_str),

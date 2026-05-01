@@ -2,7 +2,7 @@ package chechelpo.demo.frameworks.entities.assets;
 
 import chechelpo.demo.exceptions.Severity;
 import chechelpo.demo.exceptions.types.NotFound;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
+import chechelpo.demo.frameworks.entities.microservices.EntityKey;
 import chechelpo.demo.utils.IO.FileReaders;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.TableRecord;

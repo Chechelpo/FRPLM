@@ -2,9 +2,9 @@ import {EntityABS} from "@/frameworks/entities/EntityABS";
 import {FieldInfo} from "@/frameworks/entities/FieldMetadata";
 import {Character} from "@/domain/entities/chars/Characters";
 import {filterWithAttribute} from "@/utils/filters";
-import {fetch_all} from "@/utils/EntityFetch";
+import {fetch_all} from "@/domain/entities/EntityFetch";
 import {DataRecord, EntityField, KeyRecord} from "@/types/DTOs";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 
 interface StartingLocationKeys extends KeyRecord{

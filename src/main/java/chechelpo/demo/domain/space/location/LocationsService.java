@@ -5,8 +5,8 @@ import chechelpo.demo.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.demo.jooq.generated.tables.Locations;
 import chechelpo.demo.jooq.generated.tables.Lorebooks;
 import chechelpo.demo.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.demo.domain.lorebook.main.LorebookService;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
+import chechelpo.demo.domain.lorebook.core.LorebookService;
+import chechelpo.demo.frameworks.entities.microservices.EntityDataPayload;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 

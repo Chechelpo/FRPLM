@@ -1,9 +1,10 @@
 import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
-import {fetchApi} from "@/utils/EntityFetch";
+import {fetchApi} from "@/domain/entities/EntityFetch";
 import {API_BASE} from "@/config";
 import {DTO} from "@/types/DTOs";
+import {Lorebook} from "@/domain/entities/lorebook/Lorebook";
 
 export enum ActivationStrategy {
     /** Always active per message (this doesn't mean it will appear, It's still bound by probabilities) */
@@ -51,7 +52,14 @@ export class Entry extends EntityABS<EntryKey, EntryData>{
         return [CommonFields.NAME];
     }
     //Workaround until query works
-    static async ofLorebook(lorebookID:number): Promise<Entry[]> {
+    static async ofLorebook(lorebook:Lorebook | number): Promise<Entry[]> {
+        let lorebookID:number;
+        if (typeof lorebook === "number") {
+            lorebookID = lorebook;
+        }else
+            lorebookID = lorebook.get('id')
+
+        console.info(`Fetching entries of lorebook with id ${lorebookID}`);
         const response = await fetchApi(
             `${API_BASE}/${EntityTypes.ENTRY}/entity/${lorebookID}`,
             {

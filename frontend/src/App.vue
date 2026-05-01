@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from "vue-router";
 import {route_to} from "@/app/router";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 </script>
 
 <style scoped>

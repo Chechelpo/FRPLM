@@ -1,9 +1,9 @@
 import { API_BASE } from "@/config";
 import { FieldInfo } from "@/frameworks/entities/FieldMetadata";
-import {fetchApi, getEntityController, UpdateEntityField} from "@/utils/EntityFetch";
+import {fetchApi, getEntityController, UpdateEntityField} from "@/domain/entities/EntityFetch";
 import {DTO} from "@/types/DTOs";
 import {CommonFields} from "@/utils/CommonFields";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {Equatable, ValueComparable} from "@/types/Equatable";
 
 /** JSON-safe primitives typically received from backend SQL row payloads */
@@ -63,7 +63,7 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
     public dataMap: Data;
 
     public constructor(dto:DTO, expected_type?: EntityTypes) {
-        console.log(dto)
+        console.log(`Received ${expected_type} with dto: \n ${JSON.stringify(dto)}`)
         if (dto.type !== expected_type)
             throw new Error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`);
 
@@ -164,6 +164,13 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
         }
 
         return true;
+    }
+
+    public toString():string {
+        return `${this.getEntityType()} \n 
+        Key: ${JSON.stringify(this.key)} \n 
+        Data: ${JSON.stringify(this.dataMap)}
+        `
     }
 
     public hashKey(): string {

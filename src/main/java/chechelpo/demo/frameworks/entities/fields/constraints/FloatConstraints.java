@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 ///  - read_only = `false`
 ///  - is_key = `false`
 ///
-public final class FloatConstraints extends Constraints<FieldKind.FloatKind> {
+public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Float> {
     private final Double min;
     private final Double max;
     private final boolean is_key;
@@ -31,6 +31,15 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind> {
         this.is_key = builder.is_key;
     }
 
+    @Override
+    public Float coerce(Object value) {
+        return switch (value) {
+            case null -> null;
+            case Float v -> v;
+            case String s -> Float.parseFloat(s);
+            default -> throw new IllegalArgumentException("Cannot coerce " + value + " to " + FieldType.FLOAT);
+        };
+    }
 
     public static class FloatConstraintsBuilder {
         private Double min;

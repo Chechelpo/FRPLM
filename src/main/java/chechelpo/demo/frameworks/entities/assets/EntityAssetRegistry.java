@@ -5,7 +5,7 @@ import chechelpo.demo.asset.AssetInfo;
 import chechelpo.demo.exceptions.Severity;
 import chechelpo.demo.exceptions.types.NotFound;
 import chechelpo.demo.exceptions.types.UnsupportedAction;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
+import chechelpo.demo.frameworks.entities.microservices.EntityKey;
 import chechelpo.demo.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.demo.utils.NameValidator;
 import org.jetbrains.annotations.Contract;

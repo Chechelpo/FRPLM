@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public final class FieldInfo<T extends FieldKind>{
     public final @NotNull FieldType type;
     public final @Nullable Format<T> format;
-    public final @Nullable Constraints<T> constraints;
+    public final @Nullable Constraints<T, ?> constraints;
     public final boolean require;
 
     @Contract(pure = true)
@@ -51,7 +51,7 @@ public final class FieldInfo<T extends FieldKind>{
     public static class FieldInfoBuilder<T extends FieldKind> {
         private final FieldType type;
         private Format<T> format;
-        private Constraints<T> constraints;
+        private Constraints<T, ?> constraints;
         private boolean require;
 
         private FieldInfoBuilder(FieldType type) {
@@ -62,7 +62,7 @@ public final class FieldInfo<T extends FieldKind>{
             this.format = format;
             return this;
         }
-        public FieldInfoBuilder<T> setConstraints(Constraints<T> constraints) {
+        public FieldInfoBuilder<T> setConstraints(Constraints<T, ?> constraints) {
             this.constraints = constraints;
             return this;
         }

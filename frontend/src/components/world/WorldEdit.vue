@@ -6,8 +6,8 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import LocationEdgesEditor from "@/components/world/LocationEdgesEditor.vue";
 import {World, WorldData, WorldKey} from "@/domain/entities/space/World";
 import {Location, LocationData, LocationKey} from "@/domain/entities/space/Location";
-import {create_Entity, fetchOne} from "@/utils/EntityFetch";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {createEntity, fetchOne} from "@/domain/entities/EntityFetch";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 
 const props = defineProps<{
   id:number
@@ -22,7 +22,7 @@ async function onCreate() { //Create location of a world
   const name = window.prompt("Enter new character name:");
   if (!name) return;
 
-  locationToEdit.value = await create_Entity<LocationKey,LocationData,Location>(
+  locationToEdit.value = await createEntity<LocationKey,LocationData,Location>(
       {worldID:props.value.world.get('id')},
       {name: name},
       EntityTypes.LOCATIONS,

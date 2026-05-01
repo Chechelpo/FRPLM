@@ -1,6 +1,6 @@
 package chechelpo.demo.frameworks.entities.assets;
 
-import chechelpo.demo.frameworks.entities.data.EntityKey;
+import chechelpo.demo.frameworks.entities.microservices.EntityKey;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.TableRecord;
 import org.springframework.web.multipart.MultipartFile;

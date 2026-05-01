@@ -1,15 +1,18 @@
 package chechelpo.demo.frameworks.entities.microservices;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import chechelpo.demo.config.controllers.EntityTypes;
+import chechelpo.demo.events.EventManager;
+import chechelpo.demo.events.types.DeletedEntity;
+import chechelpo.demo.events.types.NewEntity;
+import chechelpo.demo.events.types.UpdatedEntity;
 import chechelpo.demo.exceptions.Severity;
 import chechelpo.demo.exceptions.types.ExpectedField;
 import chechelpo.demo.exceptions.types.InvalidID;
 import chechelpo.demo.exceptions.types.NotFound;
 import chechelpo.demo.exceptions.types.UnexpectedException;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
 import chechelpo.demo.frameworks.entities.data.QueryObject;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
 import chechelpo.demo.frameworks.entities.fields.constraints.Constraints;
 import chechelpo.demo.frameworks.entities.fields.constraints.NumberConstraints;
 import org.jetbrains.annotations.NotNull;
@@ -27,17 +30,20 @@ public abstract class ABSEntityService<
     private final static EnumSet<EntityTypes.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityTypes.Types.class);
 
     private final Set<TableField<Record, ?>> required_instantiation_fields = new HashSet<>();
-    private final HashMap<TableField<Record, ?>, Constraints<?>> constraints = new HashMap<>();
+    private final HashMap<TableField<Record, ?>, Constraints<?,?>> constraints = new HashMap<>();
     private final Set<TableField<Record, ?>> keys = new HashSet<>();
 
     protected final Store store;
     private final Logger log;
+    private final EntityTypes.Types entityType;
 
     public ABSEntityService(Store store, EntityTypes.Types types) {
         if(REGISTERED_TYPES.contains(types))
             throw new IllegalStateException("Type " + types + " is already registered");
 
         REGISTERED_TYPES.add(types);
+        this.entityType = types;
+
         this.store = store;
         log = (Logger) LoggerFactory.getLogger(types + "_Service");
     }
@@ -48,26 +54,25 @@ public abstract class ABSEntityService<
     public EntityKey<Record> keyOf(Record record){
         EntityKey.Builder<Record> builder = EntityKey.builder();
         for (TableField<Record, ?> field : keys) {
-            builder.set(field, record.getValue(field));
+            builder.unsafeSet(field, record.getValue(field));
         }
         return builder.build();
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // VALIDATORS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     protected void throwIfInvalid(@NotNull EntityKey<Record> key) {
         if (!key.getValues().keySet().equals(keys)) {
             log.error("Invalid key: {}", key);
             throw new InvalidID("Unknown ID", Severity.USER);
         }
     }
-    void registerField(TableField<Record, ?> field, boolean required, @Nullable Constraints<?> constraint) {
-        if (constraint != null) {
-            constraints.put(field, constraint);
-            if (constraint instanceof NumberConstraints){
-                if (((NumberConstraints) constraint).isKey()) {
-                    keys.add(field);
-                }
-            }
+    protected void throwIfNotPartialKey(@NotNull EntityKey<Record> key) {
+        if (!keys.containsAll(key.getValues().keySet())) {
+            log.error("Invalid key: {}", key);
+            throw new InvalidID("Invalid key", Severity.USER);
         }
-        if (required) required_instantiation_fields.add(field);
     }
 
     private void throwOnConstraintsViolation(@Nullable EntityKey<Record> key, @Nullable EntityDataPayload<Record> payload) {
@@ -89,43 +94,96 @@ public abstract class ABSEntityService<
         }
     }
 
+    private EntityKey<Record> coerceFullKey(EntityKey<Record> key) {
+        throwIfInvalid(key);
+        for (TableField<Record, ?> field : this.keys){
+            Constraints<?, ?> constraint = constraints.get(field);
+            key.setOrReplace(field, constraint.coerce(key.getValue(field)));
+        }
+
+        return key;
+    }
+    private EntityKey<Record> coercePartialKey(EntityKey<Record> key) {
+        throwIfNotPartialKey(key);
+        for (TableField<Record, ?> field : key.getValues().keySet()){
+            Constraints<?, ?> constraint = constraints.get(field);
+            key.setOrReplace(field, constraint.coerce(key.getValue(field)));
+        }
+
+        return key;
+    }
+    private EntityDataPayload<Record> coercePayload(EntityDataPayload<Record> data) {
+        throwOnConstraintsViolation(null, data);
+        for (TableField<Record, ?> field : data.values().keySet()){
+            Constraints<?, ?> constraint = constraints.get(field);
+            data.unsafeSetValue(field, constraint.coerce(data.getValue(field)));
+        }
+
+        return data;
+    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // FIELDS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    void registerField(TableField<Record, ?> field, boolean required, @Nullable Constraints<?,?> constraint) {
+        if (constraint != null) {
+            constraints.put(field, constraint);
+            if (constraint instanceof NumberConstraints){
+                if (((NumberConstraints) constraint).isKey()) {
+                    keys.add(field);
+                }
+            }
+        }
+        if (required) required_instantiation_fields.add(field);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Operations
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     public Optional<Record> find(EntityKey<Record> k){
         log.debug("Finding record with id {}", k);
-        throwIfInvalid(k);
+        coerceFullKey(k);
         return Optional.ofNullable(store.get(k));
     }
 
     public List<Record> getAll() {
         return store.getAll();
     }
+    public List<Record> getMatching(EntityKey<Record> k) {
+        throwIfNotPartialKey(k);
+        coercePartialKey(k);
+        return store.getAllMatching(k);
+    }
 
     protected EntityDataPayload<Record> beforeCreate(EntityDataPayload<Record> data) {
         checkForCreation(data);
+        coercePayload(data);
         return data;
     }
 
     public @NotNull Record createAndGet(EntityDataPayload<Record> data) {
         data = beforeCreate(data);
-
+        coercePayload(data);
         Record result = store.createAndGet(data);
         if (result == null) {
             log.error("Could not create new entity");
             throw new UnexpectedException("New entity creation failed with data: " + data, Severity.SYSTEM);
         }
-
+        EventManager.emitEvent(new NewEntity(this.entityType, result));
         return result;
     }
 
 
     public <T> @NotNull T createAndGet(EntityDataPayload<Record> data, TableField<Record,T> field) {
         data = beforeCreate(data);
-        T result = store.createAndGet(data, field);
+        coercePayload(data);
+        Record result = store.createAndGet(data);
         if (result == null){
             log.error("Could not create and fetch new entity");
             throw new UnexpectedException("New entity creation failed with data: " + data, Severity.SYSTEM);
         }
+        EventManager.emitEvent(new NewEntity(this.entityType, result));
 
-        return result;
+        return result.get(field);
     }
 
     private void checkForCreation(EntityDataPayload<Record> data) {
@@ -149,19 +207,34 @@ public abstract class ABSEntityService<
         log.debug("Querying for {}", query);
         return store.query(query);
     }
+
     public boolean update(EntityKey<Record> id, EntityDataPayload<Record> update) {
         log.debug("Updating entity {} with new data {}", id, update);
-        throwIfInvalid(id);
-        return store.update(id, update);
+        coerceFullKey(id);
+        coercePayload(update);
+
+        boolean success = store.update(id, update);
+        if (success) EventManager.emitEvent(new DeletedEntity(this.entityType, id));
+
+        return success;
     }
 
     public boolean delete(EntityKey<Record> id) {
+        log.setLevel(Level.TRACE);
         log.debug("Deleting entity {}", id);
-        return store.delete(id);
+        coerceFullKey(id);
+
+        boolean success = store.delete(id);
+        if (success) EventManager.emitEvent(new DeletedEntity(this.entityType, id));
+
+        return success;
     }
 
     public <T extends Number> T getAndIncrement(TableField<Record,T> field, EntityKey<Record> entityKey) {
-        return store.getAndIncrement(field, entityKey);
+        coerceFullKey(entityKey);
+        T number = store.getAndIncrement(field, entityKey);
+        EventManager.emitEvent(new UpdatedEntity(this.entityType, EntityDataPayload.fromValues(Map.of(field, number))));
+        return number;
     }
     /**
      * @param k key of the entity
@@ -169,10 +242,12 @@ public abstract class ABSEntityService<
      * @implNote  does not throw {@link chechelpo.demo.exceptions.types.NotFound}, that's in charge of the caller
      */
     public boolean exists(EntityKey<Record> k){
+        coerceFullKey(k);
         return store.exists(k);
     }
 
     public Record require(EntityKey<Record> id) throws NotFound {
+        coerceFullKey(id);
         return find(id).orElseThrow(() ->
                 new NotFound(
                         "Required entity missing: " + id,
@@ -182,6 +257,7 @@ public abstract class ABSEntityService<
     }
 
     public Record getForUser(EntityKey<Record> id) {
+        coerceFullKey(id);
         return find(id).orElseThrow(() ->
                 new NotFound(
                         "No entity with id " + id,

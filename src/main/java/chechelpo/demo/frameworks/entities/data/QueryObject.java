@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.jooq.impl.DSL.trueCondition;
-
+/// Simple query operator (multiple EQUALS condition)
 public final class QueryObject<R extends TableRecord<R>> {
     private final Map<TableField<R, ?>, FieldQuery<R,?>> queries = new HashMap<>();
     public QueryObject() {}

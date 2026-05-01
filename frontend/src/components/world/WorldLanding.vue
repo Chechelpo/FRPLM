@@ -4,8 +4,8 @@ import {onMounted, ref} from "vue";
 import List from "@/components/utils/list/List.vue";
 import {goToEdit} from "@/app/router";
 import {World, WorldData, WorldKey} from "@/domain/entities/space/World";
-import {create_Entity, fetch_all} from "@/utils/EntityFetch";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {createEntity, fetch_all} from "@/domain/entities/EntityFetch";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 
 const worlds = ref<World[]>();
 async function onCreate(){
@@ -13,7 +13,7 @@ async function onCreate(){
   if (!input_name) return;
 
   // Create
-  const new_world = await create_Entity<WorldKey, WorldData, World>(
+  const new_world = await createEntity<WorldKey, WorldData, World>(
       null,
       {name:input_name},
       EntityTypes.WORLDS,

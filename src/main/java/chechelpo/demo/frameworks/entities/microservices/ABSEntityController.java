@@ -6,8 +6,6 @@ import chechelpo.demo.config.controllers.EntityTypes;
 import chechelpo.demo.exceptions.Severity;
 import chechelpo.demo.exceptions.types.InvalidID;
 import chechelpo.demo.exceptions.types.UnknownField;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
 import chechelpo.demo.frameworks.entities.fields.format.Format;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -90,7 +88,7 @@ public abstract class ABSEntityController<
                 throw new InvalidID("Field " + field + " is not a key", Severity.USER);
             }
 
-            builder.set(field, entry.getValue());
+            builder.unsafeSet(field, entry.getValue());
         }
 
         return builder.build();
@@ -262,7 +260,7 @@ public abstract class ABSEntityController<
             value = ENTITY_PATH,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    private ResponseEntity<EntityDTO> get(@RequestParam Map<String, Object> variables){
+    protected ResponseEntity<EntityDTO> get(@RequestParam Map<String, Object> variables){
         return ResponseEntity.ok(
                 wrapEntity(service.getForUser(extractKey(variables)))
         );
@@ -309,5 +307,12 @@ public abstract class ABSEntityController<
         }
     }
 
-
+    @DeleteMapping(
+            value = ENTITY_PATH
+    )
+    protected ResponseEntity<Boolean> delete(@RequestParam Map<String, Object> params){
+        return ResponseEntity.ok(
+                service.delete(extractKey(params))
+        );
+    }
 }

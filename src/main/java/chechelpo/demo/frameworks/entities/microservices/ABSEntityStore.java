@@ -4,9 +4,7 @@ import ch.qos.logback.classic.Logger;
 import chechelpo.demo.config.controllers.EntityTypes;
 import chechelpo.demo.exceptions.Severity;
 import chechelpo.demo.exceptions.types.NotFound;
-import chechelpo.demo.frameworks.entities.data.EntityKey;
 import chechelpo.demo.frameworks.entities.data.QueryObject;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.*;
@@ -49,6 +47,11 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
         log.trace("Found {} record with id: {}", record, id);
 
         return record;
+    }
+    protected List<R> getAllMatching(@NotNull EntityKey<R> id){
+        return ctx.selectFrom(main_table)
+                .where(id.getEqualityConditions())
+                .fetch();
     }
 
 

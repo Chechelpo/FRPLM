@@ -3,7 +3,7 @@ import CharacterLanding from "@/components/char/CharacterLanding.vue";
 import EmptyView from "@/components/layout/EmptyView.vue";
 import ConnectionView from "@/components/connections/ConnectionView.vue";
 import WorldLanding from "@/components/world/WorldLanding.vue";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import WorldEdit from "@/components/world/WorldEdit.vue";
 

@@ -25,6 +25,13 @@ public class ABSFieldInstantiationHelper<
         this.controller = controller;
     }
 
+    protected <T> void register_field(
+            @Nullable String dto_name,
+            @NotNull TableField<R, T> column,
+            @NotNull FieldInfo.FieldInfoBuilder<?> infoBuilder
+    ) {
+        this.register_field(dto_name, column, infoBuilder.build());
+    }
     /**
      * Registers a field to be used by the controller.
      * @param dto_name the name of the attr, distinct from its SQL name (or not). This is the name that will be received in frontend.
@@ -40,4 +47,5 @@ public class ABSFieldInstantiationHelper<
         service.registerField(column, info.require, info.constraints);
         controller.registerPublicField(column, dto_name, info.format);
     }
+
 }

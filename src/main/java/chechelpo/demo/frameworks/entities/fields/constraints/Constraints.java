@@ -4,7 +4,7 @@ import chechelpo.demo.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.TableField;
 
-public sealed abstract class Constraints<T> permits BoolConstraints, FloatConstraints, NumberConstraints, StringConstraints{
+public sealed abstract class Constraints<T, R> permits BoolConstraints, FloatConstraints, NumberConstraints, StringConstraints{
     protected final boolean read_only;
     protected final FieldType fieldType;
 
@@ -12,7 +12,7 @@ public sealed abstract class Constraints<T> permits BoolConstraints, FloatConstr
         this.read_only = read_only;
         this.fieldType = fieldType;
     }
-
+    public abstract R coerce(Object value);
     public boolean isReadOnly(){
         return read_only;
     }

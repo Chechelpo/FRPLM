@@ -2,7 +2,7 @@ package chechelpo.demo.domain.space.location;
 
 import chechelpo.demo.config.controllers.EntityTypes;
 import chechelpo.demo.frameworks.entities.microservices.ABSEntityStore;
-import chechelpo.demo.frameworks.entities.data.EntityDataPayload;
+import chechelpo.demo.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.demo.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.demo.domain.space.world.WorldService;
 import org.jetbrains.annotations.NotNull;

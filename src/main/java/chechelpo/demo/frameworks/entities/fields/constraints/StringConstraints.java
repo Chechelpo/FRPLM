@@ -22,7 +22,7 @@ import java.util.Set;
 ///  - read_only = `false`
 ///  - allows_placeholders = `true`
 ///
-public final class StringConstraints extends Constraints<FieldKind.StringKind> {
+public final class StringConstraints extends Constraints<FieldKind.StringKind, String> {
     private final Integer minLength;
     private final Integer maxLength;
     private final Set<String> allowedValues = new HashSet<>();
@@ -37,6 +37,11 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind> {
         this.read_only = builder.read_only;
         this.allows_outlets = builder.allows_outlets;
         this.allowedValues.addAll(builder.possible_values);
+    }
+
+    @Override
+    public String  coerce(Object value) {
+        return (String) value;
     }
 
     @Contract(value = " -> new", pure = true)

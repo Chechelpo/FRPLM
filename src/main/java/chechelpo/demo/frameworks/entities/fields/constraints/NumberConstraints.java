@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
 ///  - read_only = `false`
 ///  - is_key = `false`
 ///
-public final class NumberConstraints extends Constraints<FieldKind.NumberKind> {
+public final class NumberConstraints extends Constraints<FieldKind.NumberKind, Number> {
     private final Long min;
     private final Long max;
     private final FieldType fieldType;
@@ -33,6 +33,22 @@ public final class NumberConstraints extends Constraints<FieldKind.NumberKind> {
         this.read_only = builder.read_only;
         this.is_key = builder.is_key;
         this.fieldType = builder.fieldType;
+    }
+
+    @Override
+    public @Nullable Number coerce(Object value) {
+        return switch (value){
+          case null -> null;
+          case Integer i -> i;
+          case Long ii -> {
+              if (ii < Integer.MIN_VALUE || ii > Integer.MAX_VALUE) {
+                  throw new IllegalArgumentException("Cannot coerce to integer value " + ii);
+              }
+              yield ii.intValue();
+          }
+          case String s -> Integer.parseInt(s);
+          default -> throw new IllegalArgumentException("Cannot coerce to integer value " + value);
+        };
     }
 
     public static @NotNull NumberConstraintsBuilder builder(FieldType fieldType) {

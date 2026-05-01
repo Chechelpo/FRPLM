@@ -1,6 +1,6 @@
 import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
-import {fetch_all} from "@/utils/EntityFetch";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {fetch_all} from "@/domain/entities/EntityFetch";
 import {CommonFields} from "@/utils/CommonFields";
 
 export type WorldKey = {id:number}

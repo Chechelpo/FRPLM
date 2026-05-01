@@ -5,9 +5,9 @@ import {onMounted, ref} from "vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import {fetch_all} from "@/utils/EntityFetch";
+import {fetch_all} from "@/domain/entities/EntityFetch";
 import {Character, CharacterData, CharacterKey} from "@/domain/entities/chars/Characters";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
 
@@ -57,7 +57,7 @@ onMounted(async () => {
           <div> General information editor </div>
           <CharacterEditor
           v-if = 'editCharacter'
-          :edit-character='editCharacter as Character'
+          v-model='editCharacter as Character'
           ></CharacterEditor>
         </template>
         <template #right>

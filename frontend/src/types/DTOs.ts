@@ -2,7 +2,7 @@
 // Character DTOs
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import type {BackendObject, NamedObject} from "@/frameworks/interfaces";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 
 export type Primitives = string | number | boolean | null;

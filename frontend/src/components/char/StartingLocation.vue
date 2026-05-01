@@ -5,8 +5,8 @@ import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue
 import {Character} from "@/domain/entities/chars/Characters";
 import {World} from "@/domain/entities/space/World";
 import {CommonFields} from "@/utils/CommonFields";
-import {fetch_all} from "@/utils/EntityFetch";
-import {EntityTypes} from "@/domain/entities/EntityTypes";
+import {fetch_all} from "@/domain/entities/EntityFetch";
+import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 
 const props = defineModel<{
   character: Character;

@@ -66,7 +66,7 @@ CREATE TABLE TAGS
 (
     id    INT                 NOT NULL GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     name  VARCHAR(255) UNIQUE NOT NULL,
-    color CHAR(7)             NOT NULL
+    color CHAR(7)             NOT NULL DEFAULT '#000000'
 );
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
