@@ -63,7 +63,7 @@ async function handleNewTag(tag: Tag) {
   const character = characterRef.value;
   if (!character) return;
 
-  console.trace(`Adding tag ${tag} to character ${character}`);
+  console.debug(`Adding tag ${tag} to character ${character}`);
 
   await character.addTag(tag);
 
@@ -78,7 +78,7 @@ async function handleRemoveTag(tag: Tag) {
   const character = characterRef.value;
   if (!character) return;
 
-  console.trace(`Removing tag ${tag} for character ${character}`);
+  console.debug(`Removing tag ${tag} for character ${character}`);
 
   await character.removeTag(tag);
 
