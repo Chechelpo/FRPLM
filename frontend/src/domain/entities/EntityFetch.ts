@@ -6,7 +6,7 @@ import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {QueryAction} from "@/frameworks/entities/queries";
 
 const BASE:string ="http://localhost:8080/api";
-const API_BASE: string = "api";
+export const API_BASE: string = "api";
 
 const ENTITY_SUFFIX:string = "entity";
 const QUERY_SUFFIX:string = "query";
@@ -117,7 +117,6 @@ export async function UpdateEntityField<
     object_type:EntityTypes,
 ): Promise<boolean>
 {
-    console.trace(`Updating ${String(field)} of [${object_type}], key:`, Object.entries(key), `new value:`, value);
     const response = await fetchApi(
         getPathWithIDParams(object_type, key).toString(),
         {

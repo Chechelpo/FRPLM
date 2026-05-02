@@ -1,7 +1,7 @@
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {DTO, EntityField} from "@/types/DTOs";
-import {CharacterKey} from "@/domain/entities/chars/Characters";
+import {CharacterKey} from "@/domain/entities/Characters";
 import {fetchApi} from "@/domain/entities/EntityFetch";
 import {API_BASE} from "@/config";
 

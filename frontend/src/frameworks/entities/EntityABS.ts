@@ -63,14 +63,16 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
     public dataMap: Data;
 
     public constructor(dto:DTO, expected_type?: EntityTypes) {
-        console.log(`Received ${expected_type} with dto: \n ${JSON.stringify(dto)}`)
-        if (dto.type !== expected_type)
+        console.debug(`Received ${expected_type} with dto: \n ${JSON.stringify(dto)}`)
+        if (dto.type !== expected_type) {
+            console.error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`)
             throw new Error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`);
-
+        }
         if (Object.entries(dto.key).length == 0) {
             console.error("Key with no entries")
             throw new Error(`Entity with no keys: ${dto.key}`);
         }
+
         this.key = dto.key as Key;
         this.dataMap = dto.payload as Data;
     }
@@ -115,6 +117,7 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
      * Field names are restricted to Data keys, and values are restricted to the field's type.
      */
     public async update<F extends keyof Data>(field: F, value: Data[F]): Promise<boolean> {
+        console.debug(`Updating ${String(field)} of [${this.getEntityType()}], key:`, JSON.stringify(this.key), `new value:`, value);
         const updated: boolean = await UpdateEntityField(
             this.key,
             field,

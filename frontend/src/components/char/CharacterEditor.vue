@@ -1,42 +1,28 @@
 <script setup lang="ts">
-import { Character, CharacterData, CharacterKey } from "@/domain/entities/chars/Characters";
-import ShortTextBox from "@/components/utils/entity_editors/fields/textboxes/ShortTextBox.vue";
+import { Character, CharacterData, CharacterKey } from "@/domain/entities/Characters";
+import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import { CommonFields } from "@/utils/CommonFields";
-import { onMounted, ref, watch } from "vue";
-import { Lorebook } from "@/domain/entities/lorebook/Lorebook";
+import {computed, onMounted, ref, watch} from "vue";
+import { Lorebook } from "@/domain/entities/Lorebook";
 import { fetchOne } from "@/domain/entities/EntityFetch";
 import { EntityTypes } from "@/frameworks/entities/EntityTypes";
-import LorebookEditor from "@/components/lorebooks/main/LorebookEditor.vue";
+import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import TagAutocomplete from "@/components/tags/TagAutocomplete.vue";
 import { Tag } from "@/domain/entities/tags/Tag";
 
-const model = defineModel<Character | number>({
+const model = defineModel<Character>({
   required: true
 });
 
-const characterRef = ref<Character>();
 const embed_lorebook = ref<Lorebook>();
 const characterTags = ref<Tag[]>([]);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // TAGS:
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
-async function loadCharacter(value: Character | number) {
-  let character: Character;
-
-  if (typeof value === "number") {
-    character = await fetchOne<CharacterKey, CharacterData, Character>(
-        { id: value },
-        EntityTypes.CHARACTERS,
-        Character
-    );
-  } else {
-    character = value;
-  }
-
+async function loadCharacter(character: Character) {
   console.info(`Editing character ${character}`);
 
-  characterRef.value = character;
   characterTags.value = await character.getTags();
   embed_lorebook.value = await character.getLorebook();
 
@@ -55,27 +41,35 @@ watch(model, async newValue => {
   await loadCharacter(newValue);
 });
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+// ATTRIBUTES:
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+const name = computed<string>({
+  get(){
+    return model.value.get('name');
+  },
+  set(value:string){
+    model.value.update('name', value)
+  }
+})
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // TAGS:
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 async function handleNewTag(tag: Tag) {
-  const character = characterRef.value;
-  if (!character) return;
+  console.debug(`Adding tag ${tag} to character ${model.value}`);
 
-  console.debug(`Adding tag ${tag} to character ${character}`);
-
-  await character.addTag(tag);
+  await model.value.addTag(tag);
 
   const exists = characterTags.value.some(t => t.equals(tag));
 
   if (!exists) {
-    characterTags.value = await character.getTags()
+    characterTags.value = await model.value.getTags()
   }
 }
 
 async function handleRemoveTag(tag: Tag) {
-  const character = characterRef.value;
+  const character = model.value;
   if (!character) return;
 
   console.debug(`Removing tag ${tag} for character ${character}`);
@@ -90,13 +84,13 @@ async function handleRemoveTag(tag: Tag) {
   <div class="all_fields_rows">
     <!-- name -->
     <ShortTextBox
-        v-if="characterRef"
-        :read_only="false"
-        :initial_value="characterRef.getCommon(CommonFields.NAME) as string"
-    />
+        v-if="model"
+        v-model="name"
+        @edit="txt => name = txt"
+    ></ShortTextBox>
 
     <!-- Tag editor -->
-    <div v-if="characterRef">
+    <div v-if="model">
       Tags
       <TagAutocomplete
           v-if="characterTags"
@@ -109,7 +103,7 @@ async function handleRemoveTag(tag: Tag) {
     <!-- Embed lorebook entry editor -->
     <LorebookEditor
         v-if="embed_lorebook"
-        :lorebook="embed_lorebook"
+        v-model="embed_lorebook"
     />
   </div>
 </template>

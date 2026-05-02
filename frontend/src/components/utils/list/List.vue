@@ -95,6 +95,7 @@ function onRemove(element: Ent) {
   height: 100%;
   display: flex;
   gap: 10px;
+
   flex-direction: column;
 }
 

@@ -35,8 +35,7 @@ function onEdit() {
 }
 
 function onRemove() {
-  const ok = window.confirm(`Are you sure you want to delete "${props.character.getCommon(CommonFields.NAME)}"?`)
-  if (ok) emit("remove", props.character)
+  emit("remove", props.character)
 }
 
 onMounted(() => {

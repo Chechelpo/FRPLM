@@ -2,6 +2,7 @@
 export enum EntityTypes{
     //Tags
     TAGS = "tags",
+    KEYWORD = "keywords",
 
     // Chars controllers
     CHARACTERS = "characters",
@@ -11,7 +12,7 @@ export enum EntityTypes{
     //Lorebooks
     ENTRY = "entries",
     LOREBOOKS = "lorebooks",
-
+    ENTRY_KEYWORD = "entriesKeywords",
 
     //Space controllers
     WORLDS = "worlds",

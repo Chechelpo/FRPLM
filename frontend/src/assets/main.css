@@ -13,7 +13,9 @@ html, body, #app {
 :root {
   --primary: #af8218;
   --primary-accent: #ffc600;
-  --primary-background: #60520a;
+  --primary-background: #dfae7c;
+  --secondary-background: #b88f5a;
+  --transparency: 50;
 }
 
 .std-Background {

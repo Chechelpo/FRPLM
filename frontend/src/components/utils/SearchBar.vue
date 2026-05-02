@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import {ref, watch} from "vue";
 
 const search = ref("");
+const props = defineProps<
+    {
+      placeholder?: string;
+    }
+>();
+
+const placeholder = ref<string>(props.placeholder ? props.placeholder : "");
 
 const emit = defineEmits<{
   (e: "update:search", value: string): void;
@@ -27,7 +34,7 @@ function clearSearch() {
           v-model="search"
           type="text"
           style="flex-grow:3"
-          placeholder="Search characters…"
+          :placeholder="placeholder"
       />
 
       <button
@@ -51,6 +58,7 @@ function clearSearch() {
   flex-direction: row;
   justify-content: space-evenly;
 }
+
 .card_icon img {
   width: 20px;
   height: 20px;

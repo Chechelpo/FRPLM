@@ -55,7 +55,6 @@ const emit = defineEmits<{
 
 const tagsByName = ref<Map<string, Tag>>(new Map())
 const knownNames = ref<string[]>([])
-
 const selectedNames = computed<string[]>({
   get() {
     return model.value.map(tag => String(tag.get('name')))

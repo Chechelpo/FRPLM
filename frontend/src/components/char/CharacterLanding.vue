@@ -5,8 +5,8 @@ import {onMounted, ref} from "vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import {fetch_all} from "@/domain/entities/EntityFetch";
-import {Character, CharacterData, CharacterKey} from "@/domain/entities/chars/Characters";
+import {deleteEntity, fetch_all} from "@/domain/entities/EntityFetch";
+import {Character, CharacterData, CharacterKey} from "@/domain/entities/Characters";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
@@ -27,10 +27,16 @@ async function onCreate() {
 }
 
 async function onEdit(character: Character) {
-  if (editCharacter.value!= null && editCharacter.value.equals(character)) editCharacter.value = null;
+  if (editCharacter.value != null && editCharacter.value.equals(character)) editCharacter.value = null;
   else editCharacter.value = character;
 }
+async function onDelete(character: Character) {
+  const confirmation = window.confirm("Are you sure you want to delete this character?")
+  if (!confirmation) return;
 
+  await deleteEntity<CharacterKey>(character.key, EntityTypes.CHARACTERS);
+  characters.value = characters.value.filter(t => !t.equals(character));
+}
 onMounted(async () => {
   characters.value = await fetch_all<CharacterKey, CharacterData, Character>(EntityTypes.CHARACTERS, Character);
   editCharacter.value = null;
@@ -45,31 +51,17 @@ onMounted(async () => {
           v-model:elements="characters as EntityABS<CharacterKey,CharacterData>[]"
           @create="onCreate"
           @edit="(element) => onEdit(element as Character)"
+          @remove = "(element) => onDelete(element as Character)"
       ></List>
     </template>
 
     <template v-if="editCharacter" #right>
-      <SplitPanel
-          v-if = "editCharacter"
-          storage-key="Character_edit:inner"
-      >
-        <template #left>
-          <div> General information editor </div>
-          <CharacterEditor
-          v-if = 'editCharacter'
+      <div> Editor</div>
+      <CharacterEditor
+          v-if='editCharacter'
           v-model='editCharacter as Character'
-          ></CharacterEditor>
-        </template>
-        <template #right>
-          <Expandable title="StartingLocations">
-          <StartingLocation
-              v-if = "editCharacter"
-              :key = "editCharacter.get('id')"
-              model-value:character = "editCharacter"
-          ></StartingLocation>
-          </Expandable>
-        </template>
-      </SplitPanel>
+      ></CharacterEditor>
+
 
     </template>
   </SplitPanel>
