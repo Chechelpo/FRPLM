@@ -7,8 +7,24 @@ import SearchBar from "@/components/utils/SearchBar.vue";
 const model = defineModel<Lorebook>({required: true, type: Lorebook})
 
 // ---- State --------------------------------------------------------
-const entries = ref<Entry[]>([])
-const filteredEntries = ref<Entry[]>([])
+const entries = ref<Entry[]>([]);
+const searchQuery = ref('');
+
+const filteredEntries = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+
+  if (!query) {
+    return entries.value;
+  }
+
+  return entries.value.filter(entry => {
+    const entryName = entry.get('name');
+
+    return typeof entryName === 'string'
+        && entryName.toLowerCase().includes(query);
+  });
+});
+
 const error = ref<string | null>(null)
 const loading = ref<boolean>(false)
 
@@ -17,7 +33,6 @@ async function loadEntries() {
   loading.value = true
   console.info(`Editing ${model.value}`)
   entries.value = await model.value.getEntries()
-  filteredEntries.value = await model.value.getEntries()
 
   loading.value = false
 }
@@ -29,13 +44,13 @@ watch(model, loadEntries)
 async function addEntry() {
   try {
     const newEntry = await model.value.newEntry();
-    entries.value.push(newEntry)
+
+    entries.value.push(newEntry);
   } catch (e) {
-    console.error(e)
-    error.value = 'Could not create entry.'
+    console.error(e);
+    error.value = 'Could not create entry.';
   }
 }
-
 async function deleteEntry(entry: Entry): Promise<void> {
   try {
     await model.value.deleteEntry(entry);
@@ -49,21 +64,6 @@ async function deleteEntry(entry: Entry): Promise<void> {
   }
 }
 
-function filterEntriesByName(search: string): void {
-  const query = search.trim().toLowerCase();
-
-  if (!query) {
-    filteredEntries.value = entries.value;
-    return;
-  }
-
-  filteredEntries.value = entries.value.filter(entry => {
-    const entryName = entry.get('name');
-
-    return typeof entryName === 'string'
-        && entryName.toLowerCase().includes(query);
-  });
-}
 </script>
 
 <template>
@@ -87,7 +87,7 @@ function filterEntriesByName(search: string): void {
     <!-- Actual useful things -->
     <searchBar
         placeholder="Search entries by name"
-        @update:search="value => filterEntriesByName(value)"
+        @update:search="value => searchQuery = value"
     ></searchBar>
     <button
         type="button"
