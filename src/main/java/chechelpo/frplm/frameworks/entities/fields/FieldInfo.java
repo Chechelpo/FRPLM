@@ -1,6 +1,6 @@
 package chechelpo.frplm.frameworks.entities.fields;
 
-import chechelpo.frplm.frameworks.entities.fields.constraints.Constraints;
+import chechelpo.frplm.frameworks.entities.fields.constraints.*;
 import chechelpo.frplm.frameworks.entities.fields.format.Format;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldKind;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public final class FieldInfo<T extends FieldKind>{
     public final @NotNull FieldType type;
     public final @Nullable Format<T> format;
-    public final @Nullable Constraints<T, ?> constraints;
+    public final @NotNull Constraints<T, ?> constraints;
     public final boolean require;
 
     @Contract(pure = true)
@@ -32,14 +32,14 @@ public final class FieldInfo<T extends FieldKind>{
     @Contract(value = " -> new", pure = true)
     public static @NotNull FieldInfoBuilder<FieldKind.NumberKind> numberField(FieldType type) {
         if (type.isValidNumber())
-            return new FieldInfoBuilder<>(FieldType.INTEGER);
+            return new FieldInfoBuilder<>(type);
         throw new IllegalArgumentException("Type " + type + " is not supported");
     }
 
     @Contract(value = " -> new", pure = true)
     public static @NotNull FieldInfoBuilder<FieldKind.FloatKind> floatField(FieldType type) {
-        if (!type.isValidFloat())
-           return new FieldInfoBuilder<>(FieldType.FLOAT);
+        if (type.isValidFloat())
+           return new FieldInfoBuilder<>(type);
         throw new IllegalArgumentException("Type " + type + " is not supported");
     }
 
@@ -56,6 +56,7 @@ public final class FieldInfo<T extends FieldKind>{
 
         private FieldInfoBuilder(FieldType type) {
             this.type = type;
+            this.constraints = (Constraints<T, ?>) getDefaultConstraint(type);
         }
 
         public FieldInfoBuilder<T> setFormat(Format<T> format) {
@@ -76,4 +77,25 @@ public final class FieldInfo<T extends FieldKind>{
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private static <T extends FieldKind> @NotNull Constraints<T, ?> getDefaultConstraint(
+            @NotNull FieldType type
+    ) {
+        return switch (type) {
+            case STRING -> (Constraints<T, ?>) StringConstraints.builder()
+                    .build();
+
+            case BOOLEAN -> (Constraints<T, ?>) new BoolConstraints(false);
+
+            case BYTE, SHORT, INTEGER, LONG -> (Constraints<T, ?>) NumberConstraints.builder(type)
+                    .build();
+
+            case FLOAT, DOUBLE -> (Constraints<T, ?>) new FloatConstraints.FloatConstraintsBuilder(type)
+                    .build();
+
+            case ENUM -> throw new UnsupportedOperationException(
+                    "Default enum constraints are not implemented yet"
+            );
+        };
+    }
 }

@@ -13,6 +13,16 @@ public sealed interface Event permits
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Entity Events.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * Signals that a new entity will be created.
+     * @param type Entity type
+     * @param eventIdentifier the id that will come with the next draft
+     * @param initialKey initial key data
+     * @param initialData initial payload
+     * @apiNote This event must only be emitted <b>AFTER THE DATA HAS BEEN CHECKED</b>. Other systems will expect this draft
+     * to succeed 99.9% of times, so you better check the data.
+     */
     record NewEntityDraft(
             EntityTypes.Types type,
             int eventIdentifier,

@@ -4,12 +4,17 @@ import chechelpo.frplm.config.controllers.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
+import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 
+import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 import static chechelpo.frplm.jooq.generated.tables.LocationNeighbors.LOCATION_NEIGHBORS;
 
 @Component
@@ -23,6 +28,17 @@ final class EdgeStore extends ABSEntityStore<LocationNeighborsRecord> {
         return super.update(id, object);
     }
 
+    public @NotNull List<LocationsRecord> getNeighboursOf(@NotNull EntityKey<LocationsRecord> key){
+        return ctx.select()
+                .from(LOCATION_NEIGHBORS)
+                .join(LOCATIONS)
+                .on(
+                        LOCATION_NEIGHBORS.LOCATION1_ID.eq(key.getValue(LOCATIONS.ID))
+                                .or(LOCATION_NEIGHBORS.LOCATION2_ID.eq(key.getValue(LOCATIONS.ID)))
+                                        .and(key.getPkCondition())
+                )
+                .fetchInto(LocationsRecord.class);
+    }
     @Override
     public LocationNeighborsRecord createAndGet(@NotNull EntityDataPayload<LocationNeighborsRecord> data) {
         /*

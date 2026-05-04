@@ -18,34 +18,38 @@ import org.jetbrains.annotations.Nullable;
 ///  - read_only = `false`
 ///  - is_key = `false`
 ///
-public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Float> {
+public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Number> {
     private final Double min;
     private final Double max;
     private final boolean is_key;
+    private final FieldType fieldType;
 
-    @Contract(pure = true)
     private FloatConstraints(@NotNull FloatConstraintsBuilder builder) {
-        super(builder.read_only, FieldType.FLOAT);
+        super(builder.read_only, builder.fieldType);
         this.min = builder.min;
         this.max = builder.max;
         this.is_key = builder.is_key;
+        this.fieldType = builder.fieldType;
     }
 
-    @Override
-    public Float coerce(Object value) {
-        return switch (value) {
-            case null -> null;
-            case Float v -> v;
-            case String s -> Float.parseFloat(s);
-            default -> throw new IllegalArgumentException("Cannot coerce " + value + " to " + FieldType.FLOAT);
-        };
+    public static FloatConstraintsBuilder builder(FieldType fieldType) {
+        return new FloatConstraintsBuilder(fieldType);
     }
 
     public static class FloatConstraintsBuilder {
+        private final FieldType fieldType;
         private Double min;
         private Double max;
         private boolean read_only = false;
         private boolean is_key = false;
+
+        public FloatConstraintsBuilder(FieldType fieldType) {
+            if (!fieldType.isValidFloat()) {
+                throw new IllegalArgumentException("FieldType is not valid float");
+            }
+
+            this.fieldType = fieldType;
+        }
 
         public FloatConstraintsBuilder setMin(@Nullable Double min) {
             this.min = min;
@@ -57,44 +61,41 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Flo
             return this;
         }
 
-        public FloatConstraintsBuilder setReadOnly(boolean read_only) {
-            this.read_only = read_only;
+        public FloatConstraintsBuilder readOnly() {
+            this.read_only = true;
             return this;
         }
 
-        public FloatConstraintsBuilder setIsKey(boolean is_key) {
-            this.is_key = is_key;
+        public FloatConstraintsBuilder key() {
+            this.is_key = true;
             return this;
         }
 
-        @Contract(value = " -> new", pure = true)
-        public @NotNull FloatConstraints create(){
+        public FloatConstraints build() {
             if (is_key && !read_only) {
                 throw new IllegalArgumentException("Key field must be read only");
             }
+
             return new FloatConstraints(this);
         }
     }
 
-    public Double getMin() {
-        return min;
-    }
-
-    public Double getMax() {
-        return max;
+    @Override
+    public Number coerce(Object value) {
+        return switch (value) {
+            case null -> null;
+            case Float f -> f;
+            case Double d -> d;
+            case Number n -> n.doubleValue();
+            case String s -> fieldType == FieldType.FLOAT
+                    ? Float.parseFloat(s)
+                    : Double.parseDouble(s);
+            default -> throw new IllegalArgumentException("Cannot coerce " + value + " to " + fieldType);
+        };
     }
 
     @Override
     public FieldType type() {
-        return FieldType.FLOAT;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return read_only;
-    }
-
-    public boolean isKey() {
-        return is_key;
+        return fieldType;
     }
 }

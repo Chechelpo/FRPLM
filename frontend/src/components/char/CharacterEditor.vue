@@ -8,7 +8,7 @@ import { fetchOne } from "@/domain/entities/EntityFetch";
 import { EntityTypes } from "@/frameworks/entities/EntityTypes";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import TagAutocomplete from "@/components/tags/TagAutocomplete.vue";
-import { Tag } from "@/domain/entities/tags/Tag";
+import { Tag } from "@/domain/entities/Tag";
 
 const model = defineModel<Character>({
   required: true

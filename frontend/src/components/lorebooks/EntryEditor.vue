@@ -1,3 +1,4 @@
+TODO: Keywords dont get updated in between entries on addition/removal. They need a global state regarding them.
 <script setup lang="ts">
 import {ActivationStrategy, Entry, KeyWord, KeywordData} from "@/domain/entities/Lorebook";
 import LongTextBox from "@/components/utils/field-editors/LongTextBox.vue";

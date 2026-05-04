@@ -25,7 +25,7 @@ public class EntityKey<R extends TableRecord<R>>
     }
 
     @Contract("_ -> new")
-    public static<Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder(){
+    public static <Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder(){
         return new Builder<>();
     }
 

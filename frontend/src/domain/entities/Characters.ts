@@ -2,7 +2,7 @@ import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
 import {createEntity, deleteEntity, fetch_all, fetchOne} from "@/domain/entities/EntityFetch";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
-import {Tag} from "@/domain/entities/tags/Tag";
+import {Tag} from "@/domain/entities/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
 import {filterWithAttribute} from "@/utils/filters";
 

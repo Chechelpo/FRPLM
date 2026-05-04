@@ -3,7 +3,7 @@ import {onMounted, ref} from "vue";
 import SimpleList from "@/components/utils/list/SimpleList.vue";
 import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue";
 import {Character} from "@/domain/entities/Characters";
-import {World} from "@/domain/entities/space/World";
+import {World} from "@/domain/entities/World";
 import {CommonFields} from "@/utils/CommonFields";
 import {fetch_all} from "@/domain/entities/EntityFetch";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";

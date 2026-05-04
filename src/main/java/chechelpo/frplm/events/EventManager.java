@@ -2,11 +2,13 @@ package chechelpo.frplm.events;
 
 import ch.qos.logback.classic.Logger;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
+import io.netty.util.internal.ConcurrentSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Record;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 public final class EventManager {
     private EventManager() {}
@@ -14,10 +16,16 @@ public final class EventManager {
     private static final Logger log = (Logger) LoggerFactory.getLogger(EventManager.class.getSimpleName());
 
     private static final Set<EventListener> listeners = new HashSet<>();
-    private static final Set<Event> unCommitedEvents = new HashSet<>();
+    private static final ConcurrentSet<Event> unCommitedEvents = new ConcurrentSet<>();
+
+    private static final AtomicLong idHandler = new AtomicLong();
 
     public static void subscribe(EventListener eventListener) {
         listeners.add(eventListener);
+    }
+
+    public static @NotNull Long requestEventIdentifier(){
+        return idHandler.getAndIncrement();
     }
 
     private static void PanicOnUncommitedEvent(String event, EntityKey<?> key) {

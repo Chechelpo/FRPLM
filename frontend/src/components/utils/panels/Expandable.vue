@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import {ref} from "vue";
 
 const props = defineProps<{
   title: string;
@@ -18,23 +18,10 @@ function toggle() {
 
 <template>
   <div
-      class="
-      rounded-md
-      border border-slate-700
-      bg-stone-500
-    "
+      class=""
   >
     <!-- Header -->
     <div
-        class="
-        flex items-center gap-2
-        px-3 py-2
-        cursor-pointer select-none
-        text-slate-300
-        transition-colors
-        hover:bg-amber-500/10
-        hover:text-amber-300
-      "
         :class="{
         'opacity-50 cursor-not-allowed': disabled,
         'bg-stone-700 text-slate-200': open
@@ -46,11 +33,11 @@ function toggle() {
           class="
           w-4
           text-slate-500
-          transition-transform
+          transition-colors
         "
-          :class="open ? 'rotate-90 text-amber-400' : ''"
-      >
-        ▶
+                :class="open ? 'text-amber-400' : ''"
+            >
+        {{ open ? "▼" : "▶" }}
       </span>
 
       <!-- Title -->
@@ -62,14 +49,8 @@ function toggle() {
     <!-- Content -->
     <div
         v-show="open"
-        class="
-        border-t border-slate-700
-        bg-stone-400
-        px-4 py-3
-        text-slate-300
-      "
     >
-      <slot />
+      <slot/>
     </div>
   </div>
 </template>

@@ -36,5 +36,4 @@ final class LocationStore extends ABSEntityStore<LocationsRecord> {
 
         return super.createAndGet(data);
     }
-
 }

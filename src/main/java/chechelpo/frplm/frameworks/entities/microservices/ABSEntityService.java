@@ -37,7 +37,7 @@ public abstract class ABSEntityService<
     protected final List<EntityKey<Record>> temporarilyUnavailableKeys = new ArrayList<>();
 
     protected final Store store;
-    private final Logger log;
+    protected final Logger log;
     private final EntityTypes.Types entityType;
 
     public ABSEntityService(Store store, EntityTypes.Types types) {
