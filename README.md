@@ -87,5 +87,5 @@ purposes.
 Commercial use is not permitted without a separate commercial licence from the
 copyright holder.
 
-For commercial licensing, contact: your-email@example.com
+For commercial licensing, contact: felipeyelpo26@gmail.com
 
