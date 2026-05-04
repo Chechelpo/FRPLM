@@ -9,6 +9,7 @@ import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // MODEL & EMITS
@@ -63,27 +64,37 @@ async function onEdit(location: Location) {
     >
       Back
     </button>
+    <Expandable
+      info="Logical groupings of locations"
+      title="World Editor"
+    >
+      <!-- World editor (natural height, scrolls away) -->
+      <div class="background-edit-box">
+        World info edit
+        <FieldEditorWrapper
+            field-name="World's Name "
+            info="Purely metadata, won't be injected at runtime unless you use the outlet {{worldname}}"
+        >
+          <ShortTextBox
+              class="opacity-100"
+              :model-value="worldName"
+              @edit="payload => worldName = payload"
+          />
+        </FieldEditorWrapper>
+        <Expandable
+            title="World Info"
+            info="Lorebook active throughout an entire session, regardless of location"
+            :initially-open="false"
+        >
+          <LorebookEditor
+              class="opacity-100"
+              v-if="lorebook"
+              :model-value="lorebook"
+          />
+        </Expandable>
+      </div>
+    </Expandable>
 
-    <!-- World editor (natural height, scrolls away) -->
-    <div class="worldBox">
-      World info edit
-
-      <ShortTextBox
-          class="opacity-100"
-          :model-value="worldName"
-          @edit="payload => worldName = payload"
-      />
-      <Expandable
-          title="Lorebook editor"
-          :initially-open="false"
-      >
-        <LorebookEditor
-            class="opacity-100"
-            v-if="lorebook"
-            :model-value="lorebook"
-        />
-      </Expandable>
-    </div>
     <!-- Locations editor (full-screen section) -->
     <div class="flex-1 min-h-0 flex">
       <SplitPanel storage-key="WorldEdit" class="flex-1 min-h-0">
@@ -109,14 +120,4 @@ async function onEdit(location: Location) {
 
 
 <style scoped>
-.worldBox {
-  background-color: color-mix(
-      in srgb,
-      var(--secondary-background) 40%,
-      transparent
-  );
-  border: 1px solid var(--primary-accent) rounded;
-  display: flex;
-  flex-direction: column;
-}
 </style>

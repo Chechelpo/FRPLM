@@ -56,7 +56,6 @@ onMounted(async () => {
     </template>
 
     <template v-if="editCharacter" #right>
-      <div> Editor</div>
       <CharacterEditor
           v-if='editCharacter'
           v-model='editCharacter as Character'

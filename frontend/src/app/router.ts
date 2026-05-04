@@ -6,6 +6,7 @@ import WorldLanding from "@/components/space/WorldLanding.vue";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {EntityABS} from "@/frameworks/entities/EntityABS";
 import WorldEdit from "@/components/space/WorldEdit.vue";
+import LorebookLanding from "@/components/lorebooks/LorebookLanding.vue";
 
 export function route_to(type:EntityTypes): string {
     return `/${type}`;
@@ -16,6 +17,7 @@ export const router = createRouter({
     routes: [
         { path: "/", component: EmptyView },
         { path: "/llm", component: ConnectionView, name: "LLM_connections" },
+        { path: "/lorebook", component: LorebookLanding, name: "Lorebook Landing" },
         { path: route_to(EntityTypes.CHARACTERS), component: CharacterLanding, name: "Character" },
         { path: route_to(EntityTypes.WORLDS), component: WorldLanding, name: "worldList"}
     ],

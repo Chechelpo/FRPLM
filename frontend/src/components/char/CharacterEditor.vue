@@ -9,6 +9,8 @@ import { EntityTypes } from "@/frameworks/entities/EntityTypes";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import TagAutocomplete from "@/components/tags/TagAutocomplete.vue";
 import { Tag } from "@/domain/entities/Tag";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import Expandable from "@/components/utils/panels/Expandable.vue";
 
 const model = defineModel<Character>({
   required: true
@@ -81,30 +83,48 @@ async function handleRemoveTag(tag: Tag) {
 </script>
 
 <template>
-  <div class="all_fields_rows">
-    <!-- name -->
-    <ShortTextBox
-        v-if="model"
-        v-model="name"
-        @edit="txt => name = txt"
-    ></ShortTextBox>
-
-    <!-- Tag editor -->
-    <div v-if="model">
-      Tags
-      <TagAutocomplete
-          v-if="characterTags"
-          v-model="characterTags as Tag[]"
-          @new-tag="handleNewTag"
-          @remove-tag="handleRemoveTag"
-      />
+  <div class="all_fields_rows background-edit-box">
+    <div>
+      <!-- name -->
+      <div class = "flex flex-row">
+        <FieldEditorWrapper
+            field-name="Name"
+            info="Character's name, will be included in the prompt"
+        >
+          <ShortTextBox
+              v-if="model"
+              v-model="name"
+              @edit="txt => name = txt"
+          ></ShortTextBox>
+        </FieldEditorWrapper>
+      </div>
+      <!-- Tag editor -->
+      <div v-if="model">
+        <FieldEditorWrapper
+          field-name="Tags"
+          info="Character tags, write new ones to automatically create and link them"
+          :vertical="true"
+        >
+          <TagAutocomplete
+              v-if="characterTags"
+              v-model="characterTags as Tag[]"
+              @new-tag="handleNewTag"
+              @remove-tag="handleRemoveTag"
+          />
+        </FieldEditorWrapper>
+      </div>
     </div>
-
     <!-- Embed lorebook entry editor -->
-    <LorebookEditor
-        v-if="embed_lorebook"
-        v-model="embed_lorebook"
-    />
+    <Expandable
+        title="Lorebook"
+        info="A lorebook that will be activated if the character is present in the current location"
+        :initially-open="false"
+    >
+      <LorebookEditor
+          v-if="embed_lorebook"
+          v-model="embed_lorebook"
+      />
+    </Expandable>
   </div>
 </template>
 
@@ -112,6 +132,7 @@ async function handleRemoveTag(tag: Tag) {
 .all_fields_rows {
   display: flex;
   flex-direction: column;
+  overflow: scroll;
 }
 
 .top_fields_flex {
