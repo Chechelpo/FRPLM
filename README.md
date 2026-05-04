@@ -77,3 +77,15 @@ To have a character be part of a world, you specify a location. You may also spe
   - **Reason_why** the entity is there in the first place
   - **TTL** How many messages does this reason why stay injected.
 
+## Licence
+
+This project is licensed under the PolyForm Noncommercial License 1.0.0.
+
+You may use, copy, modify, and redistribute this software for non-commercial
+purposes.
+
+Commercial use is not permitted without a separate commercial licence from the
+copyright holder.
+
+For commercial licensing, contact: your-email@example.com
+
