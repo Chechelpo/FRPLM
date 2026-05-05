@@ -6,10 +6,7 @@ import chechelpo.frplm.config.controllers.EntityTypes;
 import chechelpo.frplm.events.Event;
 import chechelpo.frplm.events.EventManager;
 import chechelpo.frplm.exceptions.Severity;
-import chechelpo.frplm.exceptions.types.ExpectedField;
-import chechelpo.frplm.exceptions.types.InvalidID;
-import chechelpo.frplm.exceptions.types.NotFound;
-import chechelpo.frplm.exceptions.types.UnexpectedException;
+import chechelpo.frplm.exceptions.types.*;
 import chechelpo.frplm.frameworks.entities.data.QueryObject;
 import chechelpo.frplm.frameworks.entities.fields.constraints.Constraints;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
@@ -49,6 +46,7 @@ public abstract class ABSEntityService<
 
         this.store = store;
         log = (Logger) LoggerFactory.getLogger(types + "_Service");
+        log.setLevel(types.getLoggerLevel());
     }
 
     public boolean isKey(TableField<Record, ?> field) {
@@ -93,6 +91,10 @@ public abstract class ABSEntityService<
                         constraints.get(entry.getKey()).violatesConstraints(entry.getKey(), entry.getValue())) {
                     throw new RuntimeException("Constraint violation");
                 }
+                if(keys.contains(entry.getKey())){
+                    log.error("Tried to edit key field: {}", entry.getKey().getName());
+                    throw new UneditableField(entry.getKey().getName(), Severity.USER);
+                }
             }
         }
     }
@@ -113,12 +115,12 @@ public abstract class ABSEntityService<
         }
 
     }
-    protected final void coercePayload(EntityDataPayload<Record> data) {
-        throwOnConstraintsViolation(null, data);
+    protected final void coercePayload(@NotNull EntityDataPayload<Record> data) {
         for (TableField<Record, ?> field : data.values().keySet()){
             Constraints<?, ?> constraint = constraints.get(field);
             data.unsafeSetValue(field, constraint.coerce(data.getValue(field)));
         }
+        throwOnConstraintsViolation(null, data);
     }
 
     @Contract(pure=true)

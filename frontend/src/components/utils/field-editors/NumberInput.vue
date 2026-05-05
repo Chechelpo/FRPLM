@@ -5,24 +5,17 @@ import {onBeforeUnmount, ref} from "vue";
  */
 const EDIT_EMIT_MS = 250;
 
-const props = defineProps<{
-  read_only?:boolean
-  initial_value:number
-}>();
+const model = defineModel<number>({required:true});
 
-const lastEmitted = ref(props.initial_value);
+const lastEmitted = ref(model.value);
 const value = ref(lastEmitted.value);
 let timer: number | null = null;
 
 const emit = defineEmits<{
-  (e: "edit", payload: {
-    value: number;
-  }): void;
+  (e: "edit", payload: number): void;
 }>();
 
 function scheduleEditEmit(): void {
-  if (props.read_only) return;
-
   if (timer !== null) window.clearTimeout(timer);
 
   timer = window.setTimeout(() => {
@@ -60,7 +53,6 @@ onBeforeUnmount(() => {
     <input
         type="number"
         :value="value ?? ''"
-        :disabled="props.read_only"
         @input="onInput"
         class=""
     />

@@ -1,5 +1,6 @@
 package chechelpo.frplm.config.controllers;
 
+import ch.qos.logback.classic.Level;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +19,9 @@ public final class EntityTypes {
     private static final String CHARACTERS_str         = "characters";
     private static final String STARTING_LOCATIONS_str = "startingLocations";
     public static final String CHARACTER_TAGS_str     = "characterTags";
+
+    // Connection
+    private static final String CONNECTION_str = "connection";
 
     // Lorebooks
     private static final String LOREBOOKS_str          = "lorebooks";
@@ -42,6 +46,9 @@ public final class EntityTypes {
     public static final String STARTING_LOCATIONS_URL = BASE + "/" + STARTING_LOCATIONS_str;
     public static final String CHARACTER_TAGS_URL     = BASE + "/" + CHARACTER_TAGS_str;
 
+    // Connection
+    public static final String CONNECTION_URL         = BASE + "/" + CONNECTION_str;
+
     // Lorebooks controllers
     public static final String LOREBOOKS_URL          = BASE + "/" + LOREBOOKS_str;
     public static final String ENTRIES_URL            = BASE + "/" + ENTRIES_str;
@@ -63,26 +70,36 @@ public final class EntityTypes {
         KEYWORDS(KEYWORDS_str),
 
         CHARACTER(CHARACTERS_str),
-        STARTING_LOCATIONS(STARTING_LOCATIONS_str),
+        STARTING_LOCATIONS(STARTING_LOCATIONS_str, Level.TRACE),
         CHARACTER_TAGS(CHARACTER_TAGS_str),
+
+        CONNECTION(CONNECTION_str),
 
         LOREBOOKS(LOREBOOKS_str),
         ENTRIES(ENTRIES_str),
         ENTRY_KEYWORDS(ENTRIES_KEYWORDS_str),
 
         WORLDS(WORLDS_str),
-        LOCATIONS(LOCATIONS_str),
+        LOCATIONS(LOCATIONS_str, Level.TRACE),
         EDGES(EDGES_str)
         ;
 
         private final String type;
-
+        private final Level loggerLevel;
         Types(@NotNull String type) {
             this.type = type;
+            this.loggerLevel = Level.INFO;
+        }
+        Types(@NotNull String type, Level loggerLevel) {
+            this.type = type;
+            this.loggerLevel = loggerLevel;
         }
 
         public String getEntityType() {
             return type;
+        }
+        public Level getLoggerLevel() {
+            return loggerLevel;
         }
     }
 

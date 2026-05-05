@@ -79,7 +79,9 @@ export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> 
 
     /** Method used for avoiding duplication of entity type string */
     abstract getEntityType(): EntityTypes;
-    abstract getIterationArr():EntityField<Key, Data>[];
+    public getIterationArr():EntityField<Key, Data>[]{
+        return []
+    }
     public getFields(): EntityFieldsMap<Key, Data> {
         return EntityABS.getFields(this.getEntityType())
     }

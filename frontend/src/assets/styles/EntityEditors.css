@@ -12,3 +12,12 @@
     flex-direction: column;
     gap: 1rem;
 }
+.prompt-window-container{
+    background-color: var(--secondary-background);
+    border: 1px solid var(--primary-accent);
+    border-radius: 0.375rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}

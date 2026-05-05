@@ -19,7 +19,7 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
 
     protected final DSLContext ctx;
     private final Table<R> main_table;
-    private final Logger log;
+    protected final Logger log;
 
     protected ABSEntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityTypes.Types type) {
         if(registeredStores.contains(type))
@@ -30,6 +30,7 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
         this.main_table = main_table;
 
         this.log = (Logger) LoggerFactory.getLogger(type + "_Store");
+        this.log.setLevel(type.getLoggerLevel());
     }
 
     public List<R> getAll(){

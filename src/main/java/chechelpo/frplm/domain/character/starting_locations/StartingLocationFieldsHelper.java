@@ -87,5 +87,14 @@ public final class StartingLocationFieldsHelper extends ABSFieldInstantiationHel
                         )
                         .build()
         );
+        register_field(
+                "ttl",
+                StartingLocations.STARTING_LOCATIONS.TTL,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
+                                .setMin(0L)
+                                .build()
+                        )
+        );
     }
 }

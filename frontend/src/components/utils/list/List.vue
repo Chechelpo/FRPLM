@@ -1,8 +1,4 @@
-<script setup lang="ts" generic="
-Key extends KeyRecord,
-Data extends DataRecord,
-Ent extends EntityABS<Key,Data>
-">
+<script setup lang="ts" generic="Ent extends EntityABS<any,any>">
 import {computed, ref} from "vue";
 
 import SearchBar from "@/components/utils/SearchBar.vue";

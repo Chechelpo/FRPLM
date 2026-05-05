@@ -1,107 +1,172 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
-import SimpleList from "@/components/utils/list/SimpleList.vue";
-import Editor from "@/components/utils/entity_editors/self-assembling/Editor.vue";
-import {Character} from "@/domain/entities/Characters";
-import {World} from "@/domain/entities/World";
-import {CommonFields} from "@/utils/CommonFields";
-import {fetch_all} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import { computed, onMounted, ref } from "vue";
+import {Character, StartingLocation} from "@/domain/entities/Characters";
+import { Location, World, WorldData, WorldKey } from "@/domain/entities/World";
+import { fetch_all } from "@/domain/entities/EntityFetch";
+import { EntityTypes } from "@/frameworks/entities/EntityTypes";
+import SingleEnumInput from "@/components/utils/field-editors/SingleEnumInput.vue";
+import List from "@/components/utils/list/List.vue";
+import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
+import LongTextBox from "@/components/utils/field-editors/LongTextBox.vue";
+import NumberInput from "@/components/utils/field-editors/NumberInput.vue";
 
-const props = defineModel<{
-  character: Character;
-}>();
+const model = defineModel<Character>({ required: true });
 
-const worlds = ref<World[]>([])
-const selectedWorld = ref<World | null>(null);
-const locationsOfWorld = ref<Location[]>([])
-const selectedLocation = ref<Location | null>(null)
-const startingInfo = ref<World | null>(null);
-const creatingNew = ref<boolean>(false);
+const startingLocations = ref<Location[]>([]);
 
-async function onSelectWorld(world: World) {
-  console.trace(`Selecting world: ${world.getCommon(CommonFields.NAME)}`);
-  selectedWorld.value = world;
-  /*
-  locationsOfWorld.value = await getLocations(world.id);
-  //Now we need to check if there's a starting info
-  const response = await fetch(`/api/starting/${props.character.id}/${world.id}`,
-      {
-        method: "GET",
-      })
+const worlds = ref<World[]>();
+const worldSelected = ref<World | null>(null);
+const worldsByName = ref<Map<string, World>>(new Map());
+const worldsNames = ref<string[]>([]);
 
-  if (response.status === 404) {
-    creatingNew.value = true;
+const filteredLocations = ref<Location[]>([]);
+const selectedLocation = ref<Location | null>(null);
+
+const locationOptionsOpen = ref(false);
+
+const locationsOfWorld = ref<Location[] | null>(null);
+const allLocationsNames = ref<string[]>([]);
+const locationNames = computed<string[]>(() =>
+    filteredLocations.value.map(location => location.get("name"))
+);
+
+async function onSelectWorld(name: string) {
+  selectedLocation.value = null;
+  locationOptionsOpen.value = false;
+
+  const world = worldsByName.value.get(name);
+
+  if (!world) {
+    filteredLocations.value = [];
+    worldSelected.value = null;
     return;
   }
-  if (!response.ok) throw new Error(`Error when fetching starting location`);
 
-  //There's a starting info then:
-  startingInfo.value = await response.json();
+  worldSelected.value = world;
+  locationsOfWorld.value = await world.getLocations();
+  allLocationsNames.value = locationsOfWorld.value.map(location => location.get("name"));
 
-  //fetch matching location:
-  if (startingInfo.value === null) throw new Error("Unexpected error while fetching starting location");
-  for (let i = 0; i < locationsOfWorld.value.length; i++) {
-    const location = locationsOfWorld.value[i];
+  const worldID = world.get("id");
 
-    if (location.id === startingInfo.value.locationID) {
-      selectedLocation.value = location;
-      break;
-    }
-  }*/
+  filteredLocations.value = startingLocations.value.filter(
+      location => location.get("worldID") === worldID
+  );
 }
 
-async function onSelectLocation(location: Location) {
-  /*
-  console.trace(`Setting location: ${location.name}`);
-  if (selectedWorld.value == null) throw new Error("Invalid state")
-  selectedLocation.value = location;
-
-  if (creatingNew.value) {
-    const response = await fetch(`/api/starting/${props.character.id}/${selectedWorld.value.id}?locationID=${encodeURIComponent(selectedLocation.value.id)}`,
-        {method: "POST",}
-    );
-    if (!response.ok) throw new Error("Error creating starting location");
-
-    startingInfo.value = await response.json();
-    creatingNew.value = false;
-    return
-  } else await saveField("locationID", selectedLocation.value.id);
-  */
-}
-
-
-onMounted(async () => {
-  worlds.value = await fetch_all(EntityTypes.WORLDS, World);
+onMounted(() => {
+  load();
 });
+
+async function load() {
+  const fetchedWorlds = await fetch_all<WorldKey, WorldData, World>(
+      EntityTypes.WORLDS,
+      World
+  );
+
+  worlds.value = fetchedWorlds;
+
+  const index = new Map<string, World>();
+  fetchedWorlds.forEach(world => index.set(world.get("name"), world));
+
+  worldsByName.value = index;
+  worldsNames.value = fetchedWorlds.map(world => world.get("name"));
+
+  startingLocations.value = await model.value.getStartingLocations();
+}
+
+function onCreateLink() {
+  locationOptionsOpen.value = true;
+}
+
+function onCloseLocationPrompt() {
+  locationOptionsOpen.value = false;
+}
+
+function onPickLocationByName(name: string) {
+  const location = locationsOfWorld.value!.find(
+      location => location.get("name") == name
+  );
+  console.log(`We're adding ${name}`)
+  if (!location) {
+    console.error("Could not find location");
+    return;
+  }
+
+  model.value.markStartingAt(location);
+  filteredLocations.value.push(location);
+  selectedLocation.value = location;
+  onSelectStartingLocation(location);
+  locationOptionsOpen.value = false;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+// Starting location attributes
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
+const selectedStartingLocation = ref<StartingLocation | null>(null);
+const startingLocationName = ref<string>("");
+async function onSelectStartingLocation(loc: Location) {
+  selectedLocation.value = loc;
+  selectedStartingLocation.value = await model.value.getStartingLocation(loc);
+}
 </script>
 
 <template>
-<div class = "flex flex-col" >
-  <div class = "w-fit h-fit text-2xl"> Select world </div>
-  <SimpleList
-    :elements = "worlds"
-    @select = "onSelectWorld"
-  >
-  </SimpleList>
-  <div class = "w-fit h-fit text-2xl"
-    v-if = "selectedWorld"
-  >  Select starting location </div>
-  <SimpleList
-      v-if = "selectedWorld"
-      :elements = "locationsOfWorld"
-      :pre-selected = "selectedLocation"
-      @select = "onSelectLocation"
-  ></SimpleList>
-  <Editor
-      v-if = "startingInfo"
-      :owner = "startingInfo"
-      :no-edit = "['charID', 'locationID']"
-  >
-  </Editor>
-</div>
+  <SingleEnumInput
+      v-if="worlds"
+      :value="null"
+      :possible_values="worldsNames"
+      @edit="onSelectWorld"
+  />
+
+  <SplitPanel storage-key="StartingLocations:outer">
+    <template #left>
+      <List
+          v-if="worldSelected"
+          :elements="filteredLocations"
+          @create="onCreateLink"
+          @edit="element => onSelectStartingLocation(element)"
+      />
+    </template>
+
+    <template #right>
+      <FieldEditorWrapper
+          v-if="selectedLocation"
+          field-name="Name"
+      >
+        {{ selectedLocation.get("name") }}
+      </FieldEditorWrapper>
+      <div v-if = "selectedStartingLocation != null" :key="selectedStartingLocation">
+        <FieldEditorWrapper
+            :vertical="true"
+            field-name="Reason_why"
+            info="Will be injected at the very first turns as the reason why the character is there. After TTL turns, it'll go away permanently"
+        >
+          <LongTextBox
+              :model-value="selectedStartingLocation.get('reason_why')"
+              @edit = "payload => selectedStartingLocation!.update('reason_why', payload)"
+          />
+        </FieldEditorWrapper>
+        <FieldEditorWrapper
+            :vertical="true"
+            field-name="TTL"
+            info="After TTL turns, reason_why will no longer be injected into the prompt"
+        >
+          <NumberInput
+              :model-value="selectedStartingLocation.get('ttl')"
+              @edit = "payload => selectedStartingLocation!.update('ttl', payload)"
+          />
+        </FieldEditorWrapper>
+      </div>
+    </template>
+  </SplitPanel>
+
+  <EnumPrompt
+      v-if="locationOptionsOpen"
+      message="Select starting location"
+      :options="allLocationsNames"
+      @select="onPickLocationByName"
+      @close="onCloseLocationPrompt"
+  />
 </template>
-
-<style scoped>
-
-</style>

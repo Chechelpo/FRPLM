@@ -1,10 +1,12 @@
 import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {createEntity, deleteEntity, fetch_all, fetchOne} from "@/domain/entities/EntityFetch";
+import {API_BASE, createEntity, deleteEntity, fetch_all, fetchApi, fetchOne} from "@/domain/entities/EntityFetch";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/entities/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
 import {filterWithAttribute} from "@/utils/filters";
+import {Location} from "@/domain/entities/World";
+import {DTO} from "@/types/DTOs";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {
@@ -16,9 +18,13 @@ export class Character extends EntityABS<CharacterKey, CharacterData> {
     private static readonly type:EntityTypes = EntityTypes.CHARACTERS;
     private tags: Tag[] | null = null;
     private lorebook: Lorebook | null = null;
+    private starting_locations: Location[] | null = null
 
     getEntityType(): EntityTypes {
         return Character.type;
+    }
+    getIterationArr(): EntityField<CharacterKey,CharacterData>[] {
+        return [CommonFields.NAME];
     }
 
     public async getLorebook(): Promise<Lorebook> {
@@ -81,8 +87,46 @@ export class Character extends EntityABS<CharacterKey, CharacterData> {
         return await createEntity(null, initialData, this.type, this)
     }
 
-    getIterationArr(): EntityField<CharacterKey,CharacterData>[] {
-        return [CommonFields.NAME];
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // STARTING LOCATIONS:
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public async getStartingLocations(): Promise<Location[]>{
+        if (this.starting_locations == null) {
+            console.debug(`Fetching starting locations of character ${this}`)
+            this.starting_locations = await getStartingLocations(this.key);
+        }
+        return this.starting_locations;
+    }
+
+    public async markStartingAt(loc:Location):Promise<void>{
+        if (this.starting_locations == null)
+            this.starting_locations = await getStartingLocations(this.key);
+
+        const response = await createEntity<StartingLocationKeys,StartingLocationData,StartingLocation>(
+            {
+                worldID: loc.get('worldID')!,
+                locationID: loc.get('id')!,
+                characterID: this.get('id'),
+            },
+            null,
+            EntityTypes.STARTING_LOCATIONS,
+            StartingLocation
+        )
+
+        //If it's unsuccessful, it should throw before this
+        this.starting_locations.push(loc)
+    }
+
+    public async getStartingLocation(loc:Location):Promise<StartingLocation>{
+        return await fetchOne<StartingLocationKeys,StartingLocationData,StartingLocation>(
+            {
+                worldID: loc.get('worldID')!,
+                locationID: loc.get('id')!,
+                characterID: this.get('id'),
+            },
+            EntityTypes.STARTING_LOCATIONS,
+            StartingLocation
+        )
     }
 }
 
@@ -112,25 +156,33 @@ class CharacterTags extends EntityABS<CharacterTagsKey, CharacterTagsData>{
     }
 }
 
+async function getStartingLocations(key:CharacterKey): Promise<Location[]> {
+    const response = await fetchApi(
+        `${API_BASE}/${EntityTypes.LOCATIONS}/entity/ofCharacter/${key.id}`,
+        {
+            method: 'GET'
+        }
+    )
+    console.debug(response)
+    const dtos = await response.json() as DTO[];
+    return dtos.map(dto => new Location(dto, EntityTypes.LOCATIONS));
+}
 
 type StartingLocationKeys = {
     worldID: number,
+    locationID: number,
     characterID: number
 }
-type StartingLocationData = {
-    locationID: number,
-    description: string
+export type StartingLocationData = {
+    reason_why: string,
+    is_static: boolean,
+    ttl: number
 }
 
-class StartingLocation extends EntityABS<StartingLocationKeys, StartingLocationData> {
+export class StartingLocation extends EntityABS<StartingLocationKeys, StartingLocationData> {
     getEntityType(): EntityTypes {
         return EntityTypes.STARTING_LOCATIONS;
     }
-
-    getIterationArr(): EntityField<StartingLocationKeys, StartingLocationData>[] {
-        return [CommonFields.DESCRIPTION];
-    }
-
 
     static async getOfCharacter(character: Character): Promise<StartingLocation[]> {
         return filterWithAttribute(

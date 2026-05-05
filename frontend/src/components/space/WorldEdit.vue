@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, ref, shallowRef} from "vue";
+import {computed, onMounted, ref, shallowRef} from "vue";
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import {World, Location} from "@/domain/entities/World";
@@ -31,11 +31,7 @@ const worldName = computed<string>({
 const lorebook = computedAsync<Lorebook>(async () => {
   return await model.value.getLorebook()
 })
-const locations = computedAsync<Location[]>(
-    async () => {
-      return await model.value.getLocations()
-    }
-);
+const locations = ref<Location[]>([]);
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // Editing
@@ -45,12 +41,22 @@ const locationToEdit = shallowRef<Location | null>(null);
 async function onCreate() { //Create location of a world
   const name = window.prompt("Enter new location name:");
   if (!name) return;
-  await model.value.addLocation(name)
+  const location = await model.value.addLocation(name)
+  if (!location) return;
+  console.debug(`Created location ${location}`)
+  locations.value = await model.value.getLocations();
 }
 
 async function onEdit(location: Location) {
   if (locationToEdit.value && locationToEdit.value.equals(location)) locationToEdit.value = null;
   else locationToEdit.value = location as Location;
+}
+
+onMounted(() => {
+  load()
+})
+async function load(){
+  locations.value = await model.value.getLocations();
 }
 </script>
 
@@ -104,6 +110,7 @@ async function onEdit(location: Location) {
               :elements="locations!"
               @create="onCreate"
               @edit="(element) => onEdit(element as Location)"
+              @remove = "element => model.deleteLocation(element.get('id')!)"
           />
         </template>
 

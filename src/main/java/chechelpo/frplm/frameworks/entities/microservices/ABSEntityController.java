@@ -51,7 +51,7 @@ public abstract class ABSEntityController<
         if (REGISTERED_CONTROLLERS_TYPES.contains(type))
             throw new IllegalStateException("Duplicate controller for type " + type);
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
-        log.setLevel(Level.TRACE);
+        log.setLevel(type.getLoggerLevel());
         log.trace("Controller {} created", type);
 
         this.type = type;
