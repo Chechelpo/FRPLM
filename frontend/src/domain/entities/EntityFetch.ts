@@ -150,6 +150,13 @@ export async function QueryEntities<
     return result.map(dto => new ctor(dto, object_type));
 }
 
+type ErrorResponse = {
+    status:number,
+    type:string,
+    message:string,
+    path:string,
+}
+
 export async function fetchApi(
     input: RequestInfo,
     init?: RequestInit
@@ -159,9 +166,9 @@ export async function fetchApi(
     if (!res.ok) {
         // Attempt to parse backend ErrorResponse
         try {
-            const err = await res.json();
+            const err = await res.json() as ErrorResponse;
             //setGlobalError(err);
-            log_error("Error when fetching api", err);
+            console.error(`Encountered error when fetching backend. \n ${JSON.stringify(err, null, "\n")}`);
         } catch {
             /*
             setGlobalError({

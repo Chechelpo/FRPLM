@@ -9,9 +9,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestController
+@RestControllerAdvice
 final class Controller {
     private final Logger log;
 
@@ -19,7 +19,7 @@ final class Controller {
         this.log = LoggerFactory.get_logger(Logger_names.EXCEPTIONS);
     }
 
-    private record ErrorResponse(
+    record ErrorResponse(
             int status,
             String type,
             String message,

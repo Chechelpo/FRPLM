@@ -70,7 +70,7 @@ public final class EntityTypes {
         KEYWORDS(KEYWORDS_str),
 
         CHARACTER(CHARACTERS_str),
-        STARTING_LOCATIONS(STARTING_LOCATIONS_str, Level.TRACE),
+        STARTING_LOCATIONS(STARTING_LOCATIONS_str),
         CHARACTER_TAGS(CHARACTER_TAGS_str),
 
         CONNECTION(CONNECTION_str),
@@ -81,7 +81,7 @@ public final class EntityTypes {
 
         WORLDS(WORLDS_str),
         LOCATIONS(LOCATIONS_str, Level.TRACE),
-        EDGES(EDGES_str)
+        EDGES(EDGES_str, Level.TRACE)
         ;
 
         private final String type;

@@ -5,7 +5,6 @@ import {CommonFields} from "@/utils/CommonFields";
 import {API_BASE} from "@/config";
 import {DTO} from "@/types/DTOs";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
-import LocationEditor from "@/components/space/LocationEditor.vue";
 
 export type WorldKey = { id: number }
 export type WorldData = {
@@ -196,12 +195,22 @@ export class Location extends EntityABS<LocationKey, LocationData> {
         )
 
         if (success) {
-            this.neighbors!.filter(loc => loc.key != other.key)
+            this.neighbors = this.neighbors!.filter(loc => loc.key != other.key)
             console.log(`Disconnected location ${this} \n from ${other}`)
 
         } else console.error(`Error occurred while disconnecting ${this} \n from ${other}`)
 
         return success;
+    }
+
+    public async getEdgeInfo(other:Location):Promise<LocationEdge>{
+        if (!await this.isNeighbour(other))
+            throw new Error("Tried to get edge info for a non-connected location")
+        return await fetchOne<EdgeKey,EdgeData,LocationEdge>({
+            world_id: this.get('worldID'),
+            location1_id: this.get('id')!,
+            location2_id: other.get('id')!,
+        }, EntityTypes.EDGES, LocationEdge)
     }
 }
 
@@ -213,6 +222,7 @@ async function getNeighbours(key:LocationKey): Promise<Location[]> {
         }
     )
     const dtos = await response.json() as DTO[];
+    console.log(dtos);
     return dtos.map(dto => new Location(dto, EntityTypes.LOCATIONS));
 }
 
@@ -222,7 +232,7 @@ export type EdgeData = {
     travel_cost: number
 }
 
-class LocationEdge extends EntityABS<EdgeKey, EdgeData> {
+export class LocationEdge extends EntityABS<EdgeKey, EdgeData> {
     getEntityType(): EntityTypes {
         return EntityTypes.EDGES;
     }

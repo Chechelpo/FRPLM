@@ -1,123 +1,121 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { Location } from "@/domain/entities/World";
+import {computed, onMounted, ref, watch} from "vue";
+import {Location, LocationEdge} from "@/domain/entities/World";
+import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
+import List from "@/components/utils/list/List.vue";
+import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
+import {computedAsync} from "@vueuse/core";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import LongTextBox from "@/components/utils/field-editors/LongTextBox.vue";
 
 const model = defineModel<{
   parentLocation: Location;
   all_locations: Location[];
-}>({ required: true });
+}>({required: true});
 
-const selectedLocation = ref<Location | null>(null);
-const neighbours = ref<Location[]>([]);
-const edgeDescription = ref<string>("");
+const all_locations_names = computed<string[]>(() => model.value.all_locations
+    .filter(loc => !loc.equals(model.value.parentLocation))
+    .map(loc => loc.get('name'))
+)
+const all_locations_by_name = computed<Map<string, Location>>(() => {
+  const map = new Map<string, Location>()
+  model.value.all_locations
+      .filter(loc => !loc.equals((model.value.parentLocation)))
+      .forEach(loc => map.set(loc.get('name'), loc))
+  return map;
+})
 
-const possibleLocations = computed(() => {
-  return model.value.all_locations.filter(location => {
-    return !location.equals(model.value.parentLocation);
-  });
-});
+const neighbours = computedAsync<Location[]>(async () => await model.value.parentLocation.getNeighbours());
+const creatingNewEdge = ref<boolean>(false);
 
-const selectedIsNeighbour = computed(() => {
-  if (!selectedLocation.value) return false;
-
-  return neighbours.value.some(location =>
-      location.equals(selectedLocation.value!)
-  );
-});
-
-async function refreshNeighbours() {
-  neighbours.value = await model.value.parentLocation.getNeighbours();
+function startCreating() {
+  creatingNewEdge.value = true;
 }
 
-async function selectLocation(locationId: number | string) {
-  const numericId = Number(locationId);
+async function createNewEdge(name: string) {
+  creatingNewEdge.value = false;
+  const location = all_locations_by_name.value.get(name);
+  if (!location || location.equals(model.value.parentLocation)) return;
 
-  const location = model.value.all_locations.find(location =>
-      location.get("id") === numericId
-  );
+  const success = await model.value.parentLocation.connect(location);
+}
 
-  if (!location) return;
+async function disconnectEdge(location: Location) {
+  await model.value.parentLocation.disconnect(location);
+}
 
-  selectedLocation.value = location;
-  edgeDescription.value = "";
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Edge editing
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  const alreadyNeighbour = await model.value.parentLocation.isNeighbour(location);
-
-  if (!alreadyNeighbour) {
-    const success = await model.value.parentLocation.connect(location);
-
-    if (success) {
-      await refreshNeighbours();
-    }
+async function onSelectEdge(location: Location) {
+  if (selectedEdge.value?.equals(location)) {
+    selectedEdge.value = null
+    editingEdgeName.value = ""
+    return;
   }
+
+  editingEdgeName.value = location.get('name');
+  selectedEdge.value = await model.value.parentLocation.getEdgeInfo(location);
 }
 
-async function updateDescription() {
-  if (!selectedLocation.value) return;
-
-  await model.value.parentLocation.updateEdgeInfo(
-      selectedLocation.value,
-      "description",
-      edgeDescription.value
-  );
-}
-
-onMounted(async () => {
-  await refreshNeighbours();
+const editingEdgeName = ref<string>("");
+const selectedEdge = ref<LocationEdge | null>(null);
+const edgeDescription = computed<string | null>({
+  get() {
+    if (selectedEdge.value == null) return null;
+    return selectedEdge.value.get('description');
+  },
+  set(value: string) {
+    if (selectedEdge.value == null) return;
+    selectedEdge.value.update('description', value);
+  }
 });
+
+watch(
+    () => model.value.parentLocation,
+    () => {
+  selectedEdge.value = null;
+  editingEdgeName.value = "";
+})
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 min-h-0 gap-4">
-    <label class="flex flex-col gap-1">
-      <span>Connected location</span>
-
-      <select
-          class="border rounded p-2"
-          :value="selectedLocation?.get('id') ?? ''"
-          @change="selectLocation(($event.target as HTMLSelectElement).value)"
-      >
-        <option disabled value="">
-          Select location
-        </option>
-
-        <option
-            v-for="location in possibleLocations"
-            :key="location.get('id')"
-            :value="location.get('id')"
+  <SplitPanel storage-key="LocationEdgesEditor">
+    <template #left>
+      <List
+          v-if="neighbours"
+          :type="Location"
+          :elements="neighbours"
+          @create="startCreating"
+          @edit="loc => onSelectEdge(loc)"
+          @remove="disconnectEdge"
+      />
+    </template>
+    <template #right>
+      <div v-if = selectedEdge>
+        <FieldEditorWrapper
+            field-name="Edge to"
         >
-          {{ location.get("name") }}
-        </option>
-      </select>
-    </label>
-
-    <div
-        v-if="selectedLocation"
-        class="flex flex-col gap-2"
-    >
-      <p v-if="selectedIsNeighbour">
-        Edge exists.
-      </p>
-
-      <p v-else>
-        Creating edge...
-      </p>
-
-      <label class="flex flex-col gap-1">
-        <span>Edge description</span>
-
-        <textarea
-            v-model="edgeDescription"
-            class="border rounded p-2 min-h-24"
-        />
-      </label>
-
-      <button
-          class="border rounded p-2"
-          @click="updateDescription"
-      >
-        Update description
-      </button>
-    </div>
-  </div>
+          <div> {{ editingEdgeName }}</div>
+        </FieldEditorWrapper>
+        <FieldEditorWrapper
+            field-name="Edge description"
+            info="Will be injected into both locations"
+        >
+          <LongTextBox
+              :model-value="edgeDescription"
+              @edit="payload => edgeDescription = payload"
+          />
+        </FieldEditorWrapper>
+      </div>
+    </template>
+  </SplitPanel>
+  <EnumPrompt
+      v-if="creatingNewEdge"
+      message="Select new location to connect"
+      :options="all_locations_names"
+      @select="option => createNewEdge(option)"
+      @close="creatingNewEdge = false"
+  />
 </template>

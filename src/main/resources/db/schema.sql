@@ -237,7 +237,8 @@ CREATE TABLE location_neighbors
 
     PRIMARY KEY (world_id, location1_id, location2_id),
     FOREIGN KEY (world_id, location1_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
-    FOREIGN KEY (world_id, location2_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE
+    FOREIGN KEY (world_id, location2_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
+    CONSTRAINT chk_duplicates CHECK (location1_id <> location2_id) //We disallow directed graphs (for now)
 );
 
 

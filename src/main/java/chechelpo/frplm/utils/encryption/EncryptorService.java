@@ -14,7 +14,6 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
 
-@Service
 public final class EncryptorService {
     private static final String ENV_KEY_NAME = "FRPLM_SECRET_KEY_B64";
 

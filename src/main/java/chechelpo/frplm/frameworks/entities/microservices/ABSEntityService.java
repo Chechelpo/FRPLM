@@ -91,10 +91,12 @@ public abstract class ABSEntityService<
                         constraints.get(entry.getKey()).violatesConstraints(entry.getKey(), entry.getValue())) {
                     throw new RuntimeException("Constraint violation");
                 }
+                /*
                 if(keys.contains(entry.getKey())){
-                    log.error("Tried to edit key field: {}", entry.getKey().getName());
+                    log.error("Tried to edit key field: {}, {}", entry.getKey().getName(), payload);
                     throw new UneditableField(entry.getKey().getName(), Severity.USER);
                 }
+                */
             }
         }
     }
@@ -293,7 +295,7 @@ public abstract class ABSEntityService<
         coerceFullKey(id);
         return find(id).orElseThrow(() ->
                 new NotFound(
-                        "No entity with id " + id,
+                        "No " + this.entityType + " with id " + id,
                         Severity.USER
                 )
         );

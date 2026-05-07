@@ -10,6 +10,7 @@ import org.jooq.TableRecord;
 import java.util.HashMap;
 import java.util.Map;
 
+import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 import static org.jooq.impl.DSL.trueCondition;
 
 /**
@@ -106,6 +107,12 @@ public class EntityKey<R extends TableRecord<R>>
     }
 
     public @NotNull String toString(){
-        return values.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (Map.Entry<TableField<R, ?>, Object> e : values.entrySet()) {
+            sb.append(e.getKey().getName()).append(" = ").append(e.getValue()).append(", ");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }
