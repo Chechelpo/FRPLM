@@ -168,7 +168,7 @@ async function getStartingLocations(key:CharacterKey): Promise<Location[]> {
     return dtos.map(dto => new Location(dto, EntityTypes.LOCATIONS));
 }
 
-type StartingLocationKeys = {
+export type StartingLocationKeys = {
     worldID: number,
     locationID: number,
     characterID: number

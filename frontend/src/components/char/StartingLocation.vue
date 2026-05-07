@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import {Character, StartingLocation} from "@/domain/entities/Characters";
+import {Character, StartingLocation, StartingLocationData, StartingLocationKeys} from "@/domain/entities/Characters";
 import { Location, World, WorldData, WorldKey } from "@/domain/entities/World";
-import { fetch_all } from "@/domain/entities/EntityFetch";
+import {deleteEntity, fetch_all} from "@/domain/entities/EntityFetch";
 import { EntityTypes } from "@/frameworks/entities/EntityTypes";
 import SingleEnumInput from "@/components/utils/field-editors/SingleEnumInput.vue";
 import List from "@/components/utils/list/List.vue";
@@ -110,6 +110,19 @@ async function onSelectStartingLocation(loc: Location) {
   selectedLocation.value = loc;
   selectedStartingLocation.value = await model.value.getStartingLocation(loc);
 }
+async function onDeleteStartingLocation(loc: Location) {
+  await deleteEntity<StartingLocationKeys>(
+      {
+        worldID: loc.get("worldID"),
+        locationID: loc.get('id')!,
+        characterID: model.value.get('id')
+      },
+      EntityTypes.STARTING_LOCATIONS
+  );
+  selectedLocation.value = null;
+  selectedStartingLocation.value = null;
+  startingLocationName.value = "";
+}
 </script>
 
 <template>
@@ -127,6 +140,7 @@ async function onSelectStartingLocation(loc: Location) {
           :elements="filteredLocations"
           @create="onCreateLink"
           @edit="element => onSelectStartingLocation(element)"
+          @remove="element => onDeleteStartingLocation(element)"
       />
     </template>
 
