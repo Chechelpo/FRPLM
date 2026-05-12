@@ -48,7 +48,7 @@ onMounted(async () => {
   <SplitPanel storage-key="Character_edit:outer">
     <template #left>
       <List
-          v-model:elements="characters as EntityABS<CharacterKey,CharacterData>[]"
+          v-model:elements="characters!"
           @create="onCreate"
           @edit="(element) => onEdit(element as Character)"
           @remove = "(element) => onDelete(element as Character)"

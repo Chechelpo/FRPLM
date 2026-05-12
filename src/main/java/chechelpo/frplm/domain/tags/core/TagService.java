@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.tags.core;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.events.EventListener;
 import chechelpo.frplm.events.EventManager;
 import chechelpo.frplm.events.Event;

@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.location;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import chechelpo.frplm.domain.space.edge.EdgeService;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;

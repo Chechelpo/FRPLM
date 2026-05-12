@@ -6,9 +6,11 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
+import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 
 import java.util.Arrays;
@@ -202,6 +204,27 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_826.getInverseKey());
 
         return _sessions;
+    }
+
+    private transient StartingLocationsPath _startingLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.STARTING_LOCATIONS</code> table
+     */
+    public StartingLocationsPath startingLocations() {
+        if (_startingLocations == null)
+            _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08E.getInverseKey());
+
+        return _startingLocations;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.CHARACTERS</code> table
+     */
+    public CharactersPath characters() {
+        return startingLocations().characters();
     }
 
     @Override

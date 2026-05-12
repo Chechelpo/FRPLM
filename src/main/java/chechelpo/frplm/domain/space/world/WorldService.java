@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.world;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.Worlds;

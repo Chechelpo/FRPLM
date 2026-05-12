@@ -11,6 +11,7 @@ import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
+import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 
 import java.time.LocalDateTime;
@@ -226,6 +227,14 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public TagsPath tags() {
         return characterTags().tags();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>PUBLIC.WORLDS</code>
+     * table
+     */
+    public WorldsPath worlds() {
+        return startingLocations().worlds();
     }
 
     @Override

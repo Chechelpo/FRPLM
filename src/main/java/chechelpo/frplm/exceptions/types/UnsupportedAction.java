@@ -8,4 +8,7 @@ public final class UnsupportedAction extends DomainException {
     public UnsupportedAction(String message) {
         super(message, Severity.EXPECTED, HttpStatus.FORBIDDEN);
     }
+    public UnsupportedAction(String message, Severity severity) {
+        super(message, severity, HttpStatus.FORBIDDEN);
+    }
 }

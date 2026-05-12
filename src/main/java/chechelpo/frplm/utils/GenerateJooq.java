@@ -24,7 +24,7 @@ public final class GenerateJooq {
                                         .withIncludes(".*")
                                 )
                                 .withTarget(new Target()
-                                        .withPackageName("chechelpo.demo.jooq.generated")
+                                        .withPackageName("chechelpo.frplm.jooq.generated")
                                         .withDirectory("src/main/generated")
                                 )
                         );

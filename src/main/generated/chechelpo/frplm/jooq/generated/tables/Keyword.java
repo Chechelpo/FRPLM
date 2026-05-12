@@ -64,6 +64,11 @@ public class Keyword extends TableImpl<KeywordRecord> {
     public final TableField<KeywordRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
+     * The column <code>PUBLIC.KEYWORD.IS_REGEX</code>.
+     */
+    public final TableField<KeywordRecord, Boolean> IS_REGEX = createField(DSL.name("IS_REGEX"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
      * The column <code>PUBLIC.KEYWORD.KEYWORD</code>.
      */
     public final TableField<KeywordRecord, String> KEYWORD_ = createField(DSL.name("KEYWORD"), SQLDataType.VARCHAR(255).nullable(false), this, "");

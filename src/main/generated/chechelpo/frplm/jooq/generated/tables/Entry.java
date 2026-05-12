@@ -250,7 +250,7 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public EntryOutletPath entryOutlet() {
         if (_entryOutlet == null)
-            _entryOutlet = new EntryOutletPath(this, null, Keys.CONSTRAINT_6.getInverseKey());
+            _entryOutlet = new EntryOutletPath(this, null, Keys.CONSTRAINT_60.getInverseKey());
 
         return _entryOutlet;
     }
@@ -263,7 +263,7 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public EntryConditionGroupPath entryConditionGroup() {
         if (_entryConditionGroup == null)
-            _entryConditionGroup = new EntryConditionGroupPath(this, null, Keys.CONSTRAINT_D1.getInverseKey());
+            _entryConditionGroup = new EntryConditionGroupPath(this, null, Keys.CONSTRAINT_D1F.getInverseKey());
 
         return _entryConditionGroup;
     }

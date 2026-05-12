@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -31,6 +32,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -182,6 +184,13 @@ public class LocationNeighbors extends TableImpl<LocationNeighborsRecord> {
             _constraint_5df1 = new LocationsPath(this, Keys.CONSTRAINT_5DF1, null);
 
         return _constraint_5df1;
+    }
+
+    @Override
+    public List<Check<LocationNeighborsRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("CHK_DUPLICATES"), "\"LOCATION1_ID\" <> \"LOCATION2_ID\"", true)
+        );
     }
 
     @Override

@@ -139,7 +139,7 @@ public class EntryOutlet extends TableImpl<EntryOutletRecord> {
 
     @Override
     public List<ForeignKey<EntryOutletRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_6);
+        return Arrays.asList(Keys.CONSTRAINT_60);
     }
 
     private transient EntryPath _entry;
@@ -149,7 +149,7 @@ public class EntryOutlet extends TableImpl<EntryOutletRecord> {
      */
     public EntryPath entry() {
         if (_entry == null)
-            _entry = new EntryPath(this, Keys.CONSTRAINT_6, null);
+            _entry = new EntryPath(this, Keys.CONSTRAINT_60, null);
 
         return _entry;
     }

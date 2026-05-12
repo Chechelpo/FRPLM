@@ -2,7 +2,7 @@ package chechelpo.frplm.frameworks.entities.microservices;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.events.Event;
 import chechelpo.frplm.events.EventManager;
 import chechelpo.frplm.exceptions.Severity;
@@ -37,6 +37,19 @@ public abstract class ABSEntityService<
     protected final Logger log;
     private final EntityTypes.Types entityType;
 
+    public ABSEntityService(Store store){
+        EntityTypes.Types types = store.getType();
+        if(REGISTERED_TYPES.contains(types))
+            throw new IllegalStateException("Type " + types + " is already registered");
+
+        REGISTERED_TYPES.add(types);
+        this.entityType = types;
+
+        this.store = store;
+        log = (Logger) LoggerFactory.getLogger(types + "_Service");
+        log.setLevel(types.getLoggerLevel());
+    }
+    @Deprecated
     public ABSEntityService(Store store, EntityTypes.Types types) {
         if(REGISTERED_TYPES.contains(types))
             throw new IllegalStateException("Type " + types + " is already registered");
@@ -49,6 +62,9 @@ public abstract class ABSEntityService<
         log.setLevel(types.getLoggerLevel());
     }
 
+    public EntityTypes.Types getType(){
+        return this.entityType;
+    }
     public boolean isKey(TableField<Record, ?> field) {
         return keys.contains(field);
     }
@@ -76,6 +92,7 @@ public abstract class ABSEntityService<
         }
     }
 
+    ///  Throws on a constraints violation. TODO: REFACTOR FUNCTION
     private void throwOnConstraintsViolation(@Nullable EntityKey<Record> key, @Nullable EntityDataPayload<Record> payload) {
         if (key != null) {
             for (Map.Entry<TableField<Record, ?>, Object> entry : key.values().entrySet()) {

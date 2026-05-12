@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import static chechelpo.frplm.config.controllers.ControllerPaths.ENTITY_PATH;
-import static chechelpo.frplm.config.controllers.EntityTypes.ENTRIES_URL;
+import static chechelpo.frplm.domain.EntityTypes.ENTRIES_URL;
 
 @RestController
 @RequestMapping(ENTRIES_URL)

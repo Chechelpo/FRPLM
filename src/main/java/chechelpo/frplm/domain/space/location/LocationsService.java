@@ -1,7 +1,6 @@
 package chechelpo.frplm.domain.space.location;
 
-import ch.qos.logback.classic.Level;
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.space.world.WorldService;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;

@@ -25,7 +25,7 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
     private final FieldType fieldType;
 
     private FloatConstraints(@NotNull FloatConstraintsBuilder builder) {
-        super(builder.read_only, builder.fieldType);
+        super(builder, builder.fieldType);
         this.min = builder.min;
         this.max = builder.max;
         this.is_key = builder.is_key;
@@ -36,7 +36,8 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
         return new FloatConstraintsBuilder(fieldType);
     }
 
-    public static class FloatConstraintsBuilder {
+    public static class FloatConstraintsBuilder extends ABSConstraintsBuilder<FloatConstraints, FloatConstraintsBuilder>
+    {
         private final FieldType fieldType;
         private Double min;
         private Double max;
@@ -49,6 +50,11 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
             }
 
             this.fieldType = fieldType;
+        }
+
+        @Override
+        protected FloatConstraintsBuilder self() {
+            return this;
         }
 
         public FloatConstraintsBuilder setMin(@Nullable Double min) {

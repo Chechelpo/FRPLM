@@ -63,6 +63,11 @@ public final class FieldInfo<T extends FieldKind>{
             this.format = format;
             return this;
         }
+        public <C extends Constraints<T, ?>> FieldInfoBuilder<T> setConstraints(
+                Constraints.@NotNull ABSConstraintsBuilder<C, ?> builder
+        ) {
+            return setConstraints(builder.build());
+        }
         public FieldInfoBuilder<T> setConstraints(Constraints<T, ?> constraints) {
             this.constraints = constraints;
             return this;
@@ -85,7 +90,7 @@ public final class FieldInfo<T extends FieldKind>{
             case STRING -> (Constraints<T, ?>) StringConstraints.builder()
                     .build();
 
-            case BOOLEAN -> (Constraints<T, ?>) new BoolConstraints(false);
+            case BOOLEAN -> (Constraints<T, ?>) new BoolConstraints(new BoolConstraints.BoolConstraintsBuilder());
 
             case BYTE, SHORT, INTEGER, LONG -> (Constraints<T, ?>) NumberConstraints.builder(type)
                     .build();

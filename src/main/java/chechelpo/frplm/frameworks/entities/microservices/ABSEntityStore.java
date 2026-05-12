@@ -1,7 +1,7 @@
 package chechelpo.frplm.frameworks.entities.microservices;
 
 import ch.qos.logback.classic.Logger;
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.types.NotFound;
 import chechelpo.frplm.frameworks.entities.data.QueryObject;
@@ -19,6 +19,7 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
 
     protected final DSLContext ctx;
     private final Table<R> main_table;
+    private final EntityTypes.Types type;
     protected final Logger log;
 
     protected ABSEntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityTypes.Types type) {
@@ -28,9 +29,14 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
         registeredStores.add(type);
         this.ctx = ctx;
         this.main_table = main_table;
+        this.type = type;
 
         this.log = (Logger) LoggerFactory.getLogger(type + "_Store");
         this.log.setLevel(type.getLoggerLevel());
+    }
+
+    public EntityTypes.Types getType(){
+        return this.type;
     }
 
     public List<R> getAll(){

@@ -1,9 +1,9 @@
-package chechelpo.frplm.utils;
+package chechelpo.frplm.utils.encryption;
 
 import chechelpo.frplm.utils.encryption.EncryptedSecret;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -14,8 +14,9 @@ import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Objects;
 
+@Component
 public final class EncryptorService {
-    private static final String ENV_KEY_NAME = "FRPLM_SECRET_KEY_B64";
+    private static final String ENV_KEY_NAME = "FRPLM_KEY";
 
     private static final String CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final String KEY_ALGORITHM = "AES";

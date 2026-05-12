@@ -4,10 +4,10 @@
 package chechelpo.frplm.jooq.generated;
 
 
+import chechelpo.frplm.jooq.generated.tables.ApiHosts;
+import chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import chechelpo.frplm.jooq.generated.tables.Characters;
-import chechelpo.frplm.jooq.generated.tables.ComfyUi;
-import chechelpo.frplm.jooq.generated.tables.Connection;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.EntryCondition;
 import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
@@ -16,6 +16,7 @@ import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
 import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
@@ -53,6 +54,16 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
+     * The table <code>PUBLIC.API_HOSTS</code>.
+     */
+    public final ApiHosts API_HOSTS = ApiHosts.API_HOSTS;
+
+    /**
+     * The table <code>PUBLIC.API_KEYS</code>.
+     */
+    public final ApiKeys API_KEYS = ApiKeys.API_KEYS;
+
+    /**
      * The table <code>PUBLIC.CHARACTER_TAGS</code>.
      */
     public final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
@@ -61,16 +72,6 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.CHARACTERS</code>.
      */
     public final Characters CHARACTERS = Characters.CHARACTERS;
-
-    /**
-     * The table <code>PUBLIC.COMFY_UI</code>.
-     */
-    public final ComfyUi COMFY_UI = ComfyUi.COMFY_UI;
-
-    /**
-     * The table <code>PUBLIC.CONNECTION</code>.
-     */
-    public final Connection CONNECTION = Connection.CONNECTION;
 
     /**
      * The table <code>PUBLIC.ENTRY</code>.
@@ -111,6 +112,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public final Keyword KEYWORD = Keyword.KEYWORD;
+
+    /**
+     * The table <code>PUBLIC.LLM_CONNECTION</code>.
+     */
+    public final LlmConnection LLM_CONNECTION = LlmConnection.LLM_CONNECTION;
 
     /**
      * The table <code>PUBLIC.LLM_GEN</code>.
@@ -198,10 +204,10 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            ApiHosts.API_HOSTS,
+            ApiKeys.API_KEYS,
             CharacterTags.CHARACTER_TAGS,
             Characters.CHARACTERS,
-            ComfyUi.COMFY_UI,
-            Connection.CONNECTION,
             Entry.ENTRY,
             EntryCondition.ENTRY_CONDITION,
             EntryConditionGroup.ENTRY_CONDITION_GROUP,
@@ -210,6 +216,7 @@ public class Public extends SchemaImpl {
             Extension.EXTENSION,
             ExtensionPrompt.EXTENSION_PROMPT,
             Keyword.KEYWORD,
+            LlmConnection.LLM_CONNECTION,
             LlmGen.LLM_GEN,
             LocationNeighbors.LOCATION_NEIGHBORS,
             LocationTags.LOCATION_TAGS,

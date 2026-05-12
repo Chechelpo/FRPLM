@@ -6,8 +6,8 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
-import chechelpo.frplm.jooq.generated.tables.Connection.ConnectionPath;
 import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt.ExtensionPromptPath;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection.LlmConnectionPath;
 import chechelpo.frplm.jooq.generated.tables.MainPrompt.MainPromptPath;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 
@@ -67,7 +67,7 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public final TableField<PromptTemplateRecord, Integer> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.INTEGER, this, "");
+    public final TableField<PromptTemplateRecord, Integer> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.NAME</code>.
@@ -188,24 +188,25 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
 
     @Override
     public UniqueKey<PromptTemplateRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_ED;
+        return Keys.CONSTRAINT_E;
     }
 
     @Override
     public List<ForeignKey<PromptTemplateRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_ED5);
+        return Arrays.asList(Keys.CONSTRAINT_ED);
     }
 
-    private transient ConnectionPath _connection;
+    private transient LlmConnectionPath _llmConnection;
 
     /**
-     * Get the implicit join path to the <code>PUBLIC.CONNECTION</code> table.
+     * Get the implicit join path to the <code>PUBLIC.LLM_CONNECTION</code>
+     * table.
      */
-    public ConnectionPath connection() {
-        if (_connection == null)
-            _connection = new ConnectionPath(this, Keys.CONSTRAINT_ED5, null);
+    public LlmConnectionPath llmConnection() {
+        if (_llmConnection == null)
+            _llmConnection = new LlmConnectionPath(this, Keys.CONSTRAINT_ED, null);
 
-        return _connection;
+        return _llmConnection;
     }
 
     private transient MainPromptPath _mainPrompt;

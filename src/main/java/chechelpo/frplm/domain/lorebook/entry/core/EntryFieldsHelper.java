@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.frameworks.entities.fields.constraints.BoolConstraints;
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.frameworks.entities.fields.CommonFields;
@@ -14,19 +14,17 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
+final class EntryFieldsHelper extends ABSControllerAwareHelper<
         EntryRecord,
-        EntryStore,
         EntryService,
         EntryController
         > {
 
     EntryFieldsHelper(
             EntryService service,
-            EntryStore store,
             EntryController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
         // Key
         register_field(
                 "lorebook_id",
@@ -181,21 +179,21 @@ final class EntryFieldsHelper extends ABSFieldInstantiationHelper<
                 "prevent_further_recursion",
                 Entry.ENTRY.PREVENT_FURTHER_RECURSION,
                 FieldInfo.booleanField()
-                        .setConstraints(new BoolConstraints(false))
+                        .setConstraints(BoolConstraints.builder())
                         .build()
         );
         register_field(
                 "non_recursable",
                 Entry.ENTRY.NON_RECURSABLE,
                 FieldInfo.booleanField()
-                        .setConstraints(new BoolConstraints(false))
+                        .setConstraints(BoolConstraints.builder())
                         .build()
         );
         register_field(
                 "delay_until_recursion",
                 Entry.ENTRY.DELAY_UNTIL_RECURSION,
                 FieldInfo.booleanField()
-                        .setConstraints(new BoolConstraints(false))
+                        .setConstraints(BoolConstraints.builder())
                         .build()
         );
         register_field(

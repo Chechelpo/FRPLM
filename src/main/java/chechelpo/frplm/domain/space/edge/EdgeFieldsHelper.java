@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.edge;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
@@ -12,19 +12,17 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-final class EdgeFieldsHelper extends ABSFieldInstantiationHelper<
+final class EdgeFieldsHelper extends ABSControllerAwareHelper<
         LocationNeighborsRecord,
-        EdgeStore,
         EdgeService,
         EdgeController
         > {
 
     EdgeFieldsHelper(
-            EdgeStore store,
             EdgeService service,
             EdgeController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
 
         register_field(
                 "location1_id",

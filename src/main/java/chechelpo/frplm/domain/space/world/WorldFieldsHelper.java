@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.world;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
 import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraints;
@@ -12,18 +12,16 @@ import org.springframework.stereotype.Component;
 import static chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
 @Component
-public final class WorldFieldsHelper extends ABSFieldInstantiationHelper<
+public final class WorldFieldsHelper extends ABSControllerAwareHelper<
         WorldsRecord,
-        WorldStore,
         WorldService,
         WorldController
         > {
     WorldFieldsHelper(
-            WorldStore store,
             WorldService service,
             WorldController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
 
         register_field(
                 "id",

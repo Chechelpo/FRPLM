@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.character.core;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Characters;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.frameworks.entities.fields.CommonFields;
@@ -12,18 +12,17 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-final class CharacterFieldsHelper extends ABSFieldInstantiationHelper<
-        CharactersRecord
-        , CharacterStore
-        ,CharacterService
-        , CharacterController
+final class CharacterFieldsHelper extends ABSControllerAwareHelper<
+        CharactersRecord,
+        CharacterService,
+        CharacterController
         > {
+
     CharacterFieldsHelper(
             CharacterService service,
-            CharacterStore store,
             CharacterController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
         register_field(
                 "id",
                 Characters.CHARACTERS.ID,
@@ -45,7 +44,7 @@ final class CharacterFieldsHelper extends ABSFieldInstantiationHelper<
                                 .build()
                         )
                         .setConstraints(
-                                new StringConstraints.Builder()
+                                new StringConstraints.StringConstraintsBuilder()
                                 .setMaxLength(255).build()
                         ).build()
         );

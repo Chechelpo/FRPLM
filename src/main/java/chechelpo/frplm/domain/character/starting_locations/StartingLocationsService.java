@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.character.starting_locations;
 
 import ch.qos.logback.classic.Level;
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;

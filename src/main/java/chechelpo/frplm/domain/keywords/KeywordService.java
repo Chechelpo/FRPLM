@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.keywords;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.stereotype.Component;

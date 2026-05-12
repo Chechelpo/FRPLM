@@ -1,10 +1,9 @@
 package chechelpo.frplm.domain.space.edge;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
-import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;

@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.character.starting_locations;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import chechelpo.frplm.frameworks.entities.fields.constraints.BoolConstraints;
@@ -11,19 +11,17 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-public final class StartingLocationFieldsHelper extends ABSFieldInstantiationHelper<
+public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper<
         StartingLocationsRecord,
-        StartingLocationsStore,
         StartingLocationsService,
         StartingLocationsController
 >
 {
     StartingLocationFieldsHelper(
-            StartingLocationsStore store,
             StartingLocationsService service,
             StartingLocationsController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
 
         register_field(
                 "worldID",
@@ -80,7 +78,7 @@ public final class StartingLocationFieldsHelper extends ABSFieldInstantiationHel
                 StartingLocations.STARTING_LOCATIONS.IS_STATIC,
                 FieldInfo.booleanField()
                         .setConstraints(
-                                new BoolConstraints(false)
+                                BoolConstraints.builder()
                         )
                         .setFormat(
                                 new BoolFormat("Whether this character is permitted to move locations")

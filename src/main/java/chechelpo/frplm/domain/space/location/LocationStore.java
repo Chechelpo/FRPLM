@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.location;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;

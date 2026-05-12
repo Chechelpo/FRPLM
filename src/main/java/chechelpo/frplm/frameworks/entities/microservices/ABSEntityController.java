@@ -1,8 +1,7 @@
 package chechelpo.frplm.frameworks.entities.microservices;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.types.InvalidID;
 import chechelpo.frplm.exceptions.types.UnknownField;
@@ -44,6 +43,19 @@ public abstract class ABSEntityController<
     protected final S service;
     private final EntityTypes.Types type;
 
+    protected ABSEntityController(S service){
+        this.type = service.getType();
+        if (REGISTERED_CONTROLLERS_TYPES.contains(type))
+            throw new IllegalStateException("Duplicate controller for type " + type);
+        this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
+        log.setLevel(type.getLoggerLevel());
+        log.trace("Controller {} created", type);
+
+        this.service = service;
+        REGISTERED_CONTROLLERS_TYPES.add(type);
+    }
+
+    @Deprecated
     protected ABSEntityController(
             EntityTypes.Types type,
             S service

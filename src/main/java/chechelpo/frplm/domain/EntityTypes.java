@@ -1,4 +1,4 @@
-package chechelpo.frplm.config.controllers;
+package chechelpo.frplm.domain;
 
 import ch.qos.logback.classic.Level;
 import org.jetbrains.annotations.Contract;
@@ -15,13 +15,15 @@ public final class EntityTypes {
     private static @NotNull String concat(String one, String two){
         return one + "/" + two;
     }
-    // Chars controllers
+    // Chars
     private static final String CHARACTERS_str         = "characters";
     private static final String STARTING_LOCATIONS_str = "startingLocations";
-    public static final String CHARACTER_TAGS_str     = "characterTags";
+    public static final String CHARACTER_TAGS_str      = "characterTags";
 
     // Connection
-    private static final String CONNECTION_str = "connection";
+    private static final String API_HOSTS_str          = "apiHosts";
+    private static final String API_KEYS_str           = "apiKeys";
+    private static final String LLM_CONNECTION_str     = "llm";
 
     // Lorebooks
     private static final String LOREBOOKS_str          = "lorebooks";
@@ -29,10 +31,10 @@ public final class EntityTypes {
     private static final String ENTRIES_KEYWORDS_str   = "entriesKeywords";
 
     //Tags
-    private static final String TAGS_str              = "tags";
-    private static final String KEYWORDS_str          = "keywords";
+    private static final String TAGS_str               = "tags";
+    private static final String KEYWORDS_str           = "keywords";
 
-    // Space controllers
+    // Space
     private static final String WORLDS_str             = "worlds";
     private static final String LOCATIONS_str          = "locations";
     private static final String EDGES_str              = "edges";
@@ -47,7 +49,8 @@ public final class EntityTypes {
     public static final String CHARACTER_TAGS_URL     = BASE + "/" + CHARACTER_TAGS_str;
 
     // Connection
-    public static final String CONNECTION_URL         = BASE + "/" + CONNECTION_str;
+    public static final String API_KEYS_URL           = BASE + "/" + API_KEYS_str;
+    public static final String LLM_CONNECTION_URL     = BASE + "/" + LLM_CONNECTION_str;
 
     // Lorebooks controllers
     public static final String LOREBOOKS_URL          = BASE + "/" + LOREBOOKS_str;
@@ -73,19 +76,22 @@ public final class EntityTypes {
         STARTING_LOCATIONS(STARTING_LOCATIONS_str),
         CHARACTER_TAGS(CHARACTER_TAGS_str),
 
-        CONNECTION(CONNECTION_str),
+        API_HOSTS(API_HOSTS_str),
+        API_KEYS(API_KEYS_str),
+        LLM_CONNECTION(LLM_CONNECTION_str),
 
         LOREBOOKS(LOREBOOKS_str),
         ENTRIES(ENTRIES_str),
         ENTRY_KEYWORDS(ENTRIES_KEYWORDS_str),
 
         WORLDS(WORLDS_str),
-        LOCATIONS(LOCATIONS_str, Level.TRACE),
-        EDGES(EDGES_str, Level.TRACE)
+        LOCATIONS(LOCATIONS_str),
+        EDGES(EDGES_str)
         ;
 
         private final String type;
         private final Level loggerLevel;
+
         Types(@NotNull String type) {
             this.type = type;
             this.loggerLevel = Level.INFO;

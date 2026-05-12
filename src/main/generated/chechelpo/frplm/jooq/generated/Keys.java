@@ -4,10 +4,10 @@
 package chechelpo.frplm.jooq.generated;
 
 
+import chechelpo.frplm.jooq.generated.tables.ApiHosts;
+import chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import chechelpo.frplm.jooq.generated.tables.Characters;
-import chechelpo.frplm.jooq.generated.tables.ComfyUi;
-import chechelpo.frplm.jooq.generated.tables.Connection;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.EntryCondition;
 import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
@@ -16,6 +16,7 @@ import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
 import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
@@ -30,10 +31,10 @@ import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import chechelpo.frplm.jooq.generated.tables.Tags;
 import chechelpo.frplm.jooq.generated.tables.Worlds;
+import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.ComfyUiRecord;
-import chechelpo.frplm.jooq.generated.tables.records.ConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryConditionGroupRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryConditionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
@@ -42,6 +43,7 @@ import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ExtensionPromptRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ExtensionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationTagsRecord;
@@ -75,18 +77,23 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<ApiHostsRecord> CONSTRAINT_D = Internal.createUniqueKey(ApiHosts.API_HOSTS, DSL.name("CONSTRAINT_D"), new TableField[] { ApiHosts.API_HOSTS.ID }, true);
+    public static final UniqueKey<ApiHostsRecord> CONSTRAINT_D7 = Internal.createUniqueKey(ApiHosts.API_HOSTS, DSL.name("CONSTRAINT_D7"), new TableField[] { ApiHosts.API_HOSTS.HOST_URL }, true);
+    public static final UniqueKey<ApiKeysRecord> CONSTRAINT_6 = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("CONSTRAINT_6"), new TableField[] { ApiKeys.API_KEYS.NAME }, true);
+    public static final UniqueKey<ApiKeysRecord> CONSTRAINT_6A = Internal.createUniqueKey(ApiKeys.API_KEYS, DSL.name("CONSTRAINT_6A"), new TableField[] { ApiKeys.API_KEYS.KEY_ID }, true);
     public static final UniqueKey<CharacterTagsRecord> CONSTRAINT_95 = Internal.createUniqueKey(CharacterTags.CHARACTER_TAGS, DSL.name("CONSTRAINT_95"), new TableField[] { CharacterTags.CHARACTER_TAGS.TAG_ID, CharacterTags.CHARACTER_TAGS.CHAR_ID }, true);
     public static final UniqueKey<CharactersRecord> CONSTRAINT_67 = Internal.createUniqueKey(Characters.CHARACTERS, DSL.name("CONSTRAINT_67"), new TableField[] { Characters.CHARACTERS.ID }, true);
     public static final UniqueKey<CharactersRecord> CONSTRAINT_672 = Internal.createUniqueKey(Characters.CHARACTERS, DSL.name("CONSTRAINT_672"), new TableField[] { Characters.CHARACTERS.NAME }, true);
-    public static final UniqueKey<ConnectionRecord> CONSTRAINT_E = Internal.createUniqueKey(Connection.CONNECTION, DSL.name("CONSTRAINT_E"), new TableField[] { Connection.CONNECTION.ID }, true);
     public static final UniqueKey<EntryRecord> CONSTRAINT_3 = Internal.createUniqueKey(Entry.ENTRY, DSL.name("CONSTRAINT_3"), new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
-    public static final UniqueKey<EntryConditionRecord> CONSTRAINT_A1 = Internal.createUniqueKey(EntryCondition.ENTRY_CONDITION, DSL.name("CONSTRAINT_A1"), new TableField[] { EntryCondition.ENTRY_CONDITION.ID }, true);
-    public static final UniqueKey<EntryConditionGroupRecord> CONSTRAINT_D = Internal.createUniqueKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
+    public static final UniqueKey<EntryConditionRecord> CONSTRAINT_A = Internal.createUniqueKey(EntryCondition.ENTRY_CONDITION, DSL.name("CONSTRAINT_A"), new TableField[] { EntryCondition.ENTRY_CONDITION.ID }, true);
+    public static final UniqueKey<EntryConditionGroupRecord> CONSTRAINT_D1 = Internal.createUniqueKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D1"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
     public static final UniqueKey<EntryKeywordsRecord> CONSTRAINT_5 = Internal.createUniqueKey(EntryKeywords.ENTRY_KEYWORDS, DSL.name("CONSTRAINT_5"), new TableField[] { EntryKeywords.ENTRY_KEYWORDS.LOREBOOK_ID, EntryKeywords.ENTRY_KEYWORDS.ENTRY_ID, EntryKeywords.ENTRY_KEYWORDS.KEYWORD_ID }, true);
     public static final UniqueKey<ExtensionRecord> CONSTRAINT_8 = Internal.createUniqueKey(Extension.EXTENSION, DSL.name("CONSTRAINT_8"), new TableField[] { Extension.EXTENSION.ID }, true);
     public static final UniqueKey<ExtensionPromptRecord> CONSTRAINT_F3 = Internal.createUniqueKey(ExtensionPrompt.EXTENSION_PROMPT, DSL.name("CONSTRAINT_F3"), new TableField[] { ExtensionPrompt.EXTENSION_PROMPT.ID }, true);
     public static final UniqueKey<KeywordRecord> CONSTRAINT_F = Internal.createUniqueKey(Keyword.KEYWORD, DSL.name("CONSTRAINT_F"), new TableField[] { Keyword.KEYWORD.ID }, true);
     public static final UniqueKey<KeywordRecord> CONSTRAINT_FA = Internal.createUniqueKey(Keyword.KEYWORD, DSL.name("CONSTRAINT_FA"), new TableField[] { Keyword.KEYWORD.KEYWORD_ }, true);
+    public static final UniqueKey<LlmConnectionRecord> CONSTRAINT_5C = Internal.createUniqueKey(LlmConnection.LLM_CONNECTION, DSL.name("CONSTRAINT_5C"), new TableField[] { LlmConnection.LLM_CONNECTION.ID }, true);
+    public static final UniqueKey<LlmConnectionRecord> CONSTRAINT_5CB9 = Internal.createUniqueKey(LlmConnection.LLM_CONNECTION, DSL.name("CONSTRAINT_5CB9"), new TableField[] { LlmConnection.LLM_CONNECTION.NAME }, true);
     public static final UniqueKey<LlmGenRecord> CONSTRAINT_3A = Internal.createUniqueKey(LlmGen.LLM_GEN, DSL.name("CONSTRAINT_3A"), new TableField[] { LlmGen.LLM_GEN.SESSION_ID, LlmGen.LLM_GEN.TICK_NUM }, true);
     public static final UniqueKey<LocationNeighborsRecord> CONSTRAINT_5D = Internal.createUniqueKey(LocationNeighbors.LOCATION_NEIGHBORS, DSL.name("CONSTRAINT_5D"), new TableField[] { LocationNeighbors.LOCATION_NEIGHBORS.WORLD_ID, LocationNeighbors.LOCATION_NEIGHBORS.LOCATION1_ID, LocationNeighbors.LOCATION_NEIGHBORS.LOCATION2_ID }, true);
     public static final UniqueKey<LocationTagsRecord> CONSTRAINT_506 = Internal.createUniqueKey(LocationTags.LOCATION_TAGS, DSL.name("CONSTRAINT_506"), new TableField[] { LocationTags.LOCATION_TAGS.TAG_ID, LocationTags.LOCATION_TAGS.WORLD_ID, LocationTags.LOCATION_TAGS.LOCATION_ID }, true);
@@ -96,7 +103,7 @@ public class Keys {
     public static final UniqueKey<MainPromptRecord> CONSTRAINT_EC = Internal.createUniqueKey(MainPrompt.MAIN_PROMPT, DSL.name("CONSTRAINT_EC"), new TableField[] { MainPrompt.MAIN_PROMPT.ID }, true);
     public static final UniqueKey<MessagesRecord> CONSTRAINT_1 = Internal.createUniqueKey(Messages.MESSAGES, DSL.name("CONSTRAINT_1"), new TableField[] { Messages.MESSAGES.SESSION_ID, Messages.MESSAGES.TICK_NUM }, true);
     public static final UniqueKey<OutletRecord> CONSTRAINT_8B = Internal.createUniqueKey(Outlet.OUTLET, DSL.name("CONSTRAINT_8B"), new TableField[] { Outlet.OUTLET.ID }, true);
-    public static final UniqueKey<PromptTemplateRecord> CONSTRAINT_ED = Internal.createUniqueKey(PromptTemplate.PROMPT_TEMPLATE, DSL.name("CONSTRAINT_ED"), new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
+    public static final UniqueKey<PromptTemplateRecord> CONSTRAINT_E = Internal.createUniqueKey(PromptTemplate.PROMPT_TEMPLATE, DSL.name("CONSTRAINT_E"), new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
     public static final UniqueKey<ResponsesRecord> CONSTRAINT_31 = Internal.createUniqueKey(Responses.RESPONSES, DSL.name("CONSTRAINT_31"), new TableField[] { Responses.RESPONSES.SESSION_ID, Responses.RESPONSES.TICK_NUM, Responses.RESPONSES.RESPONSE_NUM }, true);
     public static final UniqueKey<SessionsRecord> CONSTRAINT_82 = Internal.createUniqueKey(Sessions.SESSIONS, DSL.name("CONSTRAINT_82"), new TableField[] { Sessions.SESSIONS.ID }, true);
     public static final UniqueKey<StartingLocationsRecord> CONSTRAINT_B = Internal.createUniqueKey(StartingLocations.STARTING_LOCATIONS, DSL.name("CONSTRAINT_B"), new TableField[] { StartingLocations.STARTING_LOCATIONS.CHARACTER_ID, StartingLocations.STARTING_LOCATIONS.WORLD_ID }, true);
@@ -109,18 +116,19 @@ public class Keys {
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<ApiKeysRecord, ApiHostsRecord> CONSTRAINT_6A0 = Internal.createForeignKey(ApiKeys.API_KEYS, DSL.name("CONSTRAINT_6A0"), new TableField[] { ApiKeys.API_KEYS.HOST_ID }, Keys.CONSTRAINT_D, new TableField[] { ApiHosts.API_HOSTS.ID }, true);
     public static final ForeignKey<CharacterTagsRecord, TagsRecord> CONSTRAINT_951 = Internal.createForeignKey(CharacterTags.CHARACTER_TAGS, DSL.name("CONSTRAINT_951"), new TableField[] { CharacterTags.CHARACTER_TAGS.TAG_ID }, Keys.CONSTRAINT_2, new TableField[] { Tags.TAGS.ID }, true);
     public static final ForeignKey<CharacterTagsRecord, CharactersRecord> CONSTRAINT_9510 = Internal.createForeignKey(CharacterTags.CHARACTER_TAGS, DSL.name("CONSTRAINT_9510"), new TableField[] { CharacterTags.CHARACTER_TAGS.CHAR_ID }, Keys.CONSTRAINT_67, new TableField[] { Characters.CHARACTERS.ID }, true);
     public static final ForeignKey<CharactersRecord, LorebooksRecord> CONSTRAINT_6725 = Internal.createForeignKey(Characters.CHARACTERS, DSL.name("CONSTRAINT_6725"), new TableField[] { Characters.CHARACTERS.LOREBOOK_ID }, Keys.CONSTRAINT_7, new TableField[] { Lorebooks.LOREBOOKS.ID }, true);
-    public static final ForeignKey<ComfyUiRecord, ConnectionRecord> CONSTRAINT_A = Internal.createForeignKey(ComfyUi.COMFY_UI, DSL.name("CONSTRAINT_A"), new TableField[] { ComfyUi.COMFY_UI.ID }, Keys.CONSTRAINT_E, new TableField[] { Connection.CONNECTION.ID }, true);
     public static final ForeignKey<EntryRecord, LorebooksRecord> CONSTRAINT_3F = Internal.createForeignKey(Entry.ENTRY, DSL.name("CONSTRAINT_3F"), new TableField[] { Entry.ENTRY.LOREBOOK_ID }, Keys.CONSTRAINT_7, new TableField[] { Lorebooks.LOREBOOKS.ID }, true);
-    public static final ForeignKey<EntryConditionRecord, EntryConditionGroupRecord> CONSTRAINT_A12 = Internal.createForeignKey(EntryCondition.ENTRY_CONDITION, DSL.name("CONSTRAINT_A12"), new TableField[] { EntryCondition.ENTRY_CONDITION.GROUP_ID }, Keys.CONSTRAINT_D, new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
-    public static final ForeignKey<EntryConditionGroupRecord, EntryRecord> CONSTRAINT_D1 = Internal.createForeignKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D1"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.LOREBOOK_ID, EntryConditionGroup.ENTRY_CONDITION_GROUP.ENTRY_ID }, Keys.CONSTRAINT_3, new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
-    public static final ForeignKey<EntryConditionGroupRecord, EntryConditionGroupRecord> CONSTRAINT_D1F = Internal.createForeignKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D1F"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.PARENT_GROUP_ID }, Keys.CONSTRAINT_D, new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
+    public static final ForeignKey<EntryConditionRecord, EntryConditionGroupRecord> CONSTRAINT_A1 = Internal.createForeignKey(EntryCondition.ENTRY_CONDITION, DSL.name("CONSTRAINT_A1"), new TableField[] { EntryCondition.ENTRY_CONDITION.GROUP_ID }, Keys.CONSTRAINT_D1, new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
+    public static final ForeignKey<EntryConditionGroupRecord, EntryRecord> CONSTRAINT_D1F = Internal.createForeignKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D1F"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.LOREBOOK_ID, EntryConditionGroup.ENTRY_CONDITION_GROUP.ENTRY_ID }, Keys.CONSTRAINT_3, new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
+    public static final ForeignKey<EntryConditionGroupRecord, EntryConditionGroupRecord> CONSTRAINT_D1F7 = Internal.createForeignKey(EntryConditionGroup.ENTRY_CONDITION_GROUP, DSL.name("CONSTRAINT_D1F7"), new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.PARENT_GROUP_ID }, Keys.CONSTRAINT_D1, new TableField[] { EntryConditionGroup.ENTRY_CONDITION_GROUP.ID }, true);
     public static final ForeignKey<EntryKeywordsRecord, EntryRecord> CONSTRAINT_50 = Internal.createForeignKey(EntryKeywords.ENTRY_KEYWORDS, DSL.name("CONSTRAINT_50"), new TableField[] { EntryKeywords.ENTRY_KEYWORDS.LOREBOOK_ID, EntryKeywords.ENTRY_KEYWORDS.ENTRY_ID }, Keys.CONSTRAINT_3, new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
     public static final ForeignKey<EntryKeywordsRecord, KeywordRecord> CONSTRAINT_500 = Internal.createForeignKey(EntryKeywords.ENTRY_KEYWORDS, DSL.name("CONSTRAINT_500"), new TableField[] { EntryKeywords.ENTRY_KEYWORDS.KEYWORD_ID }, Keys.CONSTRAINT_F, new TableField[] { Keyword.KEYWORD.ID }, true);
-    public static final ForeignKey<EntryOutletRecord, EntryRecord> CONSTRAINT_6 = Internal.createForeignKey(EntryOutlet.ENTRY_OUTLET, DSL.name("CONSTRAINT_6"), new TableField[] { EntryOutlet.ENTRY_OUTLET.LOREBOOK_ID, EntryOutlet.ENTRY_OUTLET.ENTRY_ID }, Keys.CONSTRAINT_3, new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
-    public static final ForeignKey<ExtensionPromptRecord, PromptTemplateRecord> CONSTRAINT_F36 = Internal.createForeignKey(ExtensionPrompt.EXTENSION_PROMPT, DSL.name("CONSTRAINT_F36"), new TableField[] { ExtensionPrompt.EXTENSION_PROMPT.ID }, Keys.CONSTRAINT_ED, new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
+    public static final ForeignKey<EntryOutletRecord, EntryRecord> CONSTRAINT_60 = Internal.createForeignKey(EntryOutlet.ENTRY_OUTLET, DSL.name("CONSTRAINT_60"), new TableField[] { EntryOutlet.ENTRY_OUTLET.LOREBOOK_ID, EntryOutlet.ENTRY_OUTLET.ENTRY_ID }, Keys.CONSTRAINT_3, new TableField[] { Entry.ENTRY.LOREBOOK_ID, Entry.ENTRY.ENTRY_ID }, true);
+    public static final ForeignKey<ExtensionPromptRecord, PromptTemplateRecord> CONSTRAINT_F36 = Internal.createForeignKey(ExtensionPrompt.EXTENSION_PROMPT, DSL.name("CONSTRAINT_F36"), new TableField[] { ExtensionPrompt.EXTENSION_PROMPT.ID }, Keys.CONSTRAINT_E, new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
+    public static final ForeignKey<LlmConnectionRecord, ApiKeysRecord> CONSTRAINT_5CB = Internal.createForeignKey(LlmConnection.LLM_CONNECTION, DSL.name("CONSTRAINT_5CB"), new TableField[] { LlmConnection.LLM_CONNECTION.API_KEY }, Keys.CONSTRAINT_6A, new TableField[] { ApiKeys.API_KEYS.KEY_ID }, true);
     public static final ForeignKey<LlmGenRecord, MessagesRecord> CONSTRAINT_3A7 = Internal.createForeignKey(LlmGen.LLM_GEN, DSL.name("CONSTRAINT_3A7"), new TableField[] { LlmGen.LLM_GEN.SESSION_ID, LlmGen.LLM_GEN.TICK_NUM }, Keys.CONSTRAINT_1, new TableField[] { Messages.MESSAGES.SESSION_ID, Messages.MESSAGES.TICK_NUM }, true);
     public static final ForeignKey<LocationNeighborsRecord, LocationsRecord> CONSTRAINT_5DF = Internal.createForeignKey(LocationNeighbors.LOCATION_NEIGHBORS, DSL.name("CONSTRAINT_5DF"), new TableField[] { LocationNeighbors.LOCATION_NEIGHBORS.WORLD_ID, LocationNeighbors.LOCATION_NEIGHBORS.LOCATION1_ID }, Keys.CONSTRAINT_5E, new TableField[] { Locations.LOCATIONS.WORLD_ID, Locations.LOCATIONS.ID }, true);
     public static final ForeignKey<LocationNeighborsRecord, LocationsRecord> CONSTRAINT_5DF1 = Internal.createForeignKey(LocationNeighbors.LOCATION_NEIGHBORS, DSL.name("CONSTRAINT_5DF1"), new TableField[] { LocationNeighbors.LOCATION_NEIGHBORS.WORLD_ID, LocationNeighbors.LOCATION_NEIGHBORS.LOCATION2_ID }, Keys.CONSTRAINT_5E, new TableField[] { Locations.LOCATIONS.WORLD_ID, Locations.LOCATIONS.ID }, true);
@@ -128,13 +136,14 @@ public class Keys {
     public static final ForeignKey<LocationTagsRecord, TagsRecord> CONSTRAINT_506AD = Internal.createForeignKey(LocationTags.LOCATION_TAGS, DSL.name("CONSTRAINT_506AD"), new TableField[] { LocationTags.LOCATION_TAGS.TAG_ID }, Keys.CONSTRAINT_2, new TableField[] { Tags.TAGS.ID }, true);
     public static final ForeignKey<LocationsRecord, WorldsRecord> CONSTRAINT_5EB = Internal.createForeignKey(Locations.LOCATIONS, DSL.name("CONSTRAINT_5EB"), new TableField[] { Locations.LOCATIONS.WORLD_ID }, Keys.CONSTRAINT_9, new TableField[] { Worlds.WORLDS.ID }, true);
     public static final ForeignKey<LocationsRecord, LorebooksRecord> CONSTRAINT_5EBC = Internal.createForeignKey(Locations.LOCATIONS, DSL.name("CONSTRAINT_5EBC"), new TableField[] { Locations.LOCATIONS.LOREBOOK_ID }, Keys.CONSTRAINT_7, new TableField[] { Lorebooks.LOREBOOKS.ID }, true);
-    public static final ForeignKey<MainPromptRecord, PromptTemplateRecord> CONSTRAINT_EC2 = Internal.createForeignKey(MainPrompt.MAIN_PROMPT, DSL.name("CONSTRAINT_EC2"), new TableField[] { MainPrompt.MAIN_PROMPT.ID }, Keys.CONSTRAINT_ED, new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
+    public static final ForeignKey<MainPromptRecord, PromptTemplateRecord> CONSTRAINT_EC2 = Internal.createForeignKey(MainPrompt.MAIN_PROMPT, DSL.name("CONSTRAINT_EC2"), new TableField[] { MainPrompt.MAIN_PROMPT.ID }, Keys.CONSTRAINT_E, new TableField[] { PromptTemplate.PROMPT_TEMPLATE.ID }, true);
     public static final ForeignKey<MessagesRecord, SessionsRecord> CONSTRAINT_13 = Internal.createForeignKey(Messages.MESSAGES, DSL.name("CONSTRAINT_13"), new TableField[] { Messages.MESSAGES.SESSION_ID }, Keys.CONSTRAINT_82, new TableField[] { Sessions.SESSIONS.ID }, true);
-    public static final ForeignKey<PromptTemplateRecord, ConnectionRecord> CONSTRAINT_ED5 = Internal.createForeignKey(PromptTemplate.PROMPT_TEMPLATE, DSL.name("CONSTRAINT_ED5"), new TableField[] { PromptTemplate.PROMPT_TEMPLATE.CONNECTION_ID }, Keys.CONSTRAINT_E, new TableField[] { Connection.CONNECTION.ID }, true);
+    public static final ForeignKey<PromptTemplateRecord, LlmConnectionRecord> CONSTRAINT_ED = Internal.createForeignKey(PromptTemplate.PROMPT_TEMPLATE, DSL.name("CONSTRAINT_ED"), new TableField[] { PromptTemplate.PROMPT_TEMPLATE.CONNECTION_ID }, Keys.CONSTRAINT_5C, new TableField[] { LlmConnection.LLM_CONNECTION.ID }, true);
     public static final ForeignKey<ResponsesRecord, MessagesRecord> CONSTRAINT_314 = Internal.createForeignKey(Responses.RESPONSES, DSL.name("CONSTRAINT_314"), new TableField[] { Responses.RESPONSES.SESSION_ID, Responses.RESPONSES.TICK_NUM }, Keys.CONSTRAINT_1, new TableField[] { Messages.MESSAGES.SESSION_ID, Messages.MESSAGES.TICK_NUM }, true);
     public static final ForeignKey<SessionsRecord, WorldsRecord> CONSTRAINT_826 = Internal.createForeignKey(Sessions.SESSIONS, DSL.name("CONSTRAINT_826"), new TableField[] { Sessions.SESSIONS.WORLD_ID }, Keys.CONSTRAINT_9, new TableField[] { Worlds.WORLDS.ID }, true);
     public static final ForeignKey<SessionsRecord, CharactersRecord> CONSTRAINT_8265 = Internal.createForeignKey(Sessions.SESSIONS, DSL.name("CONSTRAINT_8265"), new TableField[] { Sessions.SESSIONS.USER_PERSONA_ID }, Keys.CONSTRAINT_67, new TableField[] { Characters.CHARACTERS.ID }, true);
     public static final ForeignKey<StartingLocationsRecord, CharactersRecord> CONSTRAINT_B0 = Internal.createForeignKey(StartingLocations.STARTING_LOCATIONS, DSL.name("CONSTRAINT_B0"), new TableField[] { StartingLocations.STARTING_LOCATIONS.CHARACTER_ID }, Keys.CONSTRAINT_67, new TableField[] { Characters.CHARACTERS.ID }, true);
     public static final ForeignKey<StartingLocationsRecord, LocationsRecord> CONSTRAINT_B08 = Internal.createForeignKey(StartingLocations.STARTING_LOCATIONS, DSL.name("CONSTRAINT_B08"), new TableField[] { StartingLocations.STARTING_LOCATIONS.WORLD_ID, StartingLocations.STARTING_LOCATIONS.LOCATION_ID }, Keys.CONSTRAINT_5E, new TableField[] { Locations.LOCATIONS.WORLD_ID, Locations.LOCATIONS.ID }, true);
+    public static final ForeignKey<StartingLocationsRecord, WorldsRecord> CONSTRAINT_B08E = Internal.createForeignKey(StartingLocations.STARTING_LOCATIONS, DSL.name("CONSTRAINT_B08E"), new TableField[] { StartingLocations.STARTING_LOCATIONS.WORLD_ID }, Keys.CONSTRAINT_9, new TableField[] { Worlds.WORLDS.ID }, true);
     public static final ForeignKey<WorldsRecord, LorebooksRecord> CONSTRAINT_98F = Internal.createForeignKey(Worlds.WORLDS, DSL.name("CONSTRAINT_98F"), new TableField[] { Worlds.WORLDS.LOREBOOK_ID }, Keys.CONSTRAINT_7, new TableField[] { Lorebooks.LOREBOOKS.ID }, true);
 }

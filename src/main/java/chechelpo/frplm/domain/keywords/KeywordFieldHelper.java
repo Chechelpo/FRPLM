@@ -4,16 +4,16 @@ import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
 import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraints;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.stereotype.Component;
 
 import static chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 
 @Component
-final class KeywordFieldHelper extends ABSFieldInstantiationHelper<KeywordRecord, KeywordStore, KeywordService, KeywordController> {
-    public KeywordFieldHelper(KeywordStore store, KeywordService service, KeywordController controller) {
-        super(store, service, controller);
+final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, KeywordService, KeywordController> {
+    public KeywordFieldHelper(KeywordService service, KeywordController controller) {
+        super(service, controller);
         register_field(
                 "id",
                 KEYWORD.ID,

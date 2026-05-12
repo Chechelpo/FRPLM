@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.tags.core;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.character.tags.CharacterTagsService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;
@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static chechelpo.frplm.config.controllers.EntityTypes.CHARACTER_TAGS_str;
-import static chechelpo.frplm.config.controllers.EntityTypes.TAGS_URL;
+import static chechelpo.frplm.domain.EntityTypes.CHARACTER_TAGS_str;
+import static chechelpo.frplm.domain.EntityTypes.TAGS_URL;
 
 @RestController
 @RequestMapping(TAGS_URL)

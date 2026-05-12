@@ -1,96 +1,93 @@
 package chechelpo.frplm.frameworks.entities.fields.constraints;
 
+import chechelpo.frplm.exceptions.types.InvalidValue;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.TableField;
 
-public sealed abstract class Constraints<T, R> permits BoolConstraints, FloatConstraints, NumberConstraints, StringConstraints{
-    protected final boolean read_only;
+public sealed abstract class Constraints<T, R>
+        permits BoolConstraints, FloatConstraints, NumberConstraints, StringConstraints {
+
+    protected final boolean isReadOnly;
+    protected final boolean isNullable;
     protected final FieldType fieldType;
 
-    protected Constraints(boolean read_only, FieldType fieldType) {
-        this.read_only = read_only;
+    protected Constraints(ABSConstraintsBuilder<?, ?> builder, FieldType fieldType) {
+        this.isReadOnly = builder.read_only;
+        this.isNullable = builder.nullable;
         this.fieldType = fieldType;
     }
-    public abstract R coerce(Object value);
-    public boolean isReadOnly(){
-        return read_only;
+
+    public abstract R coerce(Object value) throws InvalidValue;
+
+    protected void throwIfImpossibleValue(R value) throws InvalidValue {}
+
+    public boolean isReadOnly() {
+        return isReadOnly;
     }
-    protected FieldType type(){
+
+    public boolean isNullable() {
+        return isNullable;
+    }
+
+    protected FieldType type() {
         return fieldType;
     }
 
-    protected void violationMessage(@Nullable TableField<?, ?> field, Object value){
+    protected void violationMessage(@Nullable TableField<?, ?> field, Object value, InvalidValue exception) {
         assert field != null;
-        System.err.println("Field " + field.getName() + " violated constraint with value: " + value + " expected " + fieldType);
+        System.err.println(
+                "Field " + field.getName()
+                        + " violated constraint with value: " + value  + " type " + fieldType + "\n"
+                        + exception.getMessage()
+        );
     }
+
     /**
-     * @param field to get the name from
-     * @param value the value you want to check
-     * @return true if it violates constraints
+     * @param field field to get the name from
+     * @param value value to check
+     * @return true if the value violates constraints
      */
     public boolean violatesConstraints(@Nullable TableField<?, ?> field, Object value) {
-        // Null is always a violation (assuming columns are non-nullable)
         if (value == null) {
-            violationMessage(field, value);
+            if (!isNullable) {
+                violationMessage(field, null, new InvalidValue("Null found in NotNull column"));
+                return true;
+            }
+
+            return false;
+        }
+
+        try{
+            R coerced = this.coerce(value);
+            throwIfImpossibleValue(coerced);
+
+            return false;
+        } catch (InvalidValue e) {
+            violationMessage(field, value, e);
             return true;
         }
+    }
 
-        switch (this.fieldType) {
-            case BOOLEAN:
-                if (value instanceof Boolean) {
-                    return false;
-                }
-                // Try to parse as boolean from string
-                if (value instanceof String) {
-                    String s = (String) value;
-                    if ("true".equalsIgnoreCase(s) || "false".equalsIgnoreCase(s)) {
-                        return false;
-                    }
-                }
-                violationMessage(field, value);
-                return true;
+    public abstract static class ABSConstraintsBuilder<
+            C extends Constraints<?, ?>,
+            B extends ABSConstraintsBuilder<C, B>
+            > {
+        protected boolean read_only = false;
+        protected boolean nullable = false;
 
-            case SHORT:
-            case BYTE:
-            case LONG:
-            case INTEGER:
-                // Already a numeric type? Accept it.
-                if (value instanceof Number) {
-                    return false;
-                }
-                // Try to parse the string representation as a long
-                try {
-                    Long.parseLong(value.toString());
-                    return false; // parse succeeded
-                } catch (NumberFormatException e) {
-                    violationMessage(field, value);
-                    return true;
-                }
+        protected abstract B self();
 
-            case STRING:
-                if (value instanceof String || value instanceof Character) {
-                    return false;
-                }
-                violationMessage(field, value);
-                return true;
-
-            case FLOAT:
-            case DOUBLE:
-                // Already a floating-point numeric type? Accept it.
-                if (value instanceof Float || value instanceof Double) {
-                    return false;
-                }
-                // Try to parse as double
-                try {
-                    Double.parseDouble(value.toString());
-                    return false; // parse succeeded
-                } catch (NumberFormatException e) {
-                    violationMessage(field, value);
-                    return true;
-                }
+        public B readOnly() {
+            this.read_only = true;
+            return self();
         }
 
-        return false;
+        public B nullable() {
+            this.nullable = true;
+            return self();
+        }
+
+        public abstract C build();
     }
 }

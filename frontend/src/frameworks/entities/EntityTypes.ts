@@ -1,4 +1,4 @@
-/* Must reference and be equal to chechelpo.demo.config.controllers.ControllerConfig*/
+/* Must reference and be equal to chechelpo.frplm.domain.EntityTypes*/
 export enum EntityTypes{
     //Tags
     TAGS = "tags",
@@ -18,4 +18,7 @@ export enum EntityTypes{
     WORLDS = "worlds",
     LOCATIONS = "locations",
     EDGES = "edges",
+
+    //Connections
+    LLM = "llm",
 }

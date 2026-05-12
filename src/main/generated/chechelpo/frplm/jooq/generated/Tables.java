@@ -4,10 +4,10 @@
 package chechelpo.frplm.jooq.generated;
 
 
+import chechelpo.frplm.jooq.generated.tables.ApiHosts;
+import chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import chechelpo.frplm.jooq.generated.tables.Characters;
-import chechelpo.frplm.jooq.generated.tables.ComfyUi;
-import chechelpo.frplm.jooq.generated.tables.Connection;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.EntryCondition;
 import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
@@ -16,6 +16,7 @@ import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
 import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
@@ -39,6 +40,16 @@ import chechelpo.frplm.jooq.generated.tables.Worlds;
 public class Tables {
 
     /**
+     * The table <code>PUBLIC.API_HOSTS</code>.
+     */
+    public static final ApiHosts API_HOSTS = ApiHosts.API_HOSTS;
+
+    /**
+     * The table <code>PUBLIC.API_KEYS</code>.
+     */
+    public static final ApiKeys API_KEYS = ApiKeys.API_KEYS;
+
+    /**
      * The table <code>PUBLIC.CHARACTER_TAGS</code>.
      */
     public static final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
@@ -47,16 +58,6 @@ public class Tables {
      * The table <code>PUBLIC.CHARACTERS</code>.
      */
     public static final Characters CHARACTERS = Characters.CHARACTERS;
-
-    /**
-     * The table <code>PUBLIC.COMFY_UI</code>.
-     */
-    public static final ComfyUi COMFY_UI = ComfyUi.COMFY_UI;
-
-    /**
-     * The table <code>PUBLIC.CONNECTION</code>.
-     */
-    public static final Connection CONNECTION = Connection.CONNECTION;
 
     /**
      * The table <code>PUBLIC.ENTRY</code>.
@@ -97,6 +98,11 @@ public class Tables {
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public static final Keyword KEYWORD = Keyword.KEYWORD;
+
+    /**
+     * The table <code>PUBLIC.LLM_CONNECTION</code>.
+     */
+    public static final LlmConnection LLM_CONNECTION = LlmConnection.LLM_CONNECTION;
 
     /**
      * The table <code>PUBLIC.LLM_GEN</code>.

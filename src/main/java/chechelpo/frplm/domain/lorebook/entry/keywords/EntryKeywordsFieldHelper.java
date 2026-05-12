@@ -3,18 +3,18 @@ package chechelpo.frplm.domain.lorebook.entry.keywords;
 import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import org.springframework.stereotype.Component;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 
 @Component
-final class EntryKeywordsFieldHelper extends ABSFieldInstantiationHelper<
-        EntryKeywordsRecord, EntryKeywordStore, EntryKeywordService, EntryKeywordsController
+final class EntryKeywordsFieldHelper extends ABSControllerAwareHelper<
+        EntryKeywordsRecord, EntryKeywordService, EntryKeywordsController
         > {
-    EntryKeywordsFieldHelper(EntryKeywordStore store, EntryKeywordService service, EntryKeywordsController controller) {
-        super(store, service, controller);
+    EntryKeywordsFieldHelper(EntryKeywordService service, EntryKeywordsController controller) {
+        super(service, controller);
         register_field(
                 "lorebook_id",
                 ENTRY_KEYWORDS.LOREBOOK_ID,

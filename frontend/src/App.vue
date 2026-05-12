@@ -1,3 +1,5 @@
+# APP.vue
+
 <template>
   <div class="app-shell">
     <header class="app-header">
@@ -21,7 +23,7 @@
         </div>
 
         <div>
-          <RouterLink to="/llm" class="nav-icon" aria-label="Connections">
+          <RouterLink :to="route_to(EntityTypes.LLM)" class="nav-icon" aria-label="Connections">
             <img src="/header/Connection.png" alt="Connections" />
           </RouterLink>
         </div>
@@ -37,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import {RouterLink, RouterView} from "vue-router";
 import {route_to} from "@/app/router";
 import {EntityTypes} from "@/frameworks/entities/EntityTypes";
 </script>

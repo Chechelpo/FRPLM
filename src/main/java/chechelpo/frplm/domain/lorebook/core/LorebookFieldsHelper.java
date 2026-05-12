@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.lorebook.core;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.frameworks.entities.fields.CommonFields;
@@ -12,18 +12,16 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-final class LorebookFieldsHelper extends ABSFieldInstantiationHelper<
+final class LorebookFieldsHelper extends ABSControllerAwareHelper<
         LorebooksRecord,
-        LorebookStore,
         LorebookService,
         LorebookController
         > {
     public LorebookFieldsHelper(
-            LorebookStore store,
             LorebookService service,
             LorebookController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
         register_field(
                 "id",
                 Lorebooks.LOREBOOKS.ID,

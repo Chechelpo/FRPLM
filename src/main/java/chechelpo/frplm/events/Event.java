@@ -1,6 +1,6 @@
 package chechelpo.frplm.events;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import org.jooq.TableRecord;

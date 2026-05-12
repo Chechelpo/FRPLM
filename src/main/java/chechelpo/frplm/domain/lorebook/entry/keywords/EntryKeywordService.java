@@ -1,7 +1,6 @@
 package chechelpo.frplm.domain.lorebook.entry.keywords;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
-import chechelpo.frplm.domain.keywords.KeywordService;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;

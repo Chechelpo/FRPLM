@@ -8,6 +8,7 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
+import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 
 import java.util.Arrays;
@@ -161,7 +162,7 @@ public class StartingLocations extends TableImpl<StartingLocationsRecord> {
 
     @Override
     public List<ForeignKey<StartingLocationsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_B0, Keys.CONSTRAINT_B08);
+        return Arrays.asList(Keys.CONSTRAINT_B0, Keys.CONSTRAINT_B08, Keys.CONSTRAINT_B08E);
     }
 
     private transient CharactersPath _characters;
@@ -186,6 +187,18 @@ public class StartingLocations extends TableImpl<StartingLocationsRecord> {
             _locations = new LocationsPath(this, Keys.CONSTRAINT_B08, null);
 
         return _locations;
+    }
+
+    private transient WorldsPath _worlds;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
+     */
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_B08E, null);
+
+        return _worlds;
     }
 
     @Override

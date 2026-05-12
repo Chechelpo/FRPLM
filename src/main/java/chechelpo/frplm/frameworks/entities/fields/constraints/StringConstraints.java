@@ -1,5 +1,6 @@
 package chechelpo.frplm.frameworks.entities.fields.constraints;
 
+import chechelpo.frplm.exceptions.types.InvalidValue;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldKind;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Contract;
@@ -30,8 +31,8 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
     private final boolean allows_outlets;
 
     @Contract(pure = true)
-    private StringConstraints(@NotNull Builder builder) {
-        super(builder.read_only, FieldType.STRING);
+    private StringConstraints(@NotNull StringConstraints.StringConstraintsBuilder builder) {
+        super(builder, FieldType.STRING);
         this.minLength = builder.minLength;
         this.maxLength = builder.maxLength;
         this.read_only = builder.read_only;
@@ -45,33 +46,46 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
     }
 
     @Contract(value = " -> new", pure = true)
-    public static @NotNull Builder builder() {
-        return new Builder();
+    public static @NotNull StringConstraints.StringConstraintsBuilder builder() {
+        return new StringConstraintsBuilder();
     }
 
-    public static class Builder {
+    @Override
+    protected void throwIfImpossibleValue(String value) throws InvalidValue {
+        if (!this.allowedValues.isEmpty() && !this.allowedValues.contains(value))
+            throw new InvalidValue("Value: " + value + " not in allow list \n Allow list: " + allowedValues);
+        // TODO: Add allows outlets check
+        super.throwIfImpossibleValue(value);
+    }
+
+    public static class StringConstraintsBuilder extends ABSConstraintsBuilder<StringConstraints, StringConstraintsBuilder> {
         private Integer minLength;
         private Integer maxLength;
         private Set<String> possible_values = new HashSet<>();
         private boolean read_only = false;
         private boolean allows_outlets = false;
 
-        public Builder setMinLength(@Nullable Integer minLength) {
+        @Override
+        protected StringConstraintsBuilder self() {
+            return this;
+        }
+
+        public StringConstraintsBuilder setMinLength(@Nullable Integer minLength) {
             this.minLength = minLength;
             return this;
         }
 
-        public Builder setMaxLength(@Nullable Integer maxLength) {
+        public StringConstraintsBuilder setMaxLength(@Nullable Integer maxLength) {
             this.maxLength = maxLength;
             return this;
         }
 
-        public Builder readOnly() {
+        public StringConstraintsBuilder readOnly() {
             this.read_only = true;
             return this;
         }
 
-        public Builder setPossibleValues(@NotNull String @NotNull ... possible_values) {
+        public StringConstraintsBuilder setPossibleValues(@NotNull String @NotNull ... possible_values) {
             Set<String> possible_values_set = new HashSet<>(possible_values.length);
             Collections.addAll(possible_values_set, possible_values);
 
@@ -80,7 +94,7 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
             return this;
         }
 
-        public Builder allows_outlets() {
+        public StringConstraintsBuilder allows_outlets() {
             this.allows_outlets = true;
             return this;
         }

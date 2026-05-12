@@ -19,42 +19,8 @@ export type EntityFieldsMap<keys extends KeyRecord, data extends DataRecord> = M
 
 export abstract class EntityABS<Key extends KeyRecord, Data extends DataRecord> implements ValueComparable {
     private static registered:Set<EntityTypes> = new Set;
-    protected static fields:Map<EntityTypes, EntityFieldsMap<any,any>> = new Map;
-
-    public static registerType(type:EntityTypes): void {
-        if (this.registered.has(type)) throw new Error(`Duplicate entity handler ${type}`)
-        this.registered.add(type)
-    }
-    public static getFields(type:EntityTypes) : Map<string, FieldInfo> {
-        const fields = this.fields.get(type);
-
-        if (!fields) {
-            throw new Error(`No fields for type ${type}`);
-        }
-
-        return fields as Map<string, FieldInfo>;
-    }
-
+    
     static async initialise(): Promise<void> {
-        if (this.fields.size != 0) return;
-        for (const type of Object.values(EntityTypes)) {
-
-            const response = await fetchApi(
-                `${getEntityController(type)}/fields`,
-                {
-                    method: "GET",
-                    headers: new Headers({
-                        "Content-Type": "application/json"
-                    })
-                }
-            );
-
-            const json = await response.json() as Record<string, FieldInfo>;
-
-            const map = new Map<string, FieldInfo>(Object.entries(json));
-
-            EntityABS.fields.set(type, map);
-        }
     }
 
     /** Key attributes of entity (composite identity) */

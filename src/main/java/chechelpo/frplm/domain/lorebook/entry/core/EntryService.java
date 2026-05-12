@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
-import chechelpo.frplm.config.controllers.EntityTypes;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;

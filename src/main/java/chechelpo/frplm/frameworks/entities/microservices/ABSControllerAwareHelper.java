@@ -9,19 +9,15 @@ import org.jooq.TableRecord;
 /**
  * Class used for centralizing initialization of entities.
  */
-public class ABSFieldInstantiationHelper<
+public abstract class ABSControllerAwareHelper<
         R extends TableRecord<R>,
-        Store extends ABSEntityStore<R>,
-        Service extends ABSEntityService<R,Store>,
+        Service extends ABSEntityService<R,?>,
         C extends ABSEntityController<R, Service>
-        > {
-    protected final Store store;
-    protected final Service service;
+        > extends ABSHelper<R, Service> {
     protected final C controller;
 
-    protected ABSFieldInstantiationHelper(Store store, Service service, C controller) {
-        this.store = store;
-        this.service = service;
+    protected ABSControllerAwareHelper(Service service, C controller) {
+        super(service);
         this.controller = controller;
     }
 
@@ -44,8 +40,9 @@ public class ABSFieldInstantiationHelper<
             @NotNull TableField<R, T> column,
             @NotNull FieldInfo<?> info
     ) {
-        service.registerField(column, info.require, info.constraints);
-        controller.registerPublicField(column, dto_name, info.format);
+        super.register_field(column, info);
+
+        if (dto_name != null) controller.registerPublicField(column, dto_name, info.format);
     }
 
 }

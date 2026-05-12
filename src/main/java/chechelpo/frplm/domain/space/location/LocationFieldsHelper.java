@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.space.location;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSFieldInstantiationHelper;
+import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
@@ -11,18 +11,16 @@ import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 @Component
-final class LocationFieldsHelper extends ABSFieldInstantiationHelper<
+final class LocationFieldsHelper extends ABSControllerAwareHelper<
         LocationsRecord,
-        LocationStore,
         LocationsService,
         LocationController
         > {
     LocationFieldsHelper(
-            LocationStore store,
             LocationsService service,
             LocationController controller
     ) {
-        super(store, service, controller);
+        super(service, controller);
 
         register_field(
                 "worldID",
