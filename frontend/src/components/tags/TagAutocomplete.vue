@@ -38,10 +38,10 @@ This approach separates the generic autocomplete logic from the business logic o
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { createEntity, fetch_all } from '@/domain/entities/EntityFetch'
-import { Tag, TagData, TagKey } from '@/domain/entities/Tag'
-import { EntityTypes } from '@/frameworks/entities/EntityTypes'
+import { Tag, TagData, TagKey } from '@/domain/Tag'
+import { EntityTypes } from '@/domain/EntityTypes'
 import AutoCompleteBox from '@/components/utils/AutoCompleteBox.vue'
+import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 const model = defineModel<Tag[]>({
   default: () => []

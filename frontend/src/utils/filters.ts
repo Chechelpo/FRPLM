@@ -1,10 +1,10 @@
-import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {ABSEntity} from "@/frameworks/ABSEntity";
 import {DataRecord, KeyRecord} from "@/types/DTOs";
 
 export function filterWithAttribute<
     Data extends DataRecord,
     Field extends Extract<keyof Data, string>,
-    T extends EntityABS<any, Data> // Silence that motherfucker >:(
+    T extends ABSEntity<any, Data> // Silence that motherfucker >:(
 >(
         attrName:Field,
         attrValue:Data[Field],

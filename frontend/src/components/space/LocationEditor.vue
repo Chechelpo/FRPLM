@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {Location} from "@/domain/entities/World";
+import {Location} from "@/domain/World";
 import {computed} from "vue";
 import {computedAsync} from "@vueuse/core";
-import {Lorebook} from "@/domain/entities/Lorebook";
+import {Lorebook} from "@/domain/Lorebook";
 import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";

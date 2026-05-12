@@ -1,10 +1,16 @@
-import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
-import {createEntity, deleteEntity, fetchApi, fetchOne, UpdateEntityField} from "@/domain/entities/EntityFetch";
+import {
+    ABSEntity,
+    createEntity, deleteEntity,
+    EntityField,
+    fetchApi,
+    fetchOne,
+    UpdateEntityField
+} from "@/frameworks/ABSEntity";
+import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {API_BASE} from "@/config";
 import {DTO} from "@/types/DTOs";
-import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
+import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 
 export type WorldKey = { id: number }
 export type WorldData = {
@@ -12,7 +18,7 @@ export type WorldData = {
     lorebook_id?: number, //Guaranteed after instance
 }
 
-export class World extends EntityABS<WorldKey, WorldData> {
+export class World extends ABSEntity<WorldKey, WorldData> {
     private locations: Location[] | null = null;
     private lorebook: Lorebook | null = null;
 
@@ -103,7 +109,7 @@ export type LocationData = {
     lorebook_id?: number,
 }
 
-export class Location extends EntityABS<LocationKey, LocationData> {
+export class Location extends ABSEntity<LocationKey, LocationData> {
     private lorebook: Lorebook | null = null;
     private neighbors: Location[] | null = null;
 
@@ -232,7 +238,7 @@ export type EdgeData = {
     travel_cost: number
 }
 
-export class LocationEdge extends EntityABS<EdgeKey, EdgeData> {
+export class LocationEdge extends ABSEntity<EdgeKey, EdgeData> {
     getEntityType(): EntityTypes {
         return EntityTypes.EDGES;
     }

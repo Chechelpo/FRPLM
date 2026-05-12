@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import {computedAsync} from "@vueuse/core";
-import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
-import {createEntity, fetch_all} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
+import {EntityTypes} from "@/domain/EntityTypes";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
 import {computed, shallowRef} from "vue";
@@ -10,6 +9,7 @@ import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
+import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 const lorebooks = computedAsync<Lorebook[]>(
     async () => fetch_all<LorebookKey, LorebookData, Lorebook>(EntityTypes.LOREBOOKS, Lorebook)

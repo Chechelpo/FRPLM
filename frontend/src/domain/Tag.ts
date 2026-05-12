@@ -1,14 +1,13 @@
-import {EntityABS} from "@/frameworks/entities/EntityABS";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {ABSEntity, fetchApi} from "@/frameworks/ABSEntity";
+import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO, EntityField} from "@/types/DTOs";
-import {CharacterKey} from "@/domain/entities/Characters";
-import {fetchApi} from "@/domain/entities/EntityFetch";
+import {CharacterKey} from "@/domain/Characters";
 import {API_BASE} from "@/config";
 
 export type TagKey = {id:number}
 export type TagData = {name:string, color?:string}
 
-export class Tag extends EntityABS<TagKey,TagData>{
+export class Tag extends ABSEntity<TagKey,TagData>{
     getEntityType(): EntityTypes {
         return EntityTypes.TAGS;
     }

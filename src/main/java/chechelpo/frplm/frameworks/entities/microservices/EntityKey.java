@@ -29,6 +29,22 @@ public class EntityKey<R extends TableRecord<R>>
     public static <Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder(){
         return new Builder<>();
     }
+    public static <Rec extends TableRecord<Rec>, T> @NotNull EntityKey<Rec> of(
+            @NotNull TableField<Rec, T> field,
+            T value
+    ) {
+        return EntityKey.<Rec>builder()
+                .set(field, value)
+                .build();
+    }
+
+    public static <Rec extends TableRecord<Rec>, T> @NotNull Builder<Rec> builder(
+            @NotNull TableField<Rec, T> field,
+            T value
+    ) {
+        return EntityKey.<Rec>builder()
+                .set(field, value);
+    }
 
     public static class Builder<R extends TableRecord<R>> {
         private final Map<TableField<R, ?>, Object> values = new HashMap<>();

@@ -2,14 +2,17 @@
 import {
   LLMBackends,
   LLMConnection,
-  type LLMBackend, getModelNames,
-} from "@/domain/entities/Connection";
+  type LLMBackend,
+  getLLMModels,
+  BackendLLMModel,
+  getBackendFromID,
+  ApiKey,
+} from "@/domain/Connection";
 
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import SingleEnumInput from "@/components/utils/field-editors/SingleEnumInput.vue";
-import {computedAsync} from "@vueuse/core";
-import {st} from "vue-router/dist/router-CWoNjPRp";
+import { computedAsync } from "@vueuse/core";
 import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 
 const model = defineModel<LLMConnection>({
@@ -19,7 +22,7 @@ const model = defineModel<LLMConnection>({
 
 const editingName = computed<string>({
   get() {
-    return model.value.get("name");
+    return model.value.get("name")!;
   },
   set(value: string) {
     model.value.update("name", value);
@@ -35,15 +38,21 @@ const connectionType = computed<number>({
   },
 });
 
-const llm_model = computed<string | null>({
+const host_url = computed<string>({
   get() {
-    return model.value.get("model") ?? null;
+    return getBackendFromID(model.value.get("host_id")).host;
   },
-  set(value: string | null) {
-    model.value.update("model", value);
-  },
+  set() {},
 });
+
 const llmBackendValues = Object.values(LLMBackends) as readonly LLMBackend[];
+
+const selectedBackend = computed<LLMBackend>(() => {
+  return (
+      llmBackendValues.find((backend) => backend.id === connectionType.value) ??
+      LLMBackends.NANOGPT
+  );
+});
 
 const llmBackendIDs = computed<number[]>(() => {
   return llmBackendValues.map((backend) => backend.id);
@@ -55,26 +64,48 @@ const llmBackendNames = computed<Record<number, string>>(() => {
   ) as Record<number, string>;
 });
 
-function canEditHostByID(typeID: number): boolean {
-  return typeID !== LLMBackends.NANOGPT.id;
-}
-const selectedBackend = computed<LLMBackend>(() => {
-  return (
-      llmBackendValues.find((backend) => backend.id === connectionType.value) ??
-      LLMBackends.NANOGPT
-  );
+const llm_model = computed<string | null>({
+  get() {
+    return model.value.get('modelID') ?? null;
+  },
+  set(value: string | null) {
+    model.value.update("modelID", value);
+  },
 });
 
-const modelOptions = computedAsync<string[]>(
-    async () => getModelNames(selectedBackend.value),
+const modelOptions = computedAsync<BackendLLMModel[]>(
+    async () => await getLLMModels(selectedBackend.value),
     []
 );
 
+const modelNames = computed<string[]>(() => modelOptions.value.map((i) => i.id));
 
+const api_key = ref<string | null>(null);
+
+async function createKey(key: string) {
+  await model.value.assignNewKey(key);
+  api_key.value = "";
+}
+
+const testingConnection = ref(false);
+const connectionTestResult = ref<boolean | null>(null);
+
+async function testConnection(): Promise<void> {
+  testingConnection.value = true;
+  connectionTestResult.value = null;
+
+  try {
+    connectionTestResult.value = await model.value.testConnection();
+  } catch {
+    connectionTestResult.value = false;
+  } finally {
+    testingConnection.value = false;
+  }
+}
 </script>
 
 <template>
-  <div class = background-edit-box>
+  <div class="background-edit-box">
     <FieldEditorWrapper field-name="name">
       <div>{{ editingName }}</div>
     </FieldEditorWrapper>
@@ -87,19 +118,60 @@ const modelOptions = computedAsync<string[]>(
           @edit="connectionType = $event"
       />
     </FieldEditorWrapper>
+
     <div class="flex flex-row">
-    <FieldEditorWrapper field-name="model">
-      <SingleEnumInput
-          :value="llm_model"
-          :possible_values="modelOptions"
-          @edit="i => llm_model = i"
-      />
-    </FieldEditorWrapper>
-      <ShortTextBox
-          model-value=""
+      <FieldEditorWrapper field-name="model">
+        <SingleEnumInput
+            :value="llm_model"
+            :possible_values="modelNames"
+            @edit="i => llm_model = i"
+        />
+      </FieldEditorWrapper>
+
+      <FieldEditorWrapper
+          field-name="api_key"
+          info="Will be hidden as soon as its inputted, copy paste it"
+      >
+        <ShortTextBox
+            :model-value="api_key"
+            @edit="createKey"
+        />
+      </FieldEditorWrapper>
+    </div>
+
+    <div class="connection-test-row">
+      <button
+          type="button"
+          :disabled="testingConnection"
+          @click="testConnection"
+      >
+        {{ testingConnection ? "Testing..." : "Test connection" }}
+      </button>
+
+      <span v-if="connectionTestResult === true" class="connection-ok">
+        Connection OK
+      </span>
+
+      <span v-else-if="connectionTestResult === false" class="connection-failed">
+        Connection failed
+      </span>
     </div>
   </div>
 </template>
 
 <style scoped>
+.connection-test-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.connection-ok {
+  color: #15803d;
+}
+
+.connection-failed {
+  color: #b91c1c;
+}
 </style>

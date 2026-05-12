@@ -1,14 +1,13 @@
-import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {ABSEntity, createEntity, deleteEntity, EntityField, fetch_all, fetchApi} from "@/frameworks/ABSEntity";
+import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
-import {createEntity, deleteEntity, fetch_all, fetchApi} from "@/domain/entities/EntityFetch";
 import {API_BASE} from "@/config";
 import {DTO} from "@/types/DTOs";
 
 export type LorebookKey = { id: number }
 export type LorebookData = { name: string }
 
-export class Lorebook extends EntityABS<LorebookKey, LorebookData> {
+export class Lorebook extends ABSEntity<LorebookKey, LorebookData> {
     private entries: Entry[] | null = null;
 
     getEntityType(): EntityTypes {
@@ -91,7 +90,7 @@ export type EntryData = {
     scan_depth: number | null;
 };
 
-export class Entry extends EntityABS<EntryKey, EntryData> {
+export class Entry extends ABSEntity<EntryKey, EntryData> {
     private keywords: KeyWord[] | null = null;
 
     getEntityType(): EntityTypes {
@@ -168,7 +167,7 @@ export class Entry extends EntityABS<EntryKey, EntryData> {
 type KeywordKey = { id: number };
 export type KeywordData = { name: string };
 
-export class KeyWord extends EntityABS<KeywordKey, KeywordData> {
+export class KeyWord extends ABSEntity<KeywordKey, KeywordData> {
     public static async getAll(): Promise<KeyWord[]> {
         return fetch_all<KeywordKey, KeywordData, KeyWord>(EntityTypes.KEYWORD, this)
     }
@@ -194,7 +193,7 @@ export class KeyWord extends EntityABS<KeywordKey, KeywordData> {
     }
 }
 type EntryKeywordsKey = { lorebook_id:number, entry_id: number, keyword_id: number };
-class EntryKeywords extends EntityABS<EntryKeywordsKey, any>{
+class EntryKeywords extends ABSEntity<EntryKeywordsKey, any>{
     getEntityType(): EntityTypes {
         return EntityTypes.ENTRY_KEYWORD;
     }

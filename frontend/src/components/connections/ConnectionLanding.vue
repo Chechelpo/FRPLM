@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {computedAsync} from "@vueuse/core";
-import {LLMBackends, LLMConnection, LLMConnectionData, LLMConnectionKeys} from "@/domain/entities/Connection";
-import {createEntity, deleteEntity, fetch_all} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {LLMBackends, LLMConnection, LLMConnectionData, LLMConnectionKeys} from "@/domain/Connection";
+import {EntityTypes} from "@/domain/EntityTypes";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
 import {onMounted, ref} from "vue";
 import LLMEditor from "@/components/connections/LLMEditor.vue";
+import {createEntity, deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 const allConnections = ref<LLMConnection[]>()
 const editingConnection = ref<LLMConnection | null>(null);
@@ -21,7 +21,8 @@ async function onCreate(){
       null,
       {
         name:name,
-        type:LLMBackends.NANOGPT.id // Default type
+        type:LLMBackends.NANOGPT.id, // Default type
+        host_id: LLMBackends.NANOGPT.id
       },
       EntityTypes.LLM,
       LLMConnection)

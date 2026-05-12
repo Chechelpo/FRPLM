@@ -1,12 +1,12 @@
 <script setup lang="ts">
 
 import List from "@/components/utils/list/List.vue";
-import {World, WorldData, WorldKey} from "@/domain/entities/World";
-import {createEntity, fetch_all} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {World, WorldData, WorldKey} from "@/domain/World";
+import {EntityTypes} from "@/domain/EntityTypes";
 import {computedAsync} from "@vueuse/core";
 import {ref, shallowRef} from "vue";
 import WorldEdit from "@/components/space/WorldEdit.vue";
+import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 const worlds = computedAsync<World[]>(
     async () => await fetch_all<WorldKey, WorldData, World>(EntityTypes.WORLDS, World)

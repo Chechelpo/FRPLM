@@ -1,7 +1,7 @@
 /**
  * Contains the application-specific domain layer.
  *
- * <p>The {@code domain} package and its subpackages model the concrete
+ * <p>The {@code domain} package and its subpackages modelID the concrete
  * entities of the application: characters, worlds, locations, edges,
  * lorebooks, lorebook entries, tags, character tags, character assets, and
  * starting locations.</p>

@@ -1,19 +1,13 @@
 <script setup lang="ts">
-import {Character} from "@/domain/entities/Characters";
+import {Character} from "@/domain/Characters";
 import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import {computed, onMounted, ref, shallowRef, watch} from "vue";
-import {Lorebook} from "@/domain/entities/Lorebook";
-import {fetch_all} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {Lorebook} from "@/domain/Lorebook";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import TagAutocomplete from "@/components/tags/TagAutocomplete.vue";
-import {Tag} from "@/domain/entities/Tag";
+import {Tag} from "@/domain/Tag";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import {computedAsync} from "@vueuse/core";
-import {Location, World, WorldData, WorldKey} from "@/domain/entities/World";
-import List from "@/components/utils/list/List.vue";
-import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
 
 const model = defineModel<Character>({

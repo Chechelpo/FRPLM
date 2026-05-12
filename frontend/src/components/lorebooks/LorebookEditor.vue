@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue'
-import {Entry, Lorebook} from '@/domain/entities/Lorebook'
+import {Entry, Lorebook} from '@/domain/Lorebook'
 import EntryEditor from "@/components/lorebooks/EntryEditor.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
 

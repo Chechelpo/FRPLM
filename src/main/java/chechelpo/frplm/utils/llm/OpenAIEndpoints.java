@@ -5,7 +5,7 @@ package chechelpo.frplm.utils.llm;
  */
 public enum OpenAIEndpoints {
     TOKENIZER("/api/extra/tokencount"),
-    CURRENT_MODEL("/api/v1/model"),
+    CURRENT_MODEL("/api/v1/modelID"),
     GENERATE("/api/v1/generate"),
     MAX_CONTENT_LENGTH("/api/v1/config/max_context_length");
 

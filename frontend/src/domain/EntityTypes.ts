@@ -21,4 +21,5 @@ export enum EntityTypes{
 
     //Connections
     LLM = "llm",
+    API_KEY = "apiKeys",
 }

@@ -3,7 +3,7 @@ import CharacterLanding from "@/components/char/CharacterLanding.vue";
 import EmptyView from "@/components/layout/EmptyView.vue";
 import LlmEditor from "@/components/connections/LLMEditor.vue";
 import WorldLanding from "@/components/space/WorldLanding.vue";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {EntityTypes} from "@/domain/EntityTypes";
 import LorebookLanding from "@/components/lorebooks/LorebookLanding.vue";
 import ConnectionLanding from "@/components/connections/ConnectionLanding.vue";
 

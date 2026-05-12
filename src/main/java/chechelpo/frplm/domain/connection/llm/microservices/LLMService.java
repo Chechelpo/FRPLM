@@ -1,4 +1,4 @@
-package chechelpo.frplm.domain.connection.llm;
+package chechelpo.frplm.domain.connection.llm.microservices;
 
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;

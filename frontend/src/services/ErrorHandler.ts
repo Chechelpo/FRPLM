@@ -1,13 +1,3 @@
-
-/*
-Matches frontend error response:
-private record ErrorResponse(
-    int status,
-    String type,
-    String message,
-    String path,
-    Severity severity) {}
-*/
 export type ErrorResponse = {
     status: number;
     type: string;

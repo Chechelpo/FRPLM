@@ -1,9 +1,9 @@
-<script setup lang="ts" generic="Ent extends EntityABS<any,any>">
+<script setup lang="ts" generic="Ent extends ABSEntity<any,any>">
 import {computed, ref} from "vue";
 
 import SearchBar from "@/components/utils/SearchBar.vue";
 import Card from "@/components/utils/list/Card.vue";
-import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {ABSEntity} from "@/frameworks/ABSEntity";
 import {CommonFields} from "@/utils/CommonFields";
 import {DataRecord, KeyRecord} from "@/types/DTOs";
 

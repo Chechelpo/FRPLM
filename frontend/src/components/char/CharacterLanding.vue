@@ -3,13 +3,10 @@ import List from "@/components/utils/list/List.vue";
 
 import {onMounted, ref} from "vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
-import StartingLocation from "@/components/char/StartingLocation.vue";
-import Expandable from "@/components/utils/panels/Expandable.vue";
-import {deleteEntity, fetch_all} from "@/domain/entities/EntityFetch";
-import {Character, CharacterData, CharacterKey} from "@/domain/entities/Characters";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
-import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
+import {EntityTypes} from "@/domain/EntityTypes";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
+import {deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 /* data */
 const characters = ref<Character[]>([]);

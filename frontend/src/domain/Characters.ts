@@ -1,12 +1,20 @@
-import {EntityABS, EntityField} from "@/frameworks/entities/EntityABS";
-import {API_BASE, createEntity, deleteEntity, fetch_all, fetchApi, fetchOne} from "@/domain/entities/EntityFetch";
-import {EntityTypes} from "@/frameworks/entities/EntityTypes";
+import {
+    ABSEntity,
+    createEntity,
+    deleteEntity,
+    EntityField,
+    fetch_all,
+    fetchApi,
+    fetchOne
+} from "@/frameworks/ABSEntity";
+import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
-import {Tag} from "@/domain/entities/Tag";
-import {Lorebook, LorebookData, LorebookKey} from "@/domain/entities/Lorebook";
+import {Tag} from "@/domain/Tag";
+import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {filterWithAttribute} from "@/utils/filters";
-import {Location} from "@/domain/entities/World";
+import {Location} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
+import {API_BASE} from "@/config";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {
@@ -14,7 +22,7 @@ export type CharacterData = {
     lorebook_id?: number
 };
 
-export class Character extends EntityABS<CharacterKey, CharacterData> {
+export class Character extends ABSEntity<CharacterKey, CharacterData> {
     private static readonly type:EntityTypes = EntityTypes.CHARACTERS;
     private tags: Tag[] | null = null;
     private lorebook: Lorebook | null = null;
@@ -133,7 +141,7 @@ export class Character extends EntityABS<CharacterKey, CharacterData> {
 type CharacterTagsKey = {char_id: number, tag_id: number};
 type CharacterTagsData = {}
 
-class CharacterTags extends EntityABS<CharacterTagsKey, CharacterTagsData>{
+class CharacterTags extends ABSEntity<CharacterTagsKey, CharacterTagsData>{
     getEntityType(): EntityTypes {
         return EntityTypes.CHARACTER_TAGS;
     }
@@ -179,7 +187,7 @@ export type StartingLocationData = {
     ttl: number
 }
 
-export class StartingLocation extends EntityABS<StartingLocationKeys, StartingLocationData> {
+export class StartingLocation extends ABSEntity<StartingLocationKeys, StartingLocationData> {
     getEntityType(): EntityTypes {
         return EntityTypes.STARTING_LOCATIONS;
     }

@@ -2,9 +2,9 @@
 import {computed, onMounted, ref, shallowRef} from "vue";
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
-import {World, Location} from "@/domain/entities/World";
+import {World, Location} from "@/domain/World";
 import {computedAsync, get} from "@vueuse/core";
-import {Lorebook} from "@/domain/entities/Lorebook";
+import {Lorebook} from "@/domain/Lorebook";
 import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {computed, onMounted, ref, watch} from "vue";
-import {Location, LocationEdge} from "@/domain/entities/World";
+import {Location, LocationEdge} from "@/domain/World";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
 import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";

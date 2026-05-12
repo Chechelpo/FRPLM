@@ -1,4 +1,4 @@
-package chechelpo.frplm.domain.connection.llm;
+package chechelpo.frplm.domain.connection.llm.microservices;
 
 import chechelpo.frplm.annotations.Store;
 import chechelpo.frplm.domain.EntityTypes;

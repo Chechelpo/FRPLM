@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {LLMBackend} from "@/domain/entities/Connection";
+import {LLMBackend} from "@/domain/Connection";
 
 const props = defineProps<{
   type:LLMBackend

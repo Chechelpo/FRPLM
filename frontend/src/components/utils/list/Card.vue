@@ -1,10 +1,10 @@
 <script setup lang="ts" generic="
 Data extends DataRecord,
-EntityType extends EntityABS<any, Data>
+EntityType extends ABSEntity<any, Data>
 ">
 import {onMounted, ref} from "vue";
 import AvatarDisplay from "@/components/utils/img/AvatarDisplay.vue";
-import {EntityABS} from "@/frameworks/entities/EntityABS";
+import {ABSEntity} from "@/frameworks/ABSEntity";
 import {DataRecord, KeyRecord} from "@/types/DTOs";
 import {CommonFields} from "@/utils/CommonFields";
 

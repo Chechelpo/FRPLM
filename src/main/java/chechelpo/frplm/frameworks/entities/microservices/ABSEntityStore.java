@@ -18,7 +18,7 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
     private final static EnumSet<EntityTypes.Types> registeredStores = EnumSet.noneOf(EntityTypes.Types.class);
 
     protected final DSLContext ctx;
-    private final Table<R> main_table;
+    protected final Table<R> main_table;
     private final EntityTypes.Types type;
     protected final Logger log;
 
@@ -96,6 +96,11 @@ public abstract class ABSEntityStore<R extends TableRecord<R>>
                 .execute() == 1;
     }
 
+    public <T> T get(TableField<R, T> field, EntityKey<R> id) {
+        return ctx.selectFrom(main_table)
+                .where(id.getPkCondition())
+                .fetchOne(field);
+    }
     /**
      * Override in concrete stores to simulate triggers (auto-pointer, defaults, auditing, etc.).
      *

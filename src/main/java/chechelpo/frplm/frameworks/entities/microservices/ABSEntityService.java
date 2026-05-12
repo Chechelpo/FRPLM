@@ -118,7 +118,7 @@ public abstract class ABSEntityService<
         }
     }
 
-    protected final void coerceFullKey(EntityKey<Record> key) {
+    public final void coerceFullKey(EntityKey<Record> key) {
         throwIfInvalid(key);
         for (TableField<Record, ?> field : this.keys){
             Constraints<?, ?> constraint = constraints.get(field);
@@ -204,6 +204,9 @@ public abstract class ABSEntityService<
         throwIfNotPartialKey(k);
         coercePartialKey(k);
         return filterUncommitedEntities(store.getAllMatching(k));
+    }
+    public <T> T get(TableField<Record, T> field, EntityKey<Record> key) {
+        return store.get(field, key);
     }
 
     protected EntityDataPayload<Record> beforeCreate(EntityDataPayload<Record> data) {
