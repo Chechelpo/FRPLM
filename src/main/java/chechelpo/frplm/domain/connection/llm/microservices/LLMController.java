@@ -2,7 +2,6 @@ package chechelpo.frplm.domain.connection.llm.microservices;
 
 import chechelpo.frplm.domain.connection.llm.utils.LLMConnection;
 import chechelpo.frplm.domain.connection.llm.utils.LLMFactory;
-import chechelpo.frplm.domain.connection.llm.utils.OpenAICompatibleLLM;
 import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;

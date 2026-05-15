@@ -14,7 +14,6 @@ import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
-import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
@@ -22,9 +21,9 @@ import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.MainPrompt;
 import chechelpo.frplm.jooq.generated.tables.Messages;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
+import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
 import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
@@ -104,11 +103,6 @@ public class Public extends SchemaImpl {
     public final Extension EXTENSION = Extension.EXTENSION;
 
     /**
-     * The table <code>PUBLIC.EXTENSION_PROMPT</code>.
-     */
-    public final ExtensionPrompt EXTENSION_PROMPT = ExtensionPrompt.EXTENSION_PROMPT;
-
-    /**
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public final Keyword KEYWORD = Keyword.KEYWORD;
@@ -144,11 +138,6 @@ public class Public extends SchemaImpl {
     public final Lorebooks LOREBOOKS = Lorebooks.LOREBOOKS;
 
     /**
-     * The table <code>PUBLIC.MAIN_PROMPT</code>.
-     */
-    public final MainPrompt MAIN_PROMPT = MainPrompt.MAIN_PROMPT;
-
-    /**
      * The table <code>PUBLIC.MESSAGES</code>.
      */
     public final Messages MESSAGES = Messages.MESSAGES;
@@ -157,6 +146,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.OUTLET</code>.
      */
     public final Outlet OUTLET = Outlet.OUTLET;
+
+    /**
+     * The table <code>PUBLIC.PROMPT_SECTION</code>.
+     */
+    public final PromptSection PROMPT_SECTION = PromptSection.PROMPT_SECTION;
 
     /**
      * The table <code>PUBLIC.PROMPT_TEMPLATE</code>.
@@ -214,7 +208,6 @@ public class Public extends SchemaImpl {
             EntryKeywords.ENTRY_KEYWORDS,
             EntryOutlet.ENTRY_OUTLET,
             Extension.EXTENSION,
-            ExtensionPrompt.EXTENSION_PROMPT,
             Keyword.KEYWORD,
             LlmConnection.LLM_CONNECTION,
             LlmGen.LLM_GEN,
@@ -222,9 +215,9 @@ public class Public extends SchemaImpl {
             LocationTags.LOCATION_TAGS,
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
-            MainPrompt.MAIN_PROMPT,
             Messages.MESSAGES,
             Outlet.OUTLET,
+            PromptSection.PROMPT_SECTION,
             PromptTemplate.PROMPT_TEMPLATE,
             Responses.RESPONSES,
             Sessions.SESSIONS,

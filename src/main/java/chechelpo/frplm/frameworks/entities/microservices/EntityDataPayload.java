@@ -7,7 +7,7 @@ import org.jooq.TableRecord;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EntityDataPayload<R extends TableRecord<R>> {
+public final class EntityDataPayload<R extends TableRecord<R>> {
     private final Map<TableField<R,?>, Object> assignments;
 
     public EntityDataPayload(Map<TableField<R, ?>, Object> assignments) {
@@ -57,7 +57,7 @@ public class EntityDataPayload<R extends TableRecord<R>> {
         if (assignments.containsKey(field))
             return (T) assignments.get(field);
 
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Unknown field " + field.getName());
     }
 
     public final boolean isEmpty() {

@@ -6,7 +6,7 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
 import {computed, shallowRef} from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import {createEntity, fetch_all} from "@/frameworks/ABSEntity";

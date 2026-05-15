@@ -1,10 +1,10 @@
 TODO: Keywords dont get updated in between entries on addition/removal. They need a global state regarding them.
 <script setup lang="ts">
 import {ActivationStrategy, Entry, KeyWord, KeywordData} from "@/domain/Lorebook";
-import LongTextBox from "@/components/utils/field-editors/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import {computed, onMounted, ref, watch} from "vue";
-import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
-import SingleEnumInput from "@/components/utils/field-editors/SingleEnumInput.vue";
+import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
 import AutoCompleteBox from "@/components/utils/AutoCompleteBox.vue";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {createEntity} from "@/frameworks/ABSEntity";

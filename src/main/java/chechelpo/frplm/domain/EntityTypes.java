@@ -30,6 +30,10 @@ public final class EntityTypes {
     private static final String ENTRIES_str            = "entries";
     private static final String ENTRIES_KEYWORDS_str   = "entriesKeywords";
 
+    //Prompts
+    private static final String TEMPLATES_str          = "promptTemplates";
+    private static final String SECTIONS_str           = "promptSections";
+
     //Tags
     private static final String TAGS_str               = "tags";
     private static final String KEYWORDS_str           = "keywords";
@@ -57,6 +61,10 @@ public final class EntityTypes {
     public static final String ENTRIES_URL            = BASE + "/" + ENTRIES_str;
     public static final String ENTRIES_KEYWORDS_URL   = BASE + "/" + ENTRIES_KEYWORDS_str;
 
+    // Prompts Controllers
+    public static final String PROMPT_TEMPLATES_URL   = BASE + "/" + TEMPLATES_str;
+    public static final String SECTIONS_URL           = BASE + "/" + SECTIONS_str;
+
     //Tags
     public static final String TAGS_URL               = BASE + "/" + TAGS_str;
     public static final String KEYWORDS_URL           = BASE + "/" + KEYWORDS_str;
@@ -79,6 +87,9 @@ public final class EntityTypes {
         API_HOSTS(API_HOSTS_str),
         API_KEYS(API_KEYS_str),
         LLM_CONNECTION(LLM_CONNECTION_str),
+
+        PROMPT_TEMPLATES(TEMPLATES_str),
+        SECTIONS(SECTIONS_str),
 
         LOREBOOKS(LOREBOOKS_str),
         ENTRIES(ENTRIES_str),

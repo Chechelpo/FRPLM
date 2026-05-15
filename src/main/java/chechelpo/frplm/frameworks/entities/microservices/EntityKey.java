@@ -1,6 +1,7 @@
 package chechelpo.frplm.frameworks.entities.microservices;
 
 import chechelpo.frplm.utils.format.StandardFormats;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Condition;
@@ -25,10 +26,11 @@ public class EntityKey<R extends TableRecord<R>>
         this.values = values;
     }
 
-    @Contract("_ -> new")
+    @Contract("-> new")
     public static <Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder(){
         return new Builder<>();
     }
+    @CheckReturnValue
     public static <Rec extends TableRecord<Rec>, T> @NotNull EntityKey<Rec> of(
             @NotNull TableField<Rec, T> field,
             T value

@@ -17,6 +17,12 @@
         </div>
 
         <div>
+          <RouterLink :to="route_to(EntityTypes.TEMPLATES)" class = "nav-icon" aria-lable="prompts">
+            Prompts
+          </RouterLink>
+        </div>
+
+        <div>
           <RouterLink :to="route_to(EntityTypes.WORLDS)" class="nav-icon" aria-label="Worlds">
             <img src="/header/globe.png" alt="Worlds" />
           </RouterLink>

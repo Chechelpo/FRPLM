@@ -72,14 +72,14 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
         );
 
         for (LLMBackend backend : LLMBackend.values()){
-            if (backend.stable_id == null) continue;
+            if (backend.stable_id == null || backend.host == null) continue;
             EntityKey.Builder<ApiHostsRecord> builder = EntityKey.builder();
             builder.set(API_HOSTS.ID, backend.stable_id);
 
             if (!hosts.exists(builder.build()))
                 hosts.createAndGet(
                         EntityDataPayload.fromValues(Map.of(
-                                API_HOSTS.HOST_URL, backend.host,
+                                API_HOSTS.HOST_URL, backend.host.toString(),
                                 API_HOSTS.ID , backend.stable_id
                         ))
                 );

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Character} from "@/domain/Characters";
-import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import {computed, onMounted, ref, shallowRef, watch} from "vue";
 import {Lorebook} from "@/domain/Lorebook";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";

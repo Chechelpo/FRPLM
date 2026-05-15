@@ -5,7 +5,6 @@ import {API_BASE} from "@/config";
 
 export type LLMConnectionKeys = {id:number}
 export type LLMConnectionData = {
-    host_id: number,
     type: number;
     api_key?: number | null,
     name?:string,

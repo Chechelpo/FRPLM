@@ -14,7 +14,6 @@ import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
-import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
@@ -22,9 +21,9 @@ import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.MainPrompt;
 import chechelpo.frplm.jooq.generated.tables.Messages;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
+import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
 import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
@@ -90,11 +89,6 @@ public class Tables {
     public static final Extension EXTENSION = Extension.EXTENSION;
 
     /**
-     * The table <code>PUBLIC.EXTENSION_PROMPT</code>.
-     */
-    public static final ExtensionPrompt EXTENSION_PROMPT = ExtensionPrompt.EXTENSION_PROMPT;
-
-    /**
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public static final Keyword KEYWORD = Keyword.KEYWORD;
@@ -130,11 +124,6 @@ public class Tables {
     public static final Lorebooks LOREBOOKS = Lorebooks.LOREBOOKS;
 
     /**
-     * The table <code>PUBLIC.MAIN_PROMPT</code>.
-     */
-    public static final MainPrompt MAIN_PROMPT = MainPrompt.MAIN_PROMPT;
-
-    /**
      * The table <code>PUBLIC.MESSAGES</code>.
      */
     public static final Messages MESSAGES = Messages.MESSAGES;
@@ -143,6 +132,11 @@ public class Tables {
      * The table <code>PUBLIC.OUTLET</code>.
      */
     public static final Outlet OUTLET = Outlet.OUTLET;
+
+    /**
+     * The table <code>PUBLIC.PROMPT_SECTION</code>.
+     */
+    public static final PromptSection PROMPT_SECTION = PromptSection.PROMPT_SECTION;
 
     /**
      * The table <code>PUBLIC.PROMPT_TEMPLATE</code>.

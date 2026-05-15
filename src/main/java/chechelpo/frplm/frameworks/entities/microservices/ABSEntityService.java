@@ -106,7 +106,7 @@ public abstract class ABSEntityService<
                 if (constraints.containsKey(entry.getKey())
                         &&
                         constraints.get(entry.getKey()).violatesConstraints(entry.getKey(), entry.getValue())) {
-                    throw new RuntimeException("Constraint violation");
+                    throw new InvalidValue("Constraint violation");
                 }
                 /*
                 if(keys.contains(entry.getKey())){

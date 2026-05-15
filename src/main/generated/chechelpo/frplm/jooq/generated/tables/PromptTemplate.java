@@ -6,15 +6,15 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
-import chechelpo.frplm.jooq.generated.tables.ExtensionPrompt.ExtensionPromptPath;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection.LlmConnectionPath;
-import chechelpo.frplm.jooq.generated.tables.MainPrompt.MainPromptPath;
+import chechelpo.frplm.jooq.generated.tables.PromptSection.PromptSectionPath;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -34,6 +34,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -62,17 +63,17 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.ID</code>.
      */
-    public final TableField<PromptTemplateRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
+    public final TableField<PromptTemplateRecord, Short> ID = createField(DSL.name("ID"), SQLDataType.SMALLINT.nullable(false).identity(true), this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public final TableField<PromptTemplateRecord, Integer> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<PromptTemplateRecord, Short> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.SMALLINT, this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.NAME</code>.
      */
-    public final TableField<PromptTemplateRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(300), this, "");
+    public final TableField<PromptTemplateRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(300).nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
@@ -80,9 +81,19 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     public final TableField<PromptTemplateRecord, Integer> MAX_TOKENS = createField(DSL.name("MAX_TOKENS"), SQLDataType.INTEGER.defaultValue(DSL.field(DSL.raw("8192"), SQLDataType.INTEGER)), this, "");
 
     /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
+     */
+    public final TableField<PromptTemplateRecord, Boolean> STREAMING = createField(DSL.name("STREAMING"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
      */
     public final TableField<PromptTemplateRecord, Float> TEMPERATURE = createField(DSL.name("TEMPERATURE"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("1"), SQLDataType.REAL)), this, "");
+
+    /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
+     */
+    public final TableField<PromptTemplateRecord, Float> TOP_P = createField(DSL.name("TOP_P"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("0.95"), SQLDataType.REAL)), this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
@@ -95,24 +106,29 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     public final TableField<PromptTemplateRecord, Float> PRESENCE_PENALTY = createField(DSL.name("PRESENCE_PENALTY"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.REAL)), this, "");
 
     /**
-     * The column <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.REPETITION_PENALTY</code>.
      */
-    public final TableField<PromptTemplateRecord, Float> TOP_P = createField(DSL.name("TOP_P"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("0.95"), SQLDataType.REAL)), this, "");
+    public final TableField<PromptTemplateRecord, Float> REPETITION_PENALTY = createField(DSL.name("REPETITION_PENALTY"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.REAL)), this, "");
 
     /**
-     * The column <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
-    public final TableField<PromptTemplateRecord, Boolean> STREAMING = createField(DSL.name("STREAMING"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<PromptTemplateRecord, Float> TOP_K = createField(DSL.name("TOP_K"), SQLDataType.REAL.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.REAL)), this, "");
 
     /**
-     * The column <code>PUBLIC.PROMPT_TEMPLATE.REQUEST_REASONING</code>.
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.EXCLUDE_REASONING</code>.
      */
-    public final TableField<PromptTemplateRecord, Boolean> REQUEST_REASONING = createField(DSL.name("REQUEST_REASONING"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("TRUE"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<PromptTemplateRecord, Boolean> EXCLUDE_REASONING = createField(DSL.name("EXCLUDE_REASONING"), SQLDataType.BOOLEAN.defaultValue(DSL.field(DSL.raw("TRUE"), SQLDataType.BOOLEAN)), this, "");
 
     /**
-     * The column <code>PUBLIC.PROMPT_TEMPLATE.RAW_CONTENT</code>.
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
      */
-    public final TableField<PromptTemplateRecord, byte[]> RAW_CONTENT = createField(DSL.name("RAW_CONTENT"), SQLDataType.BLOB, this, "");
+    public final TableField<PromptTemplateRecord, Short> REASONING_EFFORT = createField(DSL.name("REASONING_EFFORT"), SQLDataType.SMALLINT, this, "");
+
+    /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
+     */
+    public final TableField<PromptTemplateRecord, Short> NEXT_SECTION_ID = createField(DSL.name("NEXT_SECTION_ID"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     private PromptTemplate(Name alias, Table<PromptTemplateRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -182,13 +198,18 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     }
 
     @Override
-    public Identity<PromptTemplateRecord, Integer> getIdentity() {
-        return (Identity<PromptTemplateRecord, Integer>) super.getIdentity();
+    public Identity<PromptTemplateRecord, Short> getIdentity() {
+        return (Identity<PromptTemplateRecord, Short>) super.getIdentity();
     }
 
     @Override
     public UniqueKey<PromptTemplateRecord> getPrimaryKey() {
         return Keys.CONSTRAINT_E;
+    }
+
+    @Override
+    public List<UniqueKey<PromptTemplateRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.CONSTRAINT_ED5);
     }
 
     @Override
@@ -209,30 +230,32 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
         return _llmConnection;
     }
 
-    private transient MainPromptPath _mainPrompt;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.MAIN_PROMPT</code>
-     * table
-     */
-    public MainPromptPath mainPrompt() {
-        if (_mainPrompt == null)
-            _mainPrompt = new MainPromptPath(this, null, Keys.CONSTRAINT_EC2.getInverseKey());
-
-        return _mainPrompt;
-    }
-
-    private transient ExtensionPromptPath _extensionPrompt;
+    private transient PromptSectionPath _promptSection;
 
     /**
      * Get the implicit to-many join path to the
-     * <code>PUBLIC.EXTENSION_PROMPT</code> table
+     * <code>PUBLIC.PROMPT_SECTION</code> table
      */
-    public ExtensionPromptPath extensionPrompt() {
-        if (_extensionPrompt == null)
-            _extensionPrompt = new ExtensionPromptPath(this, null, Keys.CONSTRAINT_F36.getInverseKey());
+    public PromptSectionPath promptSection() {
+        if (_promptSection == null)
+            _promptSection = new PromptSectionPath(this, null, Keys.CONSTRAINT_4.getInverseKey());
 
-        return _extensionPrompt;
+        return _promptSection;
+    }
+
+    @Override
+    public List<Check<PromptTemplateRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_FREQUENCY_PENALTY"), "(\"FREQUENCY_PENALTY\" >= CAST(-2.0 AS DOUBLE PRECISION))\n    AND (\"FREQUENCY_PENALTY\" <= CAST(2.0 AS DOUBLE PRECISION))", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_MAX_TOKENS"), "\"MAX_TOKENS\" > 0", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_NEXT_SECTION_ID"), "\"NEXT_SECTION_ID\" >= 0", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_PRESENCE_PENALTY"), "(\"PRESENCE_PENALTY\" >= CAST(-2.0 AS DOUBLE PRECISION))\n    AND (\"PRESENCE_PENALTY\" <= CAST(2.0 AS DOUBLE PRECISION))", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_REASONING_EFFORT"), "(\"REASONING_EFFORT\" IN(0, 1, 2, 3, 4, 5))\n    OR (\"REASONING_EFFORT\" IS NULL)", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_REPETITION_PENALTY"), "(\"REPETITION_PENALTY\" >= CAST(0.0 AS DOUBLE PRECISION))\n    AND (\"REPETITION_PENALTY\" <= CAST(2.0 AS DOUBLE PRECISION))", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_TEMPERATURE"), "(\"TEMPERATURE\" >= CAST(0.0 AS DOUBLE PRECISION))\n    AND (\"TEMPERATURE\" <= CAST(2.0 AS DOUBLE PRECISION))", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_TOP_K"), "\"TOP_K\" >= CAST(0.0 AS DOUBLE PRECISION)", true),
+            Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_TOP_P"), "(\"TOP_P\" >= CAST(0.0 AS DOUBLE PRECISION))\n    AND (\"TOP_P\" <= CAST(1.0 AS DOUBLE PRECISION))", true)
+        );
     }
 
     @Override

@@ -17,16 +17,15 @@ function edit(value:LLMConnection){
 async function onCreate(){
   const name = window.prompt("Enter name")
   if (!name) return;
-  const newEnt = await createEntity<LLMConnectionKeys,LLMConnectionData,LLMConnection>(
+  await createEntity<LLMConnectionKeys,LLMConnectionData,LLMConnection>(
       null,
       {
         name:name,
         type:LLMBackends.NANOGPT.id, // Default type
-        host_id: LLMBackends.NANOGPT.id
       },
       EntityTypes.LLM,
-      LLMConnection)
-  await reload()
+      LLMConnection
+  ).then(async () => await reload())
 }
 
 async function deleteConnection(connection:LLMConnection){

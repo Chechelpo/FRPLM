@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends string | number | symbol">
 import { onMounted, onUnmounted } from "vue";
-import SingleEnumInput from "@/components/utils/field-editors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
 
 const props = defineProps<{
   message: string;

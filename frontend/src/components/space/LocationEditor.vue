@@ -3,11 +3,11 @@ import {Location} from "@/domain/World";
 import {computed} from "vue";
 import {computedAsync} from "@vueuse/core";
 import {Lorebook} from "@/domain/Lorebook";
-import ShortTextBox from "@/components/utils/field-editors/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import LongTextBox from "@/components/utils/field-editors/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 
 const model = defineModel<{

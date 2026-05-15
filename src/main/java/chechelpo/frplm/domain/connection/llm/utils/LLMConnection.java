@@ -1,5 +1,6 @@
 package chechelpo.frplm.domain.connection.llm.utils;
 
+import chechelpo.frplm.domain.connection.llm.utils.generationRequest.ChatCompletionRequest;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
@@ -17,23 +18,21 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 /**
  * Live handle for an LLM connection
  */
-public sealed abstract class LLMConnection permits OpenAICompatibleLLM {
+public sealed abstract class LLMConnection permits NanoGPT {
     private final EntityKey<LlmConnectionRecord> id;
     private final LLMRepository repository;
-
-    protected final RestClient.Builder restClientBuilder = RestClient.builder();
-    protected final WebClient.Builder webClientBuilder = WebClient.builder();
 
     LLMConnection(LLMRepository repository, EntityKey<LlmConnectionRecord> key) {
         this.id = key;
         this.repository = repository;
     }
     public boolean test(){
-        generate("Are you there (Yes/No)?");
+        generateSingle("Are you there (Yes/No)?");
         return true;
     }
 
-    public abstract @NotNull String generate(@NotNull String prompt);
+    public abstract @NotNull String generateSingle(@NotNull String prompt);
+    public abstract @NotNull String generate(@NotNull ChatCompletionRequest request);
     public abstract @NotNull List<ModelInfo> models();
 
     /** @return a new Rest client with its host already added */

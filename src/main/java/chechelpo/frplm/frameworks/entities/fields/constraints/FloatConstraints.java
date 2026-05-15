@@ -1,5 +1,6 @@
 package chechelpo.frplm.frameworks.entities.fields.constraints;
 
+import chechelpo.frplm.exceptions.types.InvalidValue;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldKind;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Contract;
@@ -85,12 +86,15 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
             return new FloatConstraints(this);
         }
     }
-
+    public void checkLength(double value){
+        if (value<min || value>max)
+            throw new InvalidValue("Value must be between " + min + " and " + max);
+    }
     @Override
-    public Number coerce(Object value) {
-        return switch (value) {
+    public @Nullable Number coerce(Object value) {
+        Double coerced = switch (value) {
             case null -> null;
-            case Float f -> f;
+            case Float f -> f.doubleValue();
             case Double d -> d;
             case Number n -> n.doubleValue();
             case String s -> fieldType == FieldType.FLOAT
@@ -98,6 +102,8 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
                     : Double.parseDouble(s);
             default -> throw new IllegalArgumentException("Cannot coerce " + value + " to " + fieldType);
         };
+        if (coerced != null) checkLength(coerced);
+        return coerced;
     }
 
     @Override

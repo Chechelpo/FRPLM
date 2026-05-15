@@ -3,7 +3,6 @@ import {
     createEntity,
     deleteEntity,
     EntityField,
-    fetch_all,
     fetchApi,
     fetchOne
 } from "@/frameworks/ABSEntity";
@@ -11,7 +10,6 @@ import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
-import {filterWithAttribute} from "@/utils/filters";
 import {Location} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
 import {API_BASE} from "@/config";
@@ -110,7 +108,7 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
         if (this.starting_locations == null)
             this.starting_locations = await getStartingLocations(this.key);
 
-        const response = await createEntity<StartingLocationKeys,StartingLocationData,StartingLocation>(
+        await createEntity<StartingLocationKeys,StartingLocationData,StartingLocation>(
             {
                 worldID: loc.get('worldID')!,
                 locationID: loc.get('id')!,
@@ -190,14 +188,6 @@ export type StartingLocationData = {
 export class StartingLocation extends ABSEntity<StartingLocationKeys, StartingLocationData> {
     getEntityType(): EntityTypes {
         return EntityTypes.STARTING_LOCATIONS;
-    }
-
-    static async getOfCharacter(character: Character): Promise<StartingLocation[]> {
-        return filterWithAttribute(
-            "characterID",
-            character.get("id"),
-            await fetch_all<StartingLocationKeys,StartingLocationData, StartingLocation>(EntityTypes.STARTING_LOCATIONS, this),
-        )
     }
 
 }

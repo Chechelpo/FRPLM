@@ -22,9 +22,7 @@ function scheduleEditEmit(): void {
     timer = null;
 
     if (value.value !== lastEmitted.value) {
-      emit("edit", {
-        value: value.value,
-      });
+      emit("edit", value.value);
       lastEmitted.value = value.value;
     }
   }, EDIT_EMIT_MS);
@@ -35,9 +33,7 @@ function onInput(e: Event): void {
   const next = raw === "" ? 0 : Number(raw);
 
   value.value = next;
-  emit("edit", {
-    value:next
-  });
+  emit("edit", next);
 
   scheduleEditEmit();
 }

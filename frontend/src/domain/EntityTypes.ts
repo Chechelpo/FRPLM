@@ -19,6 +19,10 @@ export enum EntityTypes{
     LOCATIONS = "locations",
     EDGES = "edges",
 
+    //PROMPTS
+    TEMPLATES = "promptTemplates",
+    SECTIONS = "promptSections",
+
     //Connections
     LLM = "llm",
     API_KEY = "apiKeys",

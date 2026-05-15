@@ -51,6 +51,7 @@ public final class NumberConstraints extends Constraints<FieldKind.NumberKind, N
     public @Nullable Number coerce(Object value) {
         return switch (value){
           case null -> null;
+          case Short s -> s;
           case Integer i -> i;
           case Long ii -> {
               if (ii < Integer.MIN_VALUE || ii > Integer.MAX_VALUE) {

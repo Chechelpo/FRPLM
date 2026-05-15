@@ -21,29 +21,29 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.ID</code>.
      */
-    public void setId(Integer value) {
+    public void setId(Short value) {
         set(0, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.ID</code>.
      */
-    public Integer getId() {
-        return (Integer) get(0);
+    public Short getId() {
+        return (Short) get(0);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public void setConnectionId(Integer value) {
+    public void setConnectionId(Short value) {
         set(1, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public Integer getConnectionId() {
-        return (Integer) get(1);
+    public Short getConnectionId() {
+        return (Short) get(1);
     }
 
     /**
@@ -75,101 +75,143 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     }
 
     /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
-     */
-    public void setTemperature(Float value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
-     */
-    public Float getTemperature() {
-        return (Float) get(4);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
-     */
-    public void setFrequencyPenalty(Float value) {
-        set(5, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
-     */
-    public Float getFrequencyPenalty() {
-        return (Float) get(5);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
-     */
-    public void setPresencePenalty(Float value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
-     */
-    public Float getPresencePenalty() {
-        return (Float) get(6);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
-     */
-    public void setTopP(Float value) {
-        set(7, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
-     */
-    public Float getTopP() {
-        return (Float) get(7);
-    }
-
-    /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
      */
     public void setStreaming(Boolean value) {
-        set(8, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
      */
     public Boolean getStreaming() {
-        return (Boolean) get(8);
+        return (Boolean) get(4);
     }
 
     /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.REQUEST_REASONING</code>.
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
      */
-    public void setRequestReasoning(Boolean value) {
+    public void setTemperature(Float value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
+     */
+    public Float getTemperature() {
+        return (Float) get(5);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
+     */
+    public void setTopP(Float value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
+     */
+    public Float getTopP() {
+        return (Float) get(6);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
+     */
+    public void setFrequencyPenalty(Float value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
+     */
+    public Float getFrequencyPenalty() {
+        return (Float) get(7);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
+     */
+    public void setPresencePenalty(Float value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
+     */
+    public Float getPresencePenalty() {
+        return (Float) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.REPETITION_PENALTY</code>.
+     */
+    public void setRepetitionPenalty(Float value) {
         set(9, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.REQUEST_REASONING</code>.
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.REPETITION_PENALTY</code>.
      */
-    public Boolean getRequestReasoning() {
-        return (Boolean) get(9);
+    public Float getRepetitionPenalty() {
+        return (Float) get(9);
     }
 
     /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.RAW_CONTENT</code>.
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
-    public void setRawContent(byte[] value) {
+    public void setTopK(Float value) {
         set(10, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.RAW_CONTENT</code>.
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
-    public byte[] getRawContent() {
-        return (byte[]) get(10);
+    public Float getTopK() {
+        return (Float) get(10);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.EXCLUDE_REASONING</code>.
+     */
+    public void setExcludeReasoning(Boolean value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.EXCLUDE_REASONING</code>.
+     */
+    public Boolean getExcludeReasoning() {
+        return (Boolean) get(11);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
+     */
+    public void setReasoningEffort(Short value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
+     */
+    public Short getReasoningEffort() {
+        return (Short) get(12);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
+     */
+    public void setNextSectionId(Short value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
+     */
+    public Short getNextSectionId() {
+        return (Short) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -177,7 +219,7 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<Integer> key() {
+    public Record1<Short> key() {
         return (Record1) super.key();
     }
 
@@ -195,20 +237,23 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Create a detached, initialised PromptTemplateRecord
      */
-    public PromptTemplateRecord(Integer id, Integer connectionId, String name, Integer maxTokens, Float temperature, Float frequencyPenalty, Float presencePenalty, Float topP, Boolean streaming, Boolean requestReasoning, byte[] rawContent) {
+    public PromptTemplateRecord(Short id, Short connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Float topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
         super(PromptTemplate.PROMPT_TEMPLATE);
 
         setId(id);
         setConnectionId(connectionId);
         setName(name);
         setMaxTokens(maxTokens);
+        setStreaming(streaming);
         setTemperature(temperature);
+        setTopP(topP);
         setFrequencyPenalty(frequencyPenalty);
         setPresencePenalty(presencePenalty);
-        setTopP(topP);
-        setStreaming(streaming);
-        setRequestReasoning(requestReasoning);
-        setRawContent(rawContent);
+        setRepetitionPenalty(repetitionPenalty);
+        setTopK(topK);
+        setExcludeReasoning(excludeReasoning);
+        setReasoningEffort(reasoningEffort);
+        setNextSectionId(nextSectionId);
         resetChangedOnNotNull();
     }
 }

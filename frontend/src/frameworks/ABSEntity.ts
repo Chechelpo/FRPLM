@@ -29,6 +29,7 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
 
     public constructor(dto:DTO, expected_type?: EntityTypes) {
         console.debug(`Received ${expected_type} with dto: \n ${JSON.stringify(dto)}`)
+        expected_type = expected_type ? expected_type : this.getEntityType();
         if (dto.type !== expected_type) {
             console.error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`)
             throw new Error(`Mismatch in entity type: Response:${dto.type} vs expected:${expected_type}`);
@@ -260,8 +261,8 @@ export async function createEntity<
     Data extends DataRecord,
     T extends ABSEntity<Key,Data>,
 >(
-    initial_key: Key | null,
-    initial_data: Data | null,
+    initial_key: Partial<Key> | null,
+    initial_data: Partial<Data> | null,
     object_type: EntityTypes,
     ctor: new (dto: DTO, object_type:EntityTypes) => T
 ): Promise<T>{
