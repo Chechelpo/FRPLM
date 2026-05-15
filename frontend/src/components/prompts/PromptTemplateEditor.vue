@@ -10,64 +10,96 @@ import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import NumberSlider from "@/components/utils/primitives/NumberSlider.vue";
 import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
-import {computed} from "vue";
+import { computed, onMounted, ref } from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import PromptSectionEditor from "@/components/prompts/PromptSectionEditor.vue";
-import {computedAsync} from "@vueuse/core";
-import {LLMConnection, LLMConnectionData, LLMConnectionKeys} from "@/domain/Connection";
-import {fetch_all} from "@/frameworks/ABSEntity";
-import {EntityTypes} from "@/domain/EntityTypes";
+import { computedAsync } from "@vueuse/core";
+import { LLMConnection, LLMConnectionData, LLMConnectionKeys } from "@/domain/Connection";
+import { fetch_all } from "@/frameworks/ABSEntity";
+import { EntityTypes } from "@/domain/EntityTypes";
 
-const model = defineModel<PromptTemplate>({required:true, type:PromptTemplate});
+const model = defineModel<PromptTemplate>({
+  required: true,
+  type: PromptTemplate,
+});
+
 const reasoningEffortIDtoName = computed<ReadonlyMap<ReasoningEffortId, string>>(() => {
-  const map = new Map<ReasoningEffortId, string>()
+  const map = new Map<ReasoningEffortId, string>();
 
   Object.values(REASONING_EFFORT).forEach(obj => {
-    map.set(obj.id, obj.name)
-  })
+    map.set(obj.id, obj.name);
+  });
 
-  return map
-})
-const sections = computedAsync<PromptSection[]>(async () => await model.value.getSections(), [])
+  return map;
+});
 
-const connections = computedAsync<LLMConnection[]>(async () => await fetch_all<LLMConnectionKeys, LLMConnectionData, LLMConnection>(
+const connections = computedAsync<LLMConnection[]>(
+    async () =>
+        await fetch_all<LLMConnectionKeys, LLMConnectionData, LLMConnection>(
             EntityTypes.LLM,
             LLMConnection
-        ), [])
-const connectionIDs = computed<number[]>(() => connections.value.map(connection => connection.get("id")))
+        ),
+    []
+);
+
+const connectionIDs = computed<number[]>(() =>
+    connections.value.map(connection => connection.get("id"))
+);
+
 const connectionIDtoName = computed<ReadonlyMap<number, string>>(() => {
-  const map = new Map<number, string>()
+  const map = new Map<number, string>();
 
   connections.value.forEach(connection => {
-    map.set(connection.get("id"), connection.get("name")!)
-  })
+    map.set(connection.get("id"), connection.get("name")!);
+  });
 
-  return map
-})
+  return map;
+});
 
 const currentConnection = computed<number | null>({
-  get(){
-    const con = connections.value!.find(con => con.get('id') === model.value.get('connection_id'));
-    if (!con) return null;
-    return con.get('id');
+  get() {
+    const currentId = model.value.get("connection_id");
+    const con = connections.value.find(con => con.get("id") === currentId);
+
+    return con?.get("id") ?? null;
   },
-  set(newCon:number | null){
-    if (!newCon) return;
-    model.value.update('connection_id', newCon);
-  }
-})
-async function createSection(){
-  const name = window.prompt("Enter new section name");
-  if (!name) return;
-  sections.value.push(await model.value.createSection(name));
-}
+  set(newCon: number | null) {
+    if (newCon == null) return;
+
+    model.value.update("connection_id", newCon);
+  },
+});
+
+const sections = ref<PromptSection[]>([]);
+
 const orderedSections = computed<PromptSection[]>(() =>
     [...sections.value].sort((a, b) => a.get("position") - b.get("position"))
 );
 
+onMounted(() => {
+  reload();
+});
+
+async function reload(): Promise<void> {
+  sections.value = await model.value.getSections();
+}
+
+async function createSection(): Promise<void> {
+  const name = window.prompt("Enter new section name");
+  if (!name) return;
+
+  const newSection = await model.value.createSection(name);
+
+  //Acts up if not done this way.
+  await reload()
+}
+
 async function moveSection(section: PromptSection, direction: -1 | 1): Promise<void> {
   const ordered = orderedSections.value;
   const index = ordered.indexOf(section);
+
+  if (index < 0) return;
+
   const other = ordered[index + direction];
 
   if (!other) return;
@@ -77,16 +109,12 @@ async function moveSection(section: PromptSection, direction: -1 | 1): Promise<v
 
   await section.update("position", otherPosition);
   await other.update("position", sectionPosition);
-
-  sections.value = [...sections.value].sort(
-      (a, b) => a.get("position") - b.get("position")
-  );
 }
-async function reload(){
 
+function sectionKey(section: PromptSection): string {
+  return `${section.get("prompt_id")}:${section.get("section_id")}`;
 }
 </script>
-
 <template>
   <div class="background-edit-box">
     <FieldEditorWrapper field-name="Name">
@@ -178,14 +206,18 @@ async function reload(){
     <button
       type="button"
       @click="createSection"
-    >NEW</button>
+    >
+      NEW
+    </button>
     <PromptSectionEditor
-        v-for = "section in orderedSections"
-        :can-move-down="true"
-        :can-move-up="true"
+        v-for="(section, index) in orderedSections"
+        :key="sectionKey(section)"
         :section="section"
-        @move-down="section => moveSection(section, -1)"
-        @move-up="section => moveSection(section, 1)"
+        :index="index"
+        :can-move-up="index > 0"
+        :can-move-down="index < orderedSections.length - 1"
+        @move-up="section => moveSection(section, -1)"
+        @move-down="section => moveSection(section, 1)"
     />
   </div>
 </template>

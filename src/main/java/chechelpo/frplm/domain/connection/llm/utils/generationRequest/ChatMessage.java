@@ -42,7 +42,7 @@ import org.jetbrains.annotations.NotNull;
             }
 
             public static String[] wireValues(){
-                return new String[]{USER.name(), ASSISTANT.name(), SYSTEM.name()};
+                return new String[]{USER.wireValue, ASSISTANT.wireValue, SYSTEM.wireValue};
             }
         }
     }
