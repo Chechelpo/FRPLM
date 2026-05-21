@@ -7,6 +7,8 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
+import chechelpo.frplm.jooq.generated.tables.PromptTemplate.PromptTemplatePath;
+import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 
 import java.util.Arrays;
@@ -65,6 +67,11 @@ public class LlmGen extends TableImpl<LlmGenRecord> {
      * The column <code>PUBLIC.LLM_GEN.TICK_NUM</code>.
      */
     public final TableField<LlmGenRecord, Integer> TICK_NUM = createField(DSL.name("TICK_NUM"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.LLM_GEN.PROMPT_ID</code>.
+     */
+    public final TableField<LlmGenRecord, Integer> PROMPT_ID = createField(DSL.name("PROMPT_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.LLM_GEN.PROMPT</code>.
@@ -150,12 +157,37 @@ public class LlmGen extends TableImpl<LlmGenRecord> {
 
     @Override
     public UniqueKey<LlmGenRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_3A;
+        return Keys.CONSTRAINT_3A73;
     }
 
     @Override
     public List<ForeignKey<LlmGenRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_3A7);
+        return Arrays.asList(Keys.CONSTRAINT_3A, Keys.CONSTRAINT_3A7, Keys.CONSTRAINT_3A733);
+    }
+
+    private transient SessionsPath _sessions;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
+     */
+    public SessionsPath sessions() {
+        if (_sessions == null)
+            _sessions = new SessionsPath(this, Keys.CONSTRAINT_3A, null);
+
+        return _sessions;
+    }
+
+    private transient PromptTemplatePath _promptTemplate;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.PROMPT_TEMPLATE</code>
+     * table.
+     */
+    public PromptTemplatePath promptTemplate() {
+        if (_promptTemplate == null)
+            _promptTemplate = new PromptTemplatePath(this, Keys.CONSTRAINT_3A7, null);
+
+        return _promptTemplate;
     }
 
     private transient MessagesPath _messages;
@@ -165,7 +197,7 @@ public class LlmGen extends TableImpl<LlmGenRecord> {
      */
     public MessagesPath messages() {
         if (_messages == null)
-            _messages = new MessagesPath(this, Keys.CONSTRAINT_3A7, null);
+            _messages = new MessagesPath(this, Keys.CONSTRAINT_3A733, null);
 
         return _messages;
     }

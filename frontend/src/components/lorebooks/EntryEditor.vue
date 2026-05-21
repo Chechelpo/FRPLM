@@ -1,13 +1,17 @@
 TODO: Keywords dont get updated in between entries on addition/removal. They need a global state regarding them.
 <script setup lang="ts">
-import {ActivationStrategy, Entry, KeyWord, KeywordData} from "@/domain/Lorebook";
+import {ActivationStrategy, Entry, KeyWord, KeywordData, Outlet, OutletData} from "@/domain/Lorebook";
 import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import {computed, onMounted, ref, watch} from "vue";
 import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
-import AutoCompleteBox from "@/components/utils/AutoCompleteBox.vue";
+import AutoCompleteBox from "@/components/utils/autocomplete/AutoCompleteBox.vue";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {createEntity} from "@/frameworks/ABSEntity";
+import SingleAutoComplete from "@/components/utils/autocomplete/SingleAutoComplete.vue";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import NumberInput from "@/components/utils/primitives/NumberInput.vue";
+import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
 
 // ---- model / emit -------------------------------------------------------
 const props = defineProps<{
@@ -39,43 +43,27 @@ const activationStrategyLabels: Record<ActivationStrategy, string> = {
 };
 
 // ---- Edit handlers -------------------------------------------------------
-async function handleNewKeyword(name:string):Promise<void>{
-  let keyword:KeyWord;
-  if(!keywordsByName.value?.has(name)){
-      keyword = await createEntity<any, KeywordData, KeyWord>(
-          null,
-          {
-            name:name
-          },
-          EntityTypes.KEYWORD,
-          KeyWord
-      )
-  }else keyword = keywordsByName.value?.get(name)!
+async function handleNewKeyword(name: string): Promise<void> {
+  let keyword: KeyWord;
+  if (!keywordsByName.value?.has(name)) {
+    keyword = await createEntity<any, KeywordData, KeyWord>(
+        null,
+        {
+          name: name
+        },
+        EntityTypes.KEYWORD,
+        KeyWord
+    )
+  } else keyword = keywordsByName.value?.get(name)!
 
   await props.entry.addKeyword(keyword);
 }
 
-function handleRemoveKeyword(name:string):void{
+function handleRemoveKeyword(name: string): void {
 
 }
-// ---- values -------------------------------------------------------
-const name = computed<string | null>({
-  get() {
-    return props.entry.get('name')
-  },
-  set(value) {
-    props.entry.update('name', value);
-  }
-})
-const content = computed<string | null>({
-  get() {
-    return props.entry.get('content')
-  },
-  set(value) {
-    props.entry.update('content', value);
-  }
-})
 
+// ---- values -------------------------------------------------------
 // Injection requirements
 const probability = computed<number | null>({
   get() {
@@ -106,14 +94,8 @@ const embed_text = computed<string | null>({
     props.entry.update('embed_text', value);
   }
 })
-const outlet = computed<string | null>({
-  get() {
-    return props.entry.get('outlet')
-  },
-  set(value: string | null) {
-    props.entry.update('outlet', value);
-  }
-})
+const outlet = ref<string>('')
+const possibleOutlets = ref<string[]>([]);
 
 const entryKeywords = ref<KeyWord[]>([]);
 const entryKeywordsNames = ref<string[]>([]);
@@ -122,6 +104,16 @@ const allKeywords = ref<KeyWord[]>([]);
 const keywordsNames = ref<string[]>([]);
 const keywordsByName = ref<Map<string, KeyWord>>()
 
+
+watch(
+    () => props.entry,
+    () => {
+      load();
+    }
+)
+onMounted(async () => {
+  await load()
+})
 async function load() {
   entryKeywords.value = await props.entry.getKeywords();
   entryKeywordsNames.value = entryKeywords.value.map(keyword => keyword.get('name'));
@@ -136,26 +128,33 @@ async function load() {
   });
 
   keywordsByName.value = byName;
+
+  const string = await props.entry.getOutletName();
+  if ( string != null ) outlet.value = string;
+
+  possibleOutlets.value = await Outlet.outlets();
 }
-
-
-watch(
-    () => props.entry,
-    () => {
-      load();
-    }
-)
-onMounted(async () => {
-  await load()
-})
+async function handleOutletChange(value:string){
+  await props.entry.updateOutlet(value);
+  console.debug(`New outlet value: ${await props.entry.getOutletName()}`);
+  outlet.value = value;
+}
+async function clearOutlet(){
+  await props.entry.clearOutlet();
+  outlet.value = '';
+}
 </script>
 
 <template>
   <!-- TITLE Name + expand entry bar -->
   <div class="flexColumnBar">
+    <BooleanToggle
+        :model-value="props.entry.get('enabled')"
+        @edit="value => props.entry.update('enabled', value)"
+    />
     <ShortTextBox
-        v-model="name"
-        @edit="txt => name = txt"
+        :model-value="props.entry.get('name')"
+        @edit="txt => props.entry.update('name', txt)"
     ></ShortTextBox>
     <button
         class="expandButton"
@@ -173,7 +172,6 @@ onMounted(async () => {
 
   <!-- Expanded editor -->
   <div class="expandedTop" v-if="expanded">
-    <!--Injection requirements -->
     <!-- Keywords -->
     <AutoCompleteBox
         v-if="!(strategy.valueOf() == ActivationStrategy.CONSTANT)"
@@ -184,50 +182,100 @@ onMounted(async () => {
         @remove="stringToRemove => handleRemoveKeyword(stringToRemove)"
         :allow-custom="true"
     />
+    <!-- probability -->
+    <FieldEditorWrapper
+        v-if = "!(strategy.valueOf() == ActivationStrategy.CONSTANT)"
+        field-name="probability"
+        info="The probability of this entry being injected on successful activation"
+    >
+      <NumberInput
+          :model-value="props.entry.get('probability')"
+          @edit="payload => props.entry.update('probability', payload)"
+      />
+    </FieldEditorWrapper>
+
     <!--Injection strategy -->
     <div class=flexColumnBar>
-      <div>
-        Injection strategy:
+      <FieldEditorWrapper
+          field-name="Injection Strategy"
+          info = "Normal = keyword activation. Embedding = Keywords + embedding text. Constant = Always active"
+      >
         <SingleEnumInput
             :value="strategy!"
             :possible_values="activationStrategyValues"
             :labels="activationStrategyLabels"
             @edit="option => strategy = option"
         ></SingleEnumInput>
-      </div>
+      </FieldEditorWrapper>
       <!--Outlet -->
-      <div>
-        | Outlet:
-        <ShortTextBox
-            v-model="outlet"
-            @edit="txt => outlet = txt"
-        > outlet
-        </ShortTextBox>
+      <div class = "outlet-row">
+        <FieldEditorWrapper
+            field-name="Outlet"
+            info="Place in the prompt where this entry will be inserted"
+        >
+          <SingleAutoComplete
+              v-if="possibleOutlets"
+              class="outlet-autocomplete"
+              :model-value="outlet"
+              :suggestions="possibleOutlets"
+              :allow-custom="true"
+              :clearable="true"
+              @select="txt => handleOutletChange(txt)"
+              @clear = "clearOutlet()"
+          />
+        </FieldEditorWrapper>
       </div>
     </div>
 
     <!-- Content -->
     <div class="flex-row">
       <div v-if="isEmbeddingStrategy">
-        EmbeddingText (if empty its ignored)
-        <LongTextBox
-            v-if="isEmbeddingStrategy"
-            v-model="embed_text"
-            @edit="txt => embed_text = txt"
-        />
+        <FieldEditorWrapper
+          field-name="EmbeddingText"
+          info="Text to be used as the embedded representation of the entry. If empty it'll use the content itself instead"
+          :vertical="true"
+        >
+          <LongTextBox
+              v-if="isEmbeddingStrategy"
+              v-model="embed_text"
+              @edit="txt => embed_text = txt"
+          />
+        </FieldEditorWrapper>
       </div>
       <div>
-        Content:
-        <LongTextBox
-            v-model="content"
-            @edit="txt => content = txt"
-        />
+        <FieldEditorWrapper
+          field-name="Content"
+          info="Text that will be injected on entry activation"
+          :vertical="true"
+        >
+          <LongTextBox
+              :model-value="props.entry.get('content')"
+              @edit="txt => props.entry.update('content', txt)"
+          />
+        </FieldEditorWrapper>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.outlet-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.outlet-label {
+  white-space: nowrap;
+}
+
+.outlet-autocomplete {
+  flex: 1;
+  min-width: 12rem;
+}
+
 .flexColumnBar {
   display: flex;
   flex-direction: row;

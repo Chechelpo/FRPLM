@@ -1,7 +1,7 @@
 package chechelpo.frplm.frameworks.entities.fields;
 
 import chechelpo.frplm.frameworks.entities.fields.constraints.*;
-import chechelpo.frplm.frameworks.entities.fields.format.Format;
+import chechelpo.frplm.frameworks.entities.fields.format.*;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldKind;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Contract;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class FieldInfo<T extends FieldKind>{
     public final @NotNull FieldType type;
-    public final @Nullable Format<T> format;
+    public final @NotNull Coercer<T> format;
     public final @NotNull Constraints<T, ?> constraints;
     public final boolean require;
 
@@ -29,15 +29,15 @@ public final class FieldInfo<T extends FieldKind>{
         return new FieldInfoBuilder<>(FieldType.STRING);
     }
 
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.NumberKind> numberField(FieldType type) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull FieldInfoBuilder<FieldKind.NumberKind> numberField(@NotNull FieldType type) {
         if (type.isValidNumber())
             return new FieldInfoBuilder<>(type);
         throw new IllegalArgumentException("Type " + type + " is not supported");
     }
 
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.FloatKind> floatField(FieldType type) {
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull FieldInfoBuilder<FieldKind.FloatKind> floatField(@NotNull FieldType type) {
         if (type.isValidFloat())
            return new FieldInfoBuilder<>(type);
         throw new IllegalArgumentException("Type " + type + " is not supported");
@@ -50,16 +50,17 @@ public final class FieldInfo<T extends FieldKind>{
 
     public static class FieldInfoBuilder<T extends FieldKind> {
         private final FieldType type;
-        private Format<T> format;
+        private Coercer<T> format;
         private Constraints<T, ?> constraints;
         private boolean require;
 
         private FieldInfoBuilder(FieldType type) {
             this.type = type;
             this.constraints = (Constraints<T, ?>) getDefaultConstraint(type);
+            this.format = getDefaultCoercer(type);
         }
 
-        public FieldInfoBuilder<T> setFormat(Format<T> format) {
+        public FieldInfoBuilder<T> setFormat(Coercer<T> format) {
             this.format = format;
             return this;
         }
@@ -82,7 +83,6 @@ public final class FieldInfo<T extends FieldKind>{
         }
     }
 
-    @SuppressWarnings("unchecked")
     private static <T extends FieldKind> @NotNull Constraints<T, ?> getDefaultConstraint(
             @NotNull FieldType type
     ) {
@@ -97,10 +97,15 @@ public final class FieldInfo<T extends FieldKind>{
 
             case FLOAT, DOUBLE -> (Constraints<T, ?>) new FloatConstraints.FloatConstraintsBuilder(type)
                     .build();
+        };
+    }
 
-            case ENUM -> throw new UnsupportedOperationException(
-                    "Default enum constraints are not implemented yet"
-            );
+    private static <T> @NotNull Coercer<T> getDefaultCoercer(@NotNull FieldType type) {
+        return (Coercer<T>) switch (type) {
+            case STRING -> StringCoercer.create();
+            case BYTE, INTEGER, LONG, SHORT -> NumberCoercer.create(type);
+            case FLOAT, DOUBLE -> FloatCoercer.create(type);
+            case BOOLEAN -> BoolCoercer.create();
         };
     }
 }

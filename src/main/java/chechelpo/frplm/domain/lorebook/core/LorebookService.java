@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.lorebook.core;
 
-import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -9,10 +9,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public final class LorebookService extends ABSEntityService<LorebooksRecord, LorebookStore> {
-
-    public LorebookService(LorebookStore storeAbs) {
-        super(storeAbs, EntityTypes.Types.LOREBOOKS);
+public class LorebookService extends EntityService<LorebooksRecord, LorebookStore> {
+    LorebookService(LorebookStore storeAbs, EventBus eventBus) {
+        super(storeAbs, eventBus);
     }
 
     /**

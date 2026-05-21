@@ -19,8 +19,8 @@ import java.net.URI;
 import java.util.List;
 
 public final class NanoGPT extends LLMConnection {
-    NanoGPT(LLMRepository repository, EntityKey<LlmConnectionRecord> key) {
-        super(repository, key);
+    NanoGPT(EntityKey<LlmConnectionRecord> key, LLMRepository repository) {
+        super(key, repository);
     }
     private enum NanoGPTEndpoint {
         MODELS("/api/v1/models"),

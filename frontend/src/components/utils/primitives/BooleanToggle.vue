@@ -13,7 +13,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  edit: [payload: boolean]
+  (e: 'edit', value: boolean): void
 }>()
 
 function onToggle(event: Event): void {

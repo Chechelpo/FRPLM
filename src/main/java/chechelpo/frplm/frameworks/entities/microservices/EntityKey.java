@@ -18,7 +18,7 @@ import static org.jooq.impl.DSL.trueCondition;
  * Record used for identifying a specific table entry.
  * @param <R> table record class which can be identified by an instance of this class
  */
-public class EntityKey<R extends TableRecord<R>>
+public final class EntityKey<R extends TableRecord<R>>
 {
     //Type checking done at FieldsABS, not here
     private final Map<TableField<R, ?>, Object> values;
@@ -39,7 +39,12 @@ public class EntityKey<R extends TableRecord<R>>
                 .set(field, value)
                 .build();
     }
-
+    @CheckReturnValue
+    public static <Rec extends TableRecord<Rec>> @NotNull EntityKey<Rec> ofValues(
+            Map<TableField<Rec, ?>, Object> values
+    ){
+        return EntityKey.<Rec>builder().setAll(values).build();
+    }
     public static <Rec extends TableRecord<Rec>, T> @NotNull Builder<Rec> builder(
             @NotNull TableField<Rec, T> field,
             T value

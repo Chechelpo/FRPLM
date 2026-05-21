@@ -6,9 +6,11 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors.LocationNeighborsPath;
 import chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
@@ -77,14 +79,9 @@ public class Locations extends TableImpl<LocationsRecord> {
     public final TableField<LocationsRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
-     */
-    public final TableField<LocationsRecord, byte[]> DESCRIPTION = createField(DSL.name("DESCRIPTION"), SQLDataType.BLOB, this, "");
-
-    /**
      * The column <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
      */
-    public final TableField<LocationsRecord, Integer> LOREBOOK_ID = createField(DSL.name("LOREBOOK_ID"), SQLDataType.INTEGER, this, "");
+    public final TableField<LocationsRecord, Integer> LOREBOOK_ID = createField(DSL.name("LOREBOOK_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     private Locations(Name alias, Table<LocationsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -155,7 +152,7 @@ public class Locations extends TableImpl<LocationsRecord> {
 
     @Override
     public UniqueKey<LocationsRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_5E;
+        return Keys.CONSTRAINT_5EB;
     }
 
     @Override
@@ -165,19 +162,7 @@ public class Locations extends TableImpl<LocationsRecord> {
 
     @Override
     public List<ForeignKey<LocationsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_5EB, Keys.CONSTRAINT_5EBC);
-    }
-
-    private transient WorldsPath _worlds;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
-     */
-    public WorldsPath worlds() {
-        if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_5EB, null);
-
-        return _worlds;
+        return Arrays.asList(Keys.CONSTRAINT_5E, Keys.CONSTRAINT_5EBC);
     }
 
     private transient LorebooksPath _lorebooks;
@@ -187,9 +172,21 @@ public class Locations extends TableImpl<LocationsRecord> {
      */
     public LorebooksPath lorebooks() {
         if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_5EBC, null);
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_5E, null);
 
         return _lorebooks;
+    }
+
+    private transient WorldsPath _worlds;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
+     */
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_5EBC, null);
+
+        return _worlds;
     }
 
     private transient LocationTagsPath _locationTags;
@@ -233,6 +230,19 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _constraint_5df1;
     }
 
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5AF8.getInverseKey());
+
+        return _currentLocations;
+    }
+
     private transient StartingLocationsPath _startingLocations;
 
     /**
@@ -244,6 +254,19 @@ public class Locations extends TableImpl<LocationsRecord> {
             _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08.getInverseKey());
 
         return _startingLocations;
+    }
+
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68625.getInverseKey());
+
+        return _movements;
     }
 
     /**

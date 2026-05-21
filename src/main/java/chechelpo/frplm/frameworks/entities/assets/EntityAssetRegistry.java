@@ -6,7 +6,7 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.types.NotFound;
 import chechelpo.frplm.exceptions.types.UnsupportedAction;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.utils.NameValidator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +25,7 @@ import java.util.Set;
  * <p>
  * "{@link AppDirectory#APP_DIRECTORY}/assets/{@link #entityName}/{@link AssetType}"
  * </p>
- * Also prevents fetching paths of non-existing entities via {@link ABSEntityService#exists(EntityKey)} and creating asset registries
+ * Also prevents fetching paths of non-existing entities via {@link EntityService#exists(EntityKey)} and creating asset registries
  * with the same names.
  * @param <Key> ID object of the entity
  * @param <R> Table record related with the entity
@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public abstract class EntityAssetRegistry<
         R extends TableRecord<R>,
-        S extends ABSEntityService<R,?>
+        S extends EntityService<R,?>
         >
 {
     private static final Set<String> ENTITIES_NAMES = new HashSet<>();

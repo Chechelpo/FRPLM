@@ -13,6 +13,7 @@ export enum EntityTypes{
     ENTRY = "entries",
     LOREBOOKS = "lorebooks",
     ENTRY_KEYWORD = "entriesKeywords",
+    OUTLETS = "outlets",
 
     //Space controllers
     WORLDS = "worlds",
@@ -26,4 +27,8 @@ export enum EntityTypes{
     //Connections
     LLM = "llm",
     API_KEY = "apiKeys",
+
+    //Sessions
+    SESSIONS = "sessions",
+    MESSAGES = "messages",
 }

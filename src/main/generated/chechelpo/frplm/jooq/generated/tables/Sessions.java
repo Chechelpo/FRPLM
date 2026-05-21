@@ -7,7 +7,11 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
+import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.PromptTemplate.PromptTemplatePath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 
@@ -70,9 +74,9 @@ public class Sessions extends TableImpl<SessionsRecord> {
     public final TableField<SessionsRecord, Integer> WORLD_ID = createField(DSL.name("WORLD_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.SESSIONS.START_TIME</code>.
+     * The column <code>PUBLIC.SESSIONS.MAIN_PROMPT</code>.
      */
-    public final TableField<SessionsRecord, String> START_TIME = createField(DSL.name("START_TIME"), SQLDataType.VARCHAR(300), this, "");
+    public final TableField<SessionsRecord, Integer> MAIN_PROMPT = createField(DSL.name("MAIN_PROMPT"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.SESSIONS.USER_PERSONA_ID</code>.
@@ -163,7 +167,7 @@ public class Sessions extends TableImpl<SessionsRecord> {
 
     @Override
     public List<ForeignKey<SessionsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_826, Keys.CONSTRAINT_8265);
+        return Arrays.asList(Keys.CONSTRAINT_826, Keys.CONSTRAINT_8265, Keys.CONSTRAINT_8265C);
     }
 
     private transient WorldsPath _worlds;
@@ -178,6 +182,19 @@ public class Sessions extends TableImpl<SessionsRecord> {
         return _worlds;
     }
 
+    private transient PromptTemplatePath _promptTemplate;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.PROMPT_TEMPLATE</code>
+     * table.
+     */
+    public PromptTemplatePath promptTemplate() {
+        if (_promptTemplate == null)
+            _promptTemplate = new PromptTemplatePath(this, Keys.CONSTRAINT_8265, null);
+
+        return _promptTemplate;
+    }
+
     private transient CharactersPath _characters;
 
     /**
@@ -185,22 +202,74 @@ public class Sessions extends TableImpl<SessionsRecord> {
      */
     public CharactersPath characters() {
         if (_characters == null)
-            _characters = new CharactersPath(this, Keys.CONSTRAINT_8265, null);
+            _characters = new CharactersPath(this, Keys.CONSTRAINT_8265C, null);
 
         return _characters;
     }
 
-    private transient MessagesPath _messages;
+    private transient MessagesPath _constraint_1;
 
     /**
      * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
+     * table, via the <code>CONSTRAINT_1</code> key
+     */
+    public MessagesPath constraint_1() {
+        if (_constraint_1 == null)
+            _constraint_1 = new MessagesPath(this, null, Keys.CONSTRAINT_1.getInverseKey());
+
+        return _constraint_1;
+    }
+
+    private transient MessagesPath _constraint_131;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
+     * table, via the <code>CONSTRAINT_131</code> key
+     */
+    public MessagesPath constraint_131() {
+        if (_constraint_131 == null)
+            _constraint_131 = new MessagesPath(this, null, Keys.CONSTRAINT_131.getInverseKey());
+
+        return _constraint_131;
+    }
+
+    private transient LlmGenPath _llmGen;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.LLM_GEN</code>
      * table
      */
-    public MessagesPath messages() {
-        if (_messages == null)
-            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_13.getInverseKey());
+    public LlmGenPath llmGen() {
+        if (_llmGen == null)
+            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A.getInverseKey());
 
-        return _messages;
+        return _llmGen;
+    }
+
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A.getInverseKey());
+
+        return _currentLocations;
+    }
+
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E6.getInverseKey());
+
+        return _movements;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.prompts.section;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;
+import chechelpo.frplm.frameworks.entities.microservices.EntityController;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import org.springframework.http.ResponseEntity;
@@ -14,13 +14,13 @@ import static chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 
 @RestController
 @RequestMapping(SECTIONS_URL)
-final class SectionController extends ABSEntityController<PromptSectionRecord, SectionService> {
+final class SectionController extends EntityController<PromptSectionRecord, SectionService> {
     SectionController(SectionService service) {
         super(service);
     }
 
     @GetMapping("/ofTemplate/{templateKey}")
-    public ResponseEntity<EntityDTO[]> findAllByTemplateKey(@PathVariable("templateKey") Integer templateKey) {
+    public ResponseEntity<EntityDTO[]> findAllByTemplateKey(@PathVariable("templateKey") short templateKey) {
         return ResponseEntity.ok(
                 wrapEntities(
                         service.getMatching(

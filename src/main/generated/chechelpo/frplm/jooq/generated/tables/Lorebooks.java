@@ -9,11 +9,14 @@ import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
+import chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
@@ -73,6 +76,11 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      * The column <code>PUBLIC.LOREBOOKS.NAME</code>.
      */
     public final TableField<LorebooksRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.LOREBOOKS.DEFAULT_OUTLET_ID</code>.
+     */
+    public final TableField<LorebooksRecord, Integer> DEFAULT_OUTLET_ID = createField(DSL.name("DEFAULT_OUTLET_ID"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>PUBLIC.LOREBOOKS.NEXT_ENTRY_ID</code>.
@@ -156,6 +164,23 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
         return Keys.CONSTRAINT_7;
     }
 
+    @Override
+    public List<ForeignKey<LorebooksRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.CONSTRAINT_7E);
+    }
+
+    private transient OutletPath _outlet;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.OUTLET</code> table.
+     */
+    public OutletPath outlet() {
+        if (_outlet == null)
+            _outlet = new OutletPath(this, Keys.CONSTRAINT_7E, null);
+
+        return _outlet;
+    }
+
     private transient EntryPath _entry;
 
     /**
@@ -163,7 +188,7 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      */
     public EntryPath entry() {
         if (_entry == null)
-            _entry = new EntryPath(this, null, Keys.CONSTRAINT_3F.getInverseKey());
+            _entry = new EntryPath(this, null, Keys.CONSTRAINT_3F1.getInverseKey());
 
         return _entry;
     }
@@ -176,7 +201,7 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5EBC.getInverseKey());
+            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5E.getInverseKey());
 
         return _locations;
     }

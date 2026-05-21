@@ -24,10 +24,9 @@ import java.util.Set;
 ///  - allows_placeholders = `true`
 ///
 public final class StringConstraints extends Constraints<FieldKind.StringKind, String> {
-    private final Integer minLength;
-    private final Integer maxLength;
+    private final int minLength;
+    private final int maxLength;
     private final Set<String> allowedValues = new HashSet<>();
-    private final boolean read_only;
     private final boolean allows_outlets;
 
     @Contract(pure = true)
@@ -35,34 +34,36 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
         super(builder, FieldType.STRING);
         this.minLength = builder.minLength;
         this.maxLength = builder.maxLength;
-        this.read_only = builder.read_only;
         this.allows_outlets = builder.allows_outlets;
         this.allowedValues.addAll(builder.possible_values);
     }
 
     @Override
-    public String  coerce(Object value) {
-        return (String) value;
+    public FieldType type() {
+        return FieldType.STRING;
+    }
+
+    public boolean allowsOutlets() {
+        return allows_outlets;
+    }
+
+    @Override
+    protected void throwIfImpossibleValue(@NotNull String value) throws InvalidValue {
+        if (!this.allowedValues.isEmpty() && !this.allowedValues.contains(value))
+            throw new InvalidValue("Value: " + value + " not in allow list \n Allow list: " + allowedValues);
+        if (value.length() < minLength || value.length() > maxLength)
+            throw new InvalidValue("Value: " + value + " must be between " + minLength + " and " + maxLength);
+        // TODO: Add allows outlets check
     }
 
     @Contract(value = " -> new", pure = true)
     public static @NotNull StringConstraints.StringConstraintsBuilder builder() {
         return new StringConstraintsBuilder();
     }
-
-    @Override
-    protected void throwIfImpossibleValue(String value) throws InvalidValue {
-        if (!this.allowedValues.isEmpty() && !this.allowedValues.contains(value))
-            throw new InvalidValue("Value: " + value + " not in allow list \n Allow list: " + allowedValues);
-        // TODO: Add allows outlets check
-        super.throwIfImpossibleValue(value);
-    }
-
     public static class StringConstraintsBuilder extends ABSConstraintsBuilder<StringConstraints, StringConstraintsBuilder> {
-        private Integer minLength;
-        private Integer maxLength;
+        private int minLength = 0;
+        private int maxLength = Integer.MAX_VALUE;
         private Set<String> possible_values = new HashSet<>();
-        private boolean read_only = false;
         private boolean allows_outlets = false;
 
         @Override
@@ -70,18 +71,13 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
             return this;
         }
 
-        public StringConstraintsBuilder setMinLength(@Nullable Integer minLength) {
+        public StringConstraintsBuilder setMinLength(int minLength) {
             this.minLength = minLength;
             return this;
         }
 
-        public StringConstraintsBuilder setMaxLength(@Nullable Integer maxLength) {
+        public StringConstraintsBuilder setMaxLength(int maxLength) {
             this.maxLength = maxLength;
-            return this;
-        }
-
-        public StringConstraintsBuilder readOnly() {
-            this.read_only = true;
             return this;
         }
 
@@ -101,32 +97,10 @@ public final class StringConstraints extends Constraints<FieldKind.StringKind, S
 
         @Contract(value = " -> new", pure = true)
         public @NotNull StringConstraints build(){
-            if (minLength != null && maxLength != null && maxLength <= minLength) {
+            if ( maxLength <= minLength) {
                 throw new IllegalArgumentException("Invalid range");
             }
             return new StringConstraints(this);
         }
-    }
-
-    public Integer getMinLength() {
-        return minLength;
-    }
-
-    public Integer getMaxLength() {
-        return maxLength;
-    }
-
-    @Override
-    public FieldType type() {
-        return FieldType.STRING;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return read_only;
-    }
-
-    public boolean allowsOutlets() {
-        return allows_outlets;
     }
 }

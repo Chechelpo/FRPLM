@@ -33,6 +33,7 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                                 .key()
                                 .build()
                         )
+                        .build()
         );
 
         register_field(
@@ -43,6 +44,7 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                                 .setMaxLength(255)
                                 .build()
                         )
+                        .build()
         );
 
         register_field(
@@ -54,6 +56,7 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                                         .setPossibleValues(LLMBackend.getIDs())
                                         .nullable()
                         )
+                        .build()
         );
 
         register_field(
@@ -63,12 +66,14 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                         .setConstraints(StringConstraints.builder()
                                 .setMaxLength(255)
                         )
+                        .build()
         );
         register_field(
                 "api_key",
                 LLM_CONNECTION.API_KEY,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraints.builder(FieldType.INTEGER))
+                        .build()
         );
 
         for (LLMBackend backend : LLMBackend.values()){

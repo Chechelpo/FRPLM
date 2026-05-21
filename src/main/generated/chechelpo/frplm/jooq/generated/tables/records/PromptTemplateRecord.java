@@ -161,15 +161,15 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
-    public void setTopK(Float value) {
+    public void setTopK(Integer value) {
         set(10, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
-    public Float getTopK() {
-        return (Float) get(10);
+    public Integer getTopK() {
+        return (Integer) get(10);
     }
 
     /**
@@ -237,7 +237,7 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Create a detached, initialised PromptTemplateRecord
      */
-    public PromptTemplateRecord(Short id, Short connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Float topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
+    public PromptTemplateRecord(Short id, Short connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Integer topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
         super(PromptTemplate.PROMPT_TEMPLATE);
 
         setId(id);

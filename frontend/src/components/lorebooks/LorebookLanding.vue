@@ -4,16 +4,14 @@ import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {EntityTypes} from "@/domain/EntityTypes";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
-import {computed, shallowRef} from "vue";
+import {computed, onMounted, ref, shallowRef} from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
-import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {createEntity, deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
 
-const lorebooks = computedAsync<Lorebook[]>(
-    async () => fetch_all<LorebookKey, LorebookData, Lorebook>(EntityTypes.LOREBOOKS, Lorebook)
-)
+const lorebooks = ref<Lorebook[]>([])
 
 const editingLorebook = shallowRef<Lorebook | null>(null);
 const lorebookName = computed<string>({
@@ -46,6 +44,15 @@ function onSelect(lorebook: Lorebook) {
   }
   editingLorebook.value = lorebook;
 }
+async function onDelete(lorebook: Lorebook) {
+  const confirm = window.confirm("Are you sure you want to delete this lorebook?");
+  if (!confirm) return;
+  if (await deleteEntity<LorebookKey>({id:lorebook.get('id')}, EntityTypes.LOREBOOKS))
+    lorebooks.value = lorebooks.value!.filter(other => !other.equals(lorebook));
+}
+onMounted(async () => {
+  lorebooks.value = await fetch_all<LorebookKey, LorebookData, Lorebook>(EntityTypes.LOREBOOKS, Lorebook)
+})
 </script>
 
 <template>
@@ -57,6 +64,7 @@ function onSelect(lorebook: Lorebook) {
           v-model:elements="lorebooks"
           @create="onCreate"
           @edit="loc => onSelect(loc)"
+          @remove="loc => onDelete(loc)"
       />
     </template>
     <template #right v-if="editingLorebook">

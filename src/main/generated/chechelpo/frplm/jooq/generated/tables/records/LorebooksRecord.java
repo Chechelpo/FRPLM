@@ -63,17 +63,31 @@ public class LorebooksRecord extends UpdatableRecordImpl<LorebooksRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.LOREBOOKS.DEFAULT_OUTLET_ID</code>.
+     */
+    public void setDefaultOutletId(Integer value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.LOREBOOKS.DEFAULT_OUTLET_ID</code>.
+     */
+    public Integer getDefaultOutletId() {
+        return (Integer) get(3);
+    }
+
+    /**
      * Setter for <code>PUBLIC.LOREBOOKS.NEXT_ENTRY_ID</code>.
      */
     public void setNextEntryId(Integer value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOREBOOKS.NEXT_ENTRY_ID</code>.
      */
     public Integer getNextEntryId() {
-        return (Integer) get(3);
+        return (Integer) get(4);
     }
 
     // -------------------------------------------------------------------------
@@ -99,12 +113,13 @@ public class LorebooksRecord extends UpdatableRecordImpl<LorebooksRecord> {
     /**
      * Create a detached, initialised LorebooksRecord
      */
-    public LorebooksRecord(Integer id, LocalDateTime created, String name, Integer nextEntryId) {
+    public LorebooksRecord(Integer id, LocalDateTime created, String name, Integer defaultOutletId, Integer nextEntryId) {
         super(Lorebooks.LOREBOOKS);
 
         setId(id);
         setCreated(created);
         setName(name);
+        setDefaultOutletId(defaultOutletId);
         setNextEntryId(nextEntryId);
         resetChangedOnNotNull();
     }

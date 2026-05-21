@@ -6,6 +6,8 @@ import {EntityTypes} from "@/domain/EntityTypes";
 import LorebookLanding from "@/components/lorebooks/LorebookLanding.vue";
 import ConnectionLanding from "@/components/connections/ConnectionLanding.vue";
 import PromptTemplatePicker from "@/components/prompts/PromptTemplatePicker.vue";
+import SessionList from "@/components/session/SessionList.vue";
+import {Session} from "@/domain/Session";
 
 export function route_to(type:EntityTypes): string {
     return `/${type}`;
@@ -14,7 +16,8 @@ export function route_to(type:EntityTypes): string {
 export const router = createRouter({
     history: createWebHistory(),
     routes: [
-        { path: "/", component: EmptyView },
+        { path: "/", component: SessionList },
+        { path: "/session" , component: Session },
         { path: "/lorebook", component: LorebookLanding, name: "Lorebook Landing" },
         { path: route_to(EntityTypes.CHARACTERS), component: CharacterLanding, name: "Character" },
         { path: route_to(EntityTypes.WORLDS), component: WorldLanding, name: "worldList"},

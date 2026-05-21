@@ -7,19 +7,12 @@ import org.jooq.TableRecord;
 
 public abstract class ABSHelper<
         R extends TableRecord<R>,
-        Service extends ABSEntityService<R,?>
+        Service extends EntityService<R,?>
         > {
     protected final Service service;
 
     public ABSHelper(Service service) {
         this.service = service;
-    }
-
-    protected <T> void register_field(
-            @NotNull TableField<R, T> column,
-            @NotNull FieldInfo.FieldInfoBuilder<?> infoBuilder
-    ) {
-        this.register_field(column, infoBuilder.build());
     }
 
     /**
@@ -33,5 +26,12 @@ public abstract class ABSHelper<
             @NotNull FieldInfo<?> info
     ) {
         service.registerField(column, info.require, info.constraints);
+    }
+    protected <T> void register_field(
+            @NotNull TableField<R, T> column,
+            @NotNull FieldInfo<?> info,
+            T defaultValue
+    ){
+        service.registerField(column, info.require, info.constraints, defaultValue);
     }
 }

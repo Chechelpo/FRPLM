@@ -88,7 +88,7 @@ async function deleteEntry(entry: Entry): Promise<void> {
     <searchBar
         placeholder="Search entries by name"
         @update:search="value => searchQuery = value"
-    ></searchBar>
+    />
     <button
         type="button"
         class="btn add-btn"

@@ -5,7 +5,7 @@ import chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import chechelpo.frplm.frameworks.entities.fields.constraints.BoolConstraints;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
-import chechelpo.frplm.frameworks.entities.fields.format.BoolFormat;
+import chechelpo.frplm.frameworks.entities.fields.format.BoolCoercer;
 import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
@@ -80,9 +80,6 @@ public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper
                         .setConstraints(
                                 BoolConstraints.builder()
                         )
-                        .setFormat(
-                                new BoolFormat("Whether this character is permitted to move locations")
-                        )
                         .build()
         );
         register_field(
@@ -93,6 +90,7 @@ public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper
                                 .setMin(0L)
                                 .build()
                         )
+                        .build()
         );
     }
 }

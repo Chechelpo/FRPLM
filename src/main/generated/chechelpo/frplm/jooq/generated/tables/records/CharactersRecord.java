@@ -63,17 +63,59 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
+     */
+    public void setIsArchetype(Boolean value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
+     */
+    public Boolean getIsArchetype() {
+        return (Boolean) get(3);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
+     */
+    public void setCanBeUser(Boolean value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
+     */
+    public Boolean getCanBeUser() {
+        return (Boolean) get(4);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
+     */
+    public void setWelcomeMessage(String value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
+     */
+    public String getWelcomeMessage() {
+        return (String) get(5);
+    }
+
+    /**
      * Setter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public void setLorebookId(Integer value) {
-        set(3, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public Integer getLorebookId() {
-        return (Integer) get(3);
+        return (Integer) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -99,12 +141,15 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     /**
      * Create a detached, initialised CharactersRecord
      */
-    public CharactersRecord(Integer id, LocalDateTime created, String name, Integer lorebookId) {
+    public CharactersRecord(Integer id, LocalDateTime created, String name, Boolean isArchetype, Boolean canBeUser, String welcomeMessage, Integer lorebookId) {
         super(Characters.CHARACTERS);
 
         setId(id);
         setCreated(created);
         setName(name);
+        setIsArchetype(isArchetype);
+        setCanBeUser(canBeUser);
+        setWelcomeMessage(welcomeMessage);
         setLorebookId(lorebookId);
         resetChangedOnNotNull();
     }

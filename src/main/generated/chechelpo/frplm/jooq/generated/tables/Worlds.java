@@ -7,8 +7,10 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
+import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
@@ -188,7 +190,7 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5EB.getInverseKey());
+            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5EBC.getInverseKey());
 
         return _locations;
     }
@@ -206,6 +208,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
         return _sessions;
     }
 
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5A.getInverseKey());
+
+        return _currentLocations;
+    }
+
     private transient StartingLocationsPath _startingLocations;
 
     /**
@@ -217,6 +232,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08E.getInverseKey());
 
         return _startingLocations;
+    }
+
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686.getInverseKey());
+
+        return _movements;
     }
 
     /**

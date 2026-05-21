@@ -19,8 +19,7 @@ export type EntityFieldsMap<keys extends KeyRecord, data extends DataRecord> = M
 export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> implements ValueComparable {
     private static registered:Set<EntityTypes> = new Set;
     
-    static async initialise(): Promise<void> {
-    }
+    static async initialise(): Promise<void> {}
 
     /** Key attributes of entity (composite identity) */
     public readonly key: Readonly<Key>;
@@ -284,7 +283,7 @@ export async function UpdateEntityField<
     Field extends keyof Data,
 >(
     key: Key,
-    field:Field,
+    field: Field,
     value: Data[Field],
     object_type:EntityTypes,
 ): Promise<boolean>

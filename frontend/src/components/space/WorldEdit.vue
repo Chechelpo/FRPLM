@@ -44,7 +44,7 @@ async function onCreate() { //Create location of a world
   const location = await model.value.addLocation(name)
   if (!location) return;
   console.debug(`Created location ${location}`)
-  locations.value = await model.value.getLocations();
+  locations.value.push(location);
 }
 
 async function onEdit(location: Location) {

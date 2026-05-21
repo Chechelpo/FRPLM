@@ -1,5 +1,5 @@
 package chechelpo.frplm.frameworks.entities.fields.kinds;
-/** Field type. Can either be a primitive or array of values ({@link #ENUM})*/
+
 public enum FieldType {
         STRING,
         BYTE,
@@ -8,9 +8,7 @@ public enum FieldType {
         LONG,
         FLOAT,
         DOUBLE,
-        BOOLEAN,
-        /** Meant to represent an array of options */
-        ENUM
+        BOOLEAN
         ;
 
 

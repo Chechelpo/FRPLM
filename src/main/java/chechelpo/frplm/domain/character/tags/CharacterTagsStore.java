@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.character.tags;
 
 import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
+import chechelpo.frplm.frameworks.entities.microservices.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ import static chechelpo.frplm.jooq.generated.tables.CharacterTags.CHARACTER_TAGS
 import static chechelpo.frplm.jooq.generated.tables.Tags.TAGS;
 
 @Component
-final class CharacterTagsStore extends ABSEntityStore<CharacterTagsRecord> {
+final class CharacterTagsStore extends EntityStore<CharacterTagsRecord> {
     public CharacterTagsStore(@NotNull DSLContext ctx) {
         super(ctx, CHARACTER_TAGS, EntityTypes.Types.CHARACTER_TAGS);
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {Character, StartingLocation, StartingLocationData, StartingLocationKeys} from "@/domain/Characters";
 import { Location, World, WorldData, WorldKey } from "@/domain/World";
 import { EntityTypes } from "@/domain/EntityTypes";
@@ -10,7 +10,7 @@ import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
 import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import NumberInput from "@/components/utils/primitives/NumberInput.vue";
-import {fetch_all} from "@/frameworks/ABSEntity";
+import {deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
 
 const model = defineModel<Character>({ required: true });
 
@@ -28,10 +28,6 @@ const locationOptionsOpen = ref(false);
 
 const locationsOfWorld = ref<Location[] | null>(null);
 const allLocationsNames = ref<string[]>([]);
-const locationNames = computed<string[]>(() =>
-    filteredLocations.value.map(location => location.get("name"))
-);
-
 async function onSelectWorld(name: string) {
   selectedLocation.value = null;
   locationOptionsOpen.value = false;
@@ -55,6 +51,11 @@ async function onSelectWorld(name: string) {
   );
 }
 
+
+watch(
+    model.value,
+    () => load()
+)
 onMounted(() => {
   load();
 });

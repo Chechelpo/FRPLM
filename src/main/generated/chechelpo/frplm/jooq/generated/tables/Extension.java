@@ -101,7 +101,7 @@ public class Extension extends TableImpl<ExtensionRecord> {
 
     @Override
     public UniqueKey<ExtensionRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_8;
+        return Keys.CONSTRAINT_81;
     }
 
     @Override

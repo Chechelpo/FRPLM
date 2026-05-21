@@ -2,6 +2,7 @@ package chechelpo.frplm.domain.connection.llm.utils;
 
 import chechelpo.frplm.domain.connection.llm.utils.generationRequest.ChatCompletionRequest;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
+import chechelpo.frplm.frameworks.entities.repository.Entity;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
@@ -18,13 +19,9 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 /**
  * Live handle for an LLM connection
  */
-public sealed abstract class LLMConnection permits NanoGPT {
-    private final EntityKey<LlmConnectionRecord> id;
-    private final LLMRepository repository;
-
-    LLMConnection(LLMRepository repository, EntityKey<LlmConnectionRecord> key) {
-        this.id = key;
-        this.repository = repository;
+public sealed abstract class LLMConnection extends Entity<LlmConnectionRecord, LLMRepository> permits NanoGPT {
+    LLMConnection(EntityKey<LlmConnectionRecord> key, LLMRepository repository) {
+        super(key,repository);
     }
     public boolean test(){
         generateSingle("Are you there (Yes/No)?");
@@ -55,7 +52,7 @@ public sealed abstract class LLMConnection permits NanoGPT {
     protected @NotNull EntityKey<ApiKeysRecord> apiKey(){
         return EntityKey.of(
                 API_KEYS.KEY_ID,
-                repository.getFromLLM(LLM_CONNECTION.API_KEY, id)
+                repository.getFromLLM(LLM_CONNECTION.API_KEY, key)
         );
     }
     protected @NotNull EntityKey<ApiHostsRecord> apiHost(){
@@ -66,7 +63,7 @@ public sealed abstract class LLMConnection permits NanoGPT {
     }
 
     public final String getModelID(){
-        return repository.getFromLLM(LLM_CONNECTION.MODEL, id);
+        return repository.getFromLLM(LLM_CONNECTION.MODEL, key);
     }
     public URI getHostURI(){
         return URI.create(repository.getFromHosts(API_HOSTS.HOST_URL, apiHost()));

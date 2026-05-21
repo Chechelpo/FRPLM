@@ -1,5 +1,7 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
+import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
+import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import chechelpo.frplm.frameworks.entities.fields.constraints.BoolConstraints;
 import chechelpo.frplm.frameworks.entities.microservices.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Entry;
@@ -8,10 +10,12 @@ import chechelpo.frplm.frameworks.entities.fields.CommonFields;
 import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
 import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraints;
 import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraints;
-import chechelpo.frplm.frameworks.entities.fields.format.NumberFormat;
-import chechelpo.frplm.frameworks.entities.fields.format.StringFormat;
+import chechelpo.frplm.frameworks.entities.fields.format.NumberCoercer;
+import chechelpo.frplm.frameworks.entities.fields.format.StringCoercer;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
+
+import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @Component
 final class EntryFieldsHelper extends ABSControllerAwareHelper<
@@ -62,14 +66,15 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                                         .setMaxLength(255)
                                         .build()
                         )
-                        .setFormat(
-                                StringFormat.builder()
-                                        .setInfo("Metadata name")
-                                        .setType(StringFormat.Types.SHORT_TEXT)
-                                        .build()
-                        )
                         .build()
         );
+        register_field(
+                "enabled",
+                ENTRY.ENABLED,
+                FieldInfo.booleanField()
+                        .build()
+        );
+
         register_field(
                 "content",
                 Entry.ENTRY.CONTENT,
@@ -77,11 +82,6 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                         .setConstraints(
                                 StringConstraints.builder()
                                         .allows_outlets()
-                                        .build()
-                        )
-                        .setFormat(
-                                StringFormat.builder()
-                                        .setType(StringFormat.Types.LONG_TEXT)
                                         .build()
                         )
                         .build()
@@ -96,26 +96,22 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                                 NumberConstraints.builder(FieldType.SHORT)
                                         .build()
                         )
-                        .setFormat(
-                                NumberFormat.builder()
-                                        .setInfo("The probability of this content being inputted on a successful activation")
-                                        .setType(NumberFormat.Types.INPUT)
+                        .build()
+        );
+
+
+        register_field(
+                "outlet_id",
+                Entry.ENTRY.OUTLET,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(
+                                NumberConstraints.builder(FieldType.INTEGER)
+                                        .nullable()
                                         .build()
                         )
                         .build()
         );
 
-        register_field(
-                "outlet",
-                Entry.ENTRY.OUTLET,
-                FieldInfo.stringField()
-                        .setConstraints(
-                                StringConstraints.builder()
-                                        .setMaxLength(255)
-                                        .build()
-                        )
-                        .build()
-        );
         register_field(
                 "delay",
                 Entry.ENTRY.DELAY,
@@ -126,6 +122,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                         )
                         .build()
         );
+
         register_field(
                 "cooldown",
                 Entry.ENTRY.COOLDOWN,
@@ -161,10 +158,13 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 "strategy",
                 Entry.ENTRY.STRATEGY,
                 FieldInfo.numberField(FieldType.SHORT)
-                        .setConstraints(NumberConstraints.builder(FieldType.SHORT)
-                                .build()
+                        .setConstraints(
+                                NumberConstraints.builder(FieldType.SHORT)
+                                        .setPossibleValues(ActivationStrategy.stableIDs())
+                                        .build()
                         )
-                        .build()
+                        .build(),
+                ActivationStrategy.COMMON.stable_id
         );
         register_field(
                 "embed_text",

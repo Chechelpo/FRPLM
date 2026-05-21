@@ -61,17 +61,31 @@ public class ResponsesRecord extends UpdatableRecordImpl<ResponsesRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
+     */
+    public void setAdvancesTimeBy(Integer value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
+     */
+    public Integer getAdvancesTimeBy() {
+        return (Integer) get(3);
+    }
+
+    /**
      * Setter for <code>PUBLIC.RESPONSES.CONTENT</code>.
      */
     public void setContent(String value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.RESPONSES.CONTENT</code>.
      */
     public String getContent() {
-        return (String) get(3);
+        return (String) get(4);
     }
 
     // -------------------------------------------------------------------------
@@ -97,12 +111,13 @@ public class ResponsesRecord extends UpdatableRecordImpl<ResponsesRecord> {
     /**
      * Create a detached, initialised ResponsesRecord
      */
-    public ResponsesRecord(Integer sessionId, Integer tickNum, Short responseNum, String content) {
+    public ResponsesRecord(Integer sessionId, Integer tickNum, Short responseNum, Integer advancesTimeBy, String content) {
         super(Responses.RESPONSES);
 
         setSessionId(sessionId);
         setTickNum(tickNum);
         setResponseNum(responseNum);
+        setAdvancesTimeBy(advancesTimeBy);
         setContent(content);
         resetChangedOnNotNull();
     }

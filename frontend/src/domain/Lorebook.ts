@@ -1,8 +1,16 @@
-import {ABSEntity, createEntity, deleteEntity, EntityField, fetch_all, fetchApi} from "@/frameworks/ABSEntity";
+import {
+    ABSEntity,
+    createEntity,
+    deleteEntity,
+    EntityField,
+    fetch_all,
+    fetchApi,
+    fetchOne
+} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {API_BASE} from "@/config";
-import {DTO} from "@/types/DTOs";
+import {DTO, Primitives} from "@/types/DTOs";
 
 export type LorebookKey = { id: number }
 export type LorebookData = { name: string }
@@ -63,23 +71,21 @@ export enum ActivationStrategy {
     EMBEDDING = 2,
 }
 
-type EntryKey = {
-    lorebook_id: number,
-    entry_id?: number // If its initialized its always there
-}
+type EntryKey = { lorebook_id: number, entry_id: number }
 export type EntryData = {
     name: string | null;
+    enabled: boolean;
     content: string | null;
 
     // Injection requirements
-    probability: number | null;
-    outlet: string | null;
+    probability: number;
+    outlet_id: number | null;
     delay: number;
     cooldown: number;
     stick_through: number;
 
     // Injection options
-    injection_order: number | null;
+    injection_order: number;
 
     // Activation strategy
     strategy: ActivationStrategy | number;
@@ -92,14 +98,30 @@ export type EntryData = {
 
 export class Entry extends ABSEntity<EntryKey, EntryData> {
     private keywords: KeyWord[] | null = null;
+    private outlet:string | null = null;
 
     getEntityType(): EntityTypes {
         return EntityTypes.ENTRY;
     }
 
-
     getIterationArr(): EntityField<EntryKey, EntryData>[] { //This isn't as important, the entry editor must be special
         return [CommonFields.NAME];
+    }
+
+    async update<F extends keyof EntryData>(field: F, value: EntryData[F]): Promise<boolean> {
+        if (field == "outlet_id")
+            throw new Error("Trying to update outlet via normal update API")
+        return super.update(field, value);
+    }
+
+    public override get<K extends keyof EntryData>(key: K): EntryData[K];
+    public override get<K extends keyof EntryKey>(key: K): EntryKey[K];
+    public override get(key: keyof EntryData | keyof EntryKey): Primitives {
+        if (key === "outlet_id") {
+            throw new Error("Use getOutletName() instead of get('outlet_id')");
+        }
+
+        return super.get(key as keyof EntryData);
     }
 
     //Workaround until a query works
@@ -118,8 +140,7 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
             }
         )
         const dtos = await response.json() as DTO[];
-        const entries: Entry[] = dtos.map(dto => new Entry(dto, EntityTypes.ENTRY));
-        return entries;
+        return dtos.map(dto => new Entry(dto, EntityTypes.ENTRY));
     }
 
     public async getKeywords(): Promise<KeyWord[]> {
@@ -135,7 +156,7 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
             return
         const newEntry = await createEntity<EntryKeywordsKey, any, EntryKeywords>(
             {
-                lorebook_id: this.get('lorebook_id'),
+                lorebook_id: this.get('lorebook_id')!,
                 entry_id: this.get('entry_id')!, // Its initialized, so it's guaranteed to be defined
                 keyword_id: keyword.get('id')
             },
@@ -156,11 +177,47 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
         const response = await deleteEntity<EntryKeywordsKey>(
             {
                 lorebook_id: this.get('lorebook_id'),
-                entry_id: this.get('entry_id')!,
+                entry_id: this.get('entry_id'),
                 keyword_id: keyword.get('id')
             },
             EntityTypes.ENTRY_KEYWORD
         )
+    }
+
+    public async getOutletName() : Promise<string | null>{
+        if (this.outlet != null) return this.outlet;
+        if (super.get('outlet_id') == null) {
+            this.outlet = null;
+            console.debug(`This has no outlet`)
+            return this.outlet;
+        }
+        if (this.outlet == null)
+            await fetchOne<OutletKey, OutletData, Outlet>(
+                {
+                    id:super.get('outlet_id')!
+                },
+                EntityTypes.OUTLETS,
+                Outlet
+            ).then( x=> {
+                console.debug(`${x}`)
+                this.outlet = x.get('name')
+            })
+        return this.outlet;
+    }
+
+    public async updateOutlet(outlet:string) : Promise<void>{
+        console.debug(`Updating outlet for ${this.get('name')} with new value ${outlet}`)
+        const result = await fetchApi(
+            `${API_BASE}/${EntityTypes.ENTRY}/entity/${this.get('lorebook_id')}/${super.get('entry_id')}`,
+            {
+                method: "PATCH",
+                body: outlet,
+            })
+
+        if (await result.json() as boolean) this.outlet = outlet;
+    }
+    public async clearOutlet(): Promise<void> {
+        await super.update('outlet_id', null)
     }
 }
 
@@ -192,7 +249,8 @@ export class KeyWord extends ABSEntity<KeywordKey, KeywordData> {
         return dtos.map(dto => new KeyWord(dto, EntityTypes.KEYWORD));
     }
 }
-type EntryKeywordsKey = { lorebook_id:number, entry_id: number, keyword_id: number };
+
+type EntryKeywordsKey = {lorebook_id:number, entry_id: number, keyword_id: number };
 class EntryKeywords extends ABSEntity<EntryKeywordsKey, any>{
     getEntityType(): EntityTypes {
         return EntityTypes.ENTRY_KEYWORD;
@@ -200,5 +258,18 @@ class EntryKeywords extends ABSEntity<EntryKeywordsKey, any>{
 
     getIterationArr(): EntityField<EntryKeywordsKey, any>[] {
         return [];
+    }
+}
+
+export type OutletKey = {id:number};
+export type OutletData = {name: string};
+export class Outlet extends ABSEntity<OutletKey, OutletData> {
+    getEntityType(): EntityTypes {
+        return EntityTypes.OUTLETS
+    }
+
+    public static async outlets(): Promise<string[]>{
+        return await fetch_all<OutletKey,OutletData,Outlet>(EntityTypes.OUTLETS, Outlet)
+            .then(result => result.map(outlet => outlet.get('name')))
     }
 }

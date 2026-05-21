@@ -41,8 +41,16 @@ import org.jetbrains.annotations.NotNull;
                 return wireValue;
             }
 
-            public static String[] wireValues(){
+            @Contract(value = " -> new", pure = true)
+            public static String @NotNull [] wireValues(){
                 return new String[]{USER.wireValue, ASSISTANT.wireValue, SYSTEM.wireValue};
+            }
+            public static @NotNull Role fromWireValue(String wireValue) {
+                for (Role role : Role.values()) {
+                    if (role.wireValue.equals(wireValue))
+                        return role;
+                }
+                throw new IllegalArgumentException("Invalid wire value: " + wireValue);
             }
         }
     }

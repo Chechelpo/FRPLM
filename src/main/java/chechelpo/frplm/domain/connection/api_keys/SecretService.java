@@ -1,6 +1,7 @@
 package chechelpo.frplm.domain.connection.api_keys;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityDataPayload;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
@@ -8,19 +9,17 @@ import chechelpo.frplm.utils.encryption.EncryptorService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
-
 @Service
-public final class SecretService extends ABSEntityService<ApiKeysRecord, SecretStore> {
+public class SecretService extends EntityService<ApiKeysRecord, SecretStore> {
     private final EncryptorService encryptor;
 
-    SecretService(@NotNull EncryptorService encryptor, @NotNull SecretStore secretsStore) {
-        super(secretsStore);
+    SecretService(@NotNull EncryptorService encryptor, @NotNull SecretStore secretsStore, EventBus eventBus) {
+        super(secretsStore, eventBus);
         this.encryptor = encryptor;
     }
 
     @Override
-    protected EntityDataPayload<ApiKeysRecord> beforeCreate(EntityDataPayload<ApiKeysRecord> data) {
+    protected void beforeCreate(EntityDataPayload<ApiKeysRecord> data, long operationID) {
         log.error("Secrets can't be created normally");
         throw new UnsupportedOperationException("Secrets can't be created through normal framework");
     }
@@ -36,7 +35,6 @@ public final class SecretService extends ABSEntityService<ApiKeysRecord, SecretS
         }
 
         return store.newKey(host_id, encryptor.encrypt(normalized));
-
     }
 
     public @NotNull String getKey(EntityKey<ApiKeysRecord> key) {

@@ -4,6 +4,7 @@
 package chechelpo.frplm.jooq.generated.tables;
 
 
+import chechelpo.frplm.jooq.generated.Indexes;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
@@ -17,6 +18,7 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -137,6 +139,11 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.ENTRIESBYKEYWORDS);
     }
 
     @Override

@@ -34,7 +34,7 @@ export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionDat
 }
 
 export type APIKeys = {id:number}
-export class ApiKey extends ABSEntity<any, any>{
+export class ApiKey extends ABSEntity<APIKeys, any>{
     getEntityType(): EntityTypes {
         return EntityTypes.API_KEY;
     }

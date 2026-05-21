@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.lorebook.core;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
+import chechelpo.frplm.frameworks.entities.microservices.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import java.util.List;
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
-final class LorebookStore extends ABSEntityStore<LorebooksRecord> {
+final class LorebookStore extends EntityStore<LorebooksRecord> {
     LorebookStore(@NotNull DSLContext ctx) {
         super(ctx, Lorebooks.LOREBOOKS, EntityTypes.Types.LOREBOOKS);
     }
@@ -21,7 +21,7 @@ final class LorebookStore extends ABSEntityStore<LorebooksRecord> {
     /**
      * @return a list of lorebooks not associated with characters/locations/worlds
      */
-    List<LorebooksRecord> getGlobalLorebooks() {
+    @NotNull List<LorebooksRecord> getGlobalLorebooks() {
         return ctx.selectFrom(LOREBOOKS)
                 .where(LOREBOOKS.ID.notIn(
                         ctx.select(CHARACTERS.LOREBOOK_ID)

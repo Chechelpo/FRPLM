@@ -72,6 +72,11 @@ public class Responses extends TableImpl<ResponsesRecord> {
     public final TableField<ResponsesRecord, Short> RESPONSE_NUM = createField(DSL.name("RESPONSE_NUM"), SQLDataType.SMALLINT.nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
+     */
+    public final TableField<ResponsesRecord, Integer> ADVANCES_TIME_BY = createField(DSL.name("ADVANCES_TIME_BY"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>PUBLIC.RESPONSES.CONTENT</code>.
      */
     public final TableField<ResponsesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR.nullable(false), this, "");

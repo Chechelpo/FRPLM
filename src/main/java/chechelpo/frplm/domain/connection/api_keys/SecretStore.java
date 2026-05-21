@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.connection.api_keys;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityStore;
+import chechelpo.frplm.frameworks.entities.microservices.EntityStore;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import chechelpo.frplm.utils.encryption.EncryptedSecret;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import static chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 
 @Component
-final class SecretStore extends ABSEntityStore<ApiKeysRecord> {
+final class SecretStore extends EntityStore<ApiKeysRecord> {
 
     SecretStore(@NotNull DSLContext dsl) {
         super(dsl, API_KEYS, EntityTypes.Types.API_KEYS);

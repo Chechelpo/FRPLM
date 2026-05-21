@@ -24,6 +24,7 @@ final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, S
                                 .readOnly()
                                 .build()
                         )
+                        .build()
         );
 
         register_field(
@@ -35,6 +36,7 @@ final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, S
                                 .build()
                         )
                         .require()
+                        .build()
         );
 
         register_field(
@@ -44,6 +46,7 @@ final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, S
                         .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
                                 .build()
                         )
+                        .build()
         );
     }
 }

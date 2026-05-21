@@ -1,11 +1,4 @@
-import {
-    ABSEntity,
-    createEntity,
-    deleteEntity,
-    EntityField,
-    fetchApi,
-    fetchOne
-} from "@/frameworks/ABSEntity";
+import {ABSEntity, createEntity, deleteEntity, EntityField, fetchApi, fetchOne} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/Tag";
@@ -17,17 +10,19 @@ import {API_BASE} from "@/config";
 export type CharacterKey = { id: number };
 export type CharacterData = {
     name: string,
+    is_archetype: boolean,
+    can_be_user: boolean,
+    firstMessage: string,
     lorebook_id?: number
 };
 
 export class Character extends ABSEntity<CharacterKey, CharacterData> {
-    private static readonly type:EntityTypes = EntityTypes.CHARACTERS;
     private tags: Tag[] | null = null;
     private lorebook: Lorebook | null = null;
     private starting_locations: Location[] | null = null
 
     getEntityType(): EntityTypes {
-        return Character.type;
+        return EntityTypes.CHARACTERS;
     }
     getIterationArr(): EntityField<CharacterKey,CharacterData>[] {
         return [CommonFields.NAME];
@@ -63,8 +58,7 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
         }
         console.info(`Removed tag ${tag} of character ${this}`)
 
-        if (this.tags != null)
-            this.tags = this.tags.filter(t => !t.equals(tag))
+        if (this.tags != null) this.tags = this.tags.filter(t => !t.equals(tag))
     }
 
     public async addTag(tag: Tag): Promise<void> {
@@ -84,13 +78,13 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
     }
 
     public static async getWithID(id: CharacterKey): Promise<Character> {
-        return await fetchOne<CharacterKey, CharacterData, Character>(id, this.type, this)
+        return await fetchOne<CharacterKey, CharacterData, Character>(id, EntityTypes.CHARACTERS, this)
     }
 
-    public static async createNew(initialData:CharacterData): Promise<Character> {
+    public static async createNew(initialData:Partial<CharacterData>): Promise<Character> {
         if (initialData.name === undefined || initialData.name === null)
             throw new Error("Name is required for character instantiation");
-        return await createEntity(null, initialData, this.type, this)
+        return await createEntity(null, initialData, EntityTypes.CHARACTERS, this)
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,6 +127,16 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             EntityTypes.STARTING_LOCATIONS,
             StartingLocation
         )
+    }
+
+    public static async getStartingAt(worldID:number):Promise<Character[]>{
+        const response = await fetchApi(
+            `${API_BASE}/${EntityTypes.CHARACTERS}/${worldID}`,
+            {
+                method:'GET'
+            }
+        )
+        return (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS))
     }
 }
 

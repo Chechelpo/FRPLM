@@ -11,8 +11,8 @@ import org.jooq.TableRecord;
  */
 public abstract class ABSControllerAwareHelper<
         R extends TableRecord<R>,
-        Service extends ABSEntityService<R,?>,
-        C extends ABSEntityController<R, Service>
+        Service extends EntityService<R,?>,
+        C extends EntityController<R, Service>
         > extends ABSHelper<R, Service> {
     protected final C controller;
 
@@ -20,14 +20,16 @@ public abstract class ABSControllerAwareHelper<
         super(service);
         this.controller = controller;
     }
-
     protected <T> void register_field(
             @Nullable String dto_name,
             @NotNull TableField<R, T> column,
-            @NotNull FieldInfo.FieldInfoBuilder<?> infoBuilder
-    ) {
-        this.register_field(dto_name, column, infoBuilder.build());
+            @NotNull FieldInfo<?> info,
+            T defaultValue
+    ){
+        super.register_field(column, info, defaultValue);
+        if(dto_name != null) controller.registerPublicField(column, dto_name, info.format);
     }
+
     /**
      * Registers a field to be used by the controller.
      * @param dto_name the name of the attr, distinct from its SQL name (or not). This is the name that will be received in frontend.

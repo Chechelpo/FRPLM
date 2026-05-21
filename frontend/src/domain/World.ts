@@ -44,10 +44,7 @@ export class World extends ABSEntity<WorldKey, WorldData> {
     }
 
     public async getLocations(): Promise<Location[]> {
-        if (this.locations == null)
-            this.locations = await getLocationsOfWorld(this.key)
-
-        return this.locations;
+        return  await getLocationsOfWorld(this.key);
     }
 
     public async addLocation(name:string): Promise<Location> {

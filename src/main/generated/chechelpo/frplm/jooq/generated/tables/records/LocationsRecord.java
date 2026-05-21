@@ -61,31 +61,17 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
-     */
-    public void setDescription(byte[] value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
-     */
-    public byte[] getDescription() {
-        return (byte[]) get(3);
-    }
-
-    /**
      * Setter for <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
      */
     public void setLorebookId(Integer value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
      */
     public Integer getLorebookId() {
-        return (Integer) get(4);
+        return (Integer) get(3);
     }
 
     // -------------------------------------------------------------------------
@@ -111,13 +97,12 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     /**
      * Create a detached, initialised LocationsRecord
      */
-    public LocationsRecord(Integer id, Integer worldId, String name, byte[] description, Integer lorebookId) {
+    public LocationsRecord(Integer id, Integer worldId, String name, Integer lorebookId) {
         super(Locations.LOCATIONS);
 
         setId(id);
         setWorldId(worldId);
         setName(name);
-        setDescription(description);
         setLorebookId(lorebookId);
         resetChangedOnNotNull();
     }

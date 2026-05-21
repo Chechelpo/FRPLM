@@ -7,7 +7,10 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags.CharacterTagsPath;
+import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
+import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
@@ -77,6 +80,21 @@ public class Characters extends TableImpl<CharactersRecord> {
      * The column <code>PUBLIC.CHARACTERS.NAME</code>.
      */
     public final TableField<CharactersRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
+     */
+    public final TableField<CharactersRecord, Boolean> IS_ARCHETYPE = createField(DSL.name("IS_ARCHETYPE"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
+     */
+    public final TableField<CharactersRecord, Boolean> CAN_BE_USER = createField(DSL.name("CAN_BE_USER"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
+     */
+    public final TableField<CharactersRecord, String> WELCOME_MESSAGE = createField(DSL.name("WELCOME_MESSAGE"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("' '"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
@@ -190,7 +208,7 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public SessionsPath sessions() {
         if (_sessions == null)
-            _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_8265.getInverseKey());
+            _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_8265C.getInverseKey());
 
         return _sessions;
     }
@@ -208,6 +226,19 @@ public class Characters extends TableImpl<CharactersRecord> {
         return _characterTags;
     }
 
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5.getInverseKey());
+
+        return _currentLocations;
+    }
+
     private transient StartingLocationsPath _startingLocations;
 
     /**
@@ -221,12 +252,33 @@ public class Characters extends TableImpl<CharactersRecord> {
         return _startingLocations;
     }
 
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68.getInverseKey());
+
+        return _movements;
+    }
+
     /**
      * Get the implicit many-to-many join path to the <code>PUBLIC.TAGS</code>
      * table
      */
     public TagsPath tags() {
         return characterTags().tags();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.MESSAGES</code> table
+     */
+    public MessagesPath messages() {
+        return movements().messages();
     }
 
     /**

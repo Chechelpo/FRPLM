@@ -24,6 +24,7 @@ final class CharacterTagsControllerAwareHelper
                                 .build()
                         )
                         .require()
+                        .build()
         );
         register_field(
                 "tag_id",
@@ -35,6 +36,7 @@ final class CharacterTagsControllerAwareHelper
                                 .build()
                         )
                         .require()
+                        .build()
         );
     }
 }

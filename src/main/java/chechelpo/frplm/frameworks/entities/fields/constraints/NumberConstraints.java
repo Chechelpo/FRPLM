@@ -26,9 +26,9 @@ import java.util.Set;
 ///  - is_key = `false`
 ///
 public final class NumberConstraints extends Constraints<FieldKind.NumberKind, Number> {
-    private final Long min;
-    private final Long max;
-    private final FieldType fieldType;
+    private final @NotNull Long min;
+    private final @NotNull Long max;
+    private final @NotNull FieldType fieldType;
     private final LongSet allowed_values;
     private final boolean read_only;
     private final boolean is_key;
@@ -48,26 +48,26 @@ public final class NumberConstraints extends Constraints<FieldKind.NumberKind, N
     }
 
     @Override
-    public @Nullable Number coerce(Object value) {
-        return switch (value){
-          case null -> null;
-          case Short s -> s;
-          case Integer i -> i;
-          case Long ii -> {
-              if (ii < Integer.MIN_VALUE || ii > Integer.MAX_VALUE) {
-                  throw new InvalidValue("Cannot coerce to integer value " + ii);
-              }
-              yield ii;
-          }
-          case String s -> Integer.parseInt(s);
-          default -> throw new InvalidValue("Cannot coerce to integer value " + value);
-        };
+    public FieldType type() {
+        return fieldType;
     }
 
     @Override
-    protected void throwIfImpossibleValue(Number value){
+    public boolean isReadOnly() {
+        return read_only;
+    }
+
+    public boolean isKey() {
+        return is_key;
+    }
+
+    @Override
+    protected void throwIfImpossibleValue(@NotNull Number value){
+        if (value == null) return;
         if (!this.allowed_values.isEmpty() && !this.allowed_values.contains(value.longValue()))
             throw new InvalidValue("Invalid value for field: " + value + " \n allowed values are " + allowed_values);
+        if (value.longValue() < min || value.longValue() > max)
+            throw new InvalidValue(value + " must be between " + min + " and " + max);
     }
 
     public static @NotNull NumberConstraintsBuilder builder(FieldType fieldType) {
@@ -75,8 +75,8 @@ public final class NumberConstraints extends Constraints<FieldKind.NumberKind, N
     }
 
     public static class NumberConstraintsBuilder extends ABSConstraintsBuilder<NumberConstraints, NumberConstraintsBuilder> {
-        private Long min;
-        private Long max;
+        private Long min = Long.MIN_VALUE;
+        private Long max = Long.MAX_VALUE;
         private final FieldType fieldType;
         private final LongSet possible_values = new LongOpenHashSet();
         private boolean read_only = false;
@@ -124,27 +124,5 @@ public final class NumberConstraints extends Constraints<FieldKind.NumberKind, N
             }
             return new NumberConstraints(this);
         }
-    }
-
-    public Long getMin() {
-        return min;
-    }
-
-    public Long getMax() {
-        return max;
-    }
-
-    @Override
-    public FieldType type() {
-        return fieldType;
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return read_only;
-    }
-
-    public boolean isKey() {
-        return is_key;
     }
 }

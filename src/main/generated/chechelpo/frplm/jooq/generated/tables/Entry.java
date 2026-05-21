@@ -6,11 +6,11 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
-import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup.EntryConditionGroupPath;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import chechelpo.frplm.jooq.generated.tables.EntryOutlet.EntryOutletPath;
 import chechelpo.frplm.jooq.generated.tables.Keyword.KeywordPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
+import chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 
 import java.util.Arrays;
@@ -76,6 +76,11 @@ public class Entry extends TableImpl<EntryRecord> {
     public final TableField<EntryRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255), this, "");
 
     /**
+     * The column <code>PUBLIC.ENTRY.ENABLED</code>.
+     */
+    public final TableField<EntryRecord, Boolean> ENABLED = createField(DSL.name("ENABLED"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("TRUE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
      * The column <code>PUBLIC.ENTRY.CONTENT</code>.
      */
     public final TableField<EntryRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR, this, "");
@@ -86,9 +91,14 @@ public class Entry extends TableImpl<EntryRecord> {
     public final TableField<EntryRecord, Short> PROBABILITY = createField(DSL.name("PROBABILITY"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
 
     /**
+     * The column <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
+     */
+    public final TableField<EntryRecord, Boolean> IS_CUSTOM_OUTLET = createField(DSL.name("IS_CUSTOM_OUTLET"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
      * The column <code>PUBLIC.ENTRY.OUTLET</code>.
      */
-    public final TableField<EntryRecord, String> OUTLET = createField(DSL.name("OUTLET"), SQLDataType.VARCHAR(255), this, "");
+    public final TableField<EntryRecord, Integer> OUTLET = createField(DSL.name("OUTLET"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.DELAY</code>.
@@ -209,12 +219,24 @@ public class Entry extends TableImpl<EntryRecord> {
 
     @Override
     public UniqueKey<EntryRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_3;
+        return Keys.CONSTRAINT_3F;
     }
 
     @Override
     public List<ForeignKey<EntryRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_3F);
+        return Arrays.asList(Keys.CONSTRAINT_3, Keys.CONSTRAINT_3F1);
+    }
+
+    private transient OutletPath _outlet;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.OUTLET</code> table.
+     */
+    public OutletPath outlet() {
+        if (_outlet == null)
+            _outlet = new OutletPath(this, Keys.CONSTRAINT_3, null);
+
+        return _outlet;
     }
 
     private transient LorebooksPath _lorebooks;
@@ -224,7 +246,7 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public LorebooksPath lorebooks() {
         if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_3F, null);
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_3F1, null);
 
         return _lorebooks;
     }
@@ -253,19 +275,6 @@ public class Entry extends TableImpl<EntryRecord> {
             _entryOutlet = new EntryOutletPath(this, null, Keys.CONSTRAINT_60.getInverseKey());
 
         return _entryOutlet;
-    }
-
-    private transient EntryConditionGroupPath _entryConditionGroup;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.ENTRY_CONDITION_GROUP</code> table
-     */
-    public EntryConditionGroupPath entryConditionGroup() {
-        if (_entryConditionGroup == null)
-            _entryConditionGroup = new EntryConditionGroupPath(this, null, Keys.CONSTRAINT_D1F.getInverseKey());
-
-        return _entryConditionGroup;
     }
 
     /**

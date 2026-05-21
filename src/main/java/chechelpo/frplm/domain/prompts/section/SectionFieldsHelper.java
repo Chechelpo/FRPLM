@@ -25,6 +25,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                                 .key    ()
                         )
                         .require()
+                        .build()
         );
         register_field(
                 "section_id",
@@ -34,6 +35,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                                 .key()
                                 .readOnly()
                         )
+                        .build()
         );
 
         register_field(
@@ -44,18 +46,21 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                                 .setMaxLength(255)
                         )
                         .require()
+                        .build()
         );
 
         register_field(
                 "active",
                 PROMPT_SECTION.ACTIVE,
                 FieldInfo.booleanField()
+                        .build()
         );
         register_field(
                 "position",
                 PROMPT_SECTION.POSITION,
                 FieldInfo.numberField(FieldType.SHORT)
                         .setConstraints(NumberConstraints.builder(FieldType.SHORT))
+                        .build()
         );
 
         register_field(
@@ -65,6 +70,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                         .setConstraints(StringConstraints.builder()
                                 .setMaxLength(9)
                                 .setPossibleValues(ChatMessage.Role.wireValues()))
+                        .build()
         );
 
         register_field(
@@ -72,6 +78,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                 PROMPT_SECTION.CONTENT,
                 FieldInfo.stringField()
                         .setConstraints(StringConstraints.builder().allows_outlets())
+                        .build()
         );
     }
 }

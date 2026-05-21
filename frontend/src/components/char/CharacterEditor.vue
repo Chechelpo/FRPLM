@@ -9,6 +9,8 @@ import {Tag} from "@/domain/Tag";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
+import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
+import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 
 const model = defineModel<Character>({
   required: true
@@ -53,6 +55,14 @@ const name = computed<string>({
     model.value.update('name', value)
   }
 })
+const can_be_user = computed<boolean>({
+  get(){
+    return model.value.get('can_be_user');
+  },
+  set(value: boolean) {
+    model.value.update('can_be_user', value);
+  }
+});
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // TAGS:
@@ -95,6 +105,22 @@ async function handleRemoveTag(tag: Tag) {
               @edit="txt => name = txt"
           ></ShortTextBox>
         </FieldEditorWrapper>
+        <FieldEditorWrapper field-name="CanBeUser" info="Whether this character can be played by user">
+          <BooleanToggle
+              :model-value="can_be_user"
+              @edit="value => can_be_user = value"
+          />
+        </FieldEditorWrapper>
+
+        <FieldEditorWrapper
+            v-if = "can_be_user"
+            field-name="FirstMessage"
+        >
+          <LongTextBox
+              :model-value="model.get('firstMessage')"
+              @edit="payload => model.update('firstMessage', payload)"
+          />
+        </FieldEditorWrapper>
       </div>
       <!-- Tag editor -->
       <div v-if="model">
@@ -129,6 +155,7 @@ async function handleRemoveTag(tag: Tag) {
     >
       <StartingLocation
         v-model:model-value="model"
+        :key="model.get('id')"
       />
     </Expandable>
   </div>

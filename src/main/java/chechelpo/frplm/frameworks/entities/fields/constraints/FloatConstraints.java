@@ -33,16 +33,31 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
         this.fieldType = builder.fieldType;
     }
 
-    public static FloatConstraintsBuilder builder(FieldType fieldType) {
-        return new FloatConstraintsBuilder(fieldType);
+
+    public void checkLength(double value){
+        if (value<min || value>max) throw new InvalidValue("Value must be between " + min + " and " + max);
     }
 
+
+    @Override
+    public FieldType type() {
+        return fieldType;
+    }
+
+    @Override
+    protected void throwIfImpossibleValue(@NotNull Number value) throws InvalidValue {
+        checkLength(value.doubleValue());
+    }
+
+    @Contract("_ -> new")
+    public static @NotNull FloatConstraintsBuilder builder(FieldType fieldType) {
+        return new FloatConstraintsBuilder(fieldType);
+    }
     public static class FloatConstraintsBuilder extends ABSConstraintsBuilder<FloatConstraints, FloatConstraintsBuilder>
     {
         private final FieldType fieldType;
         private Double min;
         private Double max;
-        private boolean read_only = false;
         private boolean is_key = false;
 
         public FloatConstraintsBuilder(FieldType fieldType) {
@@ -68,11 +83,6 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
             return this;
         }
 
-        public FloatConstraintsBuilder readOnly() {
-            this.read_only = true;
-            return this;
-        }
-
         public FloatConstraintsBuilder key() {
             this.is_key = true;
             return this;
@@ -85,29 +95,5 @@ public final class FloatConstraints extends Constraints<FieldKind.FloatKind, Num
 
             return new FloatConstraints(this);
         }
-    }
-    public void checkLength(double value){
-        if (value<min || value>max)
-            throw new InvalidValue("Value must be between " + min + " and " + max);
-    }
-    @Override
-    public @Nullable Number coerce(Object value) {
-        Double coerced = switch (value) {
-            case null -> null;
-            case Float f -> f.doubleValue();
-            case Double d -> d;
-            case Number n -> n.doubleValue();
-            case String s -> fieldType == FieldType.FLOAT
-                    ? Float.parseFloat(s)
-                    : Double.parseDouble(s);
-            default -> throw new IllegalArgumentException("Cannot coerce " + value + " to " + fieldType);
-        };
-        if (coerced != null) checkLength(coerced);
-        return coerced;
-    }
-
-    @Override
-    public FieldType type() {
-        return fieldType;
     }
 }

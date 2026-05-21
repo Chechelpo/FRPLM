@@ -8,9 +8,8 @@ import chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import chechelpo.frplm.jooq.generated.tables.Characters;
+import chechelpo.frplm.jooq.generated.tables.CurrentLocations;
 import chechelpo.frplm.jooq.generated.tables.Entry;
-import chechelpo.frplm.jooq.generated.tables.EntryCondition;
-import chechelpo.frplm.jooq.generated.tables.EntryConditionGroup;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
@@ -22,6 +21,7 @@ import chechelpo.frplm.jooq.generated.tables.LocationTags;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.Messages;
+import chechelpo.frplm.jooq.generated.tables.Movements;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
 import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
@@ -73,19 +73,14 @@ public class Public extends SchemaImpl {
     public final Characters CHARACTERS = Characters.CHARACTERS;
 
     /**
+     * The table <code>PUBLIC.CURRENT_LOCATIONS</code>.
+     */
+    public final CurrentLocations CURRENT_LOCATIONS = CurrentLocations.CURRENT_LOCATIONS;
+
+    /**
      * The table <code>PUBLIC.ENTRY</code>.
      */
     public final Entry ENTRY = Entry.ENTRY;
-
-    /**
-     * The table <code>PUBLIC.ENTRY_CONDITION</code>.
-     */
-    public final EntryCondition ENTRY_CONDITION = EntryCondition.ENTRY_CONDITION;
-
-    /**
-     * The table <code>PUBLIC.ENTRY_CONDITION_GROUP</code>.
-     */
-    public final EntryConditionGroup ENTRY_CONDITION_GROUP = EntryConditionGroup.ENTRY_CONDITION_GROUP;
 
     /**
      * The table <code>PUBLIC.ENTRY_KEYWORDS</code>.
@@ -141,6 +136,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.MESSAGES</code>.
      */
     public final Messages MESSAGES = Messages.MESSAGES;
+
+    /**
+     * The table <code>PUBLIC.MOVEMENTS</code>.
+     */
+    public final Movements MOVEMENTS = Movements.MOVEMENTS;
 
     /**
      * The table <code>PUBLIC.OUTLET</code>.
@@ -202,9 +202,8 @@ public class Public extends SchemaImpl {
             ApiKeys.API_KEYS,
             CharacterTags.CHARACTER_TAGS,
             Characters.CHARACTERS,
+            CurrentLocations.CURRENT_LOCATIONS,
             Entry.ENTRY,
-            EntryCondition.ENTRY_CONDITION,
-            EntryConditionGroup.ENTRY_CONDITION_GROUP,
             EntryKeywords.ENTRY_KEYWORDS,
             EntryOutlet.ENTRY_OUTLET,
             Extension.EXTENSION,
@@ -216,6 +215,7 @@ public class Public extends SchemaImpl {
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
             Messages.MESSAGES,
+            Movements.MOVEMENTS,
             Outlet.OUTLET,
             PromptSection.PROMPT_SECTION,
             PromptTemplate.PROMPT_TEMPLATE,

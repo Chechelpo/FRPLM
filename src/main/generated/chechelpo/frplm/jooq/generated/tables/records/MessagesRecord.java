@@ -33,44 +33,44 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.MESSAGES.TIME</code>.
+     */
+    public void setTime(Integer value) {
+        set(1, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.TIME</code>.
+     */
+    public Integer getTime() {
+        return (Integer) get(1);
+    }
+
+    /**
      * Setter for <code>PUBLIC.MESSAGES.TICK_NUM</code>.
      */
     public void setTickNum(Integer value) {
-        set(1, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.TICK_NUM</code>.
      */
     public Integer getTickNum() {
-        return (Integer) get(1);
+        return (Integer) get(2);
     }
 
     /**
      * Setter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
      */
     public void setLocationId(Integer value) {
-        set(2, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
      */
     public Integer getLocationId() {
-        return (Integer) get(2);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.MESSAGES.ADVANCES_TIME_BY</code>.
-     */
-    public void setAdvancesTimeBy(Integer value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.MESSAGES.ADVANCES_TIME_BY</code>.
-     */
-    public Integer getAdvancesTimeBy() {
         return (Integer) get(3);
     }
 
@@ -125,13 +125,13 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     /**
      * Create a detached, initialised MessagesRecord
      */
-    public MessagesRecord(Integer sessionId, Integer tickNum, Integer locationId, Integer advancesTimeBy, Boolean userGenerated, String content) {
+    public MessagesRecord(Integer sessionId, Integer time, Integer tickNum, Integer locationId, Boolean userGenerated, String content) {
         super(Messages.MESSAGES);
 
         setSessionId(sessionId);
+        setTime(time);
         setTickNum(tickNum);
         setLocationId(locationId);
-        setAdvancesTimeBy(advancesTimeBy);
         setUserGenerated(userGenerated);
         setContent(content);
         resetChangedOnNotNull();

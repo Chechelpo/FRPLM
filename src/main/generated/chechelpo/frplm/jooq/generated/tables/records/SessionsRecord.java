@@ -47,17 +47,17 @@ public class SessionsRecord extends UpdatableRecordImpl<SessionsRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.SESSIONS.START_TIME</code>.
+     * Setter for <code>PUBLIC.SESSIONS.MAIN_PROMPT</code>.
      */
-    public void setStartTime(String value) {
+    public void setMainPrompt(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.SESSIONS.START_TIME</code>.
+     * Getter for <code>PUBLIC.SESSIONS.MAIN_PROMPT</code>.
      */
-    public String getStartTime() {
-        return (String) get(2);
+    public Integer getMainPrompt() {
+        return (Integer) get(2);
     }
 
     /**
@@ -111,12 +111,12 @@ public class SessionsRecord extends UpdatableRecordImpl<SessionsRecord> {
     /**
      * Create a detached, initialised SessionsRecord
      */
-    public SessionsRecord(Integer id, Integer worldId, String startTime, Integer userPersonaId, Integer currentTick) {
+    public SessionsRecord(Integer id, Integer worldId, Integer mainPrompt, Integer userPersonaId, Integer currentTick) {
         super(Sessions.SESSIONS);
 
         setId(id);
         setWorldId(worldId);
-        setStartTime(startTime);
+        setMainPrompt(mainPrompt);
         setUserPersonaId(userPersonaId);
         setCurrentTick(currentTick);
         resetChangedOnNotNull();

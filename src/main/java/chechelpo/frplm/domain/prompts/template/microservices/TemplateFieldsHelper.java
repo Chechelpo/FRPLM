@@ -1,5 +1,6 @@
 package chechelpo.frplm.domain.prompts.template.microservices;
 
+import chechelpo.frplm.domain.prompts.section.StandardSections;
 import chechelpo.frplm.domain.prompts.template.ReasoningEffort;
 import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
 import chechelpo.frplm.frameworks.entities.fields.constraints.FloatConstraints;
@@ -30,6 +31,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .readOnly()
                                 .key()
                         )
+                        .build()
         );
         register_field(
                 "connection_id",
@@ -39,6 +41,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .builder(FieldType.INTEGER)
                                 .nullable()
                         )
+                        .build()
         );
 
         register_field(
@@ -46,6 +49,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                 PROMPT_TEMPLATE.NAME,
                 FieldInfo.stringField()
                         .setConstraints(StringConstraints.builder().setMaxLength(255))
+                        .build()
         );
 
         register_field(
@@ -55,11 +59,13 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                         .setConstraints(NumberConstraints.builder(FieldType.INTEGER)
                                 .setMin(0L)
                         )
+                        .build()
         );
         register_field(
                 "streaming",
                 PROMPT_TEMPLATE.STREAMING,
                 FieldInfo.booleanField()
+                        .build()
         );
 
         // Gen params
@@ -71,6 +77,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
         register_field(
                 "top_p",
@@ -80,6 +87,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
         register_field(
                 "frequency_penalty",
@@ -89,6 +97,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
         register_field(
                 "presence_penalty",
@@ -98,6 +107,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
         register_field(
                 "repetition_penalty",
@@ -107,6 +117,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
         register_field(
                 "top_k",
@@ -116,12 +127,14 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                                 .setMax(2D)
                                 .setMin(0D)
                         )
+                        .build()
         );
 
         register_field(
                 "exclude_reasoning",
                 PROMPT_TEMPLATE.EXCLUDE_REASONING,
                 FieldInfo.booleanField()
+                        .build()
         );
         register_field(
                 "reasoning_effort",
@@ -130,6 +143,19 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                         .setConstraints(NumberConstraints.builder(FieldType.SHORT)
                                 .setPossibleValues(ReasoningEffort.possible_values())
                         )
+                        .build(),
+                (short) ReasoningEffort.Maximum.id
+        );
+
+        register_field(
+                null,
+                PROMPT_TEMPLATE.NEXT_SECTION_ID,
+                FieldInfo.numberField(FieldType.SHORT)
+                        .setConstraints(NumberConstraints.builder(FieldType.SHORT)
+                                .readOnly()
+                        )
+                        .build(),
+                StandardSections.maxReservedSectionID()
         );
     }
 }

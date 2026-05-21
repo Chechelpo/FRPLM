@@ -61,185 +61,213 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.ENTRY.ENABLED</code>.
+     */
+    public void setEnabled(Boolean value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.ENTRY.ENABLED</code>.
+     */
+    public Boolean getEnabled() {
+        return (Boolean) get(3);
+    }
+
+    /**
      * Setter for <code>PUBLIC.ENTRY.CONTENT</code>.
      */
     public void setContent(String value) {
-        set(3, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.CONTENT</code>.
      */
     public String getContent() {
-        return (String) get(3);
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.PROBABILITY</code>.
      */
     public void setProbability(Short value) {
-        set(4, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.PROBABILITY</code>.
      */
     public Short getProbability() {
-        return (Short) get(4);
+        return (Short) get(5);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
+     */
+    public void setIsCustomOutlet(Boolean value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
+     */
+    public Boolean getIsCustomOutlet() {
+        return (Boolean) get(6);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.OUTLET</code>.
      */
-    public void setOutlet(String value) {
-        set(5, value);
+    public void setOutlet(Integer value) {
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.OUTLET</code>.
      */
-    public String getOutlet() {
-        return (String) get(5);
+    public Integer getOutlet() {
+        return (Integer) get(7);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.DELAY</code>.
      */
     public void setDelay(Integer value) {
-        set(6, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.DELAY</code>.
      */
     public Integer getDelay() {
-        return (Integer) get(6);
+        return (Integer) get(8);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.COOLDOWN</code>.
      */
     public void setCooldown(Integer value) {
-        set(7, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.COOLDOWN</code>.
      */
     public Integer getCooldown() {
-        return (Integer) get(7);
+        return (Integer) get(9);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.STICK_THROUGH</code>.
      */
     public void setStickThrough(Integer value) {
-        set(8, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.STICK_THROUGH</code>.
      */
     public Integer getStickThrough() {
-        return (Integer) get(8);
+        return (Integer) get(10);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
      */
     public void setInjectionOrder(Short value) {
-        set(9, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
      */
     public Short getInjectionOrder() {
-        return (Short) get(9);
+        return (Short) get(11);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.STRATEGY</code>.
      */
     public void setStrategy(Short value) {
-        set(10, value);
+        set(12, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.STRATEGY</code>.
      */
     public Short getStrategy() {
-        return (Short) get(10);
+        return (Short) get(12);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.EMBED_TEXT</code>.
      */
     public void setEmbedText(String value) {
-        set(11, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.EMBED_TEXT</code>.
      */
     public String getEmbedText() {
-        return (String) get(11);
+        return (String) get(13);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.PREVENT_FURTHER_RECURSION</code>.
      */
     public void setPreventFurtherRecursion(Boolean value) {
-        set(12, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.PREVENT_FURTHER_RECURSION</code>.
      */
     public Boolean getPreventFurtherRecursion() {
-        return (Boolean) get(12);
+        return (Boolean) get(14);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.NON_RECURSABLE</code>.
      */
     public void setNonRecursable(Boolean value) {
-        set(13, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.NON_RECURSABLE</code>.
      */
     public Boolean getNonRecursable() {
-        return (Boolean) get(13);
+        return (Boolean) get(15);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.DELAY_UNTIL_RECURSION</code>.
      */
     public void setDelayUntilRecursion(Boolean value) {
-        set(14, value);
+        set(16, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.DELAY_UNTIL_RECURSION</code>.
      */
     public Boolean getDelayUntilRecursion() {
-        return (Boolean) get(14);
+        return (Boolean) get(16);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.SCAN_DEPTH</code>.
      */
     public void setScanDepth(Short value) {
-        set(15, value);
+        set(17, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.SCAN_DEPTH</code>.
      */
     public Short getScanDepth() {
-        return (Short) get(15);
+        return (Short) get(17);
     }
 
     // -------------------------------------------------------------------------
@@ -265,14 +293,16 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     /**
      * Create a detached, initialised EntryRecord
      */
-    public EntryRecord(Integer lorebookId, Integer entryId, String name, String content, Short probability, String outlet, Integer delay, Integer cooldown, Integer stickThrough, Short injectionOrder, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
+    public EntryRecord(Integer lorebookId, Integer entryId, String name, Boolean enabled, String content, Short probability, Boolean isCustomOutlet, Integer outlet, Integer delay, Integer cooldown, Integer stickThrough, Short injectionOrder, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
         super(Entry.ENTRY);
 
         setLorebookId(lorebookId);
         setEntryId(entryId);
         setName(name);
+        setEnabled(enabled);
         setContent(content);
         setProbability(probability);
+        setIsCustomOutlet(isCustomOutlet);
         setOutlet(outlet);
         setDelay(delay);
         setCooldown(cooldown);

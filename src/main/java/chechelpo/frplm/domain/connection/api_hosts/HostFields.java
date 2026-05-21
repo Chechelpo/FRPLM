@@ -22,6 +22,7 @@ public final class HostFields extends ABSHelper<ApiHostsRecord, HostService> {
                                 .readOnly()
                                 .key()
                         )
+                        .build()
         );
         register_field(
                 API_HOSTS.HOST_URL,
@@ -29,6 +30,7 @@ public final class HostFields extends ABSHelper<ApiHostsRecord, HostService> {
                         .setConstraints(StringConstraints.builder()
                                 .readOnly()
                         )
+                        .build()
         );
     }
 }

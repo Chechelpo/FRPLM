@@ -5,6 +5,12 @@
     <header class="app-header">
       <nav class="nav-links" aria-label="Main navigation">
         <div>
+          <RouterLink to="/" class="nav-icon" aria-label="Characters">
+            Sess
+          </RouterLink>
+        </div>
+
+        <div>
           <RouterLink :to="route_to(EntityTypes.CHARACTERS)" class="nav-icon" aria-label="Characters">
             <img src="/header/Characters.png" alt="Characters" />
           </RouterLink>
@@ -36,7 +42,7 @@
       </nav>
     </header>
 
-    <div class="main-background"></div>
+    <div class="main-background"/>
 
     <main class="content">
       <RouterView class = "router-view" />

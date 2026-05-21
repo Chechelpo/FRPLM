@@ -1,8 +1,8 @@
 package chechelpo.frplm.domain.character.tags;
 
-import chechelpo.frplm.domain.EntityTypes;
+import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
 import org.jetbrains.annotations.NotNull;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public final class CharacterTagsService extends ABSEntityService<CharacterTagsRecord, CharacterTagsStore> {
-    CharacterTagsService(CharacterTagsStore store) {
-        super(store, EntityTypes.Types.CHARACTER_TAGS);
+public class CharacterTagsService extends EntityService<CharacterTagsRecord, CharacterTagsStore> {
+    CharacterTagsService(CharacterTagsStore store, EventBus eventBus) {
+        super(store, eventBus);
     }
 
     public @NotNull List<TagsRecord> getTagsOfCharacter(EntityKey<CharacterTagsRecord> key) {
-        throwIfNotPartialKey(key);
+        throwIfInvalidKey(key, false);
         return store.getCharacterTags(key);
     }
 }

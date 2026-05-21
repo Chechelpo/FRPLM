@@ -1,11 +1,11 @@
 package chechelpo.frplm.frameworks.entities.assets;
 
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import org.jooq.TableRecord;
 
 import java.util.EnumMap;
 
-public abstract class AssetsController<R extends TableRecord<R>, S extends ABSEntityService<R, ?>> {
+public abstract class AssetsController<R extends TableRecord<R>, S extends EntityService<R, ?>> {
     private final EnumMap<AssetType, AssetManager> assetManagers = new EnumMap<>(AssetType.class);
     protected final EntityAssetRegistry<R, S> registry;
 

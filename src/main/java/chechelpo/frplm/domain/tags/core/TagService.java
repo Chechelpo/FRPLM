@@ -1,14 +1,18 @@
 package chechelpo.frplm.domain.tags.core;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.events.EventListener;
-import chechelpo.frplm.events.EventManager;
-import chechelpo.frplm.events.Event;
+import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.events.crud.CRUDCommittedEvent;
+import chechelpo.frplm.events.crud.CRUDEvent;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Objects;
 
@@ -16,27 +20,26 @@ import static chechelpo.frplm.jooq.generated.Tables.CHARACTER_TAGS;
 import static chechelpo.frplm.jooq.generated.tables.Tags.TAGS;
 
 @Component
-public final class TagService extends ABSEntityService<TagsRecord, TagStore> implements EventListener {
-    TagService(TagStore store) {
-        super(store, EntityTypes.Types.TAGS);
-        EventManager.subscribe(this);
+public class TagService extends EntityService<TagsRecord, TagStore> {
+    TagService(TagStore store, EventBus eventBus) {
+        super(store, eventBus);
     }
 
-    @Override
-    public void onEvent(Event event) {
-        if (Objects.requireNonNull(event) instanceof Event.DeletedEntity del) {
-            if (del.type().equals(EntityTypes.Types.CHARACTER_TAGS)) {
-                EntityKey.Builder<TagsRecord> builder = new EntityKey.Builder<>();
-                EntityKey<CharacterTagsRecord> deletedKey = (EntityKey<CharacterTagsRecord>) del.key();
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @TransactionalEventListener
+    public void onDeleteCharacterTag(CRUDCommittedEvent.@NotNull DeletedEntity<?> event) {
+        if (event.type() != EntityTypes.Types.CHARACTER_TAGS) return;
 
-                EntityKey<TagsRecord> key = builder.set(
-                        TAGS.ID,
-                        deletedKey.getValue(CHARACTER_TAGS.TAG_ID)
-                ).build();
+        CRUDCommittedEvent.DeletedEntity<CharacterTagsRecord> del = (CRUDCommittedEvent.DeletedEntity<CharacterTagsRecord>) event;
+        EntityKey.Builder<TagsRecord> builder = new EntityKey.Builder<>();
+        EntityKey<CharacterTagsRecord> deletedKey = (EntityKey<CharacterTagsRecord>) del.key();
 
-                if (this.store.countUsages(key) == 0)
-                    this.delete(key);
-            }
-        }
+        EntityKey<TagsRecord> key = builder.set(
+                TAGS.ID,
+                deletedKey.getValue(CHARACTER_TAGS.TAG_ID)
+        ).build();
+
+        if (this.store.countUsages(key) == 0)
+            this.delete(key);
     }
 }

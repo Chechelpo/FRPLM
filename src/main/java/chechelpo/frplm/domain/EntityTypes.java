@@ -11,10 +11,6 @@ import org.jetbrains.annotations.NotNull;
 public final class EntityTypes {
     public static final String BASE = "/api";
 
-    @Contract(pure = true)
-    private static @NotNull String concat(String one, String two){
-        return one + "/" + two;
-    }
     // Chars
     private static final String CHARACTERS_str         = "characters";
     private static final String STARTING_LOCATIONS_str = "startingLocations";
@@ -29,6 +25,7 @@ public final class EntityTypes {
     private static final String LOREBOOKS_str          = "lorebooks";
     private static final String ENTRIES_str            = "entries";
     private static final String ENTRIES_KEYWORDS_str   = "entriesKeywords";
+    private static final String OUTLET_str             = "outlets";
 
     //Prompts
     private static final String TEMPLATES_str          = "promptTemplates";
@@ -42,6 +39,13 @@ public final class EntityTypes {
     private static final String WORLDS_str             = "worlds";
     private static final String LOCATIONS_str          = "locations";
     private static final String EDGES_str              = "edges";
+
+    // Sessions
+    private static final String SESSIONS_str           = "sessions";
+    private static final String MESSAGES_str           = "messages";
+    private static final String LLM_GEN_str            = "llm";
+    private static final String RESPONSES_str          = "responses";
+    private static final String MOVEMENTS_str          = "movements";
 
     // I know the following variables are stupid, and you'll need to refactor each one if something changes, but bootstrap forces me into it
     // Sorry, future me.
@@ -60,6 +64,7 @@ public final class EntityTypes {
     public static final String LOREBOOKS_URL          = BASE + "/" + LOREBOOKS_str;
     public static final String ENTRIES_URL            = BASE + "/" + ENTRIES_str;
     public static final String ENTRIES_KEYWORDS_URL   = BASE + "/" + ENTRIES_KEYWORDS_str;
+    public static final String OUTLET_URL             = BASE + "/" + OUTLET_str;
 
     // Prompts Controllers
     public static final String PROMPT_TEMPLATES_URL   = BASE + "/" + TEMPLATES_str;
@@ -74,7 +79,11 @@ public final class EntityTypes {
     public static final String LOCATIONS_URL          = BASE + "/" + LOCATIONS_str;
     public static final String EDGES_URL              = BASE + "/" + EDGES_str;
 
-
+    // Sessions
+    public static final String SESSIONS_URL           = BASE + "/" + SESSIONS_str;
+    public static final String MESSAGES_URL           = BASE + "/" + MESSAGES_str;
+    public static final String LLM_GEN_URL            = BASE + "/" + LLM_GEN_str;
+    public static final String MOVEMENTS_URL          = BASE + "/" + MOVEMENTS_str;
 
     public enum Types {
         TAGS(TAGS_str),
@@ -88,17 +97,23 @@ public final class EntityTypes {
         API_KEYS(API_KEYS_str),
         LLM_CONNECTION(LLM_CONNECTION_str),
 
-        PROMPT_TEMPLATES(TEMPLATES_str),
-        SECTIONS(SECTIONS_str),
+        PROMPT_TEMPLATES(TEMPLATES_str, Level.TRACE),
+        SECTIONS(SECTIONS_str, Level.TRACE),
 
         LOREBOOKS(LOREBOOKS_str),
         ENTRIES(ENTRIES_str),
         ENTRY_KEYWORDS(ENTRIES_KEYWORDS_str),
+        OUTLET(OUTLET_str),
 
         WORLDS(WORLDS_str),
         LOCATIONS(LOCATIONS_str),
-        EDGES(EDGES_str)
-        ;
+        EDGES(EDGES_str),
+
+        SESSIONS(SESSIONS_str),
+        MESSAGES(MESSAGES_str),
+        LLM_GEN(LLM_GEN_str),
+        RESPONSES(RESPONSES_str),
+        MOVEMENTS(MOVEMENTS_str);
 
         private final String type;
         private final Level loggerLevel;

@@ -6,16 +6,24 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
+import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Identity;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -56,9 +64,9 @@ public class Outlet extends TableImpl<OutletRecord> {
     public final TableField<OutletRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
 
     /**
-     * The column <code>PUBLIC.OUTLET.KEYWORD</code>.
+     * The column <code>PUBLIC.OUTLET.OUTLET</code>.
      */
-    public final TableField<OutletRecord, String> KEYWORD = createField(DSL.name("KEYWORD"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+    public final TableField<OutletRecord, String> OUTLET_ = createField(DSL.name("OUTLET"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     private Outlet(Name alias, Table<OutletRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -89,6 +97,39 @@ public class Outlet extends TableImpl<OutletRecord> {
         this(DSL.name("OUTLET"), null);
     }
 
+    public <O extends Record> Outlet(Table<O> path, ForeignKey<O, OutletRecord> childPath, InverseForeignKey<O, OutletRecord> parentPath) {
+        super(path, childPath, parentPath, OUTLET);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class OutletPath extends Outlet implements Path<OutletRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> OutletPath(Table<O> path, ForeignKey<O, OutletRecord> childPath, InverseForeignKey<O, OutletRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private OutletPath(Name alias, Table<OutletRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public OutletPath as(String alias) {
+            return new OutletPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public OutletPath as(Name alias) {
+            return new OutletPath(alias, this);
+        }
+
+        @Override
+        public OutletPath as(Table<?> alias) {
+            return new OutletPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -101,7 +142,37 @@ public class Outlet extends TableImpl<OutletRecord> {
 
     @Override
     public UniqueKey<OutletRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_8B;
+        return Keys.CONSTRAINT_8;
+    }
+
+    @Override
+    public List<UniqueKey<OutletRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.CONSTRAINT_8B);
+    }
+
+    private transient EntryPath _entry;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.ENTRY</code> table
+     */
+    public EntryPath entry() {
+        if (_entry == null)
+            _entry = new EntryPath(this, null, Keys.CONSTRAINT_3.getInverseKey());
+
+        return _entry;
+    }
+
+    private transient LorebooksPath _lorebooks;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.LOREBOOKS</code>
+     * table
+     */
+    public LorebooksPath lorebooks() {
+        if (_lorebooks == null)
+            _lorebooks = new LorebooksPath(this, null, Keys.CONSTRAINT_7E.getInverseKey());
+
+        return _lorebooks;
     }
 
     @Override

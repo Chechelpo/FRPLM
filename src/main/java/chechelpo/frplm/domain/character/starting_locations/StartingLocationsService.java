@@ -1,32 +1,35 @@
 package chechelpo.frplm.domain.character.starting_locations;
 
 import ch.qos.logback.classic.Level;
-import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityService;
+import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.frameworks.entities.microservices.EntityService;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public final class StartingLocationsService extends ABSEntityService<
+public class StartingLocationsService extends EntityService<
         StartingLocationsRecord,
         StartingLocationsStore
         > {
 
-    StartingLocationsService(
-            StartingLocationsStore store
-    ) {
-        super(store, EntityTypes.Types.STARTING_LOCATIONS);
+    StartingLocationsService(StartingLocationsStore store, EventBus bus) {
+        super(store,bus);
         log.setLevel(Level.DEBUG);
     }
 
-    public List<LocationsRecord> getStartingLocationsOf(EntityKey<CharactersRecord> key) {
+    public @NotNull List<LocationsRecord> getStartingLocationsOf(EntityKey<CharactersRecord> key) {
         List<LocationsRecord> list = store.getStartingLocations(key);
         log.debug("Got starting locations of key {} \n {}", key, list);
         return list;
+    }
+
+    public @NotNull List<LocationsRecord> startingLocationAt(EntityKey<CharactersRecord> key, int worldID) {
+        return store.getStartingLocationAt(key, worldID);
     }
 }

@@ -33,16 +33,16 @@ public class OutletRecord extends UpdatableRecordImpl<OutletRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.OUTLET.KEYWORD</code>.
+     * Setter for <code>PUBLIC.OUTLET.OUTLET</code>.
      */
-    public void setKeyword(String value) {
+    public void setOutlet(String value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.OUTLET.KEYWORD</code>.
+     * Getter for <code>PUBLIC.OUTLET.OUTLET</code>.
      */
-    public String getKeyword() {
+    public String getOutlet() {
         return (String) get(1);
     }
 
@@ -69,11 +69,11 @@ public class OutletRecord extends UpdatableRecordImpl<OutletRecord> {
     /**
      * Create a detached, initialised OutletRecord
      */
-    public OutletRecord(Integer id, String keyword) {
+    public OutletRecord(Integer id, String outlet) {
         super(Outlet.OUTLET);
 
         setId(id);
-        setKeyword(keyword);
+        setOutlet(outlet);
         resetChangedOnNotNull();
     }
 }

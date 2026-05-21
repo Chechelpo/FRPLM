@@ -1,5 +1,6 @@
 package chechelpo.frplm.frameworks.entities.fields.constraints;
 
+import chechelpo.frplm.exceptions.types.InvalidValue;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldKind;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Contract;
@@ -11,20 +12,15 @@ public final class BoolConstraints extends Constraints<FieldKind.BooleanKind, Bo
         super(builder,FieldType.BOOLEAN);
     }
 
-    @Override
-    public @Nullable Boolean coerce(Object value) {
-        return switch (value) {
-            case null -> null;
-            case Boolean b -> b;
-            case String s -> Boolean.parseBoolean(s);
-            default -> throw new IllegalArgumentException("Cannot coerce '" + value + "' to boolean");
-        };
-    }
+
 
     @Contract(value = " -> new", pure = true)
     public static @NotNull BoolConstraintsBuilder builder(){
         return new BoolConstraintsBuilder();
     }
+
+    @Override
+    protected void throwIfImpossibleValue(@NotNull Boolean value) throws InvalidValue {}
 
     public static class BoolConstraintsBuilder extends ABSConstraintsBuilder<BoolConstraints, BoolConstraintsBuilder>{
         @Override

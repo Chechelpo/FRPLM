@@ -6,7 +6,9 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
@@ -64,6 +66,11 @@ public class Messages extends TableImpl<MessagesRecord> {
     public final TableField<MessagesRecord, Integer> SESSION_ID = createField(DSL.name("SESSION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.MESSAGES.TIME</code>.
+     */
+    public final TableField<MessagesRecord, Integer> TIME = createField(DSL.name("TIME"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>PUBLIC.MESSAGES.TICK_NUM</code>.
      */
     public final TableField<MessagesRecord, Integer> TICK_NUM = createField(DSL.name("TICK_NUM"), SQLDataType.INTEGER.nullable(false), this, "");
@@ -74,11 +81,6 @@ public class Messages extends TableImpl<MessagesRecord> {
     public final TableField<MessagesRecord, Integer> LOCATION_ID = createField(DSL.name("LOCATION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.MESSAGES.ADVANCES_TIME_BY</code>.
-     */
-    public final TableField<MessagesRecord, Integer> ADVANCES_TIME_BY = createField(DSL.name("ADVANCES_TIME_BY"), SQLDataType.INTEGER.nullable(false), this, "");
-
-    /**
      * The column <code>PUBLIC.MESSAGES.USER_GENERATED</code>.
      */
     public final TableField<MessagesRecord, Boolean> USER_GENERATED = createField(DSL.name("USER_GENERATED"), SQLDataType.BOOLEAN.nullable(false), this, "");
@@ -86,7 +88,7 @@ public class Messages extends TableImpl<MessagesRecord> {
     /**
      * The column <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
-    public final TableField<MessagesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR.nullable(false), this, "");
+    public final TableField<MessagesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR.defaultValue(DSL.field(DSL.raw("NULL"), SQLDataType.VARCHAR)), this, "");
 
     private Messages(Name alias, Table<MessagesRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -157,24 +159,38 @@ public class Messages extends TableImpl<MessagesRecord> {
 
     @Override
     public UniqueKey<MessagesRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_1;
+        return Keys.CONSTRAINT_13;
     }
 
     @Override
     public List<ForeignKey<MessagesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_13);
+        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_131);
     }
 
-    private transient SessionsPath _sessions;
+    private transient SessionsPath _constraint_1;
 
     /**
-     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
+     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table, via
+     * the <code>CONSTRAINT_1</code> key.
      */
-    public SessionsPath sessions() {
-        if (_sessions == null)
-            _sessions = new SessionsPath(this, Keys.CONSTRAINT_13, null);
+    public SessionsPath constraint_1() {
+        if (_constraint_1 == null)
+            _constraint_1 = new SessionsPath(this, Keys.CONSTRAINT_1, null);
 
-        return _sessions;
+        return _constraint_1;
+    }
+
+    private transient SessionsPath _constraint_131;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table, via
+     * the <code>CONSTRAINT_131</code> key.
+     */
+    public SessionsPath constraint_131() {
+        if (_constraint_131 == null)
+            _constraint_131 = new SessionsPath(this, Keys.CONSTRAINT_131, null);
+
+        return _constraint_131;
     }
 
     private transient ResponsesPath _responses;
@@ -198,9 +214,30 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public LlmGenPath llmGen() {
         if (_llmGen == null)
-            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A7.getInverseKey());
+            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A733.getInverseKey());
 
         return _llmGen;
+    }
+
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686258.getInverseKey());
+
+        return _movements;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.CHARACTERS</code> table
+     */
+    public CharactersPath characters() {
+        return movements().characters();
     }
 
     @Override

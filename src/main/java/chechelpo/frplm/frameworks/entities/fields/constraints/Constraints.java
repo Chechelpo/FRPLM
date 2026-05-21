@@ -2,6 +2,7 @@ package chechelpo.frplm.frameworks.entities.fields.constraints;
 
 import chechelpo.frplm.exceptions.types.InvalidValue;
 import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.TableField;
 
@@ -18,10 +19,6 @@ public sealed abstract class Constraints<T, R>
         this.fieldType = fieldType;
     }
 
-    public abstract R coerce(Object value) throws InvalidValue;
-
-    protected void throwIfImpossibleValue(R value) throws InvalidValue {}
-
     public boolean isReadOnly() {
         return isReadOnly;
     }
@@ -34,39 +31,25 @@ public sealed abstract class Constraints<T, R>
         return fieldType;
     }
 
-    protected void violationMessage(@Nullable TableField<?, ?> field, Object value, InvalidValue exception) {
-        assert field != null;
-        System.err.println(
-                "Field " + field.getName()
-                        + " violated constraint with value: " + value  + " type " + fieldType + "\n"
-                        + exception.getMessage()
-        );
-    }
 
+    protected abstract void throwIfImpossibleValue(@NotNull R value) throws InvalidValue;
     /**
      * @param field field to get the name from
      * @param value value to check
-     * @return true if the value violates constraints
      */
-    public boolean violatesConstraints(@Nullable TableField<?, ?> field, Object value) {
-        if (value == null) {
-            if (!isNullable) {
-                violationMessage(field, null, new InvalidValue("Null found in NotNull column"));
-                return true;
-            }
-
-            return false;
+    public final void throwOnConstraintViolation(@NotNull TableField<?, ?> field, Object value, boolean editing) throws InvalidValue {
+        if (editing && isReadOnly)
+            throw new InvalidValue("Tried to edit read-only field " + field.getName());
+        if (value == null){
+            if (!isNullable) throw new InvalidValue("Null found in" + field + " NotNull column");
+            return;
         }
-
         try{
-            R coerced = this.coerce(value);
-            throwIfImpossibleValue(coerced);
-
-            return false;
-        } catch (InvalidValue e) {
-            violationMessage(field, value, e);
-            return true;
+            throwIfImpossibleValue((R) value);
+        } catch (InvalidValue ex) {
+            throw new InvalidValue("Violation when checking " + field + ": \n" + ex.getMessage());
         }
+
     }
 
     public abstract static class ABSConstraintsBuilder<

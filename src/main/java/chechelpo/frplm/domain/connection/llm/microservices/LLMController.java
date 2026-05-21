@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.connection.llm.microservices;
 
 import chechelpo.frplm.domain.connection.llm.utils.LLMConnection;
 import chechelpo.frplm.domain.connection.llm.utils.LLMFactory;
-import chechelpo.frplm.frameworks.entities.microservices.ABSEntityController;
+import chechelpo.frplm.frameworks.entities.microservices.EntityController;
 import chechelpo.frplm.frameworks.entities.microservices.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import static chechelpo.frplm.domain.EntityTypes.LLM_CONNECTION_URL;
 
 @RestController
 @RequestMapping(LLM_CONNECTION_URL)
-final class LLMController extends ABSEntityController<LlmConnectionRecord, LLMService> {
+final class LLMController extends EntityController<LlmConnectionRecord, LLMService> {
     private final LLMFactory llmFactory;
     LLMController(LLMService service, LLMFactory factory) {
         super(service);
@@ -27,9 +27,8 @@ final class LLMController extends ABSEntityController<LlmConnectionRecord, LLMSe
     @GetMapping("/test")
     public ResponseEntity<Boolean> test(@RequestParam Map<String, Object> params) {
         EntityKey<LlmConnectionRecord> key = extractKey(params);
-        service.coerceFullKey(key);
 
-        LLMConnection connection = llmFactory.getOf(key);
+        LLMConnection connection = llmFactory.instantiate(key);
         return ResponseEntity.ok(connection.test());
     }
 }
