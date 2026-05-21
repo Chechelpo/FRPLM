@@ -37,7 +37,7 @@ Keywords are not part of the entries, instead relying on an external table entri
 Implemented. 
 
 ### On the activation algorithm
-WIP. The general idea is a first scan on every prompt section, deteccting keywords and outlets (eligible by active lorebooks)
+WIP. The general idea is a first scan on every prompt section, deteccting keywords and outlets (eligible by active lorebooks). After gathering all of those that were detected, we then pass each section the lorebooks that hold any of the outlets present in that current section (which then are tested for entries that are activated).
 
 ## World modeling
 Worlds are not just entries inside a lorebook. Now they are actually modeled via a graph with locations. This allows for
