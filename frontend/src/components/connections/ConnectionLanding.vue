@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {computedAsync} from "@vueuse/core";
 import {LLMBackends, LLMConnection, LLMConnectionData, LLMConnectionKeys} from "@/domain/Connection";
 import {EntityTypes} from "@/domain/EntityTypes";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";

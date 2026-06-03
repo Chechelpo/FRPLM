@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
-import { PromptSection, Role } from "@/domain/Prompts";
+import { PromptSection } from "@/domain/Prompts";
 import { computed, ref } from "vue";
 import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 const props = defineProps<{
   section: PromptSection;
@@ -39,11 +40,11 @@ const content = computed<string>({
   },
 });
 
-const role = computed<Role>({
+const role = computed<ChatCompletionRole>({
   get() {
     return props.section.get("role");
   },
-  set(value: Role) {
+  set(value: ChatCompletionRole) {
     props.section.update("role", value);
   },
 });
@@ -64,7 +65,7 @@ const contentPreview = computed<string>(() => {
   return `${normalized.slice(0, 140)}…`;
 });
 
-const roles = [Role.USER, Role.ASSISTANT, Role.SYSTEM] satisfies Role[];
+const roles = [ChatCompletionRole.USER, ChatCompletionRole.ASSISTANT, ChatCompletionRole.SYSTEM] satisfies ChatCompletionRole[];
 
 function openEditor(): void {
   edit.value = true;
@@ -417,7 +418,7 @@ function closeEditor(): void {
 }
 
 .section-editor-window {
-  width: min(900px, 100%);
+  width: min(500px, 100%);
   max-height: min(90vh, 800px);
 
   display: flex;

@@ -3,13 +3,11 @@ import {
   LLMBackends,
   LLMConnection,
   type LLMBackend,
-  getLLMModels,
-  BackendLLMModel,
   getBackendFromID,
-  ApiKey,
+  ModelResponse,
 } from "@/domain/Connection";
 
-import { computed, ref } from "vue";
+import {computed, onMounted, ref} from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
 import { computedAsync } from "@vueuse/core";
@@ -36,13 +34,6 @@ const connectionType = computed<number>({
   set(value: number) {
     model.value.update("type", value);
   },
-});
-
-const host_url = computed<string>({
-  get() {
-    return getBackendFromID(model.value.get("host_id")).host;
-  },
-  set() {},
 });
 
 const llmBackendValues = Object.values(LLMBackends) as readonly LLMBackend[];
@@ -73,18 +64,20 @@ const llm_model = computed<string | null>({
   },
 });
 
-const modelOptions = computedAsync<BackendLLMModel[]>(
-    async () => await getLLMModels(selectedBackend.value),
-    []
-);
+const modelOptions = ref<ModelResponse[]>([]);
 
 const modelNames = computed<string[]>(() => modelOptions.value.map((i) => i.id));
+
+async function loadModels() : Promise<void> {
+  modelOptions.value = await model.value.getModels();
+}
 
 const api_key = ref<string | null>(null);
 
 async function createKey(key: string) {
   await model.value.assignNewKey(key);
   api_key.value = "";
+  await loadModels() //Some providers change the available model list based on the key
 }
 
 const testingConnection = ref(false);
@@ -95,13 +88,17 @@ async function testConnection(): Promise<void> {
   connectionTestResult.value = null;
 
   try {
-    connectionTestResult.value = await model.value.testConnection();
+    console.debug("Testing connection");
+    const response = await model.value.testConnection();
+    console.log(`Connection test result: ${response}`);
+    connectionTestResult.value = response;
   } catch {
     connectionTestResult.value = false;
   } finally {
     testingConnection.value = false;
   }
 }
+onMounted( () => {loadModels()})
 </script>
 
 <template>

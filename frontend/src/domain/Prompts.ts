@@ -1,6 +1,7 @@
-import {ABSEntity, API_BASE, createEntity, fetchApi} from "@/frameworks/ABSEntity";
+import {ABSEntity, API_BASE, createEntity, fetch_all, fetchApi} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
+import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 
 export type REASONING_EFFORT_VALUE = {id:number, name:string}
@@ -66,18 +67,35 @@ export class PromptTemplate extends ABSEntity<PromptTemplateKey, PromptTemplateD
 
         return newPromptSection;
     }
+
+    public static async getAll(): Promise<PromptTemplate[]> {
+        return await fetch_all<PromptTemplateKey, PromptTemplateData, PromptTemplate>(
+            EntityTypes.TEMPLATES, PromptTemplate
+        )
+    }
 }
 
-export enum Role {
-    USER = 'user',
-    ASSISTANT = 'assistant',
-    SYSTEM = 'system',
-}
+
 export type PromptSectionKey = {prompt_id:number, section_id:number};
-export type PromptSectionData = {name:string, active:boolean, position:number, role:Role, content:string};
+export type PromptSectionData = {name:string, active:boolean, position:number, role:ChatCompletionRole, content:string};
 export class PromptSection extends ABSEntity<PromptSectionKey, PromptSectionData>{
     getEntityType(): EntityTypes {
         return EntityTypes.SECTIONS;
+    }
+
+    public static async exchange(parent:PromptTemplate, one:PromptSection, two:PromptSection): Promise<boolean> {
+        const response = await fetchApi(
+            `${API_BASE}/${EntityTypes.SECTIONS}/exchange/${parent.get('id')}/${one.get('section_id')}/${two.get('section_id')}`,
+            {
+                method:'POST'
+            }
+        )
+        if (response.status === 200){
+            let temp = one.get('position');
+            one.dataMap.position = two.get('position');
+            two.dataMap.position = temp;
+        }
+        return response.status === 200;
     }
 }
 

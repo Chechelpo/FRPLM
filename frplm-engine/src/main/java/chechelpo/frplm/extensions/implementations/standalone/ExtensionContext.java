@@ -1,0 +1,36 @@
+package chechelpo.frplm.extensions.implementations.standalone;
+
+import chechelpo.frplm.domain.character.core.CharacterService;
+import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
+import chechelpo.frplm.domain.connection.api_keys.SecretService;
+import chechelpo.frplm.domain.connection.llm.LLMService;
+import chechelpo.frplm.domain.lorebook.core.LorebookService;
+import chechelpo.frplm.domain.lorebook.entry.core.EntryService;
+import chechelpo.frplm.domain.lorebook.keywords.KeywordService;
+import chechelpo.frplm.domain.lorebook.outlet.OutletService;
+import chechelpo.frplm.domain.prompts.section.SectionService;
+import chechelpo.frplm.domain.prompts.template.TemplateService;
+import chechelpo.frplm.domain.world.core.WorldService;
+import chechelpo.frplm.domain.world.edge.EdgeService;
+import chechelpo.frplm.domain.world.location.LocationsService;
+import org.jetbrains.annotations.NotNull;
+
+public record ExtensionContext(
+        @NotNull LLMService connections,
+        @NotNull SecretService secrets,
+
+        @NotNull CharacterService characters,
+        @NotNull StartingLocationsService startingLocations,
+
+        @NotNull WorldService worlds,
+        @NotNull LocationsService locations,
+        @NotNull EdgeService edges,
+
+        @NotNull LorebookService lorebooks,
+        @NotNull EntryService entries,
+        @NotNull KeywordService keywords,
+
+        @NotNull OutletService outlets,
+        @NotNull TemplateService templates,
+        @NotNull SectionService sections
+) {}

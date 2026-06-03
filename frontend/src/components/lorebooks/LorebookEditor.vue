@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue'
-import {Entry, Lorebook} from '@/domain/Lorebook'
+import {Entry, getAllKeywords, Lorebook, Outlet} from '@/domain/Lorebook'
 import EntryEditor from "@/components/lorebooks/EntryEditor.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
+import {fetchApi} from "@/frameworks/ABSEntity";
+import {API_BASE} from "@/config";
+import {EntityTypes} from "@/domain/EntityTypes";
 
 const model = defineModel<Lorebook>({required: true, type: Lorebook})
 
 // ---- State --------------------------------------------------------
 const entries = ref<Entry[]>([]);
+const keywords = ref<string[]>([]);
+const outlets  = ref<string[]>([]);
+
 const searchQuery = ref('');
 
 const filteredEntries = computed(() => {
@@ -29,16 +35,19 @@ const error = ref<string | null>(null)
 const loading = ref<boolean>(false)
 
 // ---- Data fetching -------------------------------------------------
-async function loadEntries() {
+async function load() {
   loading.value = true
+
   console.info(`Editing ${model.value}`)
   entries.value = await model.value.getEntries()
+  keywords.value = await model.value.keywords();
+  outlets.value = await Outlet.outlets();
 
   loading.value = false
 }
 
-onMounted(loadEntries)
-watch(model, loadEntries)
+onMounted(load)
+watch(model, load)
 
 // ---- Create / delete -------------------------------------------------------
 async function addEntry() {
@@ -64,6 +73,12 @@ async function deleteEntry(entry: Entry): Promise<void> {
   }
 }
 
+function onOutletCreate(name:string): void {
+  outlets.value.push(name);
+}
+function onKeywordCreate(name:string): void {
+  keywords.value.push(name);
+}
 </script>
 
 <template>
@@ -107,6 +122,10 @@ async function deleteEntry(entry: Entry): Promise<void> {
       >
         <EntryEditor
             :entry="entry as Entry"
+            :keywords="keywords"
+            :outlets="outlets"
+            @new-keyword="onKeywordCreate"
+            @new-outlet="onOutletCreate"
             @delete="deleteEntry"
         />
       </li>

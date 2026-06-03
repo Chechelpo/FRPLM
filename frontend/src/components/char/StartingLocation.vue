@@ -85,20 +85,20 @@ function onCloseLocationPrompt() {
   locationOptionsOpen.value = false;
 }
 
-function onPickLocationByName(name: string) {
+async function onPickLocationByName(name: string) {
   const location = locationsOfWorld.value!.find(
       location => location.get("name") == name
-  );
+  ) as Location;
   console.log(`We're adding ${name}`)
   if (!location) {
     console.error("Could not find location");
     return;
   }
 
-  model.value.markStartingAt(location);
+  await model.value.markStartingAt(location);
   filteredLocations.value.push(location);
   selectedLocation.value = location;
-  onSelectStartingLocation(location);
+  await onSelectStartingLocation(location);
   locationOptionsOpen.value = false;
 }
 
@@ -122,8 +122,10 @@ async function onDeleteStartingLocation(loc: Location) {
   );
   selectedLocation.value = null;
   selectedStartingLocation.value = null;
+  filteredLocations.value = filteredLocations.value.filter(other => !other.equals(loc));
   startingLocationName.value = "";
 }
+
 </script>
 
 <template>
@@ -138,6 +140,7 @@ async function onDeleteStartingLocation(loc: Location) {
     <template #left>
       <List
           v-if="worldSelected"
+          :key="filteredLocations"
           :elements="filteredLocations"
           @create="onCreateLink"
           @edit="element => onSelectStartingLocation(element)"

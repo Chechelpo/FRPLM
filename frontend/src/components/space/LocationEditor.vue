@@ -25,6 +25,8 @@ const name = computed<string>({
     model.value.location.update("name", value);
   }
 })
+
+/*
 const description = computed<string>({
   get() {
     return model.value.location.get("description");
@@ -32,7 +34,7 @@ const description = computed<string>({
   set(value: string) {
     model.value.location.update("description", value);
   }
-})
+})*/
 </script>
 
 <template>
@@ -52,10 +54,12 @@ const description = computed<string>({
           info="Location description, will be injected in prompt constantly if its the current location"
           :vertical="true"
       >
+        <!--
         <LongTextBox
             :model-value="description"
             @edit="payload => description = payload"
         />
+        -->
       </FieldEditorWrapper>
 
       <Expandable

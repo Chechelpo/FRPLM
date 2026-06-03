@@ -31,4 +31,5 @@ export enum EntityTypes{
     //Sessions
     SESSIONS = "sessions",
     MESSAGES = "messages",
+    CURRENT_LOCATION = "currentLocations",
 }

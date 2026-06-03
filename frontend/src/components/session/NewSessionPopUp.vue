@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import {World, WorldData, WorldKey} from "@/domain/World";
 import {Character} from "@/domain/Characters";
@@ -13,7 +12,8 @@ import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 
 const model = defineModel<boolean>({required:true, type: Boolean})
 const emit = defineEmits<{
-  (e: 'createNewSession', payload:{name:string, world:World, character:Character}) : void
+  (e: 'createNewSession', payload:{name:string, world:World, character:Character}) : void,
+  (e: 'close'): void;
 }>()
 
 const newSessionName = ref<string>('');
@@ -36,24 +36,29 @@ const selectedWorldName = computed(() => {
 
 async function selectWorld(name: string){
   selectedWorld.value = allWorlds.value.find(world => world.get('name') == name)!;
-  allCharacters.value = await Character.getStartingAt(selectedWorld.value.get('id'))
+  allCharacters.value = (await Character.getStartingAt(selectedWorld.value))
+      .filter(character => character.get('can_be_user'));
 }
+
 // Characters ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const allCharacters = ref<Character[]>([]);
 const allCharactersNames = computed<string[]>(() => allCharacters.value.map(character => character.get('name')))
 const characterName = computed<string>(() => {
-  if (!character.value) return "";
-  return character.value.get('name');
+  if (!selectedCharacter.value) return "";
+  return selectedCharacter.value.get('name');
 })
-const character = shallowRef<Character | null>(null);
+const selectedCharacter = shallowRef<Character | null>(null);
 
 function createNewSession() : void {
-  if (character.value == null || selectedWorld.value == null) return;
+  if (selectedCharacter.value == null || selectedWorld.value == null) {
+    emit('close')
+    return
+  }
   emit('createNewSession',
       {
         name : newSessionName.value,
         world : selectedWorld.value,
-        character: selectedWorld.value
+        character : selectedCharacter.value
       }
   )
   model.value = false;
@@ -80,7 +85,7 @@ function createNewSession() : void {
         <SingleEnumInput
             :value="characterName"
             :possible_values="allCharactersNames"
-            @edit="txt => character = allCharacters.find(char => char.get('name') == txt)!"
+            @edit="txt => selectedCharacter = allCharacters.find(char => char.get('name') == txt)!"
         />
       </FieldEditorWrapper>
     </template>

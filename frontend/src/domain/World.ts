@@ -15,7 +15,7 @@ import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 export type WorldKey = { id: number }
 export type WorldData = {
     name: string,
-    lorebook_id?: number, //Guaranteed after instance
+    lorebook_id: number,
 }
 
 export class World extends ABSEntity<WorldKey, WorldData> {
@@ -92,7 +92,6 @@ async function createLocation(world:World, name:string): Promise<Location> {
         },
         {
             name: name,
-            description: "",
         },
         EntityTypes.LOCATIONS,
         Location
@@ -102,8 +101,7 @@ async function createLocation(world:World, name:string): Promise<Location> {
 export type LocationKey = { worldID: number, id?: number }
 export type LocationData = {
     name: string,
-    description: string,
-    lorebook_id?: number,
+    lorebook_id: number,
 }
 
 export class Location extends ABSEntity<LocationKey, LocationData> {
@@ -115,7 +113,7 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
     }
 
     getIterationArr(): EntityField<LocationKey, LocationData>[] {
-        return [CommonFields.NAME, CommonFields.DESCRIPTION];
+        return [CommonFields.NAME];
     }
 
     public async getLorebook(): Promise<Lorebook> {

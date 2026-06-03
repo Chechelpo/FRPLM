@@ -1,6 +1,6 @@
 TODO: Keywords dont get updated in between entries on addition/removal. They need a global state regarding them.
 <script setup lang="ts">
-import {ActivationStrategy, Entry, KeyWord, KeywordData, Outlet, OutletData} from "@/domain/Lorebook";
+import {ActivationStrategy, Entry, Outlet} from "@/domain/Lorebook";
 import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import {computed, onMounted, ref, watch} from "vue";
 import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
@@ -15,11 +15,41 @@ import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
 
 // ---- model / emit -------------------------------------------------------
 const props = defineProps<{
-  entry: Entry
+  entry: Entry;
+  outlets: string[];
+  keywords: string[];
 }>();
 const emit = defineEmits<{
   (e: 'delete', payload: Entry): void;
+  (e: 'newKeyword', name: string): void;
+  (e: 'newOutlet', name: string): void;
 }>();
+
+// ---- attributes -------------------------------------------------------
+const entryKeywords = ref<string[]>([]);
+const strategy = computed<ActivationStrategy>({
+  get() {
+    return props.entry.get('strategy')
+  },
+  set(value: ActivationStrategy) {
+    props.entry.update('strategy', value)
+  }
+})
+const isEmbeddingStrategy = computed<boolean>(() => {
+  return strategy.value === ActivationStrategy.EMBEDDING;
+});
+const embed_text = computed<string | null>({
+  get() {
+    if (isEmbeddingStrategy.value)
+      return null
+    return props.entry.get('embed_text')
+  },
+  set(value: string | null) {
+    props.entry.update('embed_text', value);
+  }
+})
+const outlet = ref<string>('')
+
 
 // ---- Render state -------------------------------------------------
 const expanded = ref<boolean>(false);
@@ -44,67 +74,23 @@ const activationStrategyLabels: Record<ActivationStrategy, string> = {
 
 // ---- Edit handlers -------------------------------------------------------
 async function handleNewKeyword(name: string): Promise<void> {
-  let keyword: KeyWord;
-  if (!keywordsByName.value?.has(name)) {
-    keyword = await createEntity<any, KeywordData, KeyWord>(
-        null,
-        {
-          name: name
-        },
-        EntityTypes.KEYWORD,
-        KeyWord
-    )
-  } else keyword = keywordsByName.value?.get(name)!
-
-  await props.entry.addKeyword(keyword);
+  if (await props.entry.addKeyword(name)) emit("newKeyword", name);
 }
 
-function handleRemoveKeyword(name: string): void {
-
+async function handleRemoveKeyword(name: string): Promise<void> {
+  await props.entry.removeKeyword(name)
+}
+async function handleOutletChange(value:string){
+  await props.entry.updateOutlet(value);
+  console.debug(`New outlet value: ${await props.entry.getOutletName()}`);
+  outlet.value = value;
+}
+async function clearOutlet(){
+  await props.entry.clearOutlet();
+  outlet.value = '';
 }
 
 // ---- values -------------------------------------------------------
-// Injection requirements
-const probability = computed<number | null>({
-  get() {
-    return props.entry.get('probability')
-  },
-  set(value: number | null) {
-    props.entry.update('probability', value)
-  }
-})
-const strategy = computed<ActivationStrategy>({
-  get() {
-    return props.entry.get('strategy')
-  },
-  set(value: ActivationStrategy) {
-    props.entry.update('strategy', value)
-  }
-})
-const isEmbeddingStrategy = computed<boolean>(() => {
-  return strategy.value === ActivationStrategy.EMBEDDING;
-});
-const embed_text = computed<string | null>({
-  get() {
-    if (isEmbeddingStrategy.value)
-      return null
-    return props.entry.get('embed_text')
-  },
-  set(value: string | null) {
-    props.entry.update('embed_text', value);
-  }
-})
-const outlet = ref<string>('')
-const possibleOutlets = ref<string[]>([]);
-
-const entryKeywords = ref<KeyWord[]>([]);
-const entryKeywordsNames = ref<string[]>([]);
-
-const allKeywords = ref<KeyWord[]>([]);
-const keywordsNames = ref<string[]>([]);
-const keywordsByName = ref<Map<string, KeyWord>>()
-
-
 watch(
     () => props.entry,
     () => {
@@ -115,33 +101,10 @@ onMounted(async () => {
   await load()
 })
 async function load() {
-  entryKeywords.value = await props.entry.getKeywords();
-  entryKeywordsNames.value = entryKeywords.value.map(keyword => keyword.get('name'));
-
-  allKeywords.value = await KeyWord.getAll();
-
-  keywordsNames.value = allKeywords.value.map(keyword => keyword.get('name'))
-  const byName = new Map<string, KeyWord>();
-
-  allKeywords.value.forEach(keyword => {
-    byName.set(keyword.get('name'), keyword as KeyWord);
-  });
-
-  keywordsByName.value = byName;
+  entryKeywords.value = await props.entry.keywords();
 
   const string = await props.entry.getOutletName();
   if ( string != null ) outlet.value = string;
-
-  possibleOutlets.value = await Outlet.outlets();
-}
-async function handleOutletChange(value:string){
-  await props.entry.updateOutlet(value);
-  console.debug(`New outlet value: ${await props.entry.getOutletName()}`);
-  outlet.value = value;
-}
-async function clearOutlet(){
-  await props.entry.clearOutlet();
-  outlet.value = '';
 }
 </script>
 
@@ -174,13 +137,13 @@ async function clearOutlet(){
   <div class="expandedTop" v-if="expanded">
     <!-- Keywords -->
     <AutoCompleteBox
-        v-if="!(strategy.valueOf() == ActivationStrategy.CONSTANT)"
-        placeholder="Activation keywords"
-        :model-value="entryKeywordsNames"
-        :suggestions="keywordsNames"
-        @add="newValue => handleNewKeyword(newValue)"
-        @remove="stringToRemove => handleRemoveKeyword(stringToRemove)"
-        :allow-custom="true"
+        v-if         = "!(strategy.valueOf() == ActivationStrategy.CONSTANT)"
+        placeholder  = "Activation keywords"
+        :model-value = "entryKeywords"
+        :suggestions = "props.keywords"
+        @add         = "handleNewKeyword"
+        @remove      = "handleRemoveKeyword"
+        :allow-custom= "true"
     />
     <!-- probability -->
     <FieldEditorWrapper
@@ -214,10 +177,9 @@ async function clearOutlet(){
             info="Place in the prompt where this entry will be inserted"
         >
           <SingleAutoComplete
-              v-if="possibleOutlets"
               class="outlet-autocomplete"
               :model-value="outlet"
-              :suggestions="possibleOutlets"
+              :suggestions="outlets"
               :allow-custom="true"
               :clearable="true"
               @select="txt => handleOutletChange(txt)"

@@ -17,6 +17,7 @@ import { computedAsync } from "@vueuse/core";
 import { LLMConnection, LLMConnectionData, LLMConnectionKeys } from "@/domain/Connection";
 import { fetch_all } from "@/frameworks/ABSEntity";
 import { EntityTypes } from "@/domain/EntityTypes";
+import Expandable from "@/components/utils/panels/Expandable.vue";
 
 const model = defineModel<PromptTemplate>({
   required: true,
@@ -104,11 +105,8 @@ async function moveSection(section: PromptSection, direction: -1 | 1): Promise<v
 
   if (!other) return;
 
-  const sectionPosition = section.get("position");
-  const otherPosition = other.get("position");
-
-  await section.update("position", otherPosition);
-  await other.update("position", sectionPosition);
+  const succeeded = await PromptSection.exchange(model.value, section, other)
+  if (succeeded) sections.value = [...sections.value];
 }
 
 function sectionKey(section: PromptSection): string {
@@ -203,25 +201,30 @@ function sectionKey(section: PromptSection): string {
           @edit = "value => model.update('reasoning_effort', value)"
       />
     </FieldEditorWrapper>
-    <button
-      type="button"
-      @click="createSection"
-    >
-      NEW
-    </button>
-    <PromptSectionEditor
-        v-for="(section, index) in orderedSections"
-        :key="sectionKey(section)"
-        :section="section"
-        :index="index"
-        :can-move-up="index > 0"
-        :can-move-down="index < orderedSections.length - 1"
-        @move-up="section => moveSection(section, -1)"
-        @move-down="section => moveSection(section, 1)"
-    />
+    <Expandable title="Sections">
+      <button
+        type="button"
+        @click="createSection"
+      >
+        NEW
+      </button>
+      <PromptSectionEditor
+          class="section_style"
+          v-for="(section, index) in orderedSections"
+          :key="sectionKey(section)"
+          :section="section"
+          :index="index"
+          :can-move-up="index > 0"
+          :can-move-down="index < orderedSections.length - 1"
+          @move-up="section => moveSection(section, -1)"
+          @move-down="section => moveSection(section, 1)"
+      />
+    </Expandable>
   </div>
 </template>
 
 <style scoped>
-
+.section_style{
+  overflow-x: clip;
+}
 </style>

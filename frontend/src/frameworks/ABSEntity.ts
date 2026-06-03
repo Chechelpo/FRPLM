@@ -170,7 +170,7 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
 
 
 const BASE:string ="http://localhost:8080/api";
-export const API_BASE: string = "api";
+export const API_BASE = "http://localhost:8080/api";
 
 const ENTITY_SUFFIX:string = "entity";
 const QUERY_SUFFIX:string = "query";
@@ -182,7 +182,7 @@ function getQueryPath(object_type:EntityTypes): URL {
     return new URL(`${API_BASE}/${object_type}/${QUERY_SUFFIX}`, BASE)
 }
 
-function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key:Key | null): URL {
+function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key:Partial<Key> | null): URL {
     const url = new URL(`${API_BASE}/${object_type}/${ENTITY_SUFFIX}`, BASE);
     if (key == null) return url;
     // identityParams come from query string
@@ -194,7 +194,7 @@ function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key
  * @param url mutates, will append params
  * @param key to append
  */
-export function appendIDParams<Key extends KeyRecord>(url:URL, key: Key): void {
+export function appendIDParams<Key extends KeyRecord>(url:URL, key: Partial<Key>): void {
     // identityParams come from query string
     for (const [k, v] of Object.entries(key)) {
         if (v === undefined) continue;
@@ -253,7 +253,7 @@ export async function deleteEntity<
             method:"DELETE"
         }
     )
-    return await response.json() as boolean;
+    return response.status === 200;
 }
 export async function createEntity<
     Key extends KeyRecord,

@@ -3,7 +3,7 @@ import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
-import {Location} from "@/domain/World";
+import {Location, World} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
 import {API_BASE} from "@/config";
 
@@ -128,10 +128,9 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             StartingLocation
         )
     }
-
-    public static async getStartingAt(worldID:number):Promise<Character[]>{
+    public static async getStartingAt(world:World):Promise<Character[]>{
         const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.CHARACTERS}/${worldID}`,
+            `${API_BASE}/${EntityTypes.CHARACTERS}/${world.get('id')}`,
             {
                 method:'GET'
             }

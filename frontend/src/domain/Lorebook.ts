@@ -5,7 +5,8 @@ import {
     EntityField,
     fetch_all,
     fetchApi,
-    fetchOne
+    fetchOne,
+    getEntityController
 } from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
@@ -60,6 +61,15 @@ export class Lorebook extends ABSEntity<LorebookKey, LorebookData> {
 
         return success;
     }
+
+    public async keywords(): Promise<string[]> {
+        return fetchApi(
+            `${getEntityController(EntityTypes.ENTRY_KEYWORD)}/${this.get('id')}`,
+            {
+                method:"GET"
+            }
+        ).then(async response => await response.json() as string[])
+    }
 }
 
 export enum ActivationStrategy {
@@ -97,9 +107,6 @@ export type EntryData = {
 };
 
 export class Entry extends ABSEntity<EntryKey, EntryData> {
-    private keywords: KeyWord[] | null = null;
-    private outlet:string | null = null;
-
     getEntityType(): EntityTypes {
         return EntityTypes.ENTRY;
     }
@@ -143,133 +150,83 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
         return dtos.map(dto => new Entry(dto, EntityTypes.ENTRY));
     }
 
-    public async getKeywords(): Promise<KeyWord[]> {
-        if (this.keywords == null)
-            this.keywords = await KeyWord.getOfEntry(this);
-        return this.keywords;
+    private keywordPath(keyword : string): string {
+        return `${getEntityController(EntityTypes.ENTRY_KEYWORD)}/${this.get('lorebook_id')}/${this.get('entry_id')}?name=${keyword}`
     }
-
-    async addKeyword(keyword: KeyWord): Promise<void> {
-        if (this.keywords == null)
-            await this.getKeywords()
-        if (this.keywords!.some(key => key.key == keyword.key))
-            return
-        const newEntry = await createEntity<EntryKeywordsKey, any, EntryKeywords>(
+    public async keywords(): Promise<string[]> {
+        return await fetchApi(
+            `${getEntityController(EntityTypes.ENTRY_KEYWORD)}/${this.get('lorebook_id')}/${this.get('entry_id')}`,
             {
-                lorebook_id: this.get('lorebook_id')!,
-                entry_id: this.get('entry_id')!, // Its initialized, so it's guaranteed to be defined
-                keyword_id: keyword.get('id')
-            },
-            null,
-            EntityTypes.ENTRY_KEYWORD,
-            EntryKeywords
-        )
-
-        this.keywords!.push(keyword);
+                method: "GET",
+            }
+        ).then(async response => await response.json() as string[])
     }
 
-    async removeKeyword(keyword: KeyWord): Promise<void> {
-        if (this.keywords == null)
-            await this.getKeywords()
-        if (!this.keywords!.some(key => key.key == keyword.key))
-            return;
-
-        const response = await deleteEntity<EntryKeywordsKey>(
+    async addKeyword(name: string): Promise<boolean> {
+        const response = await fetchApi(
+            this.keywordPath(name),
             {
-                lorebook_id: this.get('lorebook_id'),
-                entry_id: this.get('entry_id'),
-                keyword_id: keyword.get('id')
-            },
-            EntityTypes.ENTRY_KEYWORD
+                method: "PUT",
+            }
         )
+        return response.status == 200;
     }
 
-    public async getOutletName() : Promise<string | null>{
-        if (this.outlet != null) return this.outlet;
-        if (super.get('outlet_id') == null) {
-            this.outlet = null;
-            console.debug(`This has no outlet`)
-            return this.outlet;
-        }
-        if (this.outlet == null)
-            await fetchOne<OutletKey, OutletData, Outlet>(
+    async removeKeyword(keyword: string): Promise<boolean> {
+        const response = await fetchApi(
+            this.keywordPath(keyword),
+            {
+                method: "DELETE",
+            })
+        return response.status == 200;
+    }
+
+    public async getOutletName(): Promise<string | null> {
+        return await fetchOne<OutletKey, OutletData, Outlet>(
                 {
-                    id:super.get('outlet_id')!
+                    id: super.get('outlet_id')!
                 },
                 EntityTypes.OUTLETS,
                 Outlet
-            ).then( x=> {
+            ).then(x => {
                 console.debug(`${x}`)
-                this.outlet = x.get('name')
+                return x.get('name')
             })
-        return this.outlet;
     }
 
-    public async updateOutlet(outlet:string) : Promise<void>{
+    public async updateOutlet(outlet: string): Promise<void> {
         console.debug(`Updating outlet for ${this.get('name')} with new value ${outlet}`)
         const result = await fetchApi(
-            `${API_BASE}/${EntityTypes.ENTRY}/entity/${this.get('lorebook_id')}/${super.get('entry_id')}`,
+            `${getEntityController(EntityTypes.ENTRY)}/${this.get('lorebook_id')}/${super.get('entry_id')}`,
             {
                 method: "PATCH",
                 body: outlet,
             })
-
-        if (await result.json() as boolean) this.outlet = outlet;
     }
+
     public async clearOutlet(): Promise<void> {
         await super.update('outlet_id', null)
     }
 }
 
-type KeywordKey = { id: number };
-export type KeywordData = { name: string };
-
-export class KeyWord extends ABSEntity<KeywordKey, KeywordData> {
-    public static async getAll(): Promise<KeyWord[]> {
-        return fetch_all<KeywordKey, KeywordData, KeyWord>(EntityTypes.KEYWORD, this)
-    }
-
-    getEntityType(): EntityTypes {
-        return EntityTypes.KEYWORD;
-    }
-
-    getIterationArr(): EntityField<KeywordKey, KeywordData>[] {
-        return [];
-    }
-
-    static async getOfEntry(entry: Entry): Promise<KeyWord[]> {
-        const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.KEYWORD}/entry/${entry.get('lorebook_id')}/${entry.get('entry_id')}`,
-            {
-                method: 'GET'
-            }
-        )
-
-        const dtos = await response.json() as DTO[];
-        return dtos.map(dto => new KeyWord(dto, EntityTypes.KEYWORD));
-    }
+async function getAllKeywords() : Promise<string[]>{
+    return await fetchApi(
+        `${API_BASE}/${EntityTypes.KEYWORD}`,
+        {
+            method:'GET'
+        }
+    ).then(async response => await response.json() as string[])
 }
 
-type EntryKeywordsKey = {lorebook_id:number, entry_id: number, keyword_id: number };
-class EntryKeywords extends ABSEntity<EntryKeywordsKey, any>{
-    getEntityType(): EntityTypes {
-        return EntityTypes.ENTRY_KEYWORD;
-    }
-
-    getIterationArr(): EntityField<EntryKeywordsKey, any>[] {
-        return [];
-    }
-}
-
-export type OutletKey = {id:number};
-export type OutletData = {name: string};
+export type OutletKey = { id: number };
+export type OutletData = { name: string };
 export class Outlet extends ABSEntity<OutletKey, OutletData> {
     getEntityType(): EntityTypes {
         return EntityTypes.OUTLETS
     }
 
-    public static async outlets(): Promise<string[]>{
-        return await fetch_all<OutletKey,OutletData,Outlet>(EntityTypes.OUTLETS, Outlet)
+    public static async outlets(): Promise<string[]> {
+        return await fetch_all<OutletKey, OutletData, Outlet>(EntityTypes.OUTLETS, Outlet)
             .then(result => result.map(outlet => outlet.get('name')))
     }
 }
