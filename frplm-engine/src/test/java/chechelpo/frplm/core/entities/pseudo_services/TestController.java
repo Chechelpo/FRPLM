@@ -4,6 +4,6 @@ import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 
 class TestController extends EntityController<TestTableRecord, TestService> {
     TestController(TestService service) {
-        super(service);
+        super(service, false);
     }
 }

@@ -262,7 +262,7 @@ class DataValidatorTest {
         assertEquals(INCOMPLETE_ASSIGNMENTS, error.type());
         assertNull(error.fieldName());
         assertTrue(error.value().isEmpty());
-        assertTrue(error.extraMessage().isEmpty());
+        assertTrue(error.extraMessage().isPresent());
     }
 
     @Test
