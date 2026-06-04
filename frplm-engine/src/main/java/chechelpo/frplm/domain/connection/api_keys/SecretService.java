@@ -2,9 +2,8 @@ package chechelpo.frplm.domain.connection.api_keys;
 
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.utils.encryption.EncryptorService;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 
 @Service
 public class SecretService extends EntityService<ApiKeysRecord, SecretStore> {

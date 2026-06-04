@@ -1,18 +1,17 @@
 package chechelpo.frplm.domain.lorebook.core;
 
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.jooq.generated.tables.records.*;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -64,5 +63,10 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
     public @NotNull LorebooksRecord getLorebookOf(@NotNull LocationsRecord record) throws EntityNotFound {
         return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
                 .orElseThrow(() -> new IllegalStateException("Location " + record.getLorebookId() + " without a lorebook"));
+    }
+
+    //
+    public boolean importFromJSON(JsonNode file){
+        return true;
     }
 }

@@ -1,9 +1,9 @@
 package chechelpo.frplm.domain.lorebook.outlet;
 
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;

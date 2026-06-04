@@ -1,6 +1,6 @@
 package chechelpo.frplm.domain.prompts.template;
 
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

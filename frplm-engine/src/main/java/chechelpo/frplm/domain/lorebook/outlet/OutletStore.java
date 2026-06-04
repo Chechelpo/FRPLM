@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.lorebook.outlet;
 
 import chechelpo.frplm.annotations.Store;
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;

@@ -3,21 +3,16 @@ package chechelpo.frplm.domain.lorebook.keywords;
 import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URISyntaxException;
 import java.util.Map;
 
 import static chechelpo.frplm.domain.EntityTypes.KEYWORDS_URL;
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @RestController
 @RequestMapping(KEYWORDS_URL)

@@ -1,9 +1,6 @@
 package chechelpo.frplm.extensions.api;
 
-import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
-import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
-import chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
-import chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
+import chechelpo.frplm.extensions.api.standalone.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -11,6 +8,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EngineRepository {
+    <T> Optional<?> get(
+            @NotNull Class<T> type,
+            @NotNull String reference
+    );
+
     @Unmodifiable
     @NotNull List<CharacterSnapshot> getCharacters();
     Optional<CharacterSnapshot> getCharacterWithName(String name);
@@ -30,4 +32,8 @@ public interface EngineRepository {
     @NotNull List<PromptSnapshot> getPrompts();
     Optional<PromptSnapshot> getPromptWithName(String name);
     Optional<PromptSnapshot> getPrompt(PromptSnapshot.Reference reference);
+
+    List<LorebookSnapshot> getLorebooks();
+    Optional<LorebookSnapshot> getLorebookWithName(String name);
+    Optional<LorebookSnapshot> getLorebook(LorebookSnapshot.Reference reference);
 }

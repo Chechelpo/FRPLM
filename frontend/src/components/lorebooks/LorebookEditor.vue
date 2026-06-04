@@ -12,7 +12,7 @@ const model = defineModel<Lorebook>({required: true, type: Lorebook})
 // ---- State --------------------------------------------------------
 const entries = ref<Entry[]>([]);
 const keywords = ref<string[]>([]);
-const outlets  = ref<string[]>([]);
+const outlets = ref<string[]>([]);
 
 const searchQuery = ref('');
 
@@ -33,6 +33,55 @@ const filteredEntries = computed(() => {
 
 const error = ref<string | null>(null)
 const loading = ref<boolean>(false)
+
+// Import : ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const importInput = ref<HTMLInputElement | null>(null);
+const importing = ref<boolean>(false);
+
+function openImportPicker(): void {
+  importInput.value?.click();
+}
+
+async function onImportFileSelected(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    importing.value = true;
+    error.value = null;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const lorebookId = encodeURIComponent(model.value.hashKey());
+
+    const response = await fetch(
+        `${API_BASE}/lorebooks/${lorebookId}/entries/import`,
+        {
+          method: 'POST',
+          body: formData,
+        },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Import failed with status ${response.status}`);
+    }
+
+    await load();
+  } catch (e) {
+    console.error(e);
+    error.value = 'Could not import entries.';
+  } finally {
+    importing.value = false;
+
+    // Allows selecting the same file again.
+    input.value = '';
+  }
+}
 
 // ---- Data fetching -------------------------------------------------
 async function load() {
@@ -60,6 +109,7 @@ async function addEntry() {
     error.value = 'Could not create entry.';
   }
 }
+
 async function deleteEntry(entry: Entry): Promise<void> {
   try {
     await model.value.deleteEntry(entry);
@@ -73,10 +123,11 @@ async function deleteEntry(entry: Entry): Promise<void> {
   }
 }
 
-function onOutletCreate(name:string): void {
+function onOutletCreate(name: string): void {
   outlets.value.push(name);
 }
-function onKeywordCreate(name:string): void {
+
+function onKeywordCreate(name: string): void {
   keywords.value.push(name);
 }
 </script>
@@ -104,13 +155,31 @@ function onKeywordCreate(name:string): void {
         placeholder="Search entries by name"
         @update:search="value => searchQuery = value"
     />
-    <button
-        type="button"
-        class="btn add-btn"
-        @click="addEntry"
-    >
-      + New Entry
-    </button>
+    <div class = action-row>
+      <button
+          type="button"
+          class="btn add-btn"
+          @click="addEntry"
+      >
+        + New Entry
+      </button>
+
+      <input
+          ref="importInput"
+          type="file"
+          class="hidden-file-input"
+          accept=".json,.yaml,.yml,.txt"
+          @change="onImportFileSelected"
+      />
+      <button
+          type="button"
+          class="btn import-btn"
+          :disabled="importing || loading"
+          @click="openImportPicker"
+      >
+        {{ importing ? 'Importing…' : 'Import' }}
+      </button>
+    </div>
     <ul
         v-if="entries.length"
         class="entry-list"
@@ -140,7 +209,28 @@ function onKeywordCreate(name:string): void {
   </div>
 </template>
 
-<style scoped>
+<style scoped>z
+.action-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.import-btn {
+  background: #1976d2;
+  color: blue;
+  border-color: #1976d2;
+}
+
+.import-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
 .entry-list-editor {
   display: flex;
   flex-direction: column;

@@ -1,8 +1,8 @@
 package chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.jetbrains.annotations.NotNull;
@@ -61,10 +61,6 @@ final class EntryKeywordsController extends EntityController<EntryKeywordsRecord
         return ResponseEntity.badRequest().build();
     }
 
-    @Override
-    protected @NotNull ResponseEntity<EntityDTO[]> getAll(Map<String, Object> query) {
-        return ResponseEntity.badRequest().build();
-    }
 
     @Override
     protected ResponseEntity<Boolean> patch(Map<String, Object> identityParams, Map<String, Object> patch) {

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 @Ephemeral
-public interface PromptSnapshot {
+public non-sealed interface PromptSnapshot extends Snapshot {
     record Reference(int id) implements StableReference{
         private static final String prefix = "prompt: ";
 

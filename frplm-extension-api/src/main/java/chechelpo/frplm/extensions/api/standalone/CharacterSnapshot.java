@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Ephemeral
-public interface CharacterSnapshot {
+public non-sealed interface CharacterSnapshot extends Snapshot {
     record Reference(int id) implements chechelpo.frplm.extensions.api.standalone.StableReference {
         private static final String prefix = "character: ";
         @Override

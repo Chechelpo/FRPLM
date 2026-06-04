@@ -1,8 +1,8 @@
 package chechelpo.frplm.events.crud;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import org.jooq.TableRecord;
 
 import java.util.List;

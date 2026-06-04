@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.lorebook.outlet;
 
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

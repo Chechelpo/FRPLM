@@ -7,7 +7,6 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection.LlmConnectionPath;
-import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.PromptSection.PromptSectionPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
@@ -230,19 +229,6 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
             _llmConnection = new LlmConnectionPath(this, Keys.CONSTRAINT_ED, null);
 
         return _llmConnection;
-    }
-
-    private transient LlmGenPath _llmGen;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.LLM_GEN</code>
-     * table
-     */
-    public LlmGenPath llmGen() {
-        if (_llmGen == null)
-            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A7.getInverseKey());
-
-        return _llmGen;
     }
 
     private transient PromptSectionPath _promptSection;

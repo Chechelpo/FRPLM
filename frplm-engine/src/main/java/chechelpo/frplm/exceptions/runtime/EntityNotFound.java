@@ -2,7 +2,6 @@ package chechelpo.frplm.exceptions.runtime;
 
 import chechelpo.frplm.exceptions.RuntimeDomainException;
 import chechelpo.frplm.exceptions.Severity;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 

@@ -1,11 +1,11 @@
 package chechelpo.frplm.domain.connection.api_hosts;
 
 import chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSHelper;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.springframework.stereotype.Component;
 

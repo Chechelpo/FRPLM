@@ -7,6 +7,7 @@ import PromptTemplateEditor from "@/components/prompts/PromptTemplateEditor.vue"
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
 import WorldEdit from "@/components/space/WorldEdit.vue";
 import {World} from "@/domain/World";
+import Configs from "@/components/extension/Configs.vue";
 
 const model = defineModel<Session>({required:true, type:Session});
 
@@ -39,6 +40,7 @@ onMounted(async () => {
   <Expandable title="world">
     <WorldEdit v-if="world" :model-value="world"/>
   </Expandable>
+  <Configs/>
 </template>
 
 <style scoped>

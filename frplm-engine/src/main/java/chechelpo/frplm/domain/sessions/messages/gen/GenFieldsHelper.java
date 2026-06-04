@@ -1,10 +1,10 @@
 package chechelpo.frplm.domain.sessions.messages.gen;
 
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSHelper;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
 import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +37,6 @@ final class GenFieldsHelper extends ABSHelper<LlmGenRecord, GenService> {
                         .build()
         );
 
-        register_field(
-                LLM_GEN.PROMPT_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
-                        .require()
-                        .build()
-        );
         register_field(
                 LLM_GEN.PROMPT,
                 FieldInfo.stringField()

@@ -1,10 +1,10 @@
 package chechelpo.frplm.domain.sessions.messages.core;
 
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSControllerAwareHelper;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRole;
 import org.springframework.stereotype.Component;

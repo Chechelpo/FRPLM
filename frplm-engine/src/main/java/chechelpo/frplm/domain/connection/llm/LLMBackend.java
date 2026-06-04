@@ -1,11 +1,10 @@
 package chechelpo.frplm.domain.connection.llm;
 
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.interfaces.StableRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Optional;
 
 import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;

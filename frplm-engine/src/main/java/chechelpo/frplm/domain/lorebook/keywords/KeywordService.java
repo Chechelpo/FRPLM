@@ -1,18 +1,14 @@
 package chechelpo.frplm.domain.lorebook.keywords;
 
-import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.events.crud.CRUDCommittedEvent;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;

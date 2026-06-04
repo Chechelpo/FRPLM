@@ -2,8 +2,8 @@ package chechelpo.frplm.domain.character.starting_locations;
 
 import ch.qos.logback.classic.Level;
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Ephemeral
-public interface ConnectionSnapshot {
+public non-sealed interface ConnectionSnapshot extends Snapshot {
     record Reference(int id) implements StableReference {
         private static final String prefix = "connection: ";
 

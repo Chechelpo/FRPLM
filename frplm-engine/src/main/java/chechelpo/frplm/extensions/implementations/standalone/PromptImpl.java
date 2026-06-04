@@ -2,7 +2,7 @@ package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 
 import java.util.Optional;

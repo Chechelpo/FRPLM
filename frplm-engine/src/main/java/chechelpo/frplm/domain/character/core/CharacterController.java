@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.character.core;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

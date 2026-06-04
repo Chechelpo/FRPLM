@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.connection.api_hosts;
 
 import chechelpo.frplm.annotations.Store;
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;

@@ -66,11 +66,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jooq</artifactId>
         </dependency>
@@ -101,6 +96,33 @@
             <artifactId>frplm-commons</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- General unit/integration test support: JUnit Jupiter, Mockito, AssertJ, Spring Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Makes IDE/Maven JUnit Platform launching more stable -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- In-memory DB for DSLContext-backed store tests -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Only keep this if you test RestClient/RestTemplate behavior -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-restclient-test</artifactId>
         </dependency>
     </dependencies>
 

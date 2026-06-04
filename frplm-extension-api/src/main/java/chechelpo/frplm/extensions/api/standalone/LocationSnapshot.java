@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Ephemeral
-public interface LocationSnapshot {
+public non-sealed interface LocationSnapshot extends Snapshot {
     record Reference(int worldId, int entryId) implements StableReference {
         private static final String prefix = "entry: ";
         @Contract(pure = true)

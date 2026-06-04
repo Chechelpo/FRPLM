@@ -1,8 +1,8 @@
 package chechelpo.frplm.domain.tags;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;

@@ -2,8 +2,8 @@ package chechelpo.frplm.domain.tags;
 
 import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.character.tags.CharacterTagsService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
@@ -23,7 +23,7 @@ import static chechelpo.frplm.domain.EntityTypes.TAGS_URL;
 final class TagController extends EntityController<TagsRecord, TagService> {
     CharacterTagsService characterTagsService;
     public TagController(TagService service, CharacterTagsService characterTagsService) {
-        super(EntityTypes.Types.TAGS, service);
+        super(service);
         this.characterTagsService = characterTagsService;
     }
 

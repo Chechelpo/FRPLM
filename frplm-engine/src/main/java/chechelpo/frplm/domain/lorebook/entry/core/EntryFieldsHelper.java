@@ -1,15 +1,15 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
-import chechelpo.frplm.frameworks.entities.fields.constraints.BoolConstraint;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSControllerAwareHelper;
+import chechelpo.frplm.core.entities.fields.constraints.BoolConstraint;
+import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.frameworks.entities.fields.CommonFields;
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.fields.CommonFields;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;

@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.lorebook.outlet;
 
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.interfaces.StableRecord;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.jetbrains.annotations.Contract;

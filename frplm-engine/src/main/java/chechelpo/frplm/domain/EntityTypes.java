@@ -118,6 +118,7 @@ public final class EntityTypes {
 
         MOVEMENTS(MOVEMENTS_str, Level.DEBUG),
         CURRENT_LOCATIONS(CURRENT_LOCATIONS_str, Level.DEBUG),
+        TEST_ENTITY("Test_Entity", Level.TRACE);
         ;
 
         private final String type;

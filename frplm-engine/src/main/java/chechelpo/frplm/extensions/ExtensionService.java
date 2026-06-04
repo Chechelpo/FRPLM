@@ -5,6 +5,7 @@ import chechelpo.frplm.extensions.api.activation.PostGenerationActivated;
 import chechelpo.frplm.extensions.api.types.ConfigurableExtension;
 import chechelpo.frplm.extensions.api.types.Extension;
 import chechelpo.frplm.extensions.api.utils.ExtensionDBBridge;
+import chechelpo.frplm.extensions.api.utils.io;
 import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
@@ -12,6 +13,7 @@ import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -38,7 +40,9 @@ public final class ExtensionService implements ExtensionDBBridge {
         this.extensionRepository = extensionRepository;
         this.sessionContext = sessionContext;
     }
-
+    public ExtensionRepository getExtensionRepository() {
+        return extensionRepository;
+    }
 
     @PostConstruct
     void initializeExtensions(){
@@ -54,6 +58,7 @@ public final class ExtensionService implements ExtensionDBBridge {
                     registerExtension(ext.extensionId(), ext.defaultConfig());
                 });
     }
+
     public void runPostGeneration(SessionsRecord session){
         SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
         extensions.stream()
@@ -94,12 +99,20 @@ public final class ExtensionService implements ExtensionDBBridge {
                 .map(ConfigurableExtension::configPanelUrl)
                 .findFirst();
     }
+    @NotNull Optional<io.WebAsset> getConfigPanelAsset(String extensionID, String assetName){
+        Optional<ConfigurableExtension> configExtension = extensions.stream()
+                .filter(ext -> ext instanceof ConfigurableExtension && ext.extensionId().equals(extensionID))
+                .map(ConfigurableExtension.class::cast)
+                .findFirst();
+        return configExtension.flatMap(configurableExtension -> configurableExtension.getAsset(assetName));
+    }
 
     /** @apiNote the new config must include the FULL JSON, not only the changed parameters */
     @Override
     public void saveConfig(String extensionId, JsonNode newConfig) {
         store.updateConfig(extensionId, newConfig);
     }
+
 
     public List<PostGenerationActivated> getPostGenerationExtensions(){
         return extensions.stream()

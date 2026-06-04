@@ -4,7 +4,7 @@ import chechelpo.frplm.extensions.api.EngineRepository;
 import chechelpo.frplm.extensions.api.standalone.*;
 import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
 import chechelpo.frplm.extensions.implementations.standalone.*;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -26,6 +26,21 @@ final class ExtensionRepository implements EngineRepository {
 
     ExtensionContext getContext() {
         return context;
+    }
+
+
+    @Override
+    public <T> Optional<?> get(@NotNull Class<T> type, @NotNull String reference) {
+        Class<?> rawType = type;
+
+        if ( rawType == ConnectionSnapshot.class )
+            return this.getConnection(ConnectionSnapshot.Reference.fromString(reference));
+        if ( rawType == CharacterSnapshot.class )
+            return this.getCharacter(CharacterSnapshot.Reference.fromString(reference));
+        if ( rawType == PromptSnapshot.class )
+            return this.getPrompt(PromptSnapshot.Reference.fromString(reference));
+
+        return Optional.empty();
     }
 
     @Override
@@ -79,6 +94,21 @@ final class ExtensionRepository implements EngineRepository {
     @Override
     public Optional<WorldSnapshot> getWorld(WorldSnapshot.@NotNull Reference reference) {
         return context.worlds().find(EntityKey.of(WORLDS.ID, reference.id())).map(record -> new WorldImpl(record, context));
+    }
+
+    @Override
+    public List<LorebookSnapshot> getLorebooks() {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Optional<LorebookSnapshot> getLorebookWithName(String name) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Optional<LorebookSnapshot> getLorebook(LorebookSnapshot.Reference reference) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override

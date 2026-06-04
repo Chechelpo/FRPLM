@@ -1,7 +1,7 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 
 public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements CharacterSnapshot {

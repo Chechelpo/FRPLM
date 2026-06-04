@@ -1,12 +1,12 @@
 package chechelpo.frplm.domain.prompts.template;
 
 import chechelpo.frplm.domain.prompts.section.DefaultSections;
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.FloatConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSControllerAwareHelper;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.FloatConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import chechelpo.frplm.openai_compatible.ReasoningEffort;
 import org.springframework.stereotype.Component;

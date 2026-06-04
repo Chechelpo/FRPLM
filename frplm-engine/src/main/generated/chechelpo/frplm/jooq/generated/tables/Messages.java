@@ -7,6 +7,8 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import chechelpo.frplm.jooq.generated.tables.Extension.ExtensionPath;
+import chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
 import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
@@ -232,9 +234,22 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public LlmGenPath llmGen() {
         if (_llmGen == null)
-            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A733.getInverseKey());
+            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A73.getInverseKey());
 
         return _llmGen;
+    }
+
+    private transient ExtrasPath _extras;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
+     * table
+     */
+    public ExtrasPath extras() {
+        if (_extras == null)
+            _extras = new ExtrasPath(this, null, Keys.CONSTRAINT_7ABDE.getInverseKey());
+
+        return _extras;
     }
 
     private transient CurrentLocationsPath _currentLocations;
@@ -248,6 +263,14 @@ public class Messages extends TableImpl<MessagesRecord> {
             _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5AF8F.getInverseKey());
 
         return _currentLocations;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.EXTENSION</code> table
+     */
+    public ExtensionPath extension() {
+        return extras().extension();
     }
 
     @Override

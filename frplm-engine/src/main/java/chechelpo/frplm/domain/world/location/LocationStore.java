@@ -1,8 +1,8 @@
 package chechelpo.frplm.domain.world.location;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.domain.world.core.WorldService;
 import org.jetbrains.annotations.NotNull;

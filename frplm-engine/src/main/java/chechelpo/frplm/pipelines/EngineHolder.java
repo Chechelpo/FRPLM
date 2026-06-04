@@ -12,7 +12,7 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.extensions.ExtensionService;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;

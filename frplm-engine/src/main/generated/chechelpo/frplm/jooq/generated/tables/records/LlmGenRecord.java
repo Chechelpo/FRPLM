@@ -47,59 +47,45 @@ public class LlmGenRecord extends UpdatableRecordImpl<LlmGenRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.LLM_GEN.PROMPT_ID</code>.
-     */
-    public void setPromptId(Integer value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.LLM_GEN.PROMPT_ID</code>.
-     */
-    public Integer getPromptId() {
-        return (Integer) get(2);
-    }
-
-    /**
      * Setter for <code>PUBLIC.LLM_GEN.PROMPT</code>.
      */
     public void setPrompt(String value) {
-        set(3, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LLM_GEN.PROMPT</code>.
      */
     public String getPrompt() {
-        return (String) get(3);
+        return (String) get(2);
     }
 
     /**
      * Setter for <code>PUBLIC.LLM_GEN.ACTIVE_RESPONSE</code>.
      */
     public void setActiveResponse(Short value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LLM_GEN.ACTIVE_RESPONSE</code>.
      */
     public Short getActiveResponse() {
-        return (Short) get(4);
+        return (Short) get(3);
     }
 
     /**
      * Setter for <code>PUBLIC.LLM_GEN.RESPONSE_NUM</code>.
      */
     public void setResponseNum(Short value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LLM_GEN.RESPONSE_NUM</code>.
      */
     public Short getResponseNum() {
-        return (Short) get(5);
+        return (Short) get(4);
     }
 
     // -------------------------------------------------------------------------
@@ -125,12 +111,11 @@ public class LlmGenRecord extends UpdatableRecordImpl<LlmGenRecord> {
     /**
      * Create a detached, initialised LlmGenRecord
      */
-    public LlmGenRecord(Integer sessionId, Integer tickNum, Integer promptId, String prompt, Short activeResponse, Short responseNum) {
+    public LlmGenRecord(Integer sessionId, Integer tickNum, String prompt, Short activeResponse, Short responseNum) {
         super(LlmGen.LLM_GEN);
 
         setSessionId(sessionId);
         setTickNum(tickNum);
-        setPromptId(promptId);
         setPrompt(prompt);
         setActiveResponse(activeResponse);
         setResponseNum(responseNum);

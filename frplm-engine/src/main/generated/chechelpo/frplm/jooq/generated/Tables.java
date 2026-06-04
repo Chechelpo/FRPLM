@@ -13,6 +13,7 @@ import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import chechelpo.frplm.jooq.generated.tables.Extension;
+import chechelpo.frplm.jooq.generated.tables.Extras;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.LlmGen;
@@ -29,6 +30,7 @@ import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import chechelpo.frplm.jooq.generated.tables.Tags;
+import chechelpo.frplm.jooq.generated.tables.TestTable;
 import chechelpo.frplm.jooq.generated.tables.Worlds;
 
 
@@ -82,6 +84,11 @@ public class Tables {
      * The table <code>PUBLIC.EXTENSION</code>.
      */
     public static final Extension EXTENSION = Extension.EXTENSION;
+
+    /**
+     * The table <code>PUBLIC.EXTRAS</code>.
+     */
+    public static final Extras EXTRAS = Extras.EXTRAS;
 
     /**
      * The table <code>PUBLIC.KEYWORD</code>.
@@ -162,6 +169,11 @@ public class Tables {
      * The table <code>PUBLIC.TAGS</code>.
      */
     public static final Tags TAGS = Tags.TAGS;
+
+    /**
+     * The table <code>PUBLIC.TEST_TABLE</code>.
+     */
+    public static final TestTable TEST_TABLE = TestTable.TEST_TABLE;
 
     /**
      * The table <code>PUBLIC.WORLDS</code>.

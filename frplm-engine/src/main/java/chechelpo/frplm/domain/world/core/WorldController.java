@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.world.core;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +13,6 @@ final class WorldController extends EntityController<
         >
 {
     WorldController(WorldService service) {
-        super(EntityTypes.Types.WORLDS, service);
+        super(service);
     }
 }

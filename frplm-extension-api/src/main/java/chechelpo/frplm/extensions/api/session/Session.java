@@ -1,16 +1,18 @@
 package chechelpo.frplm.extensions.api.session;
 
+import chechelpo.frplm.extensions.api.annotations.Ephemeral;
 import chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
+import chechelpo.frplm.extensions.api.standalone.Snapshot;
 import chechelpo.frplm.extensions.api.standalone.StableReference;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface Session {
+@Ephemeral
+public non-sealed interface Session extends Snapshot {
     record Reference(int id) implements StableReference {
         private static final String prefix = "session: ";
 

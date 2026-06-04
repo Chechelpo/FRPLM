@@ -1,11 +1,10 @@
 package chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntSet;

@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

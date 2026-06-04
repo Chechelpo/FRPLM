@@ -1,11 +1,10 @@
 package chechelpo.frplm.domain.connection.llm;
 
-import chechelpo.frplm.domain.connection.api_hosts.HostService;
-import chechelpo.frplm.frameworks.entities.fields.FieldInfo;
-import chechelpo.frplm.frameworks.entities.fields.constraints.NumberConstraint;
-import chechelpo.frplm.frameworks.entities.fields.constraints.StringConstraint;
-import chechelpo.frplm.frameworks.entities.fields.kinds.FieldType;
-import chechelpo.frplm.frameworks.entities.pseudo_services.ABSControllerAwareHelper;
+import chechelpo.frplm.core.entities.fields.FieldInfo;
+import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.stereotype.Component;
@@ -68,7 +67,6 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
                         .build()
         );
-
     }
 
 }

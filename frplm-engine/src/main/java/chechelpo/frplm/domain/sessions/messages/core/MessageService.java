@@ -9,9 +9,9 @@ import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.jooq.generated.tables.Characters;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.records.*;
@@ -133,11 +133,6 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                                 .set(LLM_GEN.SESSION_ID, record.getSessionId())
                                 .set(LLM_GEN.TICK_NUM, record.getTickNum())
                                 .set(LLM_GEN.PROMPT, " ")
-                                .set(LLM_GEN.PROMPT_ID,
-                                        sessionService.getValueOf(SESSIONS.MAIN_PROMPT,
-                                                EntityKey.of(SESSIONS.ID, record.getSessionId()))
-                                                .orElseThrow()
-                                )
                                 .build()
                         )
                 );

@@ -6,7 +6,6 @@ import org.jooq.meta.jaxb.*;
 public final class GenerateJooq {
 
     public static void main(String[] args) throws Exception {
-
         Configuration configuration =
                 new Configuration()
                         .withJdbc(new Jdbc()
@@ -25,7 +24,7 @@ public final class GenerateJooq {
                                 )
                                 .withTarget(new Target()
                                         .withPackageName("chechelpo.frplm.jooq.generated")
-                                        .withDirectory("src/main/generated")
+                                        .withDirectory("frplm-engine/src/main/generated")
                                 )
                         );
         GenerationTool.generate(configuration);

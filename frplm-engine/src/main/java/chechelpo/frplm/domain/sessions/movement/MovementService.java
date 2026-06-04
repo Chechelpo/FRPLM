@@ -2,9 +2,9 @@ package chechelpo.frplm.domain.sessions.movement;
 
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.runtime.InvalidMove;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import org.jetbrains.annotations.NotNull;

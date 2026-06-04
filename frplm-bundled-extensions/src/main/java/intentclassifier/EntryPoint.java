@@ -8,7 +8,6 @@ import chechelpo.frplm.extensions.api.session.Session;
 import chechelpo.frplm.extensions.api.session.SessionCharacter;
 import chechelpo.frplm.extensions.api.session.SessionLocation;
 import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
-import chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import chechelpo.frplm.extensions.api.types.ConfigurableExtension;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
@@ -23,37 +22,66 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @FrplmExtension
 public class EntryPoint extends ConfigurableExtension implements PostGenerationActivated {
     private static final ObjectMapper mapper = new ObjectMapper();
-    private static final ResponseFormat responseFormat = movementIntentFormat();
+
     public EntryPoint() {
-        super("intent-classifier",
+        super("intentclassifier",
                 "Intent classifier",
                 "Automatically picks up movements from chat history",
                 null,
+                loadResourceText(
+                        EntryPoint.class,
+                        "/intentclassifier/config-panel/"
+                ),
                 getDefault()
         );
+        setFieldConfig("connection", new FieldConfig("Connection",
+                null,
+                new Field.SnapshotSelection<>(true, 1, 1, ConnectionSnapshot.class))
+        );
+        setFieldConfig("chatHistoryToInclude", new FieldConfig(
+                "Message context",
+                "How many messages back to give the classifier as context",
+                new Field.PrimitiveField.IntegerConfig(false, 0, Integer.MAX_VALUE))
+        );
+    }
+
+    private static ObjectNode getDefault() {
+        ObjectNode root = mapper.createObjectNode();
+        root.putArray("connection");
+        root.put("chatHistoryToInclude", 3);
+        return root;
+    }
+
+    @Override
+    public @NotNull String configPanelUrl() {
+        return super.configPanelUrl();
     }
 
     @Override
     public void onNewGeneration(@NotNull Session session) {
         Config config = toConfig();
 
-        List<ChatMessage> chatHistory = getLast(config.chatHistory, session.getChatHistory());
+        List<ChatMessage> chatHistory = session.getLastMessages(config.chatHistory);
         ConnectionSnapshot connection;
-        if (config.connectionRef.isPresent()) connection = this.getRepository().getConnection(config.connectionRef.get()).orElseThrow();
+        if (config.connectionRef.isPresent())
+            connection = this.getRepository().getConnection(config.connectionRef.get()).orElseThrow();
         else connection =
                 session.getPrompt()
-                .orElseThrow(() -> new IllegalStateException("Somehow the session with a new message has no prompt"))
-                .getAssignedConnection()
-                .orElseThrow(() -> new IllegalStateException("Somehow the session with a new message has no connection"));
+                        .orElseThrow(() -> new IllegalStateException("Somehow the session with a new message has no prompt"))
+                        .getAssignedConnection()
+                        .orElseThrow(() -> new IllegalStateException("Somehow the session with a new message has no connection"));
 
         SessionLocation currentLocation = session.getUserCharacter().getCurrentLocation();
         SessionCharacter[] present = currentLocation.getCharactersHere();
         SessionLocation[] neighbours = currentLocation.getSessionNeighbours();
+
+
+        String[] characterNames = Arrays.stream(present).map(SessionCharacter::getName).toArray(String[]::new);
+        String[] neighbourNames = Arrays.stream(neighbours).map(SessionLocation::getName).toArray(String[]::new);
 
         this.logger().info("""
                 present: %s,
@@ -61,61 +89,59 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
                 neighbours: %s,
                 chatHistory: %s
                 """.formatted(
-                Arrays.stream(present).map(SessionCharacter::getName).toList(),
+                characterNames,
                 currentLocation.getName(),
-                java.util.Arrays.stream(neighbours)
-                        .map(LocationSnapshot::getName)
-                        .toList(),
-                chatHistory.stream().map(ChatMessage::asChatCompletion).toList()
+                neighbourNames,
+                chatHistory.stream().map(mess -> mess.asChatCompletion().content()).toList()
         ));
         ChatCompletionResponse response = connection.generate(
                 ChatCompletionRequest.builder(connection.getModelID())
                         .system("""
-                        You are an intent classifier.
-
-                        Determine whether the characters intend to move from the current location to one of the neighbouring locations. 
-                        Including characters who haven't moved is unnecessary.
-
-                        Return only structured JSON matching the provided schema.
-
-                        Rules:
-                        - "characters" and "characterName" must appear regardless of the number of characters.
-                        - "move" is true only if the chat clearly indicates movement intent.
-                        - "location_name" must be one of the neighbouring location names when move is true.
-                        - Do not invent locations.
-                        """)
+                                You are an intent classifier.
+                                
+                                Determine whether any present character clearly intends to move from the current location
+                                to one of the neighbouring locations.
+                                
+                                Return only structured JSON matching the provided schema.
+                                
+                                Rules:
+                                - Return only characters who clearly intend to move.
+                                - If no character clearly intends to move, return {"characters": []}.
+                                - "character_name" must be one of the present character names.
+                                - "location_name" must be one of the neighbouring location names.
+                                - Do not invent characters.
+                                - Do not invent locations.
+                                - Do not include characters who are staying, hesitating, only discussing movement hypothetically, or not clearly moving.
+                                """)
                         .user("""
-                        Present characters: %s
-                        User character is: %s
-                        Current location: %s
-                        Neighbouring locations: %s
-                        """.formatted(
-                                Arrays.stream(present).map(SessionCharacter::getName).toList(),
+                                Present characters: %s
+                                User character is: %s
+                                Current location: %s
+                                Neighbouring locations: %s
+                                """.formatted(
+                                characterNames,
                                 session.getUserCharacter().getName(),
                                 currentLocation.getName(),
-                                java.util.Arrays.stream(neighbours)
-                                        .map(LocationSnapshot::getName)
-                                        .toList()
+                                neighbourNames
                         ))
                         .addAll(chatHistory.stream()
                                 .map(ChatMessage::asChatCompletion)
                                 .toList())
-                        .responseFormat(responseFormat)
+                        .responseFormat(movementIntentFormat(characterNames, neighbourNames))
                         .build()
         );
         this.logger().setLevel(Level.FINEST);
         MovementIntentResult result = parseMovementIntent(response);
         this.logger().info("""
-                result: %s
-                orders: %s
-                """.formatted(
-                result,
-                result.characters.toString()
+                        result: %s
+                        orders: %s
+                        """.formatted(
+                        result,
+                        result.characters.toString()
                 )
         );
 
-        for (CharacterMovementIntent charMovement : result.characters){
-            if (!charMovement.move) continue;
+        for (CharacterMovementIntent charMovement : result.characters) {
             Optional<SessionCharacter> movedCharacter = Arrays.stream(present)
                     .filter(character -> character.getName().equalsIgnoreCase(charMovement.characterName))
                     .findFirst();
@@ -127,7 +153,8 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
                 if (!location.getName().equalsIgnoreCase(locationName)) continue;
                 MoveResult result1 = movedCharacter.get().moveTo(location);
 
-                if (result1.successful()) this.logger().info("Moved character " + locationName + " to " + location.getName());
+                if (result1.successful())
+                    this.logger().info("Moved character " + movedCharacter.get().getName() + " to " + location.getName());
                 else this.logger().warning("Couldn't move character " + result1.getFailed());
 
                 break;
@@ -137,36 +164,19 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
 
 
     @Override
-    public void onConfigChange(@NotNull JsonNode newConfig) {
-        String rawConnection = textField(newConfig, "connection", "");
-        int chatHistoryToInclude = intField(newConfig, "chatHistoryToInclude", 3);
+    public void onConfigChange(@NotNull JsonNode newConfig) {}
 
-        if (chatHistoryToInclude < 0) {
-            throw new IllegalArgumentException("chatHistoryToInclude must be >= 0");
-        }
-
-        if (!rawConnection.isBlank()) {
-            ConnectionSnapshot.Reference.fromString(rawConnection);
-        }
-    }
-
-    private record MovementIntentResult(
-            @NotNull List<CharacterMovementIntent> characters
-    ) {}
+    private record MovementIntentResult(@NotNull List<CharacterMovementIntent> characters) {}
 
     private record CharacterMovementIntent(
             @JsonProperty("character_name")
             @NotNull String characterName,
 
-            boolean move,
-
             @JsonProperty("location_name")
             String locationName
     ) {}
 
-    private static @NotNull MovementIntentResult parseMovementIntent(
-            @NotNull ChatCompletionResponse response
-    ) {
+    private static @NotNull MovementIntentResult parseMovementIntent(@NotNull ChatCompletionResponse response) {
         String content = response.choices()
                 .getFirst()
                 .message()
@@ -186,18 +196,23 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
         }
     }
 
-    private record Config(Optional<ConnectionSnapshot.Reference> connectionRef, int chatHistory){}
+    private record Config(Optional<ConnectionSnapshot.Reference> connectionRef, int chatHistory) {
+    }
 
     private @NotNull Config toConfig() {
         JsonNode node = this.getCurrentConfig();
 
-        String rawConnection = textField(node, "connection", "");
-        int chatHistoryToInclude = intField(node, "chatHistoryToInclude", 3);
+        Optional<ConnectionSnapshot.Reference> connectionRef = Optional.empty();
 
-        Optional<ConnectionSnapshot.Reference> connectionRef =
-                rawConnection.isBlank()
-                        ? Optional.empty()
-                        : Optional.of(ConnectionSnapshot.Reference.fromString(rawConnection));
+        JsonNode connectionNode = node.get("connection");
+        if (connectionNode != null && connectionNode.isArray() && !connectionNode.isEmpty()) {
+            String rawConnection = connectionNode.get(0).asString();
+            if (!rawConnection.isBlank()) {
+                connectionRef = Optional.of(ConnectionSnapshot.Reference.fromString(rawConnection));
+            }
+        }
+
+        int chatHistoryToInclude = intField(node, "chatHistoryToInclude", 3);
 
         return new Config(
                 connectionRef,
@@ -208,18 +223,14 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
         JsonNode value = node.get(field);
         return value == null || value.isNull() ? fallback : value.asText();
     }
+
     private static int intField(@NotNull JsonNode node, @NotNull String field, int fallback) {
         JsonNode value = node.get(field);
         return value == null || value.isNull() ? fallback : value.asInt(fallback);
     }
 
-    private static ObjectNode getDefault() {
-        return mapper.createObjectNode()
-                .put("connection", "")
-                .put("chatHistoryToInclude", 3);
-    }
 
-    private static @NotNull ResponseFormat movementIntentFormat() {
+    private static @NotNull ResponseFormat movementIntentFormat(String[] characterNames, String[] locationNames) {
         ObjectNode schema = mapper.createObjectNode();
 
         schema.put("type", "object");
@@ -236,26 +247,24 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
 
         ObjectNode itemProperties = item.putObject("properties");
 
-        itemProperties.putObject("character_name")
-                .put("type", "string")
-                .put("description", "Name of the character being classified.")
-                .put();
-        itemProperties.putObject("move")
-                .put("type", "boolean")
-                .put("description", "Whether the character intends to move.");
+        ObjectNode charactersNameNode = itemProperties.putObject("character_name");
+        charactersNameNode.put("type", "string");
+        charactersNameNode.put("description", "Name of the character being classified.");
+        var characterEnum = charactersNameNode.putArray("enum");
+        Arrays.stream(characterNames).forEach(characterEnum::add);
+
 
         ObjectNode locationName = itemProperties.putObject("location_name");
-        locationName.putArray("type")
-                .add("string")
-                .add("null");
+        locationName.put("type", "string");
         locationName.put(
                 "description",
-                "Destination location name when move is true; null when no movement is intended."
+                "Destination location name."
         );
+        var locationEnum = locationName.putArray("enum");
+        Arrays.stream(locationNames).forEach(locationEnum::add);
 
         item.putArray("required")
                 .add("character_name")
-                .add("move")
                 .add("location_name");
 
         schema.putArray("required")

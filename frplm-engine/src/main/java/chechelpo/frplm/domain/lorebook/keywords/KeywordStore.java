@@ -1,8 +1,7 @@
 package chechelpo.frplm.domain.lorebook.keywords;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.Keyword;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;

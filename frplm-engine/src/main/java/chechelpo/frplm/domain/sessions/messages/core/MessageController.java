@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.sessions.messages.core;
 
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import org.springframework.http.ResponseEntity;

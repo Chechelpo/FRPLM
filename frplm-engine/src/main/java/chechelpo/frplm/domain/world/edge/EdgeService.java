@@ -2,8 +2,8 @@ package chechelpo.frplm.domain.world.edge;
 
 import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;

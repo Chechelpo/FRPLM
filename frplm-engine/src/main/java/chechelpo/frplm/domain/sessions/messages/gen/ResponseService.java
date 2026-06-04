@@ -4,15 +4,13 @@ import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityService;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 import static chechelpo.frplm.jooq.generated.Tables.RESPONSES;
 

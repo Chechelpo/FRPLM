@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.sessions.messages.gen;
 
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;

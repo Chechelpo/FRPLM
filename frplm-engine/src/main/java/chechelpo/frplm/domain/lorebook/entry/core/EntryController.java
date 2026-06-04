@@ -1,8 +1,8 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

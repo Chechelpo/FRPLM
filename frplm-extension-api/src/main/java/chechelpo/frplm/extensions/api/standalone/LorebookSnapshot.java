@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 @Ephemeral
-public interface LorebookSnapshot {
+public non-sealed interface LorebookSnapshot extends Snapshot {
     record Reference(int id) implements StableReference{
         private static final String prefix = "lorebook: ";
 

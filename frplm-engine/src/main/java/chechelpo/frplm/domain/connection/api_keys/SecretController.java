@@ -2,7 +2,7 @@ package chechelpo.frplm.domain.connection.api_keys;
 
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityController;
+import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

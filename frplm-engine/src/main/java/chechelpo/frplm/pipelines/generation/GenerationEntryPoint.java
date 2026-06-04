@@ -7,7 +7,7 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.NotInitialized;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.frameworks.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;

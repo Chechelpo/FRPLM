@@ -8,6 +8,7 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
 import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
@@ -250,6 +251,19 @@ public class Sessions extends TableImpl<SessionsRecord> {
             _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A.getInverseKey());
 
         return _llmGen;
+    }
+
+    private transient ExtrasPath _extras;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
+     * table
+     */
+    public ExtrasPath extras() {
+        if (_extras == null)
+            _extras = new ExtrasPath(this, null, Keys.CONSTRAINT_7A.getInverseKey());
+
+        return _extras;
     }
 
     private transient CurrentLocationsPath _currentLocations;

@@ -106,7 +106,7 @@ public final class SessionImpl implements Session {
     @Override
     @Contract("_ -> new")
     public @NotNull List<ChatMessage> getLastMessages(int number) {
-        return
+        return getLast(number, getChatHistory());
     }
     private static <T> @NotNull List<T> getLast(int number, @NotNull List<T> of){
         if (number <= 0 || of.isEmpty()) {
