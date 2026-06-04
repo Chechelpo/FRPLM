@@ -1,7 +1,9 @@
 package chechelpo.frplm.domain.lorebook.core;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
@@ -11,6 +13,7 @@ import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
 import tools.jackson.databind.JsonNode;
 
 import java.util.List;
@@ -36,7 +39,7 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
     @CheckReturnValue
     public @NotNull LorebooksRecord getLorebookOf(@NotNull CharactersRecord record) throws EntityNotFound {
         return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
-                .orElseThrow(() -> new IllegalStateException("Character " + record.getLorebookId() + " without a lorebook"));
+                .orElseThrow(() -> new IllegalStateException("Character " + record.getName() + " without a lorebook"));
     }
 
     @Transactional(readOnly = true)

@@ -38,13 +38,16 @@ final class OutletHelper extends ABSControllerAwareHelper<OutletRecord, OutletSe
                         .build()
         );
 
+        ensureStandardOutlets();
+    }
+
+    void ensureStandardOutlets(){
         Arrays.stream(StandardOutlet.values())
                 .forEach(
                         outlet -> outlet.toKey().ifPresent( key -> {
                             if (!service.exists(key)) service.createAndGet(outlet.toPayload().orElseThrow());
-            })
-        );
-
+                        })
+                );
     }
 }
 

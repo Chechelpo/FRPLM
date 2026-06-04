@@ -11,7 +11,7 @@ public sealed interface CRUDCommittedEvent extends CRUDEvent {
     record CreatedEntity<R extends TableRecord<R>>
             (EntityTypes.Types type, long operationID, EntityKey<R> key, R record) implements CRUDCommittedEvent {}
     record DeletedEntity<R extends TableRecord<R>>
-            (EntityTypes.Types type, long operationID, EntityKey<R> key) implements CRUDCommittedEvent {}
+            (EntityTypes.Types type, long operationID, EntityKey<R> key, R deletedRecord) implements CRUDCommittedEvent {}
     record UpdatedEntity<R extends TableRecord<R>>
             (EntityTypes.Types type, long operationID, EntityKey<R> target, EntityDataPayload<R> updatedData) implements CRUDCommittedEvent {}
     record RetrievedEntities<R extends TableRecord<R>>

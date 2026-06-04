@@ -39,4 +39,4 @@ final class TestDsl {
         static void dropSchema(DSLContext ctx) {
             ctx.execute("DROP TABLE IF EXISTS \"PUBLIC\".\"TEST_TABLE\"");
         }
-    }
+}

@@ -48,7 +48,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         int defaultOutletID = lorebooks.getValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, parentLorebookKey)
                 .orElseThrow(() -> new UnexpectedException("Could not fetch defaultOutletID from parent", Severity.SYSTEM));
 
-        data.set(Entry.ENTRY.ENTRY_ID,newEntryID);
+        data.set(Entry.ENTRY.ENTRY_ID, newEntryID);
         data.set(ENTRY.OUTLET, defaultOutletID);
 
         super.beforeCreate(data, operationID);

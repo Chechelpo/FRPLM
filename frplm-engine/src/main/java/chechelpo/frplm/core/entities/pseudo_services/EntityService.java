@@ -370,14 +370,18 @@ public abstract class EntityService<
 
         long operationID = eventBus.nextOperationID();
         beforeDelete(id, operationID);
-
+        Optional<R> staleRecord = this.find(id);
+        if (staleRecord.isEmpty()) {
+            log.error("No such entity to delete with ID {}", id);
+            return false;
+        }
         boolean success = store.delete(id);
-        if (success) afterSuccessfulDelete(id, operationID);
+        if (success) afterSuccessfulDelete(id, operationID, staleRecord.get());
 
         return success;
     }
 
-    protected void afterSuccessfulDelete(EntityKey<R> id, long operationID) {
-        eventBus.publish(new CRUDCommittedEvent.DeletedEntity<R>(this.entityType, operationID, id));
+    protected void afterSuccessfulDelete(EntityKey<R> id, long operationID, R record) {
+        eventBus.publish(new CRUDCommittedEvent.DeletedEntity<R>(this.entityType, operationID, id, record));
     }
 }

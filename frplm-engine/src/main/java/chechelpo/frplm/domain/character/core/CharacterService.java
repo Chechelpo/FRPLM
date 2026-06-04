@@ -32,6 +32,7 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
         super(store, eventBus);
         this.lorebookService = lorebookService;
     }
+
     @Override
     protected void beforeCreate(EntityDataPayload<CharactersRecord> data, long operationID) {
         EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
@@ -42,6 +43,14 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
         data.set(CHARACTERS.LOREBOOK_ID, record.getId());
 
         super.beforeCreate(data, operationID);
+    }
+
+    @Override
+    protected void afterSuccessfulDelete(EntityKey<CharactersRecord> id, long operationID, CharactersRecord record) {
+        lorebookService.delete(
+                lorebookService.keyOf(lorebookService.getLorebookOf(record))
+        );
+        super.afterSuccessfulDelete(id, operationID, record);
     }
 
     public Optional<CharactersRecord> getCharacterWith(String name){
