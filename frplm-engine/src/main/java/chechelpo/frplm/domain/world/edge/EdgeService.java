@@ -1,5 +1,6 @@
 package chechelpo.frplm.domain.world.edge;
 
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
@@ -30,6 +31,25 @@ public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStor
 
     public @NotNull List<LocationsRecord> getNeighbours(EntityKey<LocationsRecord> key) {
         return this.store.getNeighboursOf(key);
+    }
+
+    @Override
+    protected void beforeCreate(EntityDataPayload<LocationNeighborsRecord> data, long operationID) {
+
+        super.beforeCreate(data, operationID);
+    }
+
+    /**
+     * @implNote Tries the inverse if failed.
+     */
+    @Override
+    public boolean delete(EntityKey<LocationNeighborsRecord> id) {
+        return super.delete(id) || super.delete(EntityKey.<LocationNeighborsRecord>builder()
+                .set(LOCATION_NEIGHBORS.WORLD_ID, id.requireValue(LOCATION_NEIGHBORS.WORLD_ID))
+                .set(LOCATION_NEIGHBORS.LOCATION1_ID, id.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID))
+                .set(LOCATION_NEIGHBORS.LOCATION2_ID, id.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID))
+                .build()
+        );
     }
 
     /**

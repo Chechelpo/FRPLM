@@ -7,6 +7,7 @@ import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -18,7 +19,8 @@ public class LLMService extends EntityService<LlmConnectionRecord, LLMStore> {
         super(store, eventBus);
     }
 
+    @Transactional(readOnly = true)
     public Optional<LlmConnectionRecord> fromTemplate(@NotNull PromptTemplateRecord template) {
-        return this.find(EntityKey.of(LLM_CONNECTION.ID , template.getConnectionId().intValue()));
+        return this.find(EntityKey.of(LLM_CONNECTION.ID, template.getConnectionId().intValue()));
     }
 }

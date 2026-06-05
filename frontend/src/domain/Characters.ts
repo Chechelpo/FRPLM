@@ -104,8 +104,8 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
 
         await createEntity<StartingLocationKeys,StartingLocationData,StartingLocation>(
             {
-                worldID: loc.get('worldID')!,
-                locationID: loc.get('id')!,
+                worldID: loc.get('worldID'),
+                locationID: loc.get('id'),
                 characterID: this.get('id'),
             },
             null,

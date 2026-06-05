@@ -1,24 +1,22 @@
 package chechelpo.frplm.exceptions.API;
 
 import ch.qos.logback.classic.Logger;
-import chechelpo.frplm.config.logging.LoggerFactory;
 import chechelpo.frplm.config.logging.Logger_names;
 import chechelpo.frplm.exceptions.DomainException;
 import chechelpo.frplm.exceptions.RuntimeDomainException;
 import chechelpo.frplm.exceptions.Severity;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 final class Controller {
-    private final Logger log;
+    private static final Logger log = (Logger) LoggerFactory.getLogger("ExceptionController");
 
-    Controller() {
-        this.log = LoggerFactory.get_logger(Logger_names.EXCEPTIONS);
-    }
+    Controller() {}
 
     record ErrorResponse(
             int status,

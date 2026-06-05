@@ -4,7 +4,7 @@ import {
     deleteEntity,
     EntityField,
     fetch_all,
-    fetchApi,
+    fetchApi, fetchMatching,
     fetchOne,
     getEntityController
 } from "@/frameworks/ABSEntity";
@@ -131,23 +131,20 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
         return super.get(key as keyof EntryData);
     }
 
-    //Workaround until a query works
     static async ofLorebook(lorebook: Lorebook | number): Promise<Entry[]> {
         let lorebookID: number;
         if (typeof lorebook === "number") {
             lorebookID = lorebook;
-        } else
-            lorebookID = lorebook.get('id')
+        } else lorebookID = lorebook.get('id')
 
         console.info(`Fetching entries of lorebook with id ${lorebookID}`);
-        const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.ENTRY}/entity/${lorebookID}`,
+        return  await fetchMatching<EntryKey, EntryData, Entry>(
             {
-                method: "GET",
-            }
-        )
-        const dtos = await response.json() as DTO[];
-        return dtos.map(dto => new Entry(dto, EntityTypes.ENTRY));
+                lorebook_id: lorebookID,
+            },
+            EntityTypes.ENTRY,
+            Entry
+        );
     }
 
     private keywordPath(keyword : string): string {
@@ -161,7 +158,6 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
             }
         ).then(async response => await response.json() as string[])
     }
-
     async addKeyword(name: string): Promise<boolean> {
         const response = await fetchApi(
             this.keywordPath(name),
@@ -171,7 +167,6 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
         )
         return response.status == 200;
     }
-
     async removeKeyword(keyword: string): Promise<boolean> {
         const response = await fetchApi(
             this.keywordPath(keyword),
@@ -193,7 +188,6 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
                 return x.get('name')
             })
     }
-
     public async updateOutlet(outlet: string): Promise<void> {
         console.debug(`Updating outlet for ${this.get('name')} with new value ${outlet}`)
         const result = await fetchApi(
@@ -203,7 +197,6 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
                 body: outlet,
             })
     }
-
     public async clearOutlet(): Promise<void> {
         await super.update('outlet_id', null)
     }

@@ -27,34 +27,42 @@ public class WorldService extends EntityService<
         WorldsRecord,
         WorldStore
         > {
-    private final LorebookService service;
+    private final LorebookService lorebooks;
 
     WorldService(WorldStore store, LorebookService lorebooks, EventBus eventBus) {
         super(store, eventBus);
-        this.service = lorebooks;
+        this.lorebooks = lorebooks;
     }
 
     @Transactional(readOnly = true)
     @CheckReturnValue
     public WorldsRecord getWorldOf(@NotNull SessionsRecord record) throws EntityNotFound {
         return this.find(EntityKey.of(WORLDS.ID, record.getWorldId()))
-                .orElseThrow(() -> new UnexpectedException("This sesion has no world, which should be impossible", Severity.SYSTEM));
+                .orElseThrow(() -> new UnexpectedException("This session has no world, which should be impossible", Severity.SYSTEM));
     }
 
     @Override
-    protected void beforeCreate(EntityDataPayload<WorldsRecord> data, long operationID) {
+    protected void beforeCreate(@NotNull EntityDataPayload<WorldsRecord> data, long operationID) {
         EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
         lorebookData.set(LOREBOOKS.NAME, data.requireValue(WORLDS.NAME));
         lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id);
 
         data.set(
                 Worlds.WORLDS.LOREBOOK_ID,
-                service.createAndGet(
+                lorebooks.createAndGet(
                         lorebookData,
                         Lorebooks.LOREBOOKS.ID
                 )
         );
 
         super.beforeCreate(data, operationID);
+    }
+
+    @Override
+    protected void afterSuccessfulDelete(EntityKey<WorldsRecord> id, long operationID, WorldsRecord record) {
+        lorebooks.delete(
+                lorebooks.keyOf(lorebooks.getLorebookOf(record))
+        );
+        super.afterSuccessfulDelete(id, operationID, record);
     }
 }

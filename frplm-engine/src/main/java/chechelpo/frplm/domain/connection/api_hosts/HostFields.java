@@ -7,6 +7,7 @@ import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import org.jetbrains.annotations.TestOnly;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -42,6 +43,17 @@ public final class HostFields extends ABSHelper<ApiHostsRecord, HostService> {
                                     (key) -> {
                                 if (!service.exists(key)) service.createAndGet(backend.toPayload().orElseThrow());
                             })
+                );
+    }
+
+    @TestOnly
+    void ensureLLMBackendExists() {
+        Arrays.stream(LLMBackend.values())
+                .forEach(backend ->
+                        backend.toKey().ifPresent(
+                                (key) -> {
+                                    if (!service.exists(key)) service.createAndGet(backend.toPayload().orElseThrow());
+                                })
                 );
     }
 }

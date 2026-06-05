@@ -2,7 +2,7 @@ import {
     ABSEntity,
     createEntity, deleteEntity,
     EntityField,
-    fetchApi,
+    fetchApi, fetchMatching,
     fetchOne,
     UpdateEntityField
 } from "@/frameworks/ABSEntity";
@@ -44,7 +44,13 @@ export class World extends ABSEntity<WorldKey, WorldData> {
     }
 
     public async getLocations(): Promise<Location[]> {
-        return  await getLocationsOfWorld(this.key);
+        return fetchMatching<LocationKey, LocationData, Location>(
+            {
+                worldID: this.get('id')
+            },
+            EntityTypes.LOCATIONS,
+            Location
+        )
     }
 
     public async addLocation(name:string): Promise<Location> {
@@ -73,17 +79,6 @@ export class World extends ABSEntity<WorldKey, WorldData> {
 
         return success;
     }
-}
-
-async function getLocationsOfWorld(key: WorldKey): Promise<Location[]> {
-    const response = await fetchApi(
-        `${API_BASE}/${EntityTypes.LOCATIONS}/entity/ofWorld/${key.id}`,
-        {
-            method: "GET",
-        }
-    )
-    const dtos = await response.json() as DTO[];
-    return dtos.map(dto => new Location(dto, EntityTypes.LOCATIONS));
 }
 async function createLocation(world:World, name:string): Promise<Location> {
     return await createEntity<LocationKey, LocationData, Location>(
@@ -219,7 +214,8 @@ async function getNeighbours(key:LocationKey): Promise<Location[]> {
     const response = await fetchApi(
         `${API_BASE}/${EntityTypes.LOCATIONS}/entity/ofLocation/${key.worldID}/${key.id!}`,
         {
-            method:'GET'
+            method:'GET',
+            headers: new Headers({accept:'application/json'})
         }
     )
     const dtos = await response.json() as DTO[];

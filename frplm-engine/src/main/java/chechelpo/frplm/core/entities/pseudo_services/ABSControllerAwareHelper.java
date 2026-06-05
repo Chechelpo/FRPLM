@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
+import java.util.Objects;
+
 /**
  * Class used for centralizing initialization of entities.
  */
@@ -18,6 +20,7 @@ public abstract class ABSControllerAwareHelper<
 
     protected ABSControllerAwareHelper(Service service, C controller) {
         super(service);
+        Objects.requireNonNull(controller);
         this.controller = controller;
     }
     protected <T> void register_field(

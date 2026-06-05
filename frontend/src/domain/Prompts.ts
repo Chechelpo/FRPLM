@@ -1,6 +1,5 @@
-import {ABSEntity, API_BASE, createEntity, fetch_all, fetchApi} from "@/frameworks/ABSEntity";
+import {ABSEntity, API_BASE, createEntity, fetch_all, fetchApi, fetchMatching} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import {DTO} from "@/types/DTOs";
 import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 
@@ -44,28 +43,26 @@ export class PromptTemplate extends ABSEntity<PromptTemplateKey, PromptTemplateD
         return EntityTypes.TEMPLATES;
     }
     public async getSections(): Promise<PromptSection[]> {
-        if (this.sections == null)
-            this.sections = await getPromptSections(this.key)
-
-        return this.sections;
+        return await fetchMatching<PromptSectionKey, PromptSectionData, PromptSection>(
+            {
+                prompt_id: this.get('id')
+            },
+            EntityTypes.SECTIONS,
+            PromptSection
+        );
     }
 
     public async createSection(name:string): Promise<PromptSection> {
-        const newPromptSection = await createEntity<PromptSectionKey, PromptSectionData, PromptSection>(
+        return await createEntity<PromptSectionKey, PromptSectionData, PromptSection>(
             {
                 prompt_id: this.get('id'),
             },
             {
-                name:name
+                name: name
             },
             EntityTypes.SECTIONS,
             PromptSection
-        )
-
-        await this.getSections()
-        this.sections!.push(newPromptSection);
-
-        return newPromptSection;
+        );
     }
 
     public static async getAll(): Promise<PromptTemplate[]> {
@@ -97,21 +94,4 @@ export class PromptSection extends ABSEntity<PromptSectionKey, PromptSectionData
         }
         return response.status === 200;
     }
-}
-
-async function getPromptSections(ofKey:PromptTemplateKey) : Promise<PromptSection[]>{
-    return await fetchApi(
-        `${API_BASE}/${EntityTypes.SECTIONS}/ofTemplate/${ofKey.id}`,
-        {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
-            }
-        }
-    )
-    .then(
-        async response =>
-            (await response.json() as DTO[])
-                .map(dto => new PromptSection(dto))
-    )
 }

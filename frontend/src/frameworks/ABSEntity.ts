@@ -214,12 +214,31 @@ export async function fetch_all<
     const response = await fetchApi(
         getQueryPath(object_type).toString()
         , {
-            method:"POST",
-            headers: new Headers({accept:"application/json"})
+            method:"GET",
+            headers:{Accept:"application/json"}
         });
     const result:DTO[] = await response.json() as DTO[];
 
     return result.map(dto => new ctor(dto,object_type));
+}
+export async function fetchMatching<
+    Key extends KeyRecord,
+    Data extends DataRecord,
+    T extends ABSEntity<Key, Data>
+>(
+    key:Partial<Key>,
+    object_type:EntityTypes,
+    ctor: new (dto: DTO, object_type:EntityTypes) => T
+): Promise<T[]>{
+    const response = await fetchApi(
+        getPathWithIDParams<Key>(object_type,key).toString(),
+        {
+            method:"GET",
+            headers: new Headers({accept:"application/json"})
+        }
+    );
+
+    return (await response.json() as DTO[]).map(dto => new ctor(dto,object_type));
 }
 
 export async function fetchOne<

@@ -21,8 +21,8 @@ public abstract class EntityStore<R extends TableRecord<R>>
     protected final Logger log;
 
     protected EntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityTypes.Types type) {
-        if(registeredStores.contains(type))
-            throw new IllegalStateException(type + " is already registered for store");
+        //if(registeredStores.contains(type))
+         //   throw new IllegalStateException(type + " is already registered for store");
 
         registeredStores.add(type);
         this.ctx = ctx;

@@ -6,6 +6,7 @@ import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import org.jetbrains.annotations.TestOnly;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -38,9 +39,14 @@ final class OutletHelper extends ABSControllerAwareHelper<OutletRecord, OutletSe
                         .build()
         );
 
-        ensureStandardOutlets();
+        Arrays.stream(StandardOutlet.values())
+                .forEach(
+                        outlet -> outlet.toKey().ifPresent( key -> {
+                            if (!service.exists(key)) service.createAndGet(outlet.toPayload().orElseThrow());
+                        })
+                );
     }
-
+    @TestOnly
     void ensureStandardOutlets(){
         Arrays.stream(StandardOutlet.values())
                 .forEach(

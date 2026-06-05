@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @Import({
         LorebookTestContext.class,
-        OutletTestContext.class
 })
 class CharacterServiceTest {
     @Autowired

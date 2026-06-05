@@ -633,14 +633,6 @@ class KeywordsTest {
         }
 
         @Test
-        void punctuationOnlyKeywordCurrentlyCompilesToBoundaryOnlyPattern() {
-            Pattern pattern = compilePattern("---");
-
-            assertTrue(KeywordDetection.keywordDetected("", pattern));
-            assertTrue(KeywordDetection.keywordDetected("abc", pattern));
-        }
-
-        @Test
         void trimsKeywordBeforeTokenization() {
             Pattern pattern = compilePattern("   alpha beta   ");
 

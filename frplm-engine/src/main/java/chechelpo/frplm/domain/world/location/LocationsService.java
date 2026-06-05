@@ -33,7 +33,6 @@ public class LocationsService extends EntityService<
 
     LocationsService(LocationStore store, LorebookService lorebooks, WorldService worlds, EventBus bus) {
         super(store, bus);
-
         this.lorebooks = lorebooks;
         this.worlds = worlds;
     }
@@ -65,6 +64,14 @@ public class LocationsService extends EntityService<
         data.set(Locations.LOCATIONS.ID, locationID);
 
         super.beforeCreate(data, operationID);
+    }
+
+    @Override
+    protected void afterSuccessfulDelete(EntityKey<LocationsRecord> id, long operationID, LocationsRecord record) {
+        lorebooks.delete(
+                lorebooks.keyOf(lorebooks.getLorebookOf(record))
+        );
+        super.afterSuccessfulDelete(id, operationID, record);
     }
 
     @Transactional(readOnly = true)

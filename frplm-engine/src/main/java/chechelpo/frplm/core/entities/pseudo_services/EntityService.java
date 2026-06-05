@@ -39,8 +39,8 @@ public abstract class EntityService<
 
     public EntityService(@NotNull Store store, @NotNull EventBus eventBus) {
         EntityTypes.Types types = store.getType();
-        if(REGISTERED_TYPES.contains(types))
-            throw new IllegalStateException("Type " + types + " is already registered");
+        //if(REGISTERED_TYPES.contains(types))
+        //    throw new IllegalStateException("Type " + types + " is already registered");
 
         REGISTERED_TYPES.add(types);
         this.entityType = types;
@@ -51,10 +51,10 @@ public abstract class EntityService<
     }
     public EntityService(@NotNull Store store, @NotNull EventBus eventBus, boolean registerSingleton) {
         EntityTypes.Types types = store.getType();
-        if(!registerSingleton && REGISTERED_TYPES.contains(types))
-            throw new IllegalStateException("Type " + types + " is already registered");
+        //if(!registerSingleton && REGISTERED_TYPES.contains(types))
+        //    throw new IllegalStateException("Type " + types + " is already registered");
 
-        if (!registerSingleton)  REGISTERED_TYPES.add(types);
+        //if (!registerSingleton)  REGISTERED_TYPES.add(types);
         this.entityType = types;
         this.eventBus = eventBus;
         this.store = store;
@@ -181,6 +181,7 @@ public abstract class EntityService<
 
     @Transactional
     public @NotNull R createAndGet(EntityDataPayload<R> data) {
+        Objects.requireNonNull(data, "data");
         long operationID = eventBus.nextOperationID();
         beforeCreate(data, operationID);
 
@@ -199,6 +200,8 @@ public abstract class EntityService<
     }
     @Transactional
     public <T> @NotNull T createAndGet(EntityDataPayload<R> data, TableField<R,T> field) {
+        Objects.requireNonNull(data);
+        Objects.requireNonNull(field);
         long operationID = eventBus.nextOperationID();
         beforeCreate(data, operationID);
 
@@ -227,12 +230,13 @@ public abstract class EntityService<
     }
 
     @Transactional(readOnly = true)
-    public Optional<R> find(EntityKey<R> k){
+    public Optional<R> find(EntityKey<R> key){
+        Objects.requireNonNull(key);
         long operationID = eventBus.nextOperationID();
-        beforeRetrieve(k, true, operationID);
-        log.debug("Finding record with id {}", k);
+        beforeRetrieve(key, true, operationID);
+        log.debug("Finding record with id {}", key);
 
-        Optional<R> record = Optional.ofNullable(store.get(k));
+        Optional<R> record = Optional.ofNullable(store.get(key));
         record.ifPresent(r -> afterRetrieve(List.of(r), operationID));
 
         return record;
@@ -246,10 +250,11 @@ public abstract class EntityService<
     }
 
     @Transactional(readOnly = true)
-    public List<R> getMatching(EntityKey<R> k) {
-        throwIfInvalidKey(k, false);
+    public List<R> getMatching(EntityKey<R> key) {
+        Objects.requireNonNull(key);
+        throwIfInvalidKey(key, false);
 
-        List<R> records = store.getAllMatching(k);
+        List<R> records = store.getAllMatching(key);
         afterRetrieve(records, 0);
 
         return records;
@@ -257,6 +262,8 @@ public abstract class EntityService<
 
     @Transactional(readOnly = true)
     public <T> Optional<T> getValueOf(TableField<R, T> field, EntityKey<R> key) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(field);
         throwIfInvalidKey(key, true);
         if (!exists(key)) {
             log.error("Could not find {} with id {}", this.getType().getEntityType() ,key);
@@ -272,6 +279,7 @@ public abstract class EntityService<
      */
     @Transactional(readOnly = true)
     public boolean exists(EntityKey<R> k){
+        Objects.requireNonNull(k);
         throwIfInvalidKey(k, true);
         return store.exists(k);
     }
@@ -292,6 +300,8 @@ public abstract class EntityService<
 
     @Transactional
     public boolean update(EntityKey<R> id, EntityDataPayload<R> update) {
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(update);
         long operationID = eventBus.nextOperationID();
         log.trace("Updating entity {} with new data {}", id, update);
         beforeUpdate(id, update, operationID);
@@ -303,6 +313,8 @@ public abstract class EntityService<
     }
     @Transactional
     public <T extends Number> Optional<T> incrementAndGet(TableField<R,T> field, EntityKey<R> entityKey) {
+        Objects.requireNonNull(field);
+        Objects.requireNonNull(entityKey);
         if (!exists(entityKey)) {
             log.error("{} with key {} not found", this.getType().getEntityType(), entityKey.toString());
             return Optional.empty();
@@ -360,12 +372,14 @@ public abstract class EntityService<
     // DELETE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     protected void beforeDelete(EntityKey<R> id, long operationID){
+        Objects.requireNonNull(id);
         throwIfInvalidKey(id, true);
         eventBus.publish(new CRUDDraftEvent.DeleteEntityDraft<R>(this.entityType, operationID, id));
     }
 
     @Transactional
     public boolean delete(EntityKey<R> id) {
+        Objects.requireNonNull(id);
         log.debug("Deleting entity {}", id);
 
         long operationID = eventBus.nextOperationID();

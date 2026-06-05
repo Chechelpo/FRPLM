@@ -44,8 +44,8 @@ public abstract class EntityController<
 
     protected EntityController(S service) {
         this.type = service.getType();
-        if (REGISTERED_CONTROLLERS_TYPES.contains(type))
-            throw new IllegalStateException("Duplicate controller for type " + type);
+        //if (REGISTERED_CONTROLLERS_TYPES.contains(type))
+        //    throw new IllegalStateException("Duplicate controller for type " + type);
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
         log.setLevel(type.getLoggerLevel());
         log.trace("Controller {} created", type);
@@ -53,6 +53,7 @@ public abstract class EntityController<
         this.service = service;
         REGISTERED_CONTROLLERS_TYPES.add(type);
     }
+
     protected EntityController(S service, boolean isSingleton) {
         this.type = service.getType();
         if (isSingleton && REGISTERED_CONTROLLERS_TYPES.contains(type))
@@ -234,23 +235,16 @@ public abstract class EntityController<
      * @param query a map containing key field -> value
      * @return all records if no query, otherwise the records with the matching key.
      */
-    @PostMapping(
+    @GetMapping(
             value = QUERY_PATH,
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    protected ResponseEntity<EntityDTO[]> query(@RequestBody(required = false) Map<String, Object> query) {
-        if (query == null) {
-            log.debug("Query {}", (Object) wrapEntities(service.getAll()));
-            return ResponseEntity.ok(
-                    wrapEntities(service.getAll())
-            );
-        } else {
-            return ResponseEntity.ok(wrapEntities(
-                            service.getMatching(extractKey(query))
-                    )
-            );
-        }
+    protected ResponseEntity<EntityDTO[]> query(@RequestParam(required = false) Map<String, Object> query) {
+        if (query == null) return ResponseEntity.badRequest().build();
+
+        if (query.isEmpty()) return ResponseEntity.ok(wrapEntities(service.getAll()));
+        else return ResponseEntity.ok(wrapEntities(service.getMatching(extractKey(query))));
     }
 
     /**
@@ -284,7 +278,7 @@ public abstract class EntityController<
     }
 
     /**
-     * @param initialKey initial key values
+     * @param initialKey  initial key values
      * @param initialData initial data value
      * @return entity resource location + dto
      */
