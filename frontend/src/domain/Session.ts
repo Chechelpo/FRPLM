@@ -1,10 +1,11 @@
-import {ABSEntity, API_BASE, createEntity, deleteEntity, fetchApi, fetchOne} from "@/frameworks/ABSEntity";
+import {ABSEntity, createEntity, deleteEntity, fetchApi, fetchOne} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {Location, LocationData, LocationKey, World, WorldData, WorldKey} from "@/domain/World";
 import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
 import {DTO} from "@/types/DTOs";
 import {PromptTemplate, PromptTemplateData, PromptTemplateKey} from "@/domain/Prompts";
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
+import {API_BASE} from "@/config";
 
 export type SessionKey = {id:number};
 export type SessionData = {

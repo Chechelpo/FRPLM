@@ -1,4 +1,4 @@
-package chechelpo.frplm.utils;
+package chechelpo.frplm.test_utils;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -5,13 +5,19 @@ import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
+import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 
 @Component
@@ -23,8 +29,12 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
         this.keywordService = keywordService;
     }
 
-    public @NotNull List<String> keywordsOfEntry(EntityKey<EntryRecord> key){
-        return this.store.getOfEntry(key);
+    public @NotNull Set<String> keywordsOfEntry(int lorebookID, int entryID){
+        return this.store.getOfEntry(lorebookID, entryID);
+    }
+
+    public @NotNull Set<String> keywordsOfLorebook(int lorebookID){
+        return this.store.getKeywordNamesOfLorebook(lorebookID);
     }
 
     public boolean associate(int lorebookID, int entryID, String name){
@@ -38,7 +48,6 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
         );
         return true;
     }
-
     public boolean dissociate(int lorebookID, int entryID, String name){
         log.debug("Disassociating entry with lorebookID {} and entryID {} to keyword {}", lorebookID, entryID, name);
         int keywordID = keywordService.getOrGenerate(name);
@@ -50,12 +59,10 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
         );
     }
 
-    public List<String> keywordsInLorebook(int lorebookID){
-        return store.getKeywordNamesOfLorebook(lorebookID);
-    }
-
     @Override
     protected void beforeCreate(EntityDataPayload<EntryKeywordsRecord> data, long operationID) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+
 }

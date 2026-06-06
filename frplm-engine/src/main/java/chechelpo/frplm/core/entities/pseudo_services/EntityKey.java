@@ -9,6 +9,7 @@ import org.jooq.TableRecord;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static org.jooq.impl.DSL.trueCondition;
 
@@ -52,6 +53,9 @@ public final class EntityKey<R extends TableRecord<R>>
 
     public <T> @NotNull T getValue(TableField<R, T> field){
         return (T) values.get(field);
+    }
+    public <T> @NotNull Optional<T> get(TableField<R, T> field){
+        return (Optional<T>) Optional.ofNullable(values.get(field));
     }
     /**
      * @return id of the object in string format as specified by {@link StandardFormats#formatIDUnion(Map)}

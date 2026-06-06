@@ -1,6 +1,7 @@
 package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
+import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.Severity;
@@ -13,12 +14,18 @@ import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import chechelpo.frplm.utils.importers.NewEntryOrder;
+import chechelpo.frplm.utils.importers.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.databind.JsonNode;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
@@ -27,11 +34,13 @@ import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 public class EntryService extends EntityService<EntryRecord, EntryStore> {
     private final LorebookService lorebooks;
     private final OutletService outlets;
+    private final EntryKeywordService entryKeywordService;
 
-    EntryService(EntryStore entriesStore, LorebookService lorebooks, OutletService outlets, EventBus eventBus) {
+    EntryService(EntryStore entriesStore, LorebookService lorebooks, OutletService outlets, EventBus eventBus, EntryKeywordService entryKeywordService) {
         super(entriesStore, eventBus);
         this.lorebooks = lorebooks;
         this.outlets = outlets;
+        this.entryKeywordService = entryKeywordService;
     }
 
     @Override
@@ -61,16 +70,8 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         super.beforeUpdate(target, data, operationID);
     }
 
-    public @NotNull List<EntryRecord> of(@NotNull LorebooksRecord record) {
-        return this.of(record.getId());
-    }
-
-    public @NotNull List<EntryRecord> of(int lorebookID) {
-        return this.store.getOfLorebook(lorebookID);
-    }
-
     public boolean updateOutlet(EntityKey<EntryRecord> id, String newOutletName) {
-        return super.update(
+        return store.update(
                 id,
                 EntityDataPayload.of(
                         ENTRY.OUTLET,
@@ -79,10 +80,41 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         );
     }
 
+    /**
+     * @param lorebookIDs to query
+     * @param keywordIDs to detect.
+     * @return entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
+     */
     public @NotNull Map<Integer, List<EntryRecord>> getByOutletsWith(
             IntSet lorebookIDs,
             IntSet keywordIDs
     ) {
         return store.getEntriesByOutletWith(lorebookIDs, keywordIDs);
+    }
+
+    /**
+     * @param toLorebookID lorebook to import this JSON entries to
+     * @param file JSON with entries
+     * @return created records
+     */
+    @Transactional
+    public List<EntryRecord> importEntriesFromJSON(final int toLorebookID, JsonNode file){
+        Objects.requireNonNull(file);
+        List<NewEntryOrder> order = STLorebookImporter.getEntries(file);
+        List<EntryRecord> result = new ArrayList<>(order.size());
+
+        order.forEach(entry -> {
+            EntityDataPayload<EntryRecord> payload = entry.entryInfo();
+            payload.set(ENTRY.LOREBOOK_ID, toLorebookID);
+
+            EntryRecord record = this.createAndGet(entry.entryInfo());
+
+            entry.keywords().forEach(keyword ->
+                    entryKeywordService.associate(toLorebookID, record.getEntryId(), keyword)
+            );
+            result.add(record);
+        });
+
+        return result;
     }
 }

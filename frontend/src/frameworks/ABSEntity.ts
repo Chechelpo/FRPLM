@@ -4,6 +4,7 @@ import {Equatable, ValueComparable} from "@/types/Equatable";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
 import {QueryAction} from "@/frameworks/queries";
+import {API_BASE} from "@/config";
 
 /** JSON-safe primitives typically received from backend SQL row payloads */
 export type Primitives = string | number | boolean | null;
@@ -168,22 +169,18 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
     }
 }
 
-
-const BASE:string ="http://localhost:8080/api";
-export const API_BASE = "http://localhost:8080/api";
-
 const ENTITY_SUFFIX:string = "entity";
 const QUERY_SUFFIX:string = "query";
 
 export function getEntityController(object_type:EntityTypes): URL{
-    return new URL(`${API_BASE}/${object_type}`, BASE);
+    return new URL(`${API_BASE}/${object_type}`, API_BASE);
 }
 function getQueryPath(object_type:EntityTypes): URL {
-    return new URL(`${API_BASE}/${object_type}/${QUERY_SUFFIX}`, BASE)
+    return new URL(`${API_BASE}/${object_type}/${QUERY_SUFFIX}`, API_BASE)
 }
 
 function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key:Partial<Key> | null): URL {
-    const url = new URL(`${API_BASE}/${object_type}/${ENTITY_SUFFIX}`, BASE);
+    const url = new URL(`${API_BASE}/${object_type}/${ENTITY_SUFFIX}`, API_BASE);
     if (key == null) return url;
     // identityParams come from query string
     appendIDParams(url, key)
@@ -214,9 +211,9 @@ export async function fetch_all<
     const response = await fetchApi(
         getQueryPath(object_type).toString()
         , {
-            method:"GET",
-            headers:{Accept:"application/json"}
-        });
+            method:"GET"
+        }
+    );
     const result:DTO[] = await response.json() as DTO[];
 
     return result.map(dto => new ctor(dto,object_type));
@@ -230,8 +227,10 @@ export async function fetchMatching<
     object_type:EntityTypes,
     ctor: new (dto: DTO, object_type:EntityTypes) => T
 ): Promise<T[]>{
+    let path = new URL(`${getEntityController(object_type).toString()}/query`);
+    appendIDParams<Key>(path, key);
     const response = await fetchApi(
-        getPathWithIDParams<Key>(object_type,key).toString(),
+        path.toString(),
         {
             method:"GET",
             headers: new Headers({accept:"application/json"})
@@ -250,6 +249,7 @@ export async function fetchOne<
     object_type:EntityTypes,
     ctor: new (dto: DTO, object_type:EntityTypes) => T
 ): Promise<T>{
+
     const response = await fetchApi(
         getPathWithIDParams<Key>(object_type,key).toString(),
         {
@@ -316,28 +316,6 @@ export async function UpdateEntityField<
         });
 
     return response.status === 200;
-}
-
-export async function QueryEntities<
-    Key extends KeyRecord,
-    Data extends DataRecord,
-    T extends ABSEntity<Key, Data>
->(
-    queries:QueryAction<Key,Data>[],
-    object_type:EntityTypes,
-    ctor: new (dto: DTO, object_type:EntityTypes) => T
-): Promise<T[]>{
-    const response = await fetchApi(
-        getEntityController(object_type).toString(),
-        {
-            method:"POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(queries),
-        }
-    )
-    const result:DTO[] = await response.json() as DTO[];
-
-    return result.map(dto => new ctor(dto, object_type));
 }
 
 type ErrorResponse = {

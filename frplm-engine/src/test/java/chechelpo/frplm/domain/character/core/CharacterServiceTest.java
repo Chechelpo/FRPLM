@@ -2,10 +2,9 @@ package chechelpo.frplm.domain.character.core;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
-import chechelpo.frplm.domain.lorebook.outlet.OutletTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.utils.TestText;
+import chechelpo.frplm.test_utils.TestText;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

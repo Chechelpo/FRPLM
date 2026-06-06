@@ -13,6 +13,7 @@ import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -22,18 +23,19 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
         super(ctx, ENTRY_KEYWORDS, EntityTypes.Types.ENTRY_KEYWORDS);
     }
 
-    public @NotNull List<String> getOfEntry(@NotNull EntityKey<EntryRecord> key){
-        return ctx.selectDistinct(KEYWORD.KEYWORD_)
+    public @NotNull Set<String> getOfEntry(int lorebookId, int entryId) {
+        return ctx.select()
                 .from(ENTRY)
                 .join(ENTRY_KEYWORDS)
                 .on(
                         ENTRY.LOREBOOK_ID.eq(ENTRY_KEYWORDS.LOREBOOK_ID)
                                 .and(ENTRY.ENTRY_ID.eq(ENTRY_KEYWORDS.ENTRY_ID))
-                                .and(key.getPkCondition())
                 )
                 .join(KEYWORD)
                 .on(KEYWORD.ID.eq(ENTRY_KEYWORDS.KEYWORD_ID))
-                .fetch(KEYWORD.KEYWORD_);
+                .where(ENTRY.LOREBOOK_ID.eq(lorebookId)
+                        .and(ENTRY.ENTRY_ID.eq(entryId)))
+                .fetchSet(KEYWORD.KEYWORD_);
     }
 
     public IntSet getKeywordIDsOfLorebook(@NotNull EntityKey<LorebooksRecord> key){
@@ -43,7 +45,7 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
         return IntSetFactory.ofValues(keywordIDs);
     }
 
-    public @NotNull List<String> getKeywordNamesOfLorebook(int lorebookID){
+    public @NotNull Set<String> getKeywordNamesOfLorebook(int lorebookID){
         return ctx.selectDistinct(KEYWORD.KEYWORD_)
                 .from(KEYWORD)
                 .join(ENTRY_KEYWORDS)
@@ -52,6 +54,6 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
                                 .and(ENTRY_KEYWORDS.LOREBOOK_ID.eq(lorebookID))
                 )
                 .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(lorebookID))
-                .fetch(KEYWORD.KEYWORD_);
+                .fetchSet(KEYWORD.KEYWORD_);
     }
 }

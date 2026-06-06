@@ -1,6 +1,7 @@
-import {ABSEntity, API_BASE, createEntity, fetch_all, fetchApi, fetchMatching} from "@/frameworks/ABSEntity";
+import {ABSEntity, createEntity, fetch_all, fetchApi, fetchMatching} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {ChatCompletionRole} from "@/types/ChatCompletions";
+import {API_BASE} from "@/config";
 
 
 export type REASONING_EFFORT_VALUE = {id:number, name:string}

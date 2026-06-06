@@ -3,8 +3,7 @@ package chechelpo.frplm.domain.character.core;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.interfaces.DBReload;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.utils.TestText;
+import chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 
 import java.util.ArrayList;

@@ -35,8 +35,15 @@ public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStor
 
     @Override
     protected void beforeCreate(EntityDataPayload<LocationNeighborsRecord> data, long operationID) {
+        if (data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID) == data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID))
+            throw new IllegalArgumentException("Locations neighbours must have the same ID");
 
         super.beforeCreate(data, operationID);
+    }
+
+    @Override
+    public @NotNull LocationNeighborsRecord createAndGet(EntityDataPayload<LocationNeighborsRecord> data) {
+        return super.createAndGet(data);
     }
 
     /**

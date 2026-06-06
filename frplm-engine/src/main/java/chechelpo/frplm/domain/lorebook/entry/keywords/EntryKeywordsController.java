@@ -26,7 +26,7 @@ final class EntryKeywordsController extends EntityController<EntryKeywordsRecord
     @GetMapping("/{lorebookID}")
     public ResponseEntity<List<String>> keywordsOfLorebook(@PathVariable int lorebookID) {
         return ResponseEntity.ok(
-                service.keywordsInLorebook(lorebookID)
+                service.keywordsOfLorebook(lorebookID).stream().toList()
         );
     }
 
@@ -43,11 +43,7 @@ final class EntryKeywordsController extends EntityController<EntryKeywordsRecord
     @GetMapping("/{lorebookID}/{entryID}")
     public ResponseEntity<List<String>> keywordsOfEntry(@PathVariable int lorebookID, @PathVariable int entryID) {
         return ResponseEntity.ok(
-                service.keywordsOfEntry(EntityKey.<EntryRecord>builder()
-                        .set(ENTRY.LOREBOOK_ID, lorebookID)
-                        .set(ENTRY.ENTRY_ID, entryID)
-                        .build()
-                )
+                service.keywordsOfEntry(lorebookID, entryID).stream().toList()
         );
     }
 

@@ -4,11 +4,16 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import chechelpo.frplm.interfaces.DBReload;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
 
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
@@ -38,7 +43,7 @@ public class WorldTestContext implements DBReload {
         for (int i = 0; i < amount; i++)
             createdRecords.add(
                     service.createAndGet(
-                            EntityDataPayload.of(WORLDS.NAME, "world " + i)
+                            EntityDataPayload.of(WORLDS.NAME, TestText.randomText(ThreadLocalRandom.current().nextLong(), 0 , 200))
                     )
             );
 

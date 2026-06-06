@@ -42,11 +42,6 @@ public final class EntryStore extends EntityStore<EntryRecord> {
                 new Int2ObjectOpenHashMap<>(lorebookIDs.size());
 
         map.defaultReturnValue(Collections.emptyList());
-
-        if (lorebookIDs.isEmpty() || keywordIDs.isEmpty()) {
-            return map;
-        }
-
         this.ctx
                 .selectFrom(ENTRY)
                 .where(ENTRY.LOREBOOK_ID.in(lorebookIDs))

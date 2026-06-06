@@ -8,7 +8,7 @@ import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.UneditableField;
 import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
-import chechelpo.frplm.utils.TestText;
+import chechelpo.frplm.test_utils.TestText;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
 

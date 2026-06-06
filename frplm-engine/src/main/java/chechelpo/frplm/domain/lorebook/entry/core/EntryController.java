@@ -18,16 +18,6 @@ final class EntryController extends EntityController<EntryRecord, EntryService> 
         super(service);
     }
 
-    /**
-     * Temporary work-around while queries are implemented
-     */
-    @GetMapping(ENTITY_PATH + "/{lorebook_id}")
-    ResponseEntity<EntityDTO[]> ofLorebook(@PathVariable("lorebook_id") Integer lorebookId) {
-        return ResponseEntity.ok(
-                wrapEntities(service.of(lorebookId))
-        );
-    }
-
     @PatchMapping(ENTITY_PATH + "/{lorebook_id}/{entryID}")
     ResponseEntity<Boolean> updateOutlet(
             @PathVariable("lorebook_id") int lorebookId,

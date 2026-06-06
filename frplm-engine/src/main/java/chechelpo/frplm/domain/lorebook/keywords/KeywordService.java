@@ -36,6 +36,10 @@ public class KeywordService extends EntityService<KeywordRecord, KeywordStore> {
         return store.createWith(keyword);
     }
 
+    public int getIDOfKeywordWith(String name){
+        return store.getWith(name);
+    }
+
     public boolean existsWith(String name) {
         return this.store.existsWith(name);
     }

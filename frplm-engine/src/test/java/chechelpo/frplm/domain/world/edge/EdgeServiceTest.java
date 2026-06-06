@@ -24,13 +24,62 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 @Import(LocationTestContext.class)
 class EdgeServiceTest {
-    @Autowired LocationTestContext locations;
-    @Autowired EdgeService edgeService;
-    @Autowired EdgeFieldsHelper fieldsHelper;
+    @Autowired
+    LocationTestContext locations;
+    @Autowired
+    EdgeService edgeService;
+    @Autowired
+    EdgeFieldsHelper fieldsHelper;
 
     @BeforeEach
     void setUp() {
         locations.reload();
+    }
+
+    @Test
+    void linkingLocationToSameLocationDoesNothing() {
+        int testAmount = 100;
+        List<LocationsRecord> world1 = locations.createAndGetTestLocationsOfSameWorld(testAmount);
+
+        for (int i = 0; i < testAmount; i++) {
+            int finalI = i;
+            assertThrows(
+                    IllegalArgumentException.class, () ->
+                            edgeService.createAndGet(EntityDataPayload.<LocationNeighborsRecord>builder()
+                                    .set(LOCATION_NEIGHBORS.WORLD_ID, world1.get(finalI).getWorldId())
+                                    .set(LOCATION_NEIGHBORS.LOCATION1_ID, world1.get(finalI).getId())
+                                    .set(LOCATION_NEIGHBORS.LOCATION2_ID, world1.get(finalI).getId())
+                                    .build()
+                            ));
+        }
+    }
+
+
+    @Test
+    void rejectsLinkingLocationsOfDifferentWorlds() {
+        int testAmount = 100;
+        List<LocationsRecord> world1 = locations.createAndGetTestLocationsOfSameWorld(testAmount);
+        List<LocationsRecord> world2 = locations.createAndGetTestLocationsOfSameWorld(testAmount);
+
+        for (int i = 0; i < testAmount; i++) {
+            int finalI = i;
+            assertThrows(Exception.class, () -> {
+                edgeService.createAndGet(EntityDataPayload.<LocationNeighborsRecord>builder()
+                        .set(LOCATION_NEIGHBORS.WORLD_ID, world1.get(finalI).getWorldId())
+                        .set(LOCATION_NEIGHBORS.LOCATION1_ID, world1.get(finalI).getId())
+                        .set(LOCATION_NEIGHBORS.LOCATION2_ID, world2.get(finalI).getId())
+                        .build()
+                );
+            });
+            assertThrows(Exception.class, () -> {
+                edgeService.createAndGet(EntityDataPayload.<LocationNeighborsRecord>builder()
+                        .set(LOCATION_NEIGHBORS.WORLD_ID, world1.get(finalI).getWorldId())
+                        .set(LOCATION_NEIGHBORS.LOCATION1_ID, world2.get(finalI).getId())
+                        .set(LOCATION_NEIGHBORS.LOCATION2_ID, world1.get(finalI).getId())
+                        .build()
+                );
+            });
+        }
     }
 
     @Test
@@ -69,10 +118,10 @@ class EdgeServiceTest {
 
             if (i % 2 == 0) assertTrue(
                     edgeService.delete(EntityKey.<LocationNeighborsRecord>builder()
-                                    .set(LOCATION_NEIGHBORS.WORLD_ID, fromLocation.getWorldId())
-                                    .set(LOCATION_NEIGHBORS.LOCATION1_ID, fromLocation.getId())
-                                    .set(LOCATION_NEIGHBORS.LOCATION2_ID, toLocation.getId())
-                                    .build()
+                            .set(LOCATION_NEIGHBORS.WORLD_ID, fromLocation.getWorldId())
+                            .set(LOCATION_NEIGHBORS.LOCATION1_ID, fromLocation.getId())
+                            .set(LOCATION_NEIGHBORS.LOCATION2_ID, toLocation.getId())
+                            .build()
                     ),
                     "Standard: Couldn't delink location neighbours"
             );

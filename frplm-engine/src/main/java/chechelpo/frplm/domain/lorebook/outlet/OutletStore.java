@@ -26,8 +26,10 @@ final class OutletStore extends EntityStore<OutletRecord> {
     }
 
     public boolean existsName(@NotNull String name) {
-        return ctx.fetchExists(ctx.selectFrom(main_table
-                .where(OUTLET.OUTLET_.equal(name)))
+        return ctx.fetchExists(
+                ctx.selectOne()
+                        .from(main_table)
+                        .where(OUTLET.OUTLET_.eq(name))
         );
     }
 

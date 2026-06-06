@@ -7,6 +7,8 @@ import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -38,6 +40,10 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
         this.pattern = asPattern(name);
     }
 
+    public int getStableId() {
+        return stable_id;
+    }
+
     @Contract(pure = true)
     public static @NotNull String asMacro(String outlet){
         return "{{"+outlet+"}}";
@@ -45,6 +51,10 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
     @Contract(pure = true)
     public static @NotNull Pattern asPattern(String outlet){
         return Pattern.compile(Pattern.quote(asMacro(outlet)), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+    }
+
+    public int getMaxId(){
+        return Arrays.stream(StandardOutlet.values()).max(Comparator.comparingInt(StandardOutlet::getStableId)).map(StandardOutlet::getStableId).orElse(0);
     }
 
     @Contract(pure = true)

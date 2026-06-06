@@ -24,7 +24,6 @@ import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
  */
 public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     NANOGPT(0,
-            0,
             "NanoGPT",
             "https://nano-gpt.com",
             WebClient.builder()
@@ -33,7 +32,7 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
                     .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
                     .build()
     ),
-    OPENAI_COMPATIBLE(null, 1, "OpenAI Compatible", null, null),
+    OPENAI_COMPATIBLE(null, "OpenAI Compatible", null, null),
     ;
 
     private static final Int2ObjectArrayMap<LLMBackend> STABLE_IDS = new Int2ObjectArrayMap<>(LLMBackend.values().length);
@@ -59,10 +58,6 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
      */
     public final @Nullable Integer stable_id;
     /**
-     * Type of this endpoint. Refers to the LLM connection that will later be used
-     */
-    public final int type_id;
-    /**
      * Display name
      */
     public final String name;
@@ -73,10 +68,9 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
 
     private final WebClient client;
 
-    LLMBackend(@Nullable Integer stable_id, int type_id, String name, @Nullable String host, WebClient client) {
+    LLMBackend(@Nullable Integer stable_id, String name, @Nullable String host, WebClient client) {
         this.name = name;
         this.stable_id = stable_id;
-        this.type_id = type_id;
         this.client = client;
         this.host = host == null ? null : URI.create(host);
     }
@@ -89,6 +83,9 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     @Contract(pure = true)
     public static @NotNull LLMBackend get(int id) {
         return STABLE_IDS.containsKey(id) ? STABLE_IDS.get(id) : OPENAI_COMPATIBLE;
+    }
+    public static boolean isStandardBackend(int id) {
+        return STABLE_IDS.containsKey(id);
     }
 
     @Override

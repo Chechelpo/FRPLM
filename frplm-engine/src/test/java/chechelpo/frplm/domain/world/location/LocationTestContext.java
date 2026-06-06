@@ -5,7 +5,7 @@ import chechelpo.frplm.domain.world.core.WorldTestContext;
 import chechelpo.frplm.interfaces.DBReload;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import chechelpo.frplm.utils.TestText;
+import chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
 

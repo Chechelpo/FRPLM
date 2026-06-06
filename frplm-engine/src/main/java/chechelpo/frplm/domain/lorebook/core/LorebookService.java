@@ -10,12 +10,14 @@ import chechelpo.frplm.jooq.generated.tables.records.*;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.tools.json.JSONArray;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -80,4 +82,6 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
         Objects.requireNonNull(file);
         return true;
     }
+
+
 }

@@ -236,9 +236,7 @@ public abstract class EntityController<
      * @return all records if no query, otherwise the records with the matching key.
      */
     @GetMapping(
-            value = QUERY_PATH,
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            value = QUERY_PATH
     )
     protected ResponseEntity<EntityDTO[]> query(@RequestParam(required = false) Map<String, Object> query) {
         if (query == null) return ResponseEntity.badRequest().build();

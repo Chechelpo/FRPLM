@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -44,11 +45,15 @@ public class OutletService extends EntityService<OutletRecord, OutletStore> {
         );
     }
     public IntObjectPair<String>[] getOutlets(IntSet lorebookIDs) {
+        Objects.requireNonNull(lorebookIDs, "lorebookIDs must not be null");
+        if (lorebookIDs.isEmpty()) return new IntObjectPair[0];
+
         return store.getOutletsOfLorebooks(lorebookIDs);
     }
 
     @Transactional
     public int getOrCreateOutlet(@NotNull String name) {
+        Objects.requireNonNull(name, "Outlet name must not be null");
         if (store.existsName(name))
             //noinspection DataFlowIssue
             return store.getOfName(name);

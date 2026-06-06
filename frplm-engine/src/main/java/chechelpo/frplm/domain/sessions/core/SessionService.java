@@ -13,6 +13,7 @@ import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Optional;
@@ -27,23 +28,21 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
         super(store, eventBus);
         this.characterService = characters;
     }
-
+    @Transactional(readOnly = true)
     public Optional<Integer> getUserCharacterID(EntityKey<SessionsRecord> key){
         return this.getValueOf(SESSIONS.USER_PERSONA_ID, key);
     }
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<SessionsRecord> data, long operationID) {
-        boolean canBeUser;
-        try{
-            canBeUser =  characterService.getValueOf(
+        boolean canBeUser =  characterService.getValueOf(
                     CHARACTERS.CAN_BE_USER,
                     EntityKey.of(CHARACTERS.ID, data.requireValue(SESSIONS.USER_PERSONA_ID))
-            ).orElseThrow(() -> new RuntimeException("a"));
-        } catch (EntityNotFound e) {
-            throw new RuntimeException(e);
-        }
+            )
+                .orElseThrow(() -> new IllegalArgumentException("Character does not exist"));
+
         if (!canBeUser) throw new InvalidValue("Picked character can't be user");
+
         super.beforeCreate(data, operationID);
     }
 

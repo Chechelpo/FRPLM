@@ -59,4 +59,8 @@ class LorebookServiceTest {
                         "Found associated lorebook in getAll call"
                 ));
     }
+
+    @Test
+    void importFromJSON() {
+    }
 }
