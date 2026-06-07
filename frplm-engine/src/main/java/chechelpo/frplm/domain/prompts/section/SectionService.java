@@ -27,7 +27,6 @@ import static chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 public class SectionService extends EntityService<PromptSectionRecord, SectionStore> {
     private final TemplateService templateService;
 
-
     SectionService(SectionStore store, TemplateService templateService, EventBus eventBus) {
         super(store, eventBus);
         this.templateService = templateService;
@@ -78,9 +77,11 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
 
     @Override
     protected void beforeDelete(@NotNull EntityKey<PromptSectionRecord> key, long operationID) {
-        if (key.getValue(PROMPT_SECTION.PROMPT_ID) == DefaultSections.CHAT_HISTORY.sectionID) {
-            log.error("Attempted to delete a chat history off a template");
-            throw new InvalidKey("Chat history section can't be deleted", Severity.USER);
+        if (!DefaultSections.canDelete(Short.toUnsignedInt(key.requireValue(PROMPT_SECTION.SECTION_ID)))) {
+            DefaultSections triedToDeleteSection = DefaultSections.fromSectionID(
+                    Short.toUnsignedInt(key.requireValue(PROMPT_SECTION.SECTION_ID)));
+            log.error("Attempted to delete a protected default section off a template name {}", triedToDeleteSection);
+            throw new InvalidKey("Protected default section can't be deleted", Severity.USER);
         }
         super.beforeDelete(key, operationID);
     }

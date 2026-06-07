@@ -28,5 +28,4 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
         if (record.getMainPrompt() == null) return Optional.empty();
         return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getMainPrompt().shortValue()));
     }
-
 }
