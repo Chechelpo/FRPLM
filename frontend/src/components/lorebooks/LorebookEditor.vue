@@ -57,13 +57,17 @@ async function onImportFileSelected(event: Event): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const lorebookId = encodeURIComponent(model.value.hashKey());
+
+    const text = await file.text();
 
     const response = await fetch(
-        `${API_BASE}/lorebooks/${lorebookId}/entries/import`,
+        `${API_BASE}/${EntityTypes.ENTRY}/${model.value.get('id')}/import`,
         {
           method: 'POST',
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: text,
         },
     );
 

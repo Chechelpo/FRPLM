@@ -272,10 +272,14 @@ public abstract class EntityService<
         return Optional.ofNullable(store.get(field, key));
     }
 
+    @Transactional(readOnly = true)
+    public boolean exists(R record) {
+        return exists(keyOf(record));
+    }
     /**
      * @param k key of the entity
      * @return true if registered in store, false otherwise
-     * @implNote  does not throw {@link EntityNotFound}, that's in charge of the caller
+     * @implNote does not throw {@link EntityNotFound}, that's in charge of the caller
      */
     @Transactional(readOnly = true)
     public boolean exists(EntityKey<R> k){

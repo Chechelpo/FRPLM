@@ -77,11 +77,4 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
         return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
                 .orElseThrow(() -> new UnexpectedException("Location " + record.getName() + " without a lorebook", Severity.SYSTEM));
     }
-    //
-    public boolean importFromJSON(JsonNode file){
-        Objects.requireNonNull(file);
-        return true;
-    }
-
-
 }

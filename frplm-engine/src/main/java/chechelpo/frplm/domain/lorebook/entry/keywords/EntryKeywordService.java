@@ -48,6 +48,7 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
         );
         return true;
     }
+
     public boolean dissociate(int lorebookID, int entryID, String name){
         log.debug("Disassociating entry with lorebookID {} and entryID {} to keyword {}", lorebookID, entryID, name);
         int keywordID = keywordService.getOrGenerate(name);

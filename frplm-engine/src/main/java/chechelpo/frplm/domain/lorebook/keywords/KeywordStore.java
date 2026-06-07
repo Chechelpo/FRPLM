@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
@@ -47,7 +49,23 @@ final class KeywordStore extends EntityStore<KeywordRecord> {
     public Integer createWith(String name){
         return ctx.insertInto(KEYWORD)
                 .set(KEYWORD.KEYWORD_, name)
+                .onDuplicateKeyIgnore()
                 .returning(KEYWORD.ID)
                 .fetchOne(KEYWORD.ID);
+    }
+
+    public int getOrCreate(String keyword) {
+        String normalized = Objects.requireNonNull(keyword).trim();
+
+        ctx.insertInto(KEYWORD)
+                .set(KEYWORD.KEYWORD_, normalized)
+                .onDuplicateKeyIgnore()
+                .execute();
+
+        //noinspection DataFlowIssue
+        return ctx.select(KEYWORD.ID)
+                .from(KEYWORD)
+                .where(KEYWORD.KEYWORD_.eq(normalized))
+                .fetchSingle(KEYWORD.ID);
     }
 }

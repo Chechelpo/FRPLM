@@ -66,4 +66,41 @@ class StartingLocationsServiceTest {
             );
         }
     }
+
+    @Test
+    void testStartingLocationsAtWorld(){
+        LocationsRecord location1 = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
+        LocationsRecord location2 = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
+
+        assertNotEquals(location1.getWorldId(), location2.getWorldId(), "Expected world ids of locations to be different");
+
+        CharactersRecord characterRecord = characters.createAndGetRecords(1).getFirst();
+
+        assertDoesNotThrow(
+                () -> service.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
+                    .set(STARTING_LOCATIONS.WORLD_ID, location1.getWorldId())
+                    .set(STARTING_LOCATIONS.LOCATION_ID, location1.getId())
+                    .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
+                    .build()
+            ),
+                "Error creating starting location record of location 1"
+        );
+        assertDoesNotThrow(
+                () -> service.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
+                    .set(STARTING_LOCATIONS.WORLD_ID, location2.getWorldId())
+                    .set(STARTING_LOCATIONS.LOCATION_ID, location2.getId())
+                    .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
+                    .build()
+            ),
+                "Error creating starting locations record of location 2"
+        );
+
+        List<LocationsRecord> actualFromWorld1 = service.startingLocationAt(characterRecord, location1.getWorldId());
+        List<LocationsRecord> actualFromWorld2 = service.startingLocationAt(characterRecord, location2.getWorldId());
+
+        assertEquals(1, actualFromWorld1.size(), "Expected one location record");
+        assertEquals(1, actualFromWorld2.size(), "Expected one location record");
+
+        assertNotEquals(actualFromWorld1.getFirst(), actualFromWorld2.getFirst(), "Expected two different location records");
+    }
 }

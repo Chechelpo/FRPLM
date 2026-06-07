@@ -25,15 +25,7 @@ public class KeywordService extends EntityService<KeywordRecord, KeywordStore> {
     }
 
     public int getOrGenerate(String keyword) {
-        if (existsWith(keyword)) {
-            Integer id = store.getWith(keyword);
-            if (id != null) return id;
-
-            log.error("Keyword exists with name {} but ID could not be found", keyword);
-            throw new IllegalArgumentException("Keyword exists with name " + keyword + " but ID could not be found");
-        }
-        log.debug("Creating new keyword {}", keyword);
-        return store.createWith(keyword);
+        return store.getOrCreate(keyword);
     }
 
     public int getIDOfKeywordWith(String name){

@@ -1,4 +1,4 @@
-package chechelpo.frplm.utils.importers;
+package chechelpo.frplm.utils.importers.lorebooks;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;

@@ -76,7 +76,6 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         return store.getLastMessage(sessionID);
     }
 
-
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<MessagesRecord> data, long operationID) {
         MessagesRecord lastMessage = getLastOf(data.requireValue(MESSAGES.SESSION_ID));
@@ -180,8 +179,10 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                 session.getWorldId()
         );
 
-        if (locations.size() != 1)
+        if (locations.size() != 1){
+            log.error("Expected only one location for session {}, got instead: \n {}", session.getId(), locations);
             throw new IllegalStateException("Expected exactly one location for a user persona character");
+        }
 
         this.createAndGet(EntityDataPayload.<MessagesRecord>builder()
                 .set(MESSAGES.TIME, 0)

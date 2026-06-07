@@ -14,8 +14,8 @@ import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.utils.importers.NewEntryOrder;
-import chechelpo.frplm.utils.importers.STLorebookImporter;
+import chechelpo.frplm.utils.importers.lorebooks.NewEntryOrder;
+import chechelpo.frplm.utils.importers.lorebooks.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -106,13 +106,16 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         order.forEach(entry -> {
             EntityDataPayload<EntryRecord> payload = entry.entryInfo();
             payload.set(ENTRY.LOREBOOK_ID, toLorebookID);
+            try{
+                EntryRecord record = this.createAndGet(entry.entryInfo());
 
-            EntryRecord record = this.createAndGet(entry.entryInfo());
-
-            entry.keywords().forEach(keyword ->
-                    entryKeywordService.associate(toLorebookID, record.getEntryId(), keyword)
-            );
-            result.add(record);
+                entry.keywords().forEach(keyword ->
+                        entryKeywordService.associate(toLorebookID, record.getEntryId(), keyword)
+                );
+                result.add(record);
+            } catch (RuntimeException e) {
+                log.error("Error importing entry {} with info \n {}", e, entry.entryInfo());
+            }
         });
 
         return result;

@@ -27,9 +27,10 @@ final class StartingLocationsStore extends EntityStore<StartingLocationsRecord>
                 .join(LOCATIONS)
                 .on(
                         STARTING_LOCATIONS.LOCATION_ID.eq(LOCATIONS.ID)
-                                .and(STARTING_LOCATIONS.WORLD_ID.eq(worldID))
+                                .and(STARTING_LOCATIONS.WORLD_ID.eq(LOCATIONS.WORLD_ID))
                                 .and(STARTING_LOCATIONS.CHARACTER_ID.eq(key.getValue(CHARACTERS.ID)))
                 )
+                .where(STARTING_LOCATIONS.WORLD_ID.eq(worldID))
                 .fetchInto(LocationsRecord.class);
     }
 

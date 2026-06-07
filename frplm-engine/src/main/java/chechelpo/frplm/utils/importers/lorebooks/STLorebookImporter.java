@@ -1,8 +1,7 @@
-package chechelpo.frplm.utils.importers;
+package chechelpo.frplm.utils.importers.lorebooks;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
-import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.Contract;
@@ -50,9 +49,9 @@ public final class STLorebookImporter {
             boolean groupOverride,
             int groupWeight,
 
-            int sticky,
-            int cooldown,
-            int delay,
+            Integer sticky,
+            Integer cooldown,
+            Integer delay,
 
             int probability,
             int depth,
@@ -109,10 +108,10 @@ public final class STLorebookImporter {
                 .set(ENTRY.CONTENT, stEntry.content)
 
                 .set(ENTRY.STRATEGY, getEntryStrategy(stEntry).stable_id)
-                .set(ENTRY.PROBABILITY, (short) stEntry.probability)
+                .set(ENTRY.PROBABILITY, (short) stEntry.probability )
 
-                .set(ENTRY.COOLDOWN, stEntry.cooldown)
-                .set(ENTRY.DELAY, stEntry.delay)
+                .set(ENTRY.COOLDOWN, stEntry.cooldown == null ? 0 : stEntry.cooldown)
+                .set(ENTRY.DELAY, stEntry.delay == null ? 0 : stEntry.delay)
 
                 .set(ENTRY.PREVENT_FURTHER_RECURSION, stEntry.preventRecursion)
                 .build();
