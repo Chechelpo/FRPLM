@@ -13,7 +13,5 @@ public class PromptTemplateTestContext implements DBReload {
     TemplateFieldsHelper fields;
 
     @Override
-    public void reload() {
-
-    }
+    public void reload() {}
 }

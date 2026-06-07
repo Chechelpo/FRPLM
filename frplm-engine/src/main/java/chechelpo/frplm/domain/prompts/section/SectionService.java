@@ -32,6 +32,10 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
         this.templateService = templateService;
     }
 
+    /**
+     * @param template parent
+     * @return section records ordered by their position (ascending)
+     */
     public List<PromptSectionRecord> getOrderedSectionsOfTemplate(@NotNull PromptTemplateRecord template) {
         return store.getOrderedSections(template.getId());
     }

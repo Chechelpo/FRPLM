@@ -5,6 +5,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import it.unimi.dsi.fastutil.ints.IntComparators;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +92,24 @@ class SectionServiceTest {
                     "Couldn't delete unprotected section: " + defaultSection.name
             );
         });
+
+    }
+
+    @Test
+    void getOrderedSectionsOf(){
+        EntityDataPayload<PromptTemplateRecord> createdData = EntityDataPayload.<PromptTemplateRecord>builder()
+                .set(PROMPT_TEMPLATE.NAME, "Test")
+                .build();
+
+        PromptTemplateRecord prompt = sections.prompts.templates.createAndGet(createdData);
+        List<PromptSectionRecord> sectionsOfPrompt = sections.sectionService.getMatching(
+                EntityKey.of(PROMPT_SECTION.PROMPT_ID, prompt.getId())
+        );
+
+        sectionsOfPrompt.sort(Comparator.comparing(PromptSectionRecord::getPosition));
+        List<PromptSectionRecord> actualOrderedSections = sections.sectionService.getOrderedSectionsOfTemplate(prompt);
+
+        assertEquals(sectionsOfPrompt, actualOrderedSections);
 
     }
 
