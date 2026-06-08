@@ -1,8 +1,6 @@
 package chechelpo.frplm.domain.sessions.messages.gen;
 
-import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -14,7 +12,6 @@ import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Optional;
 
@@ -28,20 +25,20 @@ public class GenService extends EntityService<LlmGenRecord, GenStore> {
         this.responseService = responseService;
     }
 
-    public EntityKey<LlmGenRecord> from(@NotNull EntityKey<MessagesRecord> key) {
+    @Transactional ( readOnly = true )
+    public Optional<ResponsesRecord> getActiveResponseOf(MessagesRecord record) {
+        return this.find(this.keyFrom(record))
+                .map(responseService::getLastResponse);
+    }
+    private EntityKey<LlmGenRecord> keyFrom(@NotNull MessagesRecord record) {
         EntityKey<LlmGenRecord> result = EntityKey.<LlmGenRecord>builder()
-                .set(LLM_GEN.SESSION_ID, key.requireValue(MESSAGES.SESSION_ID))
-                .set(LLM_GEN.TICK_NUM, key.requireValue(MESSAGES.TICK_NUM))
+                .set(LLM_GEN.SESSION_ID, record.getSessionId())
+                .set(LLM_GEN.TICK_NUM, record.getTickNum())
                 .build();
         throwIfInvalidKey(result, true);
         return result;
     }
 
-    @Transactional ( readOnly = true )
-    public Optional<ResponsesRecord> getActiveResponseOf(EntityKey<MessagesRecord> key) {
-        return this.find(this.from(key))
-                .map(responseService::getLastResponse);
-    }
 
     public void registerNewResponse(EntityKey<LlmGenRecord> ofKey,  String content){
         if (!exists(ofKey)) {
@@ -64,18 +61,5 @@ public class GenService extends EntityService<LlmGenRecord, GenStore> {
         );
 
         this.update(ofKey, EntityDataPayload.of(LLM_GEN.ACTIVE_RESPONSE, newResponseNum));
-    }
-
-
-    @TransactionalEventListener
-    void beforeReturningRecords(CRUDCommittedEvent.@NotNull RetrievedEntities<?> rawEvent){
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
-
-        CRUDCommittedEvent.RetrievedEntities<MessagesRecord> event =
-                (CRUDCommittedEvent.RetrievedEntities<MessagesRecord>) rawEvent;
-
-        assert event.recordsToReturn().size() == event.targets().size();
-
-
     }
 }
