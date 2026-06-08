@@ -30,7 +30,18 @@ public class EdgeTestContext implements DBReload {
                         .build()
         );
     }
-
+    /** Links locations i -> i + 1*/
+    public void linkLinear(List<LocationsRecord> locationsToLink){
+        if (locationsToLink == null || locationsToLink.isEmpty()) throw new IllegalArgumentException("Locations list is empty or null");
+        int worldID = locationsToLink.getFirst().getWorldId();
+        for (int i = 0; i < locationsToLink.size() - 1; i++) {
+            link(worldID, locationsToLink.get(i).getId(), locationsToLink.get(i+1).getId());
+            assert service.isNeighbour(
+                    locations.service.keyOf(locationsToLink.get(i)),
+                    locations.service.keyOf(locationsToLink.get(i+1))
+            ) : "Error when linking locations";
+        }
+    }
     @Override
     public void reload() {
         locations.reload();

@@ -57,6 +57,10 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
         this.sessionService = sessionService;
     }
 
+    public void rollbackSessionTo(int sessionID, int tick){
+        store.rollbackSessionTo(sessionID, tick);
+    }
+
     public CharactersRecord[] getAtLocation(int sessionID, int locationID) {
         List<CurrentLocationsRecord> records = store.getAtLocation(sessionID, locationID);
         log.debug(records.toString());
@@ -123,15 +127,21 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
 
         data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastOf(sessionID).getTickNum());
 
-        movementService.registerMovementChange(target, data);
+        movementService.registerMovementChange(
+                previous,
+                data.requireValue(CURRENT_LOCATIONS.TICK_NUM)
+        );
         super.beforeUpdate(target, data, operationID);
     }
 
     @Override
-    protected void afterSuccessfulUpdate(EntityKey<CurrentLocationsRecord> key, EntityDataPayload<CurrentLocationsRecord> updated, long operationID) {
+    protected void afterSuccessfulUpdate(EntityKey<CurrentLocationsRecord> key, @NotNull EntityDataPayload<CurrentLocationsRecord> updated, long operationID) {
+        int movedCharacterId = key.requireValue(CURRENT_LOCATIONS.CHARACTER_ID);
+        int sessionID = key.requireValue(CURRENT_LOCATIONS.SESSION_ID);
+        boolean userCharacterMovement = movedCharacterId == sessionService.getUserCharacterID(sessionID).orElseThrow();
+
         if (updated.assignsField(CURRENT_LOCATIONS.LOCATION_ID) && updated.assignsField(CURRENT_LOCATIONS.TICK_NUM)) {
-            if (key.requireValue(CURRENT_LOCATIONS.CHARACTER_ID) ==
-                    sessionService.getUserCharacterID(EntityKey.of(SESSIONS.ID, key.requireValue(CURRENT_LOCATIONS.SESSION_ID))).orElseThrow()){
+            if (userCharacterMovement){
                 boolean success = messageService.update(
                         EntityKey.<MessagesRecord>builder()
                                 .set(MESSAGES.SESSION_ID, key.requireValue(CURRENT_LOCATIONS.SESSION_ID))

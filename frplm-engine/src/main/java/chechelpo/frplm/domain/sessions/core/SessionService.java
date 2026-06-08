@@ -29,6 +29,10 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
         this.characterService = characters;
     }
     @Transactional(readOnly = true)
+    public Optional<Integer> getUserCharacterID(int sessionID) {
+        return this.getValueOf(SESSIONS.USER_PERSONA_ID, EntityKey.of(SESSIONS.ID, sessionID));
+    }
+    @Transactional(readOnly = true)
     public Optional<Integer> getUserCharacterID(EntityKey<SessionsRecord> key){
         return this.getValueOf(SESSIONS.USER_PERSONA_ID, key);
     }

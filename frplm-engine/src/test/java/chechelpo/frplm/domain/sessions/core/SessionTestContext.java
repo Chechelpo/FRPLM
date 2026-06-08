@@ -41,8 +41,8 @@ public class SessionTestContext implements DBReload {
         locations.reload();
     }
 
-    public record SessionContext(CharactersRecord userCharacter, SessionsRecord session){}
-    /** Locations of this session are not linked */
+    public record SessionContext(CharactersRecord userCharacter, SessionsRecord session, List<LocationsRecord> sessionLocations) {}
+    /** Locations of this session are not linked. Character starts at the first location of the list */
     public SessionContext createSession(int locationsAmount, int charactersPerLocation){
         List<LocationsRecord> locationsOfSession = locations.createAndGetTestLocationsOfSameWorld(locationsAmount);
         //Create other locations of other worlds
@@ -51,7 +51,7 @@ public class SessionTestContext implements DBReload {
         }
         List<CharactersRecord> charactersRecords = characters.createAndGetRecords(locationsAmount * charactersPerLocation);
 
-        CharactersRecord userCharacter = charactersRecords.getLast();
+        CharactersRecord userCharacter = charactersRecords.getFirst();
         characters.service.update(
                 characters.service.keyOf(userCharacter),
                 EntityDataPayload.of(CHARACTERS.CAN_BE_USER, true)
@@ -76,7 +76,7 @@ public class SessionTestContext implements DBReload {
                 .build()
         );
 
-        return new SessionContext(userCharacter, newSession);
+        return new SessionContext(userCharacter, newSession, locationsOfSession);
     }
 
 }

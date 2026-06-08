@@ -22,32 +22,20 @@ public class MovementService extends EntityService<MovementsRecord, MovementStor
         super(store, eventBus);
     }
 
-
-    public void goBack(int sessionID, int tick){
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Integer getLocationBeforeTick(int characterId, int sessionId, int tick) {
+        return store.getLocationBeforeTick(characterId, sessionId, tick);
     }
 
-
-
-    void registerMovementChange(EntityKey<CurrentLocationsRecord> target, EntityDataPayload<CurrentLocationsRecord> data)
+    void registerMovementChange(CurrentLocationsRecord previous, int atTick)
             throws InvalidMove
     {
         log.trace("Registering movement change event");
         try{
-            int movedCharacterID = target.getValue(CURRENT_LOCATIONS.CHARACTER_ID);
-            int toLocationID = data.requireValue(CURRENT_LOCATIONS.LOCATION_ID);
-            int atTick = data.requireValue(CURRENT_LOCATIONS.TICK_NUM);
-            log.debug("Registering movement change event of character id {} at tick {} to location ID {}",
-                    movedCharacterID,
-                    atTick,
-                    toLocationID
-            );
-
             this.unsafeCreate(EntityDataPayload.<MovementsRecord>builder()
-                            .set(MOVEMENTS.SESSION_ID, target.getValue(CURRENT_LOCATIONS.SESSION_ID))
-                            .set(MOVEMENTS.CHARACTER_ID, movedCharacterID)
-                            .set(MOVEMENTS.WORLD_ID, data.requireValue(CURRENT_LOCATIONS.WORLD_ID))
-                            .set(MOVEMENTS.LOCATION_ID, toLocationID)
+                            .set(MOVEMENTS.SESSION_ID, previous.getSessionId())
+                            .set(MOVEMENTS.CHARACTER_ID, previous.getCharacterId())
+                            .set(MOVEMENTS.WORLD_ID, previous.getWorldId())
+                            .set(MOVEMENTS.LOCATION_ID, previous.getLocationId())
                             .set(MOVEMENTS.AT_TICK, atTick)
                             .build()
             );
