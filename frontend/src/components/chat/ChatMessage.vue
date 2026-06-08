@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { Message } from "@/domain/Session";
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { Location } from "@/domain/World";
 import { Character } from "@/domain/Characters";
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
+
+const markdown = new MarkdownIt({
+  html: true,
+  linkify: true,
+  breaks: true,
+});
 
 const props = defineProps<{
   message: Message;
@@ -14,7 +22,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  (e: 'delete' , value:Message ) : void;
+  (e: "delete", value: Message): void;
 }>();
 
 const location = shallowRef<Location>();
@@ -31,6 +39,11 @@ const savingMessage = ref<boolean>(false);
 
 const displayedContent = ref<string>("");
 const messageDraft = ref<string>("");
+
+const renderedContent = computed<string>(() => {
+  const html = markdown.render(displayedContent.value);
+  return DOMPurify.sanitize(html);
+});
 
 function getMessageContent(): string {
   const content = props.message.get("content");
@@ -64,6 +77,7 @@ async function saveMessageEdit(): Promise<void> {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 const editingCharacter = ref<boolean>(false);
 const selectedCharacter = shallowRef<Character | null>(null);
+
 function onCharacterClick(name: string): void {
   const character = presentCharacters.value.find(
       character => character.get("name") === name
@@ -92,6 +106,7 @@ async function loadMessageContext(): Promise<void> {
 }
 
 onMounted(loadMessageContext);
+
 watch(
     () => props.message,
     () => {
@@ -111,12 +126,13 @@ watch(
 
         <div class="chat-message-actions">
           <button
-            type="button"
-            class="chat-message-action-button"
-            @click="emits('delete', props.message)"
+              type="button"
+              class="chat-message-action-button"
+              @click="emits('delete', props.message)"
           >
-           D
+            D
           </button>
+
           <button
               v-if="!editingMessage"
               type="button"
@@ -181,9 +197,8 @@ watch(
     <div
         v-if="!editingMessage"
         class="chat-message-content chat-message-content-readonly"
-    >
-      {{ displayedContent }}
-    </div>
+        v-html="renderedContent"
+    />
 
     <textarea
         v-else
@@ -354,9 +369,39 @@ watch(
 
 .chat-message-content-readonly {
   cursor: default;
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
   user-select: text;
+}
+
+.chat-message-content-readonly :deep(p) {
+  margin: 0 0 0.75rem;
+}
+
+.chat-message-content-readonly :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-message-content-readonly :deep(a) {
+  color: var(--primary-accent, #f59e0b);
+  text-decoration: underline;
+}
+
+.chat-message-content-readonly :deep(pre) {
+  overflow-x: auto;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.chat-message-content-readonly :deep(code) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.chat-message-content-readonly :deep(blockquote) {
+  margin: 0.75rem 0;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--primary-accent, #f59e0b);
+  color: var(--muted-text, #94a3b8);
 }
 
 .chat-message-content-editor {

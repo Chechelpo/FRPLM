@@ -12,7 +12,8 @@
     "allowJs": true,
     "checkJs": false,
     "isolatedModules": true,
-    "jsx": "react"
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"]
 }

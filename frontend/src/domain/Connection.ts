@@ -6,7 +6,6 @@ import {API_BASE} from "@/config";
 export type LLMConnectionKeys = {id:number}
 export type LLMConnectionData = {
     type: number;
-    api_key: number | null,
     name:string,
     modelID:string | null,
 }
@@ -17,7 +16,6 @@ export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionDat
     }
     public async assignNewKey(key:string){
         const newItem:ApiKey = await ApiKey.create(key, LLMBackends.NANOGPT.id)
-        await this.update('api_key', newItem.get('id'))
     }
 
     public async testConnection(): Promise<boolean> {

@@ -9,8 +9,6 @@ import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
-
 @Component
 final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord, LLMService, LLMController> {
     LLMFieldsHelper(LLMService service, LLMController controller) {
@@ -58,13 +56,6 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                         .setConstraints(StringConstraint.builder()
                                 .setMaxLength(255)
                         )
-                        .build()
-        );
-        register_field(
-                "api_key",
-                LLM_CONNECTION.API_KEY,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
                         .build()
         );
     }

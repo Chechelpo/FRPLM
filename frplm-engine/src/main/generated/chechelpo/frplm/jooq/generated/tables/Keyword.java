@@ -163,7 +163,7 @@ public class Keyword extends TableImpl<KeywordRecord> {
      */
     public EntryKeywordsPath entryKeywords() {
         if (_entryKeywords == null)
-            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_500.getInverseKey());
+            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_50.getInverseKey());
 
         return _entryKeywords;
     }

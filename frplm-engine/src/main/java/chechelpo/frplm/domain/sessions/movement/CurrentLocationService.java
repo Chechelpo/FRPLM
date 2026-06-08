@@ -91,11 +91,6 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
         return locationsService.getLocationBy(records.getFirst());
     }
 
-    @Override
-    public boolean update(EntityKey<CurrentLocationsRecord> id, EntityDataPayload<CurrentLocationsRecord> update) {
-        return super.update(id, update);
-    }
-
     /** @implNote check the movement is valid */
     @Override
     protected void beforeUpdate(

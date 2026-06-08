@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -97,7 +98,7 @@ public final class STLorebookImporter {
         return lorebook.entries()
                 .values()
                 .stream()
-                .map(entry -> new NewEntryOrder(entry.keys, toEntryPayload(entry)))
+                .map(entry -> new NewEntryOrder(new HashSet<>(entry.keys), toEntryPayload(entry)))
                 .toList();
     }
 

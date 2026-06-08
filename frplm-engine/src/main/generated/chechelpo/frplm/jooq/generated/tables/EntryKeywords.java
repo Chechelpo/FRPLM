@@ -9,6 +9,7 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
 import chechelpo.frplm.jooq.generated.tables.Keyword.KeywordPath;
+import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 
 import java.util.Arrays;
@@ -148,24 +149,24 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
 
     @Override
     public UniqueKey<EntryKeywordsRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_5;
+        return Keys.CONSTRAINT_500;
     }
 
     @Override
     public List<ForeignKey<EntryKeywordsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_50, Keys.CONSTRAINT_500);
+        return Arrays.asList(Keys.CONSTRAINT_5, Keys.CONSTRAINT_50, Keys.CONSTRAINT_500E);
     }
 
-    private transient EntryPath _entry;
+    private transient LorebooksPath _lorebooks;
 
     /**
-     * Get the implicit join path to the <code>PUBLIC.ENTRY</code> table.
+     * Get the implicit join path to the <code>PUBLIC.LOREBOOKS</code> table.
      */
-    public EntryPath entry() {
-        if (_entry == null)
-            _entry = new EntryPath(this, Keys.CONSTRAINT_50, null);
+    public LorebooksPath lorebooks() {
+        if (_lorebooks == null)
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_5, null);
 
-        return _entry;
+        return _lorebooks;
     }
 
     private transient KeywordPath _keyword;
@@ -175,9 +176,21 @@ public class EntryKeywords extends TableImpl<EntryKeywordsRecord> {
      */
     public KeywordPath keyword() {
         if (_keyword == null)
-            _keyword = new KeywordPath(this, Keys.CONSTRAINT_500, null);
+            _keyword = new KeywordPath(this, Keys.CONSTRAINT_50, null);
 
         return _keyword;
+    }
+
+    private transient EntryPath _entry;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.ENTRY</code> table.
+     */
+    public EntryPath entry() {
+        if (_entry == null)
+            _entry = new EntryPath(this, Keys.CONSTRAINT_500E, null);
+
+        return _entry;
     }
 
     @Override

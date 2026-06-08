@@ -259,7 +259,7 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public EntryKeywordsPath entryKeywords() {
         if (_entryKeywords == null)
-            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_50.getInverseKey());
+            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_500E.getInverseKey());
 
         return _entryKeywords;
     }

@@ -8,6 +8,7 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
+import chechelpo.frplm.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
@@ -191,6 +192,19 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
             _entry = new EntryPath(this, null, Keys.CONSTRAINT_3F1.getInverseKey());
 
         return _entry;
+    }
+
+    private transient EntryKeywordsPath _entryKeywords;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.ENTRY_KEYWORDS</code> table
+     */
+    public EntryKeywordsPath entryKeywords() {
+        if (_entryKeywords == null)
+            _entryKeywords = new EntryKeywordsPath(this, null, Keys.CONSTRAINT_5.getInverseKey());
+
+        return _entryKeywords;
     }
 
     private transient LocationsPath _locations;
