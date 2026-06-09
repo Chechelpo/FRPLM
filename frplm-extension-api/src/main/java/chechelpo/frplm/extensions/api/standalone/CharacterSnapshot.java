@@ -27,7 +27,7 @@ public non-sealed interface CharacterSnapshot extends Snapshot {
     }
 
     CharacterSnapshot.Reference reference();
-
+    LorebookSnapshot lorebook();
     String getName();
     LocationSnapshot[] getStartingLocations();
 }

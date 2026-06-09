@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static chechelpo.frplm.pipelines.prompts.PromptEntryPoint.PROMPT_LOGGER;
+import static chechelpo.frplm.utils.prompts.PromptEntryPoint.PROMPT_LOGGER;
 
 public final class OutletDetection {
     private OutletDetection() {}

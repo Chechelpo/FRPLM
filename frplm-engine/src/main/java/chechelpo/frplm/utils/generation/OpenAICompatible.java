@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.generation;
+package chechelpo.frplm.utils.generation;
 
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;

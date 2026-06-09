@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static chechelpo.frplm.pipelines.prompts.PromptEntryPoint.PROMPT_LOGGER;
+import static chechelpo.frplm.utils.prompts.PromptEntryPoint.PROMPT_LOGGER;
 
 
 public final class EntryEvaluator {

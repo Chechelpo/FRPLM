@@ -4,6 +4,7 @@ import chechelpo.frplm.extensions.api.annotations.Ephemeral;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Optional;
 
 @Ephemeral
@@ -32,4 +33,5 @@ public non-sealed interface PromptSnapshot extends Snapshot {
 
     PromptSnapshot.Reference reference();
     Optional<ConnectionSnapshot> getAssignedConnection();
+    List<PromptSectionSnapshot> getSections();
 }

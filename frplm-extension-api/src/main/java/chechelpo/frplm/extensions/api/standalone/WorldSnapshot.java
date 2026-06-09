@@ -29,7 +29,7 @@ public non-sealed interface WorldSnapshot extends Snapshot {
     }
 
     WorldSnapshot.Reference reference();
-
+    LorebookSnapshot lorebook();
     LocationSnapshot[] getNeighboursOf(LocationSnapshot loc);
     boolean areNeighbours(LocationSnapshot loc, LocationSnapshot other);
 }

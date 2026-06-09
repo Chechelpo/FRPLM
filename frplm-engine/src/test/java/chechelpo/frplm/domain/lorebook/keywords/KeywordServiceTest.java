@@ -2,18 +2,32 @@ package chechelpo.frplm.domain.lorebook.keywords;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
+import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+import java.util.Map;
 
 import static chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class KeywordServiceTest {
+    @Autowired
+    EntryTestContext entryTestContext;
     @Autowired KeywordService keywordService;
     @Autowired KeywordFieldHelper fields;
+
+    @BeforeEach
+    void setUp() {
+        entryTestContext.reload();
+    }
 
     @Test
     void getOrGenerate_whenKeywordDoesNotExist_createsKeyword() {
@@ -47,5 +61,21 @@ class KeywordServiceTest {
                 UnsupportedOperationException.class,
                 () -> keywordService.update(key, payload)
         );
+    }
+
+    @Test
+    void getKeywordIDsOfLorebook(){
+        int keywordAmount = 300;
+        String[] keywords = new String[keywordAmount];
+        String prefix = "keyword_";
+        for (int i = 0; i < keywordAmount; i++) keywords[i] = prefix + i;
+
+        long seed = 120L;
+        Map<LorebooksRecord, List<EntryRecord>> entries = entryTestContext.createEntries(seed,3, 100);
+
+        for (var entry : entries.entrySet()) {
+            List<EntryRecord> entryRecords = entry.getValue();
+        }
+
     }
 }

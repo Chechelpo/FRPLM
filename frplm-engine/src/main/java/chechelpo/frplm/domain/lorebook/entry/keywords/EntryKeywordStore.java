@@ -7,6 +7,7 @@ import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.utils.collections.IntSetFactory;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -43,6 +44,20 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
                 .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(key.getValue(LOREBOOKS.ID)))
                 .fetch(ENTRY_KEYWORDS.KEYWORD_ID);
         return IntSetFactory.ofValues(keywordIDs);
+    }
+
+    public @NotNull List<IntObjectPair<String>> getKeywordsOf(IntSet lorebookIDs) {
+        return ctx.selectDistinct(KEYWORD.KEYWORD_, KEYWORD.ID)
+                .from(KEYWORD)
+                .join(ENTRY_KEYWORDS)
+                .on(KEYWORD.ID.eq(ENTRY_KEYWORDS.KEYWORD_ID))
+                .join(ENTRY)
+                .on(
+                        ENTRY_KEYWORDS.LOREBOOK_ID.eq(ENTRY.LOREBOOK_ID)
+                                .and(ENTRY_KEYWORDS.ENTRY_ID.eq(ENTRY.ENTRY_ID))
+                )
+                .where(ENTRY_KEYWORDS.LOREBOOK_ID.in(lorebookIDs))
+                .fetch(record -> IntObjectPair.of(record.get(KEYWORD.ID), record.get(KEYWORD.KEYWORD_)));
     }
 
     public @NotNull Set<String> getKeywordNamesOfLorebook(int lorebookID){

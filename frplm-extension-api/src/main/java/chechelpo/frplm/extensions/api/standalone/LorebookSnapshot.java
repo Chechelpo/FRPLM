@@ -30,9 +30,6 @@ public non-sealed interface LorebookSnapshot extends Snapshot {
 
     LorebookSnapshot.Reference reference();
 
-    /** @return whether this lorebook is associated with a character / world / location */
-    boolean isAssociated();
-    /** @apiNote if {@link #isAssociated()} this name is the name of the owner too */
     String getName();
 
     EntrySnapshot[] getEntries();

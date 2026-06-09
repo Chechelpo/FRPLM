@@ -2,6 +2,7 @@ package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 
 public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements CharacterSnapshot {
@@ -16,6 +17,11 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
     @Override
     public Reference reference() {
         return new CharacterSnapshot.Reference(this.record.getId());
+    }
+
+    @Override
+    public LorebookSnapshot lorebook() {
+        return new LorebookImpl(context.lorebooks().getLorebookOf(this.getRecord()), this.context);
     }
 
     @Override

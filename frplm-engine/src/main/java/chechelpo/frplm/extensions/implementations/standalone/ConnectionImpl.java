@@ -4,7 +4,7 @@ import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
-import chechelpo.frplm.pipelines.generation.GenerationEntryPoint;
+import chechelpo.frplm.utils.generation.GenerationEntryPoint;
 
 public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implements ConnectionSnapshot {
     public ConnectionImpl(LlmConnectionRecord record, ExtensionContext context) {

@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  *     </ul>
  * </li>
  */
-final class KeywordDetection {
+public final class KeywordDetection {
     private KeywordDetection() {}
 
     public record DetectedKeyword(int keywordID, int atDepth) {}
@@ -36,7 +36,7 @@ final class KeywordDetection {
     @Contract(pure = true)
     public static IntSet detectedKeywords(
             IntObjectPair<String> @NotNull [] keywords,
-            @NotNull List<MessagesRecord> messages
+            @NotNull List<String> messages
     ) {
         IntObjectPair<Pattern>[] compiledPatterns = compiledKeywords(keywords);
 
@@ -45,9 +45,7 @@ final class KeywordDetection {
                         IntOpenHashSet::new,
 
                         (detected, message) -> {
-                            String text = message.getContent();
-
-                            if (text == null || text.isBlank()) {
+                            if (message == null || message.isBlank()) {
                                 return;
                             }
 
@@ -55,7 +53,7 @@ final class KeywordDetection {
                                 int keywordId = keyword.firstInt();
 
                                 if (!detected.contains(keywordId)
-                                        && keywordDetected(text, keyword.second())) {
+                                        && keywordDetected(message, keyword.second())) {
                                     detected.add(keywordId);
                                 }
                             }

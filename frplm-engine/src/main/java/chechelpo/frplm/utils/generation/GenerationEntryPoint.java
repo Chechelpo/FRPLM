@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.generation;
+package chechelpo.frplm.utils.generation;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -23,7 +23,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import static chechelpo.frplm.jooq.generated.Tables.MESSAGES;
-import static chechelpo.frplm.pipelines.generation.OpenAICompatible.generateNonStreaming;
+import static chechelpo.frplm.utils.generation.OpenAICompatible.generateNonStreaming;
 
 public final class GenerationEntryPoint {
     static final Logger GENERATIONS_LOGGER = (Logger) LoggerFactory.getLogger("GENERATIONS");

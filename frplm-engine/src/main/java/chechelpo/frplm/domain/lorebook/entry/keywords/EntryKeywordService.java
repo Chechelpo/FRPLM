@@ -9,10 +9,15 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import chechelpo.frplm.utils.collections.IntSetFactory;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -35,6 +40,10 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
 
     public @NotNull Set<String> keywordsOfLorebook(int lorebookID){
         return this.store.getKeywordNamesOfLorebook(lorebookID);
+    }
+
+    public List<IntObjectPair<String>> getKeywords(IntSet lorebookIDs) {
+        return store.getKeywordsOf(lorebookIDs);
     }
 
     public boolean associate(int lorebookID, int entryID, String name){

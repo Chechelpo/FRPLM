@@ -38,7 +38,7 @@ public non-sealed interface Session extends Snapshot {
 
     SessionCharacter getUserCharacter();
     SessionWorld getWorld();
-    Optional<PromptSnapshot> getPrompt();
+    Optional<SessionPrompt> getPrompt();
 
     @UnmodifiableView
     List<ChatMessage> getChatHistory();

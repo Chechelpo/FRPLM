@@ -19,20 +19,7 @@ final class KeywordStore extends EntityStore<KeywordRecord> {
         super(ctx, KEYWORD, EntityTypes.Types.KEYWORDS);
     }
 
-    public @NotNull IntObjectPair<String>[] getKeywordsOf(IntSet lorebookIDs) {
-        return ctx.selectDistinct(KEYWORD.KEYWORD_, KEYWORD.ID)
-                .from(KEYWORD)
-                .join(ENTRY_KEYWORDS)
-                .on(KEYWORD.ID.eq(ENTRY_KEYWORDS.KEYWORD_ID))
-                .join(ENTRY)
-                .on(
-                        ENTRY_KEYWORDS.LOREBOOK_ID.eq(ENTRY.LOREBOOK_ID)
-                                .and(ENTRY_KEYWORDS.ENTRY_ID.eq(ENTRY.ENTRY_ID))
-                )
-                .where(ENTRY_KEYWORDS.LOREBOOK_ID.in(lorebookIDs))
-                .fetch(record -> IntObjectPair.of(record.get(KEYWORD.ID), record.get(KEYWORD.KEYWORD_)))
-                .toArray(IntObjectPair[]::new);
-    }
+
     public Integer getWith(String name){
         return ctx.select(KEYWORD.ID)
                 .from(main_table)

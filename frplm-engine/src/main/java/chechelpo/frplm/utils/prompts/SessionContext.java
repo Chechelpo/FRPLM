@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -37,28 +37,10 @@ final class SessionContext {
             @NotNull FullEngineContext engine
     ) {
         CharactersRecord userCharacter = engine.characters().getUserCharacter(session);
-        WorldsRecord world;
-        LocationsRecord currentLocation;
+        WorldsRecord world = engine.worlds().getWorldOf(session);
+        LocationsRecord currentLocation = engine.currentLocations().getLocationOf(userCharacter, session);
         PromptTemplateRecord promptTemplate;
-        try{
-            currentLocation = engine.currentLocations().getLocationOf(userCharacter, session);
-            promptTemplate = engine.templates().getOf(session)
-                    .orElseThrow(() -> new RuntimeException("Template not configured"));
-            world = engine.worlds().getWorldOf(session);
-        } catch (EntityNotFound e) {
-            throw new RuntimeException(e);
-        }
 
-        return new PromptRenderContext(
-                userCharacter,
-                promptTemplate,
-                currentLocation,
-                gatherLorebooks(
-                        engine.lorebooks(),
-                        world,
-                        currentLocation,
-                        engine.currentLocations().getAtLocation(currentLocation, session)
-                        )
-        );
+        return null;
     }
 }

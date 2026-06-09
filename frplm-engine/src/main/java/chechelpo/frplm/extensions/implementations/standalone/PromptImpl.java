@@ -1,10 +1,13 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import chechelpo.frplm.extensions.api.standalone.PromptSectionSnapshot;
 import chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.extensions.implementations.session.PromptSessionImpl;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 
+import java.util.List;
 import java.util.Optional;
 
 import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
@@ -26,5 +29,13 @@ public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implement
     @Override
     public Reference reference() {
         return new PromptSnapshot.Reference(this.record.getId());
+    }
+
+    @Override
+    public List<PromptSectionSnapshot> getSections() {
+        return context.sections().getOrderedSectionsOfTemplate(this.getRecord()).stream()
+                .map(section -> new PromptSectionImpl(section, this.context))
+                .map(PromptSectionSnapshot.class::cast)
+                .toList();
     }
 }

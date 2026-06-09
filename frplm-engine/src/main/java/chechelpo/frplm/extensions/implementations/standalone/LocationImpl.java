@@ -1,6 +1,7 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
+import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,5 +29,10 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
         return context.edges().getNeighboursOf(this.record).stream()
                 .map(record -> new LocationImpl(record, this.context))
                 .toArray(LocationImpl[]::new);
+    }
+
+    @Override
+    public LorebookSnapshot lorebook() {
+        return null;
     }
 }

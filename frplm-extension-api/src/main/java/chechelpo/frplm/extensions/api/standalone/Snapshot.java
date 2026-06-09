@@ -13,4 +13,4 @@ import chechelpo.frplm.extensions.api.session.Session;
  * <p>Store the corresponding {@code *Ref} instead and resolve it again through
  * the engine API when needed.</p>
  */
-public sealed interface Snapshot permits ChatMessage, Session, CharacterSnapshot, ConnectionSnapshot, EntrySnapshot, LocationSnapshot, LorebookSnapshot, PromptSnapshot, WorldSnapshot {}
+public sealed interface Snapshot permits ChatMessage, Session, CharacterSnapshot, ConnectionSnapshot, EntrySnapshot, LocationSnapshot, LorebookSnapshot, PromptSectionSnapshot, PromptSnapshot, WorldSnapshot {}

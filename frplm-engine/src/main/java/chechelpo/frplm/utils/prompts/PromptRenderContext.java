@@ -1,37 +1,45 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public record PromptRenderContext(
-            CharactersRecord character,
+            CharactersRecord userCharacter,
+            CharactersRecord[] presentCharacters,
             PromptTemplateRecord template,
             LocationsRecord currentLocation,
+            List<LocationsRecord> neighbours,
             LorebooksRecord[] lorebooks
     ) {
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return """
                 PromptRenderContext {
-                  character      \s
+                 \s
+                  Character      \s
                    %s
-                  template       \s
+                  Template       \s
                   %s
-                  currentLocation\s
+                  CurrentLocation\s
                   %s
-                  lorebooks      \s
+                  Neighbours \s
+                  %s
+                  Lorebooks      \s
                   %s
                  \s
                 }
-               \s""".formatted(
-                    safe(character),
+               """.formatted(
+                    safe(userCharacter),
                     safe(template),
                     safe(currentLocation),
+                    safe(neighbours),
                     formatLorebooks(lorebooks)
             );
         }

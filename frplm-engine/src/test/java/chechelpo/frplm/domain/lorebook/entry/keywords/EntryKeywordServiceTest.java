@@ -3,6 +3,8 @@ package chechelpo.frplm.domain.lorebook.entry.keywords;
 import chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static java.util.Arrays.stream;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,7 +64,7 @@ class EntryKeywordServiceTest {
 
             expectedByLorebook.put(lorebookID, new HashSet<>());
             expectedByEntry.put(lorebookID, new HashMap<>());
-
+            Set<String> expectedKeywordsOfLorebook = new HashSet<>();
             for (EntryRecord entry : entryRecords) {
                 int entryID = entry.getEntryId();
 
@@ -72,6 +75,7 @@ class EntryKeywordServiceTest {
                 while (selectedKeywords.size() < keywordCount) {
                     selectedKeywords.add(keywords.get(random.nextInt(keywords.size())));
                 }
+                expectedKeywordsOfLorebook.addAll(selectedKeywords);
 
                 expectedByEntry.get(lorebookID).put(entryID, selectedKeywords);
                 expectedByLorebook.get(lorebookID).addAll(selectedKeywords);
@@ -95,6 +99,15 @@ class EntryKeywordServiceTest {
                     "Lorebook keywords do not match for lorebookID=" + lorebookID
             );
         }
+
+        IntSet lorebookIDs = IntSet.of(created.entrySet().stream().flatMapToInt(record -> IntStream.of(record.getKey().getId())).toArray());
+        List<IntObjectPair<String>> keywordsOfLorebook = entryKeywords.getKeywords(lorebookIDs);
+        HashSet<String> actualKeywordsOfLorebook = new HashSet<>(keywords.size());
+        keywordsOfLorebook.forEach(record -> actualKeywordsOfLorebook.add(record.second()));
+        HashSet<String> expectedKeywordsOfAllLorebooks = new HashSet<>(actualKeywordsOfLorebook.size());
+        expectedByLorebook.values().forEach(expectedKeywordsOfAllLorebooks::addAll);
+
+        assertEquals(expectedKeywordsOfAllLorebooks, actualKeywordsOfLorebook, "Mismatch on expected lorebooks");
 
         for (var lorebookExpected : expectedByEntry.entrySet()) {
             int lorebookID = lorebookExpected.getKey();
@@ -128,5 +141,7 @@ class EntryKeywordServiceTest {
                     entryKeywords.keywordsOfLorebook(lorebookID).isEmpty()
             );
         }
+
+
     }
 }

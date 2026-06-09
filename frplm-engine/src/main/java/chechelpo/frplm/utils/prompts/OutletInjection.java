@@ -1,4 +1,4 @@
-package chechelpo.frplm.pipelines.prompts;
+package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.prompts.section.DefaultSections;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
@@ -15,7 +15,7 @@ import java.util.*;
 
 import static chechelpo.frplm.domain.lorebook.outlet.StandardOutlet.UNRESOLVED_MACRO_INLINE;
 import static chechelpo.frplm.domain.lorebook.outlet.StandardOutlet.UNRESOLVED_MACRO_LINE;
-import static chechelpo.frplm.pipelines.prompts.EntryEvaluator.renderEntries;
+import static chechelpo.frplm.utils.prompts.EntryEvaluator.renderEntries;
 
 final class OutletInjection {
     private OutletInjection() {}

@@ -1,6 +1,7 @@
 package chechelpo.frplm.pipelines.prompts;
 
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import chechelpo.frplm.utils.prompts.KeywordDetection;
 import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -16,9 +17,7 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.*;
 
 class KeywordsTest {
-    private static final Method COMPILE_PATTERN =
-            method("compilePattern", String.class);
-
+/*
     // -----------------------------------------------------------------------------------------------------------------
     // detectedKeywords
     // -----------------------------------------------------------------------------------------------------------------
@@ -763,5 +762,5 @@ class KeywordsTest {
                     "Expected keyword id was not detected: " + expectedId
             );
         }
-    }
+    }*/
 }

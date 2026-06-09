@@ -40,7 +40,7 @@ public non-sealed interface LocationSnapshot extends Snapshot {
     }
 
     LocationSnapshot.Reference reference();
-
+    LorebookSnapshot lorebook();
     LocationSnapshot[] getNeighbours();
     String getName();
 }

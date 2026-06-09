@@ -1,6 +1,7 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
+import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
@@ -47,5 +48,10 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
                 .stream()
                 .map(record -> new LocationImpl(record, context))
                 .toArray(LocationImpl[]::new);
+    }
+
+    @Override
+    public LorebookSnapshot lorebook() {
+        return null;
     }
 }
