@@ -2,8 +2,11 @@ package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,90 +16,38 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static chechelpo.frplm.utils.prompts.PromptEntryPoint.PROMPT_LOGGER;
-
 public final class OutletDetection {
-    private OutletDetection() {}
-
-    /**
-     * Detects outlets in a batch of messages.
-     *
-     * @param outlets  outletID -> outlet name
-     * @param sections sections to scan
-     * @return messages with their outlets (outlet list may be empty)
-     */
-    @Contract(pure = true)
-    public static @NotNull List<OutletInjection.OutletsOfSections> getReadyToInsert(
-            IntObjectPair<String> @NotNull [] outlets,
-            @NotNull List<PromptSectionRecord> sections
-    ) {
-        List<OutletInjection.OutletsOfSections> readyToInsert = new ArrayList<>();
-
-        for (PromptSectionRecord section : sections) {
-            List<IntObjectPair<OutletInjection.DetectedOutlet>> detectedOutlets =
-                    getDetectedOutlets(outlets, section.getContent());
-            PROMPT_LOGGER.trace("SECTION: {} \n Detected: {}", section.getName(), detectedOutlets);
-            readyToInsert.add(new OutletInjection.OutletsOfSections(section, detectedOutlets));
-        }
-
-        return readyToInsert;
-    }
-
-    /**
-     * Wraps one an already-scanned section.
-     * <p>
-     * Useful if outlet detection was performed elsewhere.
-     */
-    @Contract(pure = true)
-    public static @NotNull List<OutletInjection.OutletsOfSections> getReadyToInsert(
-            @NotNull PromptSectionRecord section,
-            @NotNull List<IntObjectPair<OutletInjection.DetectedOutlet>> outlets
-    ) {
-        List<OutletInjection.OutletsOfSections> readyToInsert = new ArrayList<>();
-
-        if (!outlets.isEmpty()) {
-            readyToInsert.add(new OutletInjection.OutletsOfSections(section, outlets));
-        }
-
-        return readyToInsert;
+    private OutletDetection() {
     }
 
     @Contract(pure = true)
-    public static @NotNull List<IntObjectPair<OutletInjection.DetectedOutlet>> getDetectedOutlets(
-            IntObjectPair<String> @NotNull [] outlets,
-            @NotNull String message
+    public static @NotNull List<DetectedOutlet> getDetectedOutlets(
+            IntObjectPair<String>[] outlets,
+            String message
     ) {
-        List<IntObjectPair<OutletInjection.DetectedOutlet>> detectedOutlets = new ArrayList<>();
+        if (outlets == null || message == null) throw new IllegalArgumentException("outlets or message are null");
+        if (message.isEmpty()) return List.of();
+        assert areUnique(outlets) : "Outlet ids are not unique";
 
-        for (IntObjectPair<String> outlet : outlets) {
-            int outletID = outlet.firstInt();
-            String outletName = outlet.second();
+        List<DetectedOutlet> detectedOutlets = new ArrayList<>(outlets.length);
 
-            getOutletLocation(message, outletName)
-                    .ifPresent(location -> detectedOutlets.add(
-                            new IntObjectImmutablePair<>(outletID, location)
-                    ));
+        for (IntObjectPair<String> outletPair : outlets) {
+            int outletID = outletPair.firstInt();
+            String outletName = outletPair.second();
+
+            getOutletLocation(
+                    outletID,
+                    message,
+                    StandardOutlet.asPattern(outletName)
+            ).ifPresent(detectedOutlets::add);
         }
 
         return detectedOutlets;
     }
 
     @Contract(pure = true)
-    private static @NotNull Optional<OutletInjection.DetectedOutlet> getOutletLocation(
-            @NotNull String text,
-            @NotNull String outletName
-    ) {
-        if (outletName.isBlank()) {
-            return Optional.empty();
-        }
-
-        Pattern pattern = StandardOutlet.asPattern(outletName);
-
-        return getOutletLocation(text, pattern);
-    }
-
-    @Contract(pure = true)
-    private static @NotNull Optional<OutletInjection.DetectedOutlet> getOutletLocation(
+    private static @NotNull Optional<DetectedOutlet> getOutletLocation(
+            int outletId,
             @NotNull String text,
             @NotNull Pattern pattern
     ) {
@@ -106,6 +57,7 @@ public final class OutletDetection {
         while (segmentStart <= text.length()) {
             int segmentEnd = segmentStart;
 
+            // Finds next newline.
             while (
                     segmentEnd < text.length()
                             && text.charAt(segmentEnd) != '\n'
@@ -118,7 +70,8 @@ public final class OutletDetection {
             matcher.region(segmentStart, segmentEnd);
 
             if (matcher.find()) {
-                return Optional.of(new OutletInjection.DetectedOutlet(
+                return Optional.of(new DetectedOutlet(
+                        outletId,
                         segmentIndex,
                         matcher.start() - segmentStart
                 ));
@@ -143,4 +96,15 @@ public final class OutletDetection {
 
         return Optional.empty();
     }
+
+    private static boolean areUnique(IntObjectPair<String> @NotNull [] outlets) {
+        IntSet outletIds = IntSetFactory.ofLength(outlets.length);
+        for (IntObjectPair<String> outlet : outlets) {
+            if (outletIds.contains(outlet.firstInt())) return false;
+            else outletIds.add(outlet.firstInt());
+        }
+        return true;
+    }
+
+
 }

@@ -10,10 +10,6 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
         super(record, context);
     }
 
-    CharactersRecord getRecord() {
-        return record;
-    }
-
     @Override
     public Reference reference() {
         return new CharacterSnapshot.Reference(this.record.getId());
@@ -28,6 +24,7 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
     public String getName() {
         return record.getName();
     }
+
     @Override
     public LocationImpl[] getStartingLocations() {
         EntityKey<CharactersRecord> thisKey = context.characters().keyOf(this.getRecord());

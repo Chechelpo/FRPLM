@@ -20,8 +20,6 @@ import static chechelpo.frplm.utils.prompts.EntryEvaluator.renderEntries;
 final class OutletInjection {
     private OutletInjection() {}
 
-    public record DetectedOutlet(int segmentIndex, int charOffset) {}
-
     public record OutletsOfSections(
             PromptSectionRecord section,
             List<IntObjectPair<DetectedOutlet>> outlets

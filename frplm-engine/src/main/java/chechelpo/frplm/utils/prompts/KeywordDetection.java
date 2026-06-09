@@ -1,15 +1,13 @@
 package chechelpo.frplm.utils.prompts;
 
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
-import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import chechelpo.frplm.utils.collections.IntSetFactory;
+import it.unimi.dsi.fastutil.ints.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -17,8 +15,8 @@ import java.util.stream.Collectors;
  * In charge of detecting keywords in messages.
  * <h> Possible optimizations: </h>
  * <li>
- *     <ul>Join all the messages into a string builder, then iterate over CharSequence (parallel per keyword instead of per message)
- *     Should be better, tested previously and had a 33% speedup due to constant factors.
+ *     <ul>Join all the messages into a string builder, then iterate over CharSequence (parallel per keyword instead of per message).
+ *     Could be better that way
  *     </ul>
  * </li>
  */
@@ -27,44 +25,59 @@ public final class KeywordDetection {
 
     public record DetectedKeyword(int keywordID, int atDepth) {}
     /**
-     * Keyword detection function. Next iterations should also return at which depth the keyword was detected.
-     * @param keywords to search for (keywordID -> keyword name)
+     * Keyword detection function.
+     * @param keywords to search for (keywordID -> keyword name). MUST BE UNIQUE
      * @param messages messages to scan
-     * @return the IDs of the detected keywords
-     * @implNote splits per section.
+     * @return keyword ID -> {@link DetectedKeyword}
+     * @implNote splits per keyword.
      */
-    @Contract(pure = true)
-    public static IntSet detectedKeywords(
-            IntObjectPair<String> @NotNull [] keywords,
-            @NotNull List<String> messages
+    public static Int2ObjectMap<DetectedKeyword> detectIn(
+            IntObjectPair<String> [] keywords,
+            List<String> messages
     ) {
-        IntObjectPair<Pattern>[] compiledPatterns = compiledKeywords(keywords);
+        if (keywords == null || messages == null) throw new IllegalArgumentException("keywords or messages cannot be null");
+        assert isUnique(keywords) : "Keywords are not unique";
 
-        return messages.parallelStream()
+        int messageCount = messages.size();
+        return Arrays.stream(keywords)
+                .parallel()
+                .map(keywordPair -> {
+                    int keywordId = keywordPair.firstInt();
+                    Pattern keywordPattern = compilePattern(keywordPair.second());
+
+                    for (int i = 0; i < messageCount; i++) {
+                        String message = messages.get(i);
+
+                        if (message == null) throw new IllegalArgumentException("Message " + i + " is null");
+                        if (message.isEmpty()) continue;
+
+                        if (keywordDetected(message, keywordPattern)) {
+                            return IntObjectPair.of(
+                                    keywordId,
+                                    new DetectedKeyword(keywordId, i) // or include i
+                            );
+                        }
+                    }
+
+                    return null;
+                })
+                .filter(Objects::nonNull)
                 .collect(
-                        IntOpenHashSet::new,
-
-                        (detected, message) -> {
-                            if (message == null || message.isBlank()) {
-                                return;
-                            }
-
-                            for (IntObjectPair<Pattern> keyword : compiledPatterns) {
-                                int keywordId = keyword.firstInt();
-
-                                if (!detected.contains(keywordId)
-                                        && keywordDetected(message, keyword.second())) {
-                                    detected.add(keywordId);
-                                }
-                            }
-                        },
-
-                        IntSet::addAll
+                        Int2ObjectOpenHashMap::new,
+                        (map, pair) -> map.put(pair.firstInt(), pair.second()),
+                        Int2ObjectMap::putAll
                 );
+    }
+    private static boolean isUnique(IntObjectPair<String> @NotNull [] keywords) {
+        IntSet seen = IntSetFactory.ofLength(keywords.length);
+        for (IntObjectPair<String> keyword : keywords)
+            if (seen.contains(keyword.firstInt())) return false;
+            else seen.add(keyword.firstInt());
+        return true;
     }
 
     @Contract(pure = true)
-    public static IntObjectPair<Pattern> @NotNull [] compiledKeywords(
+    private static IntObjectPair<Pattern> @NotNull [] compiledKeywords(
             IntObjectPair<String> @NotNull [] keywords
     ) {
         return Arrays.stream(keywords)
@@ -101,7 +114,7 @@ public final class KeywordDetection {
         );
     }
 
-    public static boolean keywordDetected(String text, @NotNull Pattern keyword) {
+    private static boolean keywordDetected(String text, @NotNull Pattern keyword) {
         return keyword.matcher(text).find();
     }
 }

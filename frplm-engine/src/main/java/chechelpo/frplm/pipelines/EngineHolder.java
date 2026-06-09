@@ -11,6 +11,7 @@ import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.extensions.ExtensionService;
+import chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
@@ -104,10 +105,9 @@ final class EngineHolder {
     }
     @Contract("_ -> new")
     public @NotNull ChatCompletionRequest getNewPrompt(int sessionID) {
-        return PromptEntryPoint.makePromptFor(
-                findOrThrowSession(sessionID),
-                this.engineContext
-        );
+        SessionsRecord record = engineContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
+                .orElseThrow();
+        return null;
     }
 
     public @NotNull MessagesRecord generateNewMessage(
