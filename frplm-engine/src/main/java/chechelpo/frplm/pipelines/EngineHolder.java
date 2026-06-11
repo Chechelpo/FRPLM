@@ -11,12 +11,17 @@ import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.extensions.ExtensionService;
+import chechelpo.frplm.extensions.api.session.SessionPrompt;
+import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import chechelpo.frplm.extensions.api.utils.MessagePrompt;
+import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
+import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.utils.generation.GenerationEntryPoint;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.domain.lorebook.entry.core.EntryService;
@@ -27,7 +32,7 @@ import chechelpo.frplm.domain.prompts.template.TemplateService;
 import chechelpo.frplm.domain.sessions.messages.core.MessageService;
 import chechelpo.frplm.domain.sessions.movement.CurrentLocationService;
 import chechelpo.frplm.domain.world.core.WorldService;
-import chechelpo.frplm.utils.prompts.PromptEntryPoint;
+import chechelpo.frplm.utils.prompts.Prompt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -43,6 +48,7 @@ final class EngineHolder {
     private final ExtensionContext standaloneContext;
     private final Logger log;
     private final ExtensionService extensionService;
+    private final SessionContext sessionContext;
 
     EngineHolder(
             @NotNull CharacterService characters,
@@ -66,8 +72,8 @@ final class EngineHolder {
             @NotNull SecretService secrets,
 
             @NotNull SessionService sessionService,
-            ExtensionContext context
-    ) {
+            ExtensionContext context,
+            SessionContext sessionContext) {
         this.log = (Logger) LoggerFactory.getLogger("ENGINE");
         log.setLevel(Level.TRACE);
         engineContext = new FullEngineContext(
@@ -94,6 +100,7 @@ final class EngineHolder {
         );
         standaloneContext = context;
         this.extensionService = extensionService;
+        this.sessionContext = sessionContext;
     }
 
     private SessionsRecord findOrThrowSession(int sessionID) {
@@ -107,7 +114,18 @@ final class EngineHolder {
     public @NotNull ChatCompletionRequest getNewPrompt(int sessionID) {
         SessionsRecord record = engineContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
                 .orElseThrow();
-        return null;
+        SessionImpl session = new SessionImpl(record, standaloneContext, sessionContext);
+
+        SessionPrompt prompt = session.getPrompt()
+                .orElseThrow(() -> new EntityNotFound("This session has no prompt", Severity.USER));
+        Prompt.Builder builder = (Prompt.Builder) prompt.getNewMessagePrompt();
+
+        ConnectionSnapshot con = prompt.getAssignedConnection()
+                .orElseThrow(() -> new EntityNotFound("This prompt has no connection", Severity.USER));
+
+        MessagePrompt rendered = builder.render(standaloneContext).build(standaloneContext, con.getModelID());
+        log.info("Prompt: {}", rendered.renderedRequest());
+        return rendered.renderedRequest();
     }
 
     public @NotNull MessagesRecord generateNewMessage(

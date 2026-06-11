@@ -16,16 +16,15 @@ import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.utils.importers.lorebooks.NewEntryOrder;
 import chechelpo.frplm.utils.importers.lorebooks.STLorebookImporter;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
@@ -83,15 +82,52 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
     /**
      * @param lorebookIDs to query
      * @param keywordIDs to detect.
-     * @return entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
+     * @return currently enabled entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
      */
-    public @NotNull Map<Integer, List<EntryRecord>> getByOutletsWith(
+    public @NotNull Int2ObjectMap<List<EntryRecord>> getByOutletsWith(
             IntSet lorebookIDs,
-            IntSet keywordIDs
+            Set<Integer> keywordIDs
     ) {
-        return store.getEntriesByOutletWith(lorebookIDs, keywordIDs);
+        Int2ObjectMap<List<EntryRecord>> map = new Int2ObjectOpenHashMap<>(lorebookIDs.size());
+        store.getEntriesWith(lorebookIDs, keywordIDs).forEach(entry -> {
+            int outletID = entry.getOutlet();
+
+            List<EntryRecord> entries = map.get(outletID);
+
+            if (!map.containsKey(outletID)) {
+                entries = new ArrayList<>();
+                map.put(outletID, entries);
+            }
+
+            entries.add(entry);
+        });
+        return map;
     }
 
+    /**
+     * @param lorebookIDs to query
+     * @param keywordIDs to detect.
+     * @return currently enabled entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
+     */
+    public @NotNull List<EntryRecord> getEntriesWith(
+            IntSet lorebookIDs,
+            Set<Integer> keywordIDs
+    ) {
+        return store.getEntriesWith(lorebookIDs, keywordIDs);
+    }
+    /**
+     * @param lorebookIDs to query
+     * @param alreadySeenIds ids of entries to ignore
+     * @param keywordIDs to detect
+     * @return currently enabled entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
+     */
+    public @NotNull List<EntryRecord> getEntriesWith(
+            IntSet lorebookIDs,
+            IntSet alreadySeenIds,
+            Set<Integer> keywordIDs
+    ) {
+        return store.getEntriesWith(lorebookIDs, alreadySeenIds, keywordIDs);
+    }
     /**
      * @param toLorebookID lorebook to import this JSON entries to
      * @param file JSON with entries

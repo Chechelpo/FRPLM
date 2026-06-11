@@ -24,16 +24,16 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @FrplmExtension
-public class EntryPoint extends ConfigurableExtension implements PostGenerationActivated {
+public class IntentClassifier extends ConfigurableExtension implements PostGenerationActivated {
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    public EntryPoint() {
+    public IntentClassifier() {
         super("intentclassifier",
                 "Intent classifier",
                 "Automatically picks up movements from chat history",
                 null,
                 loadResourceText(
-                        EntryPoint.class,
+                        IntentClassifier.class,
                         "/intentclassifier/config-panel/"
                 ),
                 getDefault()
@@ -96,7 +96,7 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
         ));
         ChatCompletionResponse response = connection.generate(
                 ChatCompletionRequest.builder(connection.getModelID())
-                        .system("""
+                        .appendAsSystem("""
                                 You are an intent classifier.
                                 
                                 Determine whether any present character clearly intends to move from the current location
@@ -113,7 +113,7 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
                                 - Do not invent locations.
                                 - Do not include characters who are staying, hesitating, only discussing movement hypothetically, or not clearly moving.
                                 """)
-                        .user("""
+                        .appendAsUser("""
                                 Present characters: %s
                                 User character is: %s
                                 Current location: %s
@@ -124,7 +124,7 @@ public class EntryPoint extends ConfigurableExtension implements PostGenerationA
                                 currentLocation.getName(),
                                 neighbourNames
                         ))
-                        .addAll(chatHistory.stream()
+                        .appendAll(chatHistory.stream()
                                 .map(ChatMessage::asChatCompletion)
                                 .toList())
                         .responseFormat(movementIntentFormat(characterNames, neighbourNames))

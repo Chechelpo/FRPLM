@@ -2,6 +2,7 @@ package chechelpo.frplm.domain.lorebook.entry.core;
 
 import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
+import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -28,24 +29,49 @@ public final class EntryStore extends EntityStore<EntryRecord> {
                 .fetch();
     }
 
+
+    /**
+     * Always returns constant entries.
+     * @param lorebookIDs ids of lorebooks
+     * @param keywordIDs keywords detected
+     * @return list of enabled entry records with lorebook IDs and all keywords.
+     */
+    @NotNull
+    List<EntryRecord> getEntriesWith(
+            @NotNull IntSet lorebookIDs,
+            @NotNull Set<Integer> keywordIDs
+    ) {
+        return this.ctx
+                .selectFrom(ENTRY)
+                .where(ENTRY.LOREBOOK_ID.in(lorebookIDs).and(ENTRY.ENABLED))
+                .and(
+                        ENTRY.STRATEGY.eq(ActivationStrategy.CONSTANT.stable_id)
+                                .orExists(
+                                        ctx.selectOne()
+                                                .from(ENTRY_KEYWORDS)
+                                                .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(ENTRY.LOREBOOK_ID))
+                                                .and(ENTRY_KEYWORDS.ENTRY_ID.eq(ENTRY.ENTRY_ID))
+                                )
+                )
+                .fetch();
+    }
     /**
      * @param lorebookIDs ids of lorebooks
      * @param keywordIDs keywords detected
-     * @return map < outletID -> list of entries to inject >
+     * @return list of enabled entry records
      */
     @NotNull
-    Int2ObjectMap<List<EntryRecord>> getEntriesByOutletWith(
+    List<EntryRecord> getEntriesWith(
             @NotNull IntSet lorebookIDs,
-            @NotNull IntSet keywordIDs
+            @NotNull IntSet alreadySeenIDs,
+            @NotNull Set<Integer> keywordIDs
     ) {
-        Int2ObjectMap<List<EntryRecord>> map =
-                new Int2ObjectOpenHashMap<>(lorebookIDs.size());
-
-        map.defaultReturnValue(Collections.emptyList());
-        this.ctx
+        return this.ctx
                 .selectFrom(ENTRY)
-                .where(ENTRY.LOREBOOK_ID.in(lorebookIDs))
-
+                .where(ENTRY.LOREBOOK_ID.in(lorebookIDs)
+                        .and(ENTRY.ENABLED)
+                        .and(ENTRY.ENTRY_ID.notIn(alreadySeenIDs))
+                )
                 // Entry must have at least one keyword.
                 .andExists(
                         ctx.selectOne()
@@ -53,7 +79,6 @@ public final class EntryStore extends EntityStore<EntryRecord> {
                                 .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(ENTRY.LOREBOOK_ID))
                                 .and(ENTRY_KEYWORDS.ENTRY_ID.eq(ENTRY.ENTRY_ID))
                 )
-
                 // No keyword attached to this entry may be absent from detected keywordIDs.
                 .andNotExists(
                         ctx.selectOne()
@@ -62,21 +87,6 @@ public final class EntryStore extends EntityStore<EntryRecord> {
                                 .and(ENTRY_KEYWORDS.ENTRY_ID.eq(ENTRY.ENTRY_ID))
                                 .and(ENTRY_KEYWORDS.KEYWORD_ID.notIn(keywordIDs))
                 )
-
-                .fetch()
-                .forEach(entry -> {
-                    int outletID = entry.getOutlet();
-
-                    List<EntryRecord> entries = map.get(outletID);
-
-                    if (!map.containsKey(outletID)) {
-                        entries = new ArrayList<>();
-                        map.put(outletID, entries);
-                    }
-
-                    entries.add(entry);
-                });
-
-        return map;
+                .fetch();
     }
 }

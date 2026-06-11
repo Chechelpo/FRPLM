@@ -6,6 +6,7 @@ import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMService;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.domain.lorebook.entry.core.EntryService;
+import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.domain.prompts.section.SectionService;
@@ -37,6 +38,8 @@ public class EngineContextConfiguration {
             LorebookService lorebooks,
             EntryService entries,
             KeywordService keywords,
+            EntryKeywordService entryKeywords,
+
             OutletService outlets,
             TemplateService templates,
             SectionService sections
@@ -55,6 +58,8 @@ public class EngineContextConfiguration {
                 lorebooks,
                 entries,
                 keywords,
+                entryKeywords,
+
                 outlets,
 
                 templates,

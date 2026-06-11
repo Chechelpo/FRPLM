@@ -37,4 +37,5 @@ public non-sealed interface EntrySnapshot extends Snapshot{
             }
         }
     }
+
 }

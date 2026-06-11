@@ -8,6 +8,7 @@ import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -37,6 +38,20 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
                 .where(ENTRY.LOREBOOK_ID.eq(lorebookId)
                         .and(ENTRY.ENTRY_ID.eq(entryId)))
                 .fetchSet(KEYWORD.KEYWORD_);
+    }
+    public @NotNull Set<Integer> getIdsOfEntry(int lorebookId, int entryId) {
+        return ctx.select()
+                .from(ENTRY)
+                .join(ENTRY_KEYWORDS)
+                .on(
+                        ENTRY.LOREBOOK_ID.eq(ENTRY_KEYWORDS.LOREBOOK_ID)
+                                .and(ENTRY.ENTRY_ID.eq(ENTRY_KEYWORDS.ENTRY_ID))
+                )
+                .join(KEYWORD)
+                .on(KEYWORD.ID.eq(ENTRY_KEYWORDS.KEYWORD_ID))
+                .where(ENTRY.LOREBOOK_ID.eq(lorebookId)
+                        .and(ENTRY.ENTRY_ID.eq(entryId)))
+                .fetchSet(KEYWORD.ID);
     }
 
     public IntSet getKeywordIDsOfLorebook(@NotNull EntityKey<LorebooksRecord> key){

@@ -1,117 +1,59 @@
 package chechelpo.frplm.utils.prompts;
 
-import chechelpo.frplm.domain.prompts.section.DefaultSections;
+import chechelpo.frplm.extensions.api.utils.DetectedOutlet;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionMessage;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
-import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import org.jetbrains.annotations.CheckReturnValue;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static chechelpo.frplm.domain.lorebook.outlet.StandardOutlet.UNRESOLVED_MACRO_INLINE;
-import static chechelpo.frplm.domain.lorebook.outlet.StandardOutlet.UNRESOLVED_MACRO_LINE;
-import static chechelpo.frplm.utils.prompts.EntryEvaluator.renderEntries;
+import static chechelpo.frplm.domain.lorebook.outlet.StandardOutlet.*;
 
-final class OutletInjection {
+public final class OutletInjection {
     private OutletInjection() {}
-
-    public record OutletsOfSections(
-            PromptSectionRecord section,
-            List<IntObjectPair<DetectedOutlet>> outlets
-    ) {}
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // INJECTION
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    /**
-     * @param outletsOfSections map <section
-     * @param entriesToInject          map < outletID -> Entry  >
-     * @param chatHistory       previous messages, injected if the standard chat history section is found
-     * @return the chatCompletionMessages, ready to be injected into a prompt
-     */
-    @CheckReturnValue
-    public static @NotNull List<ChatCompletionMessage> injectAndCreateRequest(
-            @NotNull List<OutletsOfSections> outletsOfSections,
-            @NotNull Map<Integer, List<EntryRecord>> entriesToInject,
-            @NotNull List<MessagesRecord> chatHistory
+    private record PendingInjection(int start, int end, @NotNull String content) {}
+    public static @NotNull String inject(
+            @NotNull String originalContent,
+            @NotNull List<DetectedOutlet> outlets,
+            @NotNull Int2ObjectMap<List<EntryRecord>> activeEntriesByOutlet
     ) {
-        List<ChatCompletionMessage> renderedMessages =
-                new ArrayList<>(outletsOfSections.size() + chatHistory.size());
-
-        for (OutletsOfSections outletSection : outletsOfSections) {
-            PromptSectionRecord section = outletSection.section();
-
-            if (DefaultSections.CHAT_HISTORY.sectionID == section.getSectionId()) {
-                renderedMessages.addAll(render(chatHistory));
-                continue;
-            }
-
-            String renderedContent = stripUnresolvedMacros(
-                    injectEntries(
-                            section.getContent(),
-                            outletSection.outlets(),
-                            entriesToInject
-                    )
-            );
-
-            renderedMessages.add(
-                    new ChatCompletionMessage(
-                            ChatCompletionRole.fromWireValue(section.getRole()),
-                            renderedContent
-                    ));
+        if (outlets.isEmpty() || activeEntriesByOutlet.isEmpty()) {
+            return originalContent;
         }
 
-        return renderedMessages;
-    }
+        List<PendingInjection> pending = new ArrayList<>();
 
-    private static @NotNull String injectEntries(
-            @NotNull String content,
-            @NotNull List<IntObjectPair<DetectedOutlet>> detectedOutlets,
-            @NotNull Map<Integer, List<EntryRecord>> toInject
-    ) {
-        if (detectedOutlets.isEmpty() || toInject.isEmpty()) {
-            return content;
-        }
-
-        List<PendingInjection> pendingInjections = new ArrayList<>();
-
-        for (IntObjectPair<DetectedOutlet> detectedOutlet : detectedOutlets) {
-            int outletID = detectedOutlet.firstInt();
-            DetectedOutlet location = detectedOutlet.second();
-
-            List<EntryRecord> entries = toInject.get(outletID);
+        for (DetectedOutlet outlet : outlets) {
+            List<EntryRecord> entries = activeEntriesByOutlet.get(outlet.outletId());
 
             if (entries == null || entries.isEmpty()) {
                 continue;
             }
 
-            int absoluteStart = absoluteOffsetOf(content, location);
-            int absoluteEnd = outletMarkerEnd(content, absoluteStart);
+            int start = absoluteOffsetOf(originalContent, outlet);
+            int end = outletMarkerEnd(originalContent, start);
 
-            pendingInjections.add(new PendingInjection(
-                    absoluteStart,
-                    absoluteEnd,
-                    renderEntries(entries, null, null)
+            if (start == end) {
+                continue;
+            }
+
+            pending.add(new PendingInjection(
+                    start,
+                    end,
+                    renderEntries(entries)
             ));
         }
 
-        if (pendingInjections.isEmpty()) {
-            return content;
-        }
+        pending.sort(Comparator.comparingInt(PendingInjection::start).reversed());
 
-        pendingInjections.sort(
-                Comparator.comparingInt(PendingInjection::start).reversed()
-        );
+        StringBuilder rendered = new StringBuilder(originalContent);
 
-        StringBuilder rendered = new StringBuilder(content);
-
-        for (PendingInjection injection : pendingInjections) {
+        for (PendingInjection injection : pending) {
             rendered.replace(
                     injection.start(),
                     injection.end(),
@@ -119,27 +61,21 @@ final class OutletInjection {
             );
         }
 
+        return stripUnresolvedMacros(rendered.toString());
+    }
+
+    static @NotNull String renderEntries(@NotNull List<EntryRecord> entries) {
+        StringJoiner rendered = new StringJoiner("\n");
+
+        for (EntryRecord entry : entries) {
+            String content = entry.getContent();
+
+            if (content != null && !content.isBlank()) {
+                rendered.add(content);
+            }
+        }
+
         return rendered.toString();
-    }
-
-    private record PendingInjection(
-            int start,
-            int end,
-            @NotNull String content
-    ) {
-    }
-
-    @Contract(pure = true)
-    private static List<ChatCompletionMessage> render(
-            @NotNull List<MessagesRecord> toInject
-    ) {
-        return toInject.stream()
-                .map(message ->
-                        new ChatCompletionMessage(
-                                ChatCompletionRole.fromWireValue(message.getRole()),
-                                message.getContent()
-                        ))
-                .toList();
     }
 
     @Contract(pure = true)
@@ -204,14 +140,5 @@ final class OutletInjection {
         return closing + 2;
     }
 
-    @Contract(pure = true)
-    private static @NotNull String stripUnresolvedMacros(@NotNull String content) {
-        String withoutMacroOnlyLines = UNRESOLVED_MACRO_LINE
-                .matcher(content)
-                .replaceAll("");
 
-        return UNRESOLVED_MACRO_INLINE
-                .matcher(withoutMacroOnlyLines)
-                .replaceAll("");
-    }
 }

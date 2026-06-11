@@ -52,6 +52,6 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
 
     @Override
     public LorebookSnapshot lorebook() {
-        return null;
+        return new LorebookImpl(context.lorebooks().getLorebookOf(getRecord()), context);
     }
 }

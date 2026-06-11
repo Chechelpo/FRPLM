@@ -37,7 +37,9 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
     public @NotNull Set<String> keywordsOfEntry(int lorebookID, int entryID){
         return this.store.getOfEntry(lorebookID, entryID);
     }
-
+    public @NotNull Set<Integer> keywordIDsOfEntry(int lorebookID, int entryID){
+        return this.store.getIdsOfEntry(lorebookID, entryID);
+    }
     public @NotNull Set<String> keywordsOfLorebook(int lorebookID){
         return this.store.getKeywordNamesOfLorebook(lorebookID);
     }

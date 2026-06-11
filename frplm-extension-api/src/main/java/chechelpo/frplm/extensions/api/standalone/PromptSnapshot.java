@@ -33,5 +33,6 @@ public non-sealed interface PromptSnapshot extends Snapshot {
 
     PromptSnapshot.Reference reference();
     Optional<ConnectionSnapshot> getAssignedConnection();
+    /** @return ordered (ascendant by position) sections of this prompt */
     List<PromptSectionSnapshot> getSections();
 }

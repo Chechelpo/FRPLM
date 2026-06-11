@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static chechelpo.frplm.utils.prompts.KeywordDetection.detectIn;
+import static chechelpo.frplm.utils.prompts.KeywordDetection.detectParallelIn;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -18,19 +18,19 @@ class KeywordDetectionTest {
         List<String> messages = new ArrayList<>(messageCount);
         for (int i = 0; i < messageCount; i++) messages.add("aa" + i);
         messages.add(null);
-        IntObjectPair<String>[] keywords = new IntObjectPair[messageCount];
-        for (int i = 0; i < messageCount; i++) keywords[i] = IntObjectPair.of(i, "bb" + i);
+        List<IntObjectPair<String>> keywords = new ArrayList<>(messageCount);
+        for (int i = 0; i < messageCount; i++) keywords.add(IntObjectPair.of(i, "bb" + i));
         assertThrows(
                 IllegalArgumentException.class,
-                () -> detectIn(keywords, messages)
+                () -> detectParallelIn(keywords, messages)
         );
     }
     @Test
     void detectKeywordsIn_detectsKeywordAtFirstMatchingDepth() {
-        IntObjectPair<String>[] keywords = new IntObjectPair[] {
+        List<IntObjectPair<String>> keywords = List.of(
                 IntObjectPair.of(1, "hello world"),
                 IntObjectPair.of(2, "java")
-        };
+        );
 
         List<String> messages = List.of(
                 "irrelevant",
@@ -38,7 +38,7 @@ class KeywordDetectionTest {
                 "java appears later"
         );
 
-        var detected = detectIn(keywords, messages);
+        var detected = detectParallelIn(keywords, messages);
 
         assertEquals(2, detected.size());
         assertEquals(new KeywordDetection.DetectedKeyword(1, 1), detected.get(1));
@@ -46,27 +46,28 @@ class KeywordDetectionTest {
     }
     @Test
     void detectKeywordsIn_doesNotMatchInsideLargerWords() {
-        IntObjectPair<String>[] keywords = new IntObjectPair[] {
+        List<IntObjectPair<String>> keywords = List.of(
                 IntObjectPair.of(1, "cat"),
                 IntObjectPair.of(2, "dog")
-        };
+        );
 
         List<String> messages = List.of(
                 "concatenate catalog dogmatic",
                 "a cat and a dog"
         );
 
-        var detected = detectIn(keywords, messages);
+        var detected = detectParallelIn(keywords, messages);
 
         assertEquals(2, detected.size());
         assertEquals(new KeywordDetection.DetectedKeyword(1, 1), detected.get(1));
         assertEquals(new KeywordDetection.DetectedKeyword(2, 1), detected.get(2));
     }
+
     @Test
     void detectKeywordsIn_ignoresBlankMessages() {
-        IntObjectPair<String>[] keywords = new IntObjectPair[] {
+        List<IntObjectPair<String>> keywords = List.of(
                 IntObjectPair.of(7, "target")
-        };
+        );
 
         List<String> messages = List.of(
                 "   ",
@@ -74,7 +75,7 @@ class KeywordDetectionTest {
                 "found target here"
         );
 
-        var detected = detectIn(keywords, messages);
+        var detected = detectParallelIn(keywords, messages);
 
         assertEquals(1, detected.size());
         assertEquals(new KeywordDetection.DetectedKeyword(7, 2), detected.get(7));

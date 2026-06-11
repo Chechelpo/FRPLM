@@ -33,6 +33,6 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
 
     @Override
     public LorebookSnapshot lorebook() {
-        return null;
+        return new LorebookImpl(context.lorebooks().getLorebookOf(this.getRecord()), context);
     }
 }

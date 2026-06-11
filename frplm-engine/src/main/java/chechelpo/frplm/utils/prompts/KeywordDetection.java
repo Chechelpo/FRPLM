@@ -31,16 +31,15 @@ public final class KeywordDetection {
      * @return keyword ID -> {@link DetectedKeyword}
      * @implNote splits per keyword.
      */
-    public static Int2ObjectMap<DetectedKeyword> detectIn(
-            IntObjectPair<String> [] keywords,
+    public static Int2ObjectMap<DetectedKeyword> detectParallelIn(
+            List<IntObjectPair<String>> keywords,
             List<String> messages
     ) {
         if (keywords == null || messages == null) throw new IllegalArgumentException("keywords or messages cannot be null");
         assert isUnique(keywords) : "Keywords are not unique";
 
         int messageCount = messages.size();
-        return Arrays.stream(keywords)
-                .parallel()
+        return keywords.parallelStream()
                 .map(keywordPair -> {
                     int keywordId = keywordPair.firstInt();
                     Pattern keywordPattern = compilePattern(keywordPair.second());
@@ -68,8 +67,23 @@ public final class KeywordDetection {
                         Int2ObjectMap::putAll
                 );
     }
-    private static boolean isUnique(IntObjectPair<String> @NotNull [] keywords) {
-        IntSet seen = IntSetFactory.ofLength(keywords.length);
+
+    public static IntList detectKeywordsIn(List<IntObjectPair<String>> keywords, String message){
+        if (keywords == null || message == null) throw new IllegalArgumentException("keywords or messages cannot be null");
+        assert isUnique(keywords) : "Keywords are not unique";
+
+        IntList matching = new IntArrayList(keywords.size()/2);
+        keywords.forEach(keywordPair -> {
+                    int keywordId = keywordPair.firstInt();
+                    Pattern keywordPattern = compilePattern(keywordPair.second());
+                    if (keywordDetected(message, keywordPattern)) matching.add(keywordId);
+                });
+
+        return matching;
+    }
+
+    private static boolean isUnique(List<IntObjectPair<String>> keywords) {
+        IntSet seen = IntSetFactory.ofLength(keywords.size());
         for (IntObjectPair<String> keyword : keywords)
             if (seen.contains(keyword.firstInt())) return false;
             else seen.add(keyword.firstInt());

@@ -3,13 +3,17 @@ package chechelpo.frplm.domain.lorebook.entry.core;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
+import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
+import chechelpo.frplm.domain.lorebook.keywords.KeywordService;
+import chechelpo.frplm.domain.lorebook.keywords.KeywordTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.test_utils.TestText;
 import chechelpo.frplm.utils.collections.IntSetFactory;
 import chechelpo.frplm.utils.importers.lorebooks.NewEntryOrder;
 import chechelpo.frplm.utils.importers.lorebooks.STLorebookImporter;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
@@ -42,6 +47,8 @@ class EntryServiceTest {
     EntryService entryService;
     @Autowired
     EntryFieldsHelper fields;
+    @Autowired
+    KeywordTestContext keywordTestContext;
 
     @BeforeEach
     void setUp() {
@@ -86,103 +93,113 @@ class EntryServiceTest {
     }
 
     @Test
-    void getByOutletsWith_requiresAllEntryKeywordsToBeDetected() {
+    void getWithKeywordsAndOutlets() {
         long seed = 3000;
         int lorebookAmount = 3;
         int entriesPerLorebook = 10;
+        int keywordAmount = 100;
 
-        Map<LorebooksRecord, List<EntryRecord>> created =
+        Map<LorebooksRecord, List<EntryRecord>> lorebooksEntries =
                 entryTestContext.createEntries(seed, lorebookAmount, entriesPerLorebook);
 
-        String outletA = "test_outlet_a";
-        String outletB = "test_outlet_b";
+        String[] keywordsNames = new String[keywordAmount];
+        for (int i = 0; i < keywordAmount; i++) {
+            keywordsNames[i] = "keyword_" + i;
+        }
 
-        String keywordA = "test_keyword_a";
-        String keywordB = "test_keyword_b";
-        String keywordNoise = "test_keyword_noise";
+        LorebooksRecord lorebook = lorebooksEntries.keySet().iterator().next();
+        List<EntryRecord> entries = lorebooksEntries.get(lorebook);
 
-        Set<String> expectedKeys = new HashSet<>();
+        EntryRecord matchingEntry = entries.get(0);
+        EntryRecord nonMatchingEntry = entries.get(1);
+        EntryRecord disabledEntry = entries.get(2);
+        EntryRecord noKeywordEntry = entries.get(3);
 
-        int index = 0;
+        disabledEntry.setEnabled(false);
+        disabledEntry.update();
 
-        for (var lorebookEntries : created.entrySet()) {
-            for (EntryRecord entry : lorebookEntries.getValue()) {
-                EntityKey<EntryRecord> entryKey = EntityKey.<EntryRecord>builder()
-                        .set(ENTRY.LOREBOOK_ID, entry.getLorebookId())
-                        .set(ENTRY.ENTRY_ID, entry.getEntryId())
-                        .build();
+        String keywordA = keywordsNames[1];
+        String keywordB = keywordsNames[2];
+        String keywordC = keywordsNames[3];
+        String keywordOutside = keywordsNames[99];
 
-                boolean useOutletA = index % 2 == 0;
-                boolean useKeywordA = index % 3 == 0;
-                boolean addNoiseKeyword = index % 5 == 0;
+        keywords.associate(
+                matchingEntry.getLorebookId(),
+                matchingEntry.getEntryId(),
+                keywordA
+        );
+        keywords.associate(
+                matchingEntry.getLorebookId(),
+                matchingEntry.getEntryId(),
+                keywordB
+        );
 
-                String outlet = useOutletA ? outletA : outletB;
-                String baseKeyword = useKeywordA ? keywordA : keywordB;
+        keywords.associate(
+                nonMatchingEntry.getLorebookId(),
+                nonMatchingEntry.getEntryId(),
+                keywordA
+        );
+        keywords.associate(
+                nonMatchingEntry.getLorebookId(),
+                nonMatchingEntry.getEntryId(),
+                keywordOutside
+        );
 
-                assertTrue(entryService.updateOutlet(entryKey, outlet));
+        keywords.associate(
+                disabledEntry.getLorebookId(),
+                disabledEntry.getEntryId(),
+                keywordA
+        );
 
-                assertTrue(keywords.associate(
-                        entry.getLorebookId(),
-                        entry.getEntryId(),
-                        baseKeyword
-                ));
+        IntSet lorebookIDs = new IntOpenHashSet();
+        lorebookIDs.add(lorebook.getId());
 
-                if (addNoiseKeyword) {
-                    assertTrue(keywords.associate(
-                            entry.getLorebookId(),
-                            entry.getEntryId(),
-                            keywordNoise
-                    ));
-                }
+        Set<Integer> detectedKeywordIDs = Set.of(
+                keywordTestContext.service.getOrGenerate(keywordA),
+                keywordTestContext.service.getOrGenerate(keywordB),
+                keywordTestContext.service.getOrGenerate(keywordC)
+        );
 
-                /*
-                 * Query will only contain keywordA.
-                 *
-                 * Therefore the entry matches only if:
-                 * 1. it belongs to outletA,
-                 * 2. it has keywordA,
-                 * 3. it does NOT have keywordNoise.
-                 *
-                 * Because entry keywords are interpreted as AND.
-                 */
-                if (useOutletA && useKeywordA && !addNoiseKeyword) {
-                    expectedKeys.add(entry.getLorebookId() + ":" + entry.getEntryId());
-                }
+        List<EntryRecord> actual =
+                entryService.getEntriesWith(lorebookIDs, detectedKeywordIDs);
 
-                index++;
+        assertEquals(2, actual.size());
+        List<EntryRecord> expected = List.of(matchingEntry, nonMatchingEntry);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void getWithKeywordsAndOutlets_AlwaysReturnsConstantEntries(){
+        long seed = 3000;
+        int lorebookAmount = 3;
+        int entriesPerLorebook = 10;
+        int keywordAmount = 100;
+
+        Map<LorebooksRecord, List<EntryRecord>> lorebooksEntries =
+                entryTestContext.createEntries(seed, lorebookAmount, entriesPerLorebook);
+
+        Set<EntryRecord> expectedConstantEntries = new HashSet<>(keywordAmount/3);
+        for (var lorebookAndEntries : lorebooksEntries.entrySet()){
+            List<EntryRecord> entriesOfLorebook = lorebookAndEntries.getValue();
+            for (int i = 0; i < entriesOfLorebook.size() ; i+=3){
+                EntryRecord updatedRecord = entriesOfLorebook.get(i);
+                entryService.update(
+                        entryService.keyOf(updatedRecord),
+                        EntityDataPayload.of(ENTRY.STRATEGY, ActivationStrategy.CONSTANT.stable_id)
+                );
+                updatedRecord.setStrategy(ActivationStrategy.CONSTANT.stable_id);
+                expectedConstantEntries.add(updatedRecord);
             }
         }
 
-        int outletAID = lorebookTestContext.outlets.outletService
-                .getOutletID(outletA)
-                .orElseThrow();
-
-        int keywordAID = entryTestContext.keywords.service
-                .getIDOfKeywordWith(keywordA);
-
-        IntSet lorebookIDs = IntSetFactory.ofValues(
-                created.keySet()
-                        .stream()
-                        .mapToInt(LorebooksRecord::getId)
-                        .toArray()
+        IntSet lorebookIDs = IntSetFactory.ofValues(lorebooksEntries.keySet().stream()
+                .flatMapToInt(record -> IntStream.of(record.getId()))
+                .toArray()
         );
+        IntSet outlet = IntSet.of(lorebooksEntries.keySet().stream().findFirst().get().getDefaultOutletId());
 
-        IntSet detectedKeywordIDs = IntSetFactory.ofValues(keywordAID);
-
-        Map<Integer, List<EntryRecord>> actual =
-                entryService.getByOutletsWith(lorebookIDs, detectedKeywordIDs);
-
-        assertTrue(
-                actual.containsKey(outletAID),
-                "Expected result to contain outletA"
-        );
-
-        Set<String> actualKeys = actual.get(outletAID)
-                .stream()
-                .map(entry -> entry.getLorebookId() + ":" + entry.getEntryId())
-                .collect(Collectors.toSet());
-
-        assertEquals(expectedKeys, actualKeys);
+        Set<EntryRecord> actualConstantEntries = Set.of(entryService.getEntriesWith(lorebookIDs, outlet).toArray(new EntryRecord[0]));
+        assertEquals(expectedConstantEntries, actualConstantEntries);
     }
 
     @Test

@@ -1,11 +1,9 @@
 package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
-import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import chechelpo.frplm.extensions.api.utils.DetectedOutlet;
 import chechelpo.frplm.utils.collections.IntSetFactory;
-import it.unimi.dsi.fastutil.ints.IntObjectImmutablePair;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

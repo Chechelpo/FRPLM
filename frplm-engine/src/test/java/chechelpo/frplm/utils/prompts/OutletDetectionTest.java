@@ -1,9 +1,9 @@
 package chechelpo.frplm.utils.prompts;
 
+import chechelpo.frplm.extensions.api.utils.DetectedOutlet;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static chechelpo.frplm.utils.prompts.OutletDetection.getDetectedOutlets;

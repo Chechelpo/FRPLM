@@ -2,52 +2,44 @@ package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.StringJoiner;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static chechelpo.frplm.utils.prompts.PromptEntryPoint.PROMPT_LOGGER;
-
 
 public final class EntryEvaluator {
     private EntryEvaluator() {}
 
-    static @NotNull String renderEntries(
-            @NotNull List<EntryRecord> entries,
-            PromptRenderContext renderContext,
-            byte[][] embeddings
+    public static boolean activates(
+            EntryRecord entry,
+            int recursionStep,
+            int deepestKeyword
     ) {
-        PROMPT_LOGGER.debug("Rendering entries \n {}", entries);
-        StringJoiner rendered = new StringJoiner("\n");
-
-        for (EntryRecord entry : entries) {
-            String content = entry.getContent();
-
-            if (content != null && !content.isBlank() && EntryEvaluator.entryActivates(entry)) {
-                rendered.add(content);
-            }
-        }
-
-        return rendered.toString();
-    }
-
-    @CheckReturnValue
-    private static boolean entryActivates(@NotNull EntryRecord entry) {
+        if (entry == null) return false;
         ActivationStrategy strategy = ActivationStrategy.of(entry.getStrategy());
-        boolean activates = switch (strategy) {
+        return switch (strategy) {
             case CONSTANT -> true;
-            case COMMON -> evaluateCommonActivation(entry);
-            case EMBEDDING -> evaluateCommonActivation(entry) || evaluateEmbeddingActivation(entry);
-            case null -> throw new IllegalArgumentException("No activation strategy found for entry name " + entry.getName());
+            case COMMON -> evaluateCommonActivation(entry, recursionStep, deepestKeyword);
+            case EMBEDDING -> evaluateCommonActivation(entry, recursionStep, deepestKeyword) || evaluateEmbeddingActivation();
+            case null ->
+                    throw new IllegalArgumentException("No activation strategy found for entry name " + entry.getName());
         };
-        PROMPT_LOGGER.trace("Evaluating entry: {} result: {}", entry, activates);
-        return activates;
     }
 
-    private static boolean evaluateCommonActivation(@NotNull EntryRecord entry) {
+    private static boolean evaluateCommonActivation(
+            EntryRecord entry,
+            int recursionStep,
+            int deepestKeyword
+    ) {
+        if (recursionStep != 0 && entry.getNonRecursable()) return false;
+        if (entry.getScanDepth() != null && deepestKeyword > entry.getScanDepth()) return false;
+
+        return evaluateProbability(entry);
+    }
+    private static boolean evaluateEmbeddingActivation(){
+        return false;
+    }
+
+    private static boolean evaluateProbability(@NotNull EntryRecord entry) {
         if (entry.getProbability() == null) return true;
         int probability = entry.getProbability();
 
@@ -57,8 +49,5 @@ public final class EntryEvaluator {
 
         int roll = ThreadLocalRandom.current().nextInt(1, 101); // 1..100 inclusive
         return roll <= probability;
-    }
-    private static boolean evaluateEmbeddingActivation(@NotNull EntryRecord entry) {
-        return false;
     }
 }

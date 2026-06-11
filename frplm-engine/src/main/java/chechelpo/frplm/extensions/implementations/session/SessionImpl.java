@@ -3,9 +3,11 @@ package chechelpo.frplm.extensions.implementations.session;
 import chechelpo.frplm.extensions.api.session.ChatMessage;
 import chechelpo.frplm.extensions.api.session.Session;
 import chechelpo.frplm.extensions.api.session.SessionPrompt;
+import chechelpo.frplm.extensions.api.utils.PromptBuilder;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.extensions.implementations.standalone.PromptImpl;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import chechelpo.frplm.utils.prompts.Prompt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -64,11 +66,15 @@ public final class SessionImpl implements Session {
         return context.templates().getOf(this.record)
                 .map(template -> new PromptSessionImpl(template, context, this));
     }
+    public Optional<Prompt.Builder> getNewPrompt(){
+        return getPrompt().map(promptImpl -> (Prompt.Builder) promptImpl.getNewMessagePrompt());
+    }
 
     @Contract(" -> new")
     public @NotNull ChatMessage getLastMessage() {
         return new ChatMessageImpl(
                 sessionContext.messages().getLastOf(this.record.getId()),
+                context,
                 world
         );
     }
@@ -76,7 +82,7 @@ public final class SessionImpl implements Session {
     @Override
     public @UnmodifiableView List<ChatMessage> getChatHistory() {
         return sessionContext.messages().getMessages(this.record).stream()
-                .map(record -> new ChatMessageImpl(record, world))
+                .map(record -> new ChatMessageImpl(record, context, world))
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -90,7 +96,7 @@ public final class SessionImpl implements Session {
 
     @Contract(" -> new")
     public @NotNull ChatMessageImpl lastMessage() {
-        return new ChatMessageImpl(sessionContext.messages().getLastOf(this.getRecord()), world);
+        return new ChatMessageImpl(sessionContext.messages().getLastOf(this.getRecord()), context, world);
     }
 
     @Override

@@ -6,6 +6,7 @@ import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMService;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.domain.lorebook.entry.core.EntryService;
+import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.domain.prompts.section.SectionService;
@@ -29,6 +30,7 @@ public record ExtensionContext(
         @NotNull LorebookService lorebooks,
         @NotNull EntryService entries,
         @NotNull KeywordService keywords,
+        @NotNull EntryKeywordService entryKeywords,
 
         @NotNull OutletService outlets,
         @NotNull TemplateService templates,

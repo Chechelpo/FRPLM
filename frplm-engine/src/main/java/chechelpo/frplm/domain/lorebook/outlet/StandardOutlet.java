@@ -82,4 +82,15 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
     public @NotNull Optional<EntityKey<OutletRecord>> toKey() {
         return Optional.of(key);
     }
+
+    @Contract(pure = true)
+    public static @NotNull String stripUnresolvedMacros(@NotNull String content) {
+        String withoutMacroOnlyLines = UNRESOLVED_MACRO_LINE
+                .matcher(content)
+                .replaceAll("");
+
+        return UNRESOLVED_MACRO_INLINE
+                .matcher(withoutMacroOnlyLines)
+                .replaceAll("");
+    }
 }

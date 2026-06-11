@@ -49,6 +49,7 @@ public record ChatCompletionRequest(
         return Optional.ofNullable(responseFormat);
     }
 
+
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Builder builder(@NotNull String modelID) {
         return new Builder().modelID(modelID);
@@ -57,8 +58,8 @@ public record ChatCompletionRequest(
     @Contract("_ -> new")
     public static @NotNull ChatCompletionRequest getTestMessage(@NotNull String modelID) {
         return ChatCompletionRequest.builder(modelID)
-                .system("You are a backend health-check endpoint. Reply with exactly: OK")
-                .user("Return exactly OK.")
+                .appendAsSystem("You are a backend health-check endpoint. Reply with exactly: OK")
+                .appendAsUser("Return exactly OK.")
                 .generationParameters(
                         GenerationParameters.builder()
                                 .temperature(0.0f)
@@ -72,7 +73,10 @@ public record ChatCompletionRequest(
                 .configurationParameters(new GenerationConfig(false, true, null))
                 .build();
     }
-
+    @Contract(value="-> new", pure = true)
+    public static @NotNull Builder builder() {
+        return new Builder();
+    }
     public static final class Builder {
         private String modelID;
 
@@ -88,7 +92,13 @@ public record ChatCompletionRequest(
 
         private ResponseFormat responseFormat;
 
-        private Builder() {
+        private Builder() {}
+
+        public List<ChatCompletionMessage> getMessages(){
+            return this.messages;
+        }
+        public ChatCompletionMessage getAt(int index){
+            return messages.get(index);
         }
 
         public @NotNull Builder modelID(@NotNull String modelID) {
@@ -96,17 +106,35 @@ public record ChatCompletionRequest(
             return this;
         }
 
-        public @NotNull Builder system(@NotNull String content) {
+        public @NotNull Builder appendAsSystem(@NotNull String content) {
             messages.add(ChatCompletionMessage.system(content));
             return this;
         }
 
-        public @NotNull Builder user(@NotNull String content) {
+        public @NotNull Builder appendAsUser(@NotNull String content) {
             messages.add(ChatCompletionMessage.user(content));
             return this;
         }
 
-        public @NotNull Builder addAll(List<ChatCompletionMessage> messages) {
+        public @NotNull Builder append(ChatCompletionMessage message){
+            messages.add(message);
+            return this;
+        }
+        public Builder setAt(int index, ChatCompletionMessage message){
+            messages.set(index, message);
+            return this;
+        }
+
+        public Builder insertAt(int depth, ChatCompletionMessage message){
+            if (message == null) throw new IllegalArgumentException("Can't insert a null message");
+
+            int index = Math.min(0, messages.size() - depth);
+            messages.add(index, message);
+
+            return this;
+        }
+
+        public @NotNull Builder appendAll(List<ChatCompletionMessage> messages) {
             this.messages.addAll(Objects.requireNonNull(messages, "messages must not be null"));
             return this;
         }
