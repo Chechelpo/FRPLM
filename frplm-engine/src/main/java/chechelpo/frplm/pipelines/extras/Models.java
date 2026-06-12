@@ -33,7 +33,11 @@ public final class Models {
     private static ModelResponses getNanoModels(Optional<String> apiKey) {
         return LLMBackend.NANOGPT.getDefaultClient().orElseThrow(() -> new IllegalStateException("NANOGPT has no default client configured"))
                 .get()
-                .uri(MODEL_ENDPOINT)
+                .uri(uriBuilder -> uriBuilder
+                        .path(MODEL_ENDPOINT)
+                        .queryParam("detailed", true)
+                        .build()
+                )
                 .headers(headers -> apiKey
                         .map(String::trim)
                         .filter(key -> !key.isEmpty())

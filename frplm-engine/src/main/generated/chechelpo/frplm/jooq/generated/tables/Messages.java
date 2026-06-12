@@ -96,6 +96,11 @@ public class Messages extends TableImpl<MessagesRecord> {
     public final TableField<MessagesRecord, String> ROLE = createField(DSL.name("ROLE"), SQLDataType.VARCHAR(9).nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
+     */
+    public final TableField<MessagesRecord, String> REQUEST_JSON = createField(DSL.name("REQUEST_JSON"), SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
     public final TableField<MessagesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR.defaultValue(DSL.field(DSL.raw("NULL"), SQLDataType.VARCHAR)), this, "");
@@ -276,7 +281,8 @@ public class Messages extends TableImpl<MessagesRecord> {
     @Override
     public List<Check<MessagesRecord>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("CONSTRAINT_131"), "\"ROLE\" IN('user', 'assistant')", true)
+            Internal.createCheck(this, DSL.name("CONSTRAINT_131"), "\"ROLE\" IN('user', 'assistant')", true),
+            Internal.createCheck(this, DSL.name("REQUEST_JSON_ONLY_FOR_GENERATED_MESSAGES"), "(\"REQUEST_JSON\" IS NULL)\n    OR (\"ROLE\" = 'assistant')", true)
         );
     }
 

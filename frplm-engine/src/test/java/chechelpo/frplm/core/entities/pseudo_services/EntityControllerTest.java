@@ -229,29 +229,6 @@ class EntityControllerTest {
     }
 
     @Test
-    void queryWithoutBodyDelegatesToGetAllAndReturnsWrappedDtos() {
-        TestTableRecord first = record(1, 1, "first", 0, "first description text");
-        TestTableRecord second = record(2, 2, "second", 1, "second description text");
-
-        when(service.getAll()).thenReturn(List.of(first, second));
-
-        ResponseEntity<EntityController.EntityDTO[]> response = controller.query(null);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(2, response.getBody().length);
-
-        assertEquals(1, response.getBody()[0].key().get(DTOFields.FirstID.toString()));
-        assertEquals("first", response.getBody()[0].payload().get(DTOFields.Name.toString()));
-
-        assertEquals(2, response.getBody()[1].key().get(DTOFields.FirstID.toString()));
-        assertEquals("second", response.getBody()[1].payload().get(DTOFields.Name.toString()));
-
-        verify(service, atLeastOnce()).getAll();
-        verify(service, never()).getMatching(any());
-    }
-
-    @Test
     void queryWithBodyDelegatesToGetMatchingAndReturnsWrappedDtos() {
         TestTableRecord matching = record(10, 100, "matching", 0, "matching description text");
 

@@ -25,4 +25,15 @@ public record ChatCompletionMessage(
         return new ChatCompletionMessage(ChatCompletionRole.SYSTEM, content);
     }
 
+
+    @Override
+    public @NotNull String toString() {
+        return """
+                [
+                Role: %s
+                Content:
+                %s
+                ]
+                """.formatted(role, content);
+    }
 }

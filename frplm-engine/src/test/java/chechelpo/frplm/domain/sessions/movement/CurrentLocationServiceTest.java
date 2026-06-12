@@ -4,7 +4,6 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
-import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import chechelpo.frplm.domain.sessions.messages.core.MessageTestContext;
 import chechelpo.frplm.domain.world.edge.EdgeTestContext;
@@ -184,7 +183,7 @@ class CurrentLocationServiceTest {
                 currentLocationService.getLocationOf(userCharacter, session).getId()
         );
 
-        currentLocationService.rollbackSessionTo(
+        currentLocationService.rollbackLocationsTo(
                 session.getId(),
                 tick1Message.getTickNum()
         );
@@ -239,6 +238,173 @@ class CurrentLocationServiceTest {
 
             currentLocation = nextLocation;
         }
+    }
+
+    @Test
+    void rewindLocationsOnMessageDeleted() {
+        int messageAmount = 10;
+        MessageTestContext.Context context = messages.createSessionWithMessages(100, messageAmount);
+        SessionsRecord sessionsRecord = context.sessionContext().session();
+        CharactersRecord userCharacter = context.sessionContext().userCharacter();
+
+        LocationsRecord previousLocation = currentLocationService.getLocationOf(userCharacter, sessionsRecord);
+        LocationsRecord nextLocation = context.sessionContext().sessionLocations().stream()
+                .filter(location -> !location.getId().equals(previousLocation.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No location found to test a movement"));
+        edgeTestContext.link(sessionsRecord.getWorldId(), previousLocation.getId(), nextLocation.getId());
+
+        EntityKey<CurrentLocationsRecord> currentLocationsKey = EntityKey.<CurrentLocationsRecord>builder()
+                .set(CURRENT_LOCATIONS.SESSION_ID, sessionsRecord.getId())
+                .set(CURRENT_LOCATIONS.CHARACTER_ID, userCharacter.getId())
+                .build();
+
+        CurrentLocationsRecord beforeDeletion = currentLocationService.find(currentLocationsKey)
+                .orElseThrow(() -> new IllegalStateException("Current locations record not found"));
+
+        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+
+        assertTrue(
+                currentLocationService.update(currentLocationsKey,
+                        EntityDataPayload.<CurrentLocationsRecord>builder()
+                                .set(CURRENT_LOCATIONS.WORLD_ID, sessionsRecord.getWorldId())
+                                .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
+                                .set(CURRENT_LOCATIONS.TICK_NUM, lastMessage.getTickNum())
+                                .build()
+                ),
+                "Error moving user character"
+        );
+        assertTrue(
+                messages.service.delete(EntityKey.<MessagesRecord>builder()
+                        .set(MESSAGES.SESSION_ID, sessionsRecord.getId())
+                        .set(MESSAGES.TICK_NUM, lastMessage.getTickNum())
+                        .build()
+                ),
+                "Error deleting last message"
+        );
+        Optional<CurrentLocationsRecord> actualLocation = currentLocationService.find(currentLocationsKey);
+        assertTrue(actualLocation.isPresent(), "Character has no current location");
+
+        assertNotEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
+        assertEquals(previousLocation.getId(), actualLocation.get().getLocationId(), "Didn't move back to previous location");
+    }
+    @Test
+    void rewindLocationsOnMessageDeleted_doesNothingOnWrongMessageDeletion() {
+        int messageAmount = 10;
+        MessageTestContext.Context context = messages.createSessionWithMessages(100, messageAmount);
+        SessionsRecord sessionsRecord = context.sessionContext().session();
+        CharactersRecord userCharacter = context.sessionContext().userCharacter();
+
+        LocationsRecord previousLocation = currentLocationService.getLocationOf(userCharacter, sessionsRecord);
+        LocationsRecord nextLocation = context.sessionContext().sessionLocations().stream()
+                .filter(location -> !location.getId().equals(previousLocation.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No location found to test a movement"));
+        edgeTestContext.link(sessionsRecord.getWorldId(), previousLocation.getId(), nextLocation.getId());
+
+        EntityKey<CurrentLocationsRecord> currentLocationsKey = EntityKey.<CurrentLocationsRecord>builder()
+                .set(CURRENT_LOCATIONS.SESSION_ID, sessionsRecord.getId())
+                .set(CURRENT_LOCATIONS.CHARACTER_ID, userCharacter.getId())
+                .build();
+
+        CurrentLocationsRecord beforeDeletion = currentLocationService.find(currentLocationsKey)
+                .orElseThrow(() -> new IllegalStateException("Current locations record not found"));
+
+        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+
+        assertTrue(
+                currentLocationService.update(currentLocationsKey,
+                        EntityDataPayload.<CurrentLocationsRecord>builder()
+                                .set(CURRENT_LOCATIONS.WORLD_ID, sessionsRecord.getWorldId())
+                                .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
+                                .set(CURRENT_LOCATIONS.TICK_NUM, lastMessage.getTickNum())
+                                .build()
+                ),
+                "Error moving user character"
+        );
+        assertThrows(
+                InvalidValue.class,
+                () -> messages.service.delete(EntityKey.<MessagesRecord>builder()
+                        .set(MESSAGES.SESSION_ID, sessionsRecord.getId())
+                        .set(MESSAGES.TICK_NUM, lastMessage.getTickNum() - 3) //Here we change the tick num
+                        .build()
+                ),
+                "Error deleting last message"
+        );
+        Optional<CurrentLocationsRecord> actualLocation = currentLocationService.find(currentLocationsKey);
+        assertTrue(actualLocation.isPresent(), "Character has no current location");
+
+        assertEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
+        assertNotEquals(previousLocation.getId(), actualLocation.get().getLocationId(), "Didn't move back to previous location");
+    }
+
+    @Test
+    void registeringSameMovementDoesNothing() {
+        int messageAmount = 10;
+        MessageTestContext.Context context = messages.createSessionWithMessages(100, messageAmount);
+        SessionsRecord sessionsRecord = context.sessionContext().session();
+
+        CharactersRecord character = context.sessionContext().userCharacter();
+        LocationsRecord currentLocationOfUserCharacter = currentLocationService.getLocationOf(character, sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+
+        EntityKey<CurrentLocationsRecord> currentLocationsKey = EntityKey.<CurrentLocationsRecord>builder()
+                .set(CURRENT_LOCATIONS.SESSION_ID, sessionsRecord.getId())
+                .set(CURRENT_LOCATIONS.CHARACTER_ID, character.getId())
+                .build();
+
+        CurrentLocationsRecord previousRecord = currentLocationService.find(currentLocationsKey)
+                .orElseThrow(() -> new IllegalStateException("No current location found for user character"));
+        int previousTickNum = previousRecord.getTickNum();
+
+        assertDoesNotThrow(() -> currentLocationService.update(
+                        currentLocationsKey,
+                        EntityDataPayload.<CurrentLocationsRecord>builder()
+                                .set(CURRENT_LOCATIONS.TICK_NUM, lastMessage.getTickNum())
+                                .set(CURRENT_LOCATIONS.WORLD_ID, sessionsRecord.getWorldId())
+                                .set(CURRENT_LOCATIONS.LOCATION_ID, currentLocationOfUserCharacter.getId())
+                                .build()),
+                "Error when moving user character"
+        );
+
+        CurrentLocationsRecord nextCurrentLocationsRecord = currentLocationService.find(currentLocationsKey)
+                .orElseThrow(() -> new IllegalStateException("No current location found for user character"));
+
+        assertEquals(previousTickNum, nextCurrentLocationsRecord.getTickNum(),
+                "Moving to same location should return the same tick number as its not a movement");
+    }
+
+    @Test
+    void movingUserMovesMessageLocation() {
+        int messageAmount = 10;
+        MessageTestContext.Context context = messages.createSessionWithMessages(100, messageAmount);
+        SessionsRecord sessionsRecord = context.sessionContext().session();
+
+        CharactersRecord character = context.sessionContext().userCharacter();
+        LocationsRecord currentLocationOfUserCharacter = currentLocationService.getLocationOf(character, sessionsRecord);
+        LocationsRecord nextLocation = context.sessionContext().sessionLocations().stream()
+                .filter(location -> !location.getId().equals(currentLocationOfUserCharacter.getId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No location found to test a movement"));
+        edgeTestContext.link(sessionsRecord.getWorldId(), currentLocationOfUserCharacter.getId(), nextLocation.getId());
+
+        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord finalLastMessage = lastMessage;
+        assertDoesNotThrow(() -> currentLocationService.update(
+                        EntityKey.<CurrentLocationsRecord>builder()
+                                .set(CURRENT_LOCATIONS.SESSION_ID, sessionsRecord.getId())
+                                .set(CURRENT_LOCATIONS.CHARACTER_ID, character.getId())
+                                .build(),
+                        EntityDataPayload.<CurrentLocationsRecord>builder()
+                                .set(CURRENT_LOCATIONS.TICK_NUM, finalLastMessage.getTickNum())
+                                .set(CURRENT_LOCATIONS.WORLD_ID, sessionsRecord.getWorldId())
+                                .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
+                                .build()),
+                "Error when moving user character"
+        );
+        lastMessage = messages.service.getLastOf(sessionsRecord);
+
+        assertEquals(nextLocation.getId(), lastMessage.getLocationId(), "Last message didn't change location");
     }
 
     @Test

@@ -32,6 +32,11 @@ public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implem
     }
 
     @Override
+    public ChatCompletionResponse generate(String rawRequest) {
+        return GenerationEntryPoint.generateNonStreamingResponse(rawRequest, this.record, context);
+    }
+
+    @Override
     public ChatCompletionResponse generate(ChatCompletionRequest request) {
         return GenerationEntryPoint.generateNonStreamingResponse(
                 request,

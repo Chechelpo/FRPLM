@@ -60,9 +60,9 @@ const connectionIDtoName = computed<ReadonlyMap<number, string>>(() => {
 const currentConnection = computed<number | null>({
   get() {
     const currentId = model.value.get("connection_id");
-    const con = connections.value.find(con => con.get("id") === currentId);
+    currentConnectionObject.value = connections.value.find(con => con.get("id") === currentId)!;
 
-    return con?.get("id") ?? null;
+    return currentConnectionObject.value?.get("id") ?? null;
   },
   set(newCon: number | null) {
     if (newCon == null) return;
@@ -70,6 +70,7 @@ const currentConnection = computed<number | null>({
     model.value.update("connection_id", newCon);
   },
 });
+const currentConnectionObject = ref<LLMConnection | null>(null);
 
 const sections = ref<PromptSection[]>([]);
 
@@ -83,6 +84,7 @@ onMounted(() => {
 
 async function reload(): Promise<void> {
   sections.value = await model.value.getSections();
+  console.log(sections);
 }
 
 async function createSection(): Promise<void> {
@@ -112,6 +114,16 @@ async function moveSection(section: PromptSection, direction: -1 | 1): Promise<v
 function sectionKey(section: PromptSection): string {
   return `${section.get("prompt_id")}:${section.get("section_id")}`;
 }
+
+const max_tokens = computed<number>({
+  get(){
+    return model.value.get("max_tokens");
+  },
+  set(value: number) {
+    model.value.update("max_tokens", value);
+  }
+})
+
 </script>
 <template>
   <div class="background-edit-box">
@@ -124,13 +136,21 @@ function sectionKey(section: PromptSection): string {
 
     <FieldEditorWrapper
       field-name="Connection"
-      info="If this prompt runs, this will be the connection it'll hit"
+      info="If this prompt runs, this will be the backend it'll hit"
     >
       <SingleEnumInput
           :value="currentConnection ? currentConnection : null"
           :possible_values="connectionIDs"
           :labels="connectionIDtoName"
           @edit="value => currentConnection = value"
+      />
+    </FieldEditorWrapper>
+    <FieldEditorWrapper v-if="currentConnectionObject != null" field-name="Max tokens">
+      <NumberSlider
+          :model-value="max_tokens"
+          :max="currentConnectionObject.get('max_tokens')"
+          :step="8192"
+          @edit="payload => max_tokens = payload"
       />
     </FieldEditorWrapper>
 

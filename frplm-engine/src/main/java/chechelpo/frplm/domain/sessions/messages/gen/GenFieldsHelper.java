@@ -37,13 +37,6 @@ final class GenFieldsHelper extends ABSHelper<LlmGenRecord, GenService> {
                         .build()
         );
 
-        register_field(
-                LLM_GEN.PROMPT,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder())
-                        .require()
-                        .build()
-        );
 
         register_field(
                 LLM_GEN.ACTIVE_RESPONSE,

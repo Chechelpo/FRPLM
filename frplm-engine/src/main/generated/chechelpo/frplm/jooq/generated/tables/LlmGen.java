@@ -70,11 +70,6 @@ public class LlmGen extends TableImpl<LlmGenRecord> {
     public final TableField<LlmGenRecord, Integer> TICK_NUM = createField(DSL.name("TICK_NUM"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.LLM_GEN.PROMPT</code>.
-     */
-    public final TableField<LlmGenRecord, String> PROMPT = createField(DSL.name("PROMPT"), SQLDataType.VARCHAR, this, "");
-
-    /**
      * The column <code>PUBLIC.LLM_GEN.ACTIVE_RESPONSE</code>.
      */
     public final TableField<LlmGenRecord, Short> ACTIVE_RESPONSE = createField(DSL.name("ACTIVE_RESPONSE"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");

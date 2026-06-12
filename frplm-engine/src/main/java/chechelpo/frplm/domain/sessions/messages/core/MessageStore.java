@@ -29,8 +29,10 @@ final class MessageStore extends EntityStore<MessagesRecord> {
         return ctx.select()
                 .from(MESSAGES)
                 .join(SESSIONS)
-                .on(MESSAGES.SESSION_ID.eq(SESSIONS.ID),
+                .on(
+                        MESSAGES.SESSION_ID.eq(SESSIONS.ID).and(
                         MESSAGES.TICK_NUM.eq(SESSIONS.CURRENT_TICK))
+                )
                 .where(MESSAGES.SESSION_ID.eq(sessionID))
                 .orderBy(MESSAGES.TICK_NUM.desc())
                 .limit(1)

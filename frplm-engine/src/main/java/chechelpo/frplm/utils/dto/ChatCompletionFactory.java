@@ -27,6 +27,7 @@ public class ChatCompletionFactory {
         return new GenerationConfig(
                 record.getStreaming(),
                 record.getExcludeReasoning(),
+                record.getMaxTokens(),
                 ReasoningEffort.fromId(record.getReasoningEffort())
         );
     }

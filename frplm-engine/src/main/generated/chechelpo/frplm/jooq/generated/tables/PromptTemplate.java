@@ -69,7 +69,7 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public final TableField<PromptTemplateRecord, Short> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.SMALLINT, this, "");
+    public final TableField<PromptTemplateRecord, Integer> CONNECTION_ID = createField(DSL.name("CONNECTION_ID"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.NAME</code>.

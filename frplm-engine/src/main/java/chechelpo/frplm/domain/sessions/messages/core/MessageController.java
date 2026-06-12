@@ -16,24 +16,4 @@ public final class MessageController extends EntityController<MessagesRecord, Me
     MessageController(MessageService service) {
         super(service);
     }
-
-    @GetMapping("ofSession/{sessionID}")
-    ResponseEntity<EntityDTO[]> getMessageBySessionID(@PathVariable("sessionID") int sessionID) {
-        return ResponseEntity.ok(
-                wrapEntities(
-                        this.service.getMatching(
-                                EntityKey.of(MESSAGES.SESSION_ID, sessionID)
-                        )
-                )
-        );
-    }
-
-
-    @PostMapping("generate/newMessage/{sessionID}")
-    ResponseEntity<String> generateNewMessage(
-            @PathVariable("sessionID") int sessionID,
-            @RequestBody(required = false) ChatCompletionRequest prompt
-    ) {
-        return null;
-    }
 }

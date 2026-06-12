@@ -11,6 +11,10 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import ConfigSidebar from "@/components/chat/ConfigSidebar.vue";
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import PromptDebug from "@/components/chat/PromptDebug.vue";
+import {fetchApi} from "@/frameworks/ABSEntity";
+import {API_BASE} from "@/config";
+import {DTO} from "@/types/DTOs";
+import {EntityTypes} from "@/domain/EntityTypes";
 
 const model = defineModel<Session>({
   required: true,
@@ -135,8 +139,18 @@ async function onDeleteMessage(message: Message) {
   void scrollMessagesToBottom();
 }
 
-function onRegenerateMessage(message: Message): void {
-  console.debug("Regenerate message", message);
+async function onRegenerateMessage(message: Message): void {
+  console.debug("Regenerating message : ", message);
+  const newMessage = await fetchApi(
+      `${API_BASE}/engine/regenerate?sessionID=${model.value.get('id')}&tick_num=${message.get("tick_num")}`,
+      {
+        method: "POST",
+      }
+  ).then(async response => new Message(await response.json() as DTO, EntityTypes.MESSAGES))
+
+  const toReplaceIndex = messages.value.findIndex(msg => msg.equals(newMessage));
+  if (toReplaceIndex == -1) throw new Error("Invalid message returned");
+  messages.value.splice(toReplaceIndex, 1, newMessage);
 }
 
 </script>
@@ -194,6 +208,7 @@ function onRegenerateMessage(message: Message): void {
                     :key="String(message.get('tick_num'))"
                     :message="message as Message"
                     @delete="onDeleteMessage"
+                    @regenerate="onRegenerateMessage"
                     :title="message.get('role') === ChatCompletionRole.USER
                     ? String(user_character?.get('name') ?? 'User')
                     : String(world?.get('name') ?? world_name)

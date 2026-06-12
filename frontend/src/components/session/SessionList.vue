@@ -42,34 +42,36 @@ async function deleteSession(session:Session) : Promise<void> {
 </script>
 
 <template>
-  <button
-    v-if="!sessionSelected"
-    class = max-h-10
-    type="button"
-    @click="createNewSession=true"
-  > New </button>
-  <SessionTease
-      v-if="allSessions && !sessionSelected"
-      v-for="session in allSessions"
-      :session="session"
-      @open="goToSession"
-      @delete="deleteSession"
-  />
-  <NewSessionPopUp
-    :model-value="createNewSession"
-    @create-new-session="payload => {
-      newSession(payload.name, payload.world, payload.character);
-      createNewSession = false
-    }"
-    @close="createNewSession = false"
-  />
+  <div>
+    <button
+      v-if="!sessionSelected"
+      class = max-h-10
+      type="button"
+      @click="createNewSession=true"
+    > New </button>
+    <SessionTease
+        v-if="allSessions && !sessionSelected"
+        v-for="session in allSessions"
+        :session="session"
+        @open="goToSession"
+        @delete="deleteSession"
+    />
+    <NewSessionPopUp
+      :model-value="createNewSession"
+      @create-new-session="payload => {
+        newSession(payload.name, payload.world, payload.character);
+        createNewSession = false
+      }"
+      @close="createNewSession = false"
+    />
 
-  <Chat
-      v-if="sessionSelected"
-      :key="sessionSelected.get('id')"
-      :model-value="sessionSelected"
-      @close="sessionSelected=null"
-  />
+    <Chat
+        v-if="sessionSelected"
+        :key="sessionSelected.get('id')"
+        :model-value="sessionSelected"
+        @close="sessionSelected=null"
+    />
+  </div>
 </template>
 
 <style scoped>

@@ -3,6 +3,7 @@ package chechelpo.frplm.pipelines;
 import chechelpo.frplm.domain.sessions.messages.core.MessageController;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
+import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +46,23 @@ final class EngineController {
                         engine.generateNewMessage(
                                 sessionID,
                                 options.prompt
+                        )
+                )
+        );
+    }
+
+    @PostMapping("/regenerate")
+    ResponseEntity<MessageController.EntityDTO> regenerate(
+            @RequestParam int sessionID,
+            @RequestParam int tick_num,
+            @RequestBody GenerationOptions options
+    ) throws EntityNotFound {
+        if (options.streaming) throw new UnsupportedOperationException("streaming not supported");
+        return ResponseEntity.ok(
+                messageController.wrapEntity(
+                        engine.regenerate(
+                                sessionID,
+                                tick_num
                         )
                 )
         );

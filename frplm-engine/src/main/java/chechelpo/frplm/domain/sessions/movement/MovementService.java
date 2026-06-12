@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
-public class MovementService extends EntityService<MovementsRecord, MovementStore> {
+class MovementService extends EntityService<MovementsRecord, MovementStore> {
 
     MovementService(
             @NotNull MovementStore store,
@@ -39,10 +39,9 @@ public class MovementService extends EntityService<MovementsRecord, MovementStor
                             .set(MOVEMENTS.AT_TICK, atTick)
                             .build()
             );
-
         } catch (Exception e){
             log.error("Error while registering movement change event, rolling back to last known location", e);
-            throw new InvalidMove("Invalid movement change");
+            throw new InvalidMove("Invalid movement change: \n" + e.getMessage());
         }
     }
 }

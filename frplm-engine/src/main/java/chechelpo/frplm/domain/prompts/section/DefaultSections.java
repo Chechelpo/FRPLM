@@ -5,6 +5,18 @@ import chechelpo.frplm.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.NotNull;
 
 public enum DefaultSections {
+    SYSTEM_EXPLANATION(
+            0,
+            ChatCompletionRole.SYSTEM,
+            "System explanation",
+            null,
+            """
+                    You are embedded in a larger world simulation engine. Your job is to play out this world, based on the
+                    information you've been given. You must keep narrative constrained exclusively to this knowledge, only
+                    inventing things that would be completely inconsequential to the overall world (ex.: villagers small talk).
+                    """,
+            true
+    ),
     WORLD_INFO(1,
             ChatCompletionRole.SYSTEM,
             "World information",
@@ -55,7 +67,7 @@ public enum DefaultSections {
         this.canDelete = canDelete;
     }
 
-    public static short maxReservedSectionID(){
+    public static short maxReservedSectionID() {
         int max = 0;
         for (DefaultSections section : DefaultSections.values()) {
             max = Math.max(max, section.sectionID);
@@ -72,7 +84,7 @@ public enum DefaultSections {
         throw new IllegalArgumentException("Unknown section ID: " + sectionID);
     }
 
-    public static boolean canDelete(int sectionID){
+    public static boolean canDelete(int sectionID) {
         for (DefaultSections section : DefaultSections.values())
             if (section.sectionID == sectionID)
                 return section.canDelete;

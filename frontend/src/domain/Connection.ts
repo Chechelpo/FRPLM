@@ -8,6 +8,7 @@ export type LLMConnectionData = {
     type: number;
     name:string,
     modelID:string | null,
+    max_tokens: number
 }
 
 export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionData>{

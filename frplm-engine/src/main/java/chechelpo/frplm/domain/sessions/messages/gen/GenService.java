@@ -39,7 +39,6 @@ public class GenService extends EntityService<LlmGenRecord, GenStore> {
         return result;
     }
 
-
     public void registerNewResponse(EntityKey<LlmGenRecord> ofKey,  String content){
         if (!exists(ofKey)) {
             log.error("No such entity with key {}", ofKey);

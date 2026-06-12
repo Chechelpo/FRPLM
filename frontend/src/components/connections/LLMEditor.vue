@@ -60,7 +60,9 @@ const llm_model = computed<string | null>({
     return model.value.get('modelID') ?? null;
   },
   set(value: string | null) {
-    model.value.update("modelID", value);
+    const modelResponse = modelOptions.value.find(model => model.id === value)!;
+    model.value.update("modelID", modelResponse.id);
+    model.value.update("max_tokens", modelResponse.context_length ? modelResponse.context_length : 52000);
   },
 });
 

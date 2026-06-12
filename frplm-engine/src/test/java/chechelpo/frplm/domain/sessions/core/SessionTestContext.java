@@ -41,6 +41,11 @@ public class SessionTestContext implements DBReload {
         locations.reload();
     }
 
+    /**
+     * @param userCharacter
+     * @param session
+     * @param sessionLocations (unlinked)
+     */
     public record SessionContext(CharactersRecord userCharacter, SessionsRecord session, List<LocationsRecord> sessionLocations) {}
     /** Locations of this session are not linked. Character starts at the first location of the list */
     public SessionContext createSession(int locationsAmount, int charactersPerLocation){

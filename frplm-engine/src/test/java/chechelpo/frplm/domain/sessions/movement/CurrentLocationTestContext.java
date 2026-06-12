@@ -31,7 +31,7 @@ public class CurrentLocationTestContext implements DBReload {
     @Autowired
     private SessionTestContext sessionTestContext;
     @Autowired
-    private CurrentLocationService service;
+    public CurrentLocationService service;
     @Autowired
     CurrentLocationFields fields;
     @Autowired

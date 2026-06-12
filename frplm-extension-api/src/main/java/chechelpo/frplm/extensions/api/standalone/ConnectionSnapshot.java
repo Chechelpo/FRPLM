@@ -35,5 +35,7 @@ public non-sealed interface ConnectionSnapshot extends Snapshot {
 
     String getName();
     ChatCompletionResponse generate(ChatCompletionRequest request);
+    /**@apiNote validation must be made by caller */
+    ChatCompletionResponse generate(String rawRequest);
     String getModelID();
 }

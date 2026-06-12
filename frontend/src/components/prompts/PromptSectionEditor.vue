@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
 import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
-import { PromptSection } from "@/domain/Prompts";
-import { computed, ref } from "vue";
+import {PromptSection} from "@/domain/Prompts";
+import {computed, ref} from "vue";
 import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
@@ -77,141 +77,143 @@ function closeEditor(): void {
 </script>
 
 <template>
-  <article
-      class="section-card"
-      :class="{ 'section-card--inactive': !active }"
-  >
-    <div class="section-card-order">
-      <button
-          type="button"
-          class="section-card-arrow"
-          :disabled="!canMoveUp"
-          aria-label="Move section up"
-          @click.stop="emit('move-up', section)"
-      >
-        ▲
-      </button>
-
-      <button
-          type="button"
-          class="section-card-arrow"
-          :disabled="!canMoveDown"
-          aria-label="Move section down"
-          @click.stop="emit('move-down', section)"
-      >
-        ▼
-      </button>
-    </div>
-
-    <button
-        type="button"
-        class="section-card-main"
-        @click="openEditor"
+  <div>
+    <article
+        class="section-card"
+        :class="{ 'section-card--inactive': !active }"
     >
-      <div class="section-card-meta">
+      <div class="section-card-order">
+        <button
+            type="button"
+            class="section-card-arrow"
+            :disabled="!canMoveUp"
+            aria-label="Move section up"
+            @click.stop="emit('move-up', section)"
+        >
+          ▲
+        </button>
+
+        <button
+            type="button"
+            class="section-card-arrow"
+            :disabled="!canMoveDown"
+            aria-label="Move section down"
+            @click.stop="emit('move-down', section)"
+        >
+          ▼
+        </button>
+      </div>
+
+      <button
+          type="button"
+          class="section-card-main"
+          @click="openEditor"
+      >
+        <div class="section-card-meta">
         <span class="section-card-index">
           #{{ index + 1 }}
         </span>
 
-        <span
-            class="section-card-role"
-            :data-role="role"
-        >
+          <span
+              class="section-card-role"
+              :data-role="role"
+          >
           {{ role }}
         </span>
 
-        <span
-            class="section-card-state"
-            :class="{ 'section-card-state--inactive': !active }"
-        >
+          <span
+              class="section-card-state"
+              :class="{ 'section-card-state--inactive': !active }"
+          >
           {{ active ? "active" : "inactive" }}
         </span>
-      </div>
+        </div>
 
-      <div class="section-card-name">
-        {{ name }}
-      </div>
+        <div class="section-card-name">
+          {{ name }}
+        </div>
 
-      <p class="section-card-preview">
-        {{ contentPreview }}
-      </p>
-    </button>
-
-    <div class="section-card-actions">
-      <BooleanToggle
-          :model-value="active"
-          @edit="value => active = value"
-      />
-
-      <button
-          type="button"
-          class="section-card-edit"
-          @click.stop="openEditor"
-      >
-        Edit
+        <p class="section-card-preview">
+          {{ contentPreview }}
+        </p>
       </button>
-    </div>
-  </article>
 
-  <Teleport to="body">
-    <div
-        v-if="edit"
-        class="section-editor-backdrop"
-        @click.self="closeEditor"
-    >
-      <section
-          class="section-editor-window"
-          role="dialog"
-          aria-modal="true"
+      <div class="section-card-actions">
+        <BooleanToggle
+            :model-value="active"
+            @edit="value => active = value"
+        />
+
+        <button
+            type="button"
+            class="section-card-edit"
+            @click.stop="openEditor"
+        >
+          Edit
+        </button>
+      </div>
+    </article>
+
+    <Teleport to="body">
+      <div
+          v-if="edit"
+          class="section-editor-backdrop"
+          @click.self="closeEditor"
       >
-        <header class="section-editor-header">
-          <div class="section-editor-title">
-            Edit section
-          </div>
+        <section
+            class="section-editor-window"
+            role="dialog"
+            aria-modal="true"
+        >
+          <header class="section-editor-header">
+            <div class="section-editor-title">
+              Edit section
+            </div>
 
-          <button
-              type="button"
-              class="section-editor-close"
-              aria-label="Close"
-              @click="closeEditor"
-          >
-            ×
-          </button>
-        </header>
+            <button
+                type="button"
+                class="section-editor-close"
+                aria-label="Close"
+                @click="closeEditor"
+            >
+              ×
+            </button>
+          </header>
 
-        <main class="section-editor-body">
-          <FieldEditorWrapper field-name="name">
-            <ShortTextBox
-                :model-value="name"
-                @edit="value => name = value"
-            />
-          </FieldEditorWrapper>
+          <main class="section-editor-body">
+            <FieldEditorWrapper field-name="name">
+              <ShortTextBox
+                  :model-value="name"
+                  @edit="value => name = value"
+              />
+            </FieldEditorWrapper>
 
-          <FieldEditorWrapper field-name="active">
-            <BooleanToggle
-                :model-value="active"
-                @edit="value => active = value"
-            />
-          </FieldEditorWrapper>
+            <FieldEditorWrapper field-name="active">
+              <BooleanToggle
+                  :model-value="active"
+                  @edit="value => active = value"
+              />
+            </FieldEditorWrapper>
 
-          <FieldEditorWrapper field-name="role">
-            <SingleEnumInput
-                :value="role"
-                :possible_values="roles"
-                @edit="value => role = value"
-            />
-          </FieldEditorWrapper>
+            <FieldEditorWrapper field-name="role">
+              <SingleEnumInput
+                  :value="role"
+                  :possible_values="roles"
+                  @edit="value => role = value"
+              />
+            </FieldEditorWrapper>
 
-          <FieldEditorWrapper field-name="content">
-            <LongTextBox
-                :model-value="content"
-                @edit="value => content = value"
-            />
-          </FieldEditorWrapper>
-        </main>
-      </section>
-    </div>
-  </Teleport>
+            <FieldEditorWrapper field-name="content">
+              <LongTextBox
+                  :model-value="content"
+                  @edit="value => content = value"
+              />
+            </FieldEditorWrapper>
+          </main>
+        </section>
+      </div>
+    </Teleport>
+  </div>
 </template>
 
 <style scoped>
@@ -237,15 +239,13 @@ function closeEditor(): void {
 
   color: var(--primary-text, #111827);
 
-  box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.14),
-      inset 0 1px 0 rgb(255 255 255 / 0.12);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.14),
+  inset 0 1px 0 rgb(255 255 255 / 0.12);
 
-  transition:
-      border-color 140ms ease,
-      background 140ms ease,
-      opacity 140ms ease,
-      transform 140ms ease;
+  transition: border-color 140ms ease,
+  background 140ms ease,
+  opacity 140ms ease,
+  transform 140ms ease;
 }
 
 .section-card:hover {
@@ -428,9 +428,8 @@ function closeEditor(): void {
   color: #111827;
 
   border-radius: 0.75rem;
-  box-shadow:
-      0 20px 25px rgb(0 0 0 / 0.1),
-      0 8px 10px rgb(0 0 0 / 0.1);
+  box-shadow: 0 20px 25px rgb(0 0 0 / 0.1),
+  0 8px 10px rgb(0 0 0 / 0.1);
 
   overflow: hidden;
 }

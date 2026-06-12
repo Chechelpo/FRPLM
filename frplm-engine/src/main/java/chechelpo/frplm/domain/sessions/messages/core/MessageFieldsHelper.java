@@ -70,6 +70,13 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
         );
 
         register_field(
+                "prompt",
+                MESSAGES.REQUEST_JSON,
+                FieldInfo.stringField()
+                        .build()
+        );
+
+        register_field(
                 "content",
                 MESSAGES.CONTENT,
                 FieldInfo.stringField()

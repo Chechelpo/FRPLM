@@ -36,6 +36,16 @@ final class MovementFieldsHelper extends ABSHelper<MovementsRecord, MovementServ
         );
 
         register_field(
+                MOVEMENTS.CHARACTER_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .key()
+                                .readOnly()
+                        )
+                        .build()
+        );
+
+        register_field(
                 MOVEMENTS.WORLD_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)

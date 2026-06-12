@@ -7,6 +7,7 @@ import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 
 import java.util.List;
@@ -19,43 +20,117 @@ final class CurrentLocationStore extends EntityStore<CurrentLocationsRecord> {
         super(ctx, CURRENT_LOCATIONS, EntityTypes.Types.CURRENT_LOCATIONS);
     }
 
+    /**
+     * Rollbacks the locations where entities where before this tick number.
+     * <p>
+     *     Essentially, the movement record with the highest tick num is sacrificed and transformed to be the new current location
+     *     of that particular character. After this, that particular movement record is erased.
+     * </p>
+     * <h3>Algorithm:</h3>
+     * <pre>
+     *     1. Fetches the latest (highest tick_num) movement records of each entity with a tick > tick_num.
+     *     2. Converts those movement history records into the new current locations.
+     *     3. Erases those particular movement history.
+     * </pre>
+     * @param sessionID id
+     * @param tick to go back to
+     */
     public void rollbackSessionTo(int sessionID, int tick) {
         ctx.transaction(configuration -> {
             DSLContext tx = DSL.using(configuration);
 
-            var movementsToUndo = tx.selectFrom(MOVEMENTS)
-                    .where(MOVEMENTS.SESSION_ID.eq(sessionID))
-                    .and(MOVEMENTS.AT_TICK.gt(tick))
-                    .orderBy(MOVEMENTS.AT_TICK.desc())
-                    .fetch();
+            boolean targetTickExists = tx.fetchExists(
+                    tx.selectOne()
+                            .from(MESSAGES)
+                            .where(MESSAGES.SESSION_ID.eq(sessionID))
+                            .and(MESSAGES.TICK_NUM.eq(tick))
+            );
 
-            for (MovementsRecord movement : movementsToUndo) {
-                tx.update(CURRENT_LOCATIONS)
-                        .set(CURRENT_LOCATIONS.TICK_NUM, tick)
-                        .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
-                        .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
-                        .where(CURRENT_LOCATIONS.SESSION_ID.eq(sessionID))
-                        .and(CURRENT_LOCATIONS.CHARACTER_ID.eq(movement.getCharacterId()))
-                        .execute();
+            if (!targetTickExists) {
+                throw new IllegalStateException(
+                        "Cannot rollback session " + sessionID +
+                                " to tick " + tick +
+                                ": target tick does not exist in MESSAGES."
+                );
             }
 
-            tx.deleteFrom(MOVEMENTS)
-                    .where(MOVEMENTS.SESSION_ID.eq(sessionID))
-                    .and(MOVEMENTS.AT_TICK.gt(tick))
-                    .execute();
+            while (true) {
+                Integer latestMovementTick = tx.select(DSL.max(MOVEMENTS.AT_TICK))
+                        .from(MOVEMENTS)
+                        .where(MOVEMENTS.SESSION_ID.eq(sessionID))
+                        .and(MOVEMENTS.AT_TICK.gt(tick))
+                        .fetchOne(0, Integer.class);
 
-            tx.deleteFrom(LLM_GEN)
-                    .where(LLM_GEN.SESSION_ID.eq(sessionID))
-                    .and(LLM_GEN.TICK_NUM.gt(tick))
-                    .execute();
+                if (latestMovementTick == null) {
+                    break;
+                }
 
-            tx.deleteFrom(MESSAGES)
-                    .where(MESSAGES.SESSION_ID.eq(sessionID))
-                    .and(MESSAGES.TICK_NUM.gt(tick))
-                    .execute();
+                Result<MovementsRecord> movementsToPop = tx.selectFrom(MOVEMENTS)
+                        .where(MOVEMENTS.SESSION_ID.eq(sessionID))
+                        .and(MOVEMENTS.AT_TICK.eq(latestMovementTick))
+                        .fetch();
+
+                for (MovementsRecord movement : movementsToPop) {
+                    tx.insertInto(CURRENT_LOCATIONS)
+                            .set(CURRENT_LOCATIONS.SESSION_ID, sessionID)
+                            .set(CURRENT_LOCATIONS.TICK_NUM, tick)
+                            .set(CURRENT_LOCATIONS.CHARACTER_ID, movement.getCharacterId())
+                            .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .onDuplicateKeyUpdate()
+                            .set(CURRENT_LOCATIONS.TICK_NUM, tick)
+                            .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .execute();
+                }
+
+                tx.deleteFrom(MOVEMENTS)
+                        .where(MOVEMENTS.SESSION_ID.eq(sessionID))
+                        .and(MOVEMENTS.AT_TICK.eq(latestMovementTick))
+                        .execute();
+            }
         });
     }
 
+    public void rollbackLocationsToBefore(int sessionID, int deletedTick) {
+        ctx.transaction(configuration -> {
+            DSLContext tx = DSL.using(configuration);
+
+            Integer previousTick = tx.select(DSL.max(MESSAGES.TICK_NUM))
+                    .from(MESSAGES)
+                    .where(MESSAGES.SESSION_ID.eq(sessionID))
+                    .and(MESSAGES.TICK_NUM.lt(deletedTick))
+                    .fetchOne(0, Integer.class);
+
+            Result<MovementsRecord> movements = tx.selectFrom(MOVEMENTS)
+                    .where(MOVEMENTS.SESSION_ID.eq(sessionID))
+                    .and(MOVEMENTS.AT_TICK.eq(deletedTick))
+                    .fetch();
+
+            for (MovementsRecord movement : movements) {
+                if (previousTick == null) {
+                    tx.deleteFrom(CURRENT_LOCATIONS)
+                            .where(CURRENT_LOCATIONS.SESSION_ID.eq(sessionID))
+                            .and(CURRENT_LOCATIONS.CHARACTER_ID.eq(movement.getCharacterId()))
+                            .execute();
+                } else {
+                    tx.insertInto(CURRENT_LOCATIONS)
+                            .set(CURRENT_LOCATIONS.SESSION_ID, sessionID)
+                            .set(CURRENT_LOCATIONS.TICK_NUM, previousTick)
+                            .set(CURRENT_LOCATIONS.CHARACTER_ID, movement.getCharacterId())
+                            .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .onDuplicateKeyUpdate()
+                            .set(CURRENT_LOCATIONS.TICK_NUM, previousTick)
+                            .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .execute();
+                }
+
+                movement.delete();
+            }
+        });
+    }
     public @NotNull List<CurrentLocationsRecord> getAtLocation(
             int sessionID,
             int locationID

@@ -116,7 +116,7 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
                     this
             );
         } catch (EntityNotFound ignored) {
-            throw new RuntimeException("Character " + character + " does not have a current location");
+            throw new RuntimeException("Character " + character.getName() + " does not have a current location");
         }
     }
 

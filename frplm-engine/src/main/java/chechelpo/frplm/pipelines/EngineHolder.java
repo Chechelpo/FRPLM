@@ -6,10 +6,12 @@ import chechelpo.frplm.domain.character.core.CharacterService;
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMService;
 import chechelpo.frplm.domain.sessions.core.SessionService;
+import chechelpo.frplm.domain.sessions.messages.gen.GenService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import chechelpo.frplm.exceptions.runtime.NotInitialized;
 import chechelpo.frplm.extensions.ExtensionService;
 import chechelpo.frplm.extensions.api.session.SessionPrompt;
 import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
@@ -18,6 +20,9 @@ import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection;
+import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LlmGenRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
@@ -32,6 +37,7 @@ import chechelpo.frplm.domain.prompts.template.TemplateService;
 import chechelpo.frplm.domain.sessions.messages.core.MessageService;
 import chechelpo.frplm.domain.sessions.movement.CurrentLocationService;
 import chechelpo.frplm.domain.world.core.WorldService;
+import chechelpo.frplm.utils.generation.OpenAICompatible;
 import chechelpo.frplm.utils.prompts.Prompt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +46,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.SESSIONS;
+import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class EngineHolder {
@@ -49,6 +55,7 @@ final class EngineHolder {
     private final Logger log;
     private final ExtensionService extensionService;
     private final SessionContext sessionContext;
+    private final GenService genService;
 
     EngineHolder(
             @NotNull CharacterService characters,
@@ -73,7 +80,7 @@ final class EngineHolder {
 
             @NotNull SessionService sessionService,
             ExtensionContext context,
-            SessionContext sessionContext) {
+            SessionContext sessionContext, GenService genService) {
         this.log = (Logger) LoggerFactory.getLogger("ENGINE");
         log.setLevel(Level.TRACE);
         engineContext = new FullEngineContext(
@@ -101,6 +108,7 @@ final class EngineHolder {
         standaloneContext = context;
         this.extensionService = extensionService;
         this.sessionContext = sessionContext;
+        this.genService = genService;
     }
 
     private SessionsRecord findOrThrowSession(int sessionID) {
@@ -134,6 +142,7 @@ final class EngineHolder {
     ) {
         try {
             SessionsRecord session = findOrThrowSession(sessionID);
+
             MessagesRecord generated = GenerationEntryPoint.generateNonStreamingMessage(
                     prompt.orElse(getNewPrompt(sessionID)),
                     session,
@@ -147,6 +156,41 @@ final class EngineHolder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public MessagesRecord regenerate(int sessionID, int tick_num){
+        MessagesRecord previous = sessionContext.messages().find(EntityKey.<MessagesRecord>builder()
+                .set(MESSAGES.SESSION_ID, sessionID)
+                .set(MESSAGES.TICK_NUM, tick_num)
+                .build()
+        ).orElseThrow(() -> {
+            log.error("Tried to regenerate a non-existent message \n sessionId: {} \n tick num: {}", sessionID, tick_num);
+            throw new EntityNotFound("No message with this key", Severity.USER);
+        });
+        if (previous.getRequestJson() == null) throw new IllegalArgumentException("Tried to regenerate a message with no prompt");
+        SessionImpl session = new SessionImpl(findOrThrowSession(sessionID), standaloneContext, sessionContext);
+
+        ConnectionSnapshot con = session.getPrompt()
+                .orElseThrow(() -> new NotInitialized("This session has no prompt", Severity.EXPECTED))
+                .getAssignedConnection()
+                .orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.EXPECTED));
+
+        ChatCompletionResponse response = con.generate(previous.getRequestJson());
+        sessionContext.currentLocations().rollbackLocationsTo(sessionID, tick_num-1);
+
+        genService.registerNewResponse(
+                EntityKey.<LlmGenRecord>builder()
+                        .set(LLM_GEN.SESSION_ID, sessionID)
+                        .set(LLM_GEN.TICK_NUM, tick_num)
+                        .build()
+                ,
+                response.choices().getFirst().message().content()
+        );
+
+        extensionService.runPostGeneration(findOrThrowSession(sessionID));
+        return sessionContext.messages().find(
+                sessionContext.messages().keyOf(previous)
+        ).orElseThrow();
     }
 
     public @NotNull ChatCompletionRequest generateSimple(

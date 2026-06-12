@@ -35,15 +35,15 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public void setConnectionId(Short value) {
+    public void setConnectionId(Integer value) {
         set(1, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.CONNECTION_ID</code>.
      */
-    public Short getConnectionId() {
-        return (Short) get(1);
+    public Integer getConnectionId() {
+        return (Integer) get(1);
     }
 
     /**
@@ -237,7 +237,7 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Create a detached, initialised PromptTemplateRecord
      */
-    public PromptTemplateRecord(Short id, Short connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Integer topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
+    public PromptTemplateRecord(Short id, Integer connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Integer topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
         super(PromptTemplate.PROMPT_TEMPLATE);
 
         setId(id);

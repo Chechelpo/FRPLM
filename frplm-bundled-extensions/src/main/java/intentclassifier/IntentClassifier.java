@@ -113,20 +113,22 @@ public class IntentClassifier extends ConfigurableExtension implements PostGener
                                 - Do not invent locations.
                                 - Do not include characters who are staying, hesitating, only discussing movement hypothetically, or not clearly moving.
                                 """)
+                        .appendAll(chatHistory.stream()
+                                .map(ChatMessage::asChatCompletion)
+                                .toList())
                         .appendAsUser("""
                                 Present characters: %s
                                 User character is: %s
                                 Current location: %s
-                                Neighbouring locations: %s
+                                Neighbouring locations: %s.
+                                
+                                Remember, any other format but the specified structured JSON is incorrect.
                                 """.formatted(
                                 characterNames,
                                 session.getUserCharacter().getName(),
                                 currentLocation.getName(),
                                 neighbourNames
                         ))
-                        .appendAll(chatHistory.stream()
-                                .map(ChatMessage::asChatCompletion)
-                                .toList())
                         .responseFormat(movementIntentFormat(characterNames, neighbourNames))
                         .build()
         );

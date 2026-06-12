@@ -103,17 +103,31 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
+     */
+    public void setRequestJson(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
+     */
+    public String getRequestJson() {
+        return (String) get(6);
+    }
+
+    /**
      * Setter for <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
     public void setContent(String value) {
-        set(6, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
     public String getContent() {
-        return (String) get(6);
+        return (String) get(7);
     }
 
     // -------------------------------------------------------------------------
@@ -139,7 +153,7 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     /**
      * Create a detached, initialised MessagesRecord
      */
-    public MessagesRecord(Integer sessionId, Integer tickNum, Integer time, Integer worldId, Integer locationId, String role, String content) {
+    public MessagesRecord(Integer sessionId, Integer tickNum, Integer time, Integer worldId, Integer locationId, String role, String requestJson, String content) {
         super(Messages.MESSAGES);
 
         setSessionId(sessionId);
@@ -148,6 +162,7 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
         setWorldId(worldId);
         setLocationId(locationId);
         setRole(role);
+        setRequestJson(requestJson);
         setContent(content);
         resetChangedOnNotNull();
     }

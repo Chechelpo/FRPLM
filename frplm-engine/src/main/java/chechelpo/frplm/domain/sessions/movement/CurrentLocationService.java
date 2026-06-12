@@ -9,6 +9,7 @@ import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.events.crud.CRUDCommittedEvent;
+import chechelpo.frplm.events.crud.CRUDDraftEvent;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -23,8 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
+import java.util.Objects;
 
 import static chechelpo.frplm.domain.sessions.messages.core.MessageService.FIRST_MESSAGE_TICK_NUM;
 import static chechelpo.frplm.jooq.generated.Tables.*;
@@ -57,7 +61,7 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
         this.sessionService = sessionService;
     }
 
-    public void rollbackSessionTo(int sessionID, int tick){
+    public void rollbackLocationsTo(int sessionID, int tick){
         store.rollbackSessionTo(sessionID, tick);
     }
 
@@ -119,18 +123,24 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
                         .set(LOCATIONS.ID, data.requireValue(CURRENT_LOCATIONS.LOCATION_ID))
                         .build();
 
-        if (!neighbours.isNeighbour(previousLocation, nextLocation)){
+        if (!Objects.equals(previous.getWorldId(), data.requireValue(CURRENT_LOCATIONS.WORLD_ID)))
+            throw new InvalidValue("Previous world id mismatch");
+
+        if (nextLocation.requireValue(LOCATIONS.ID) == previousLocation.requireValue(LOCATIONS.ID))
+            data.set(CURRENT_LOCATIONS.TICK_NUM, previous.getTickNum());
+        else if (!neighbours.isNeighbour(previousLocation, nextLocation)){
             log.error("Location {} and {} are not neighbours", previousLocation, nextLocation);
             throw new InvalidValue("Location " + previousLocation + " and " + nextLocation + " are not neighbours");
         }
-        int sessionID = target.requireValue(CURRENT_LOCATIONS.SESSION_ID);
+        else { //This is a legitimate movement
+            int sessionID = target.requireValue(CURRENT_LOCATIONS.SESSION_ID);
+            data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastOf(sessionID).getTickNum());
+            movementService.registerMovementChange(
+                    previous,
+                    data.requireValue(CURRENT_LOCATIONS.TICK_NUM)
+            );
+        }
 
-        data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastOf(sessionID).getTickNum());
-
-        movementService.registerMovementChange(
-                previous,
-                data.requireValue(CURRENT_LOCATIONS.TICK_NUM)
-        );
         super.beforeUpdate(target, data, operationID);
     }
 
@@ -140,6 +150,7 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
         int sessionID = key.requireValue(CURRENT_LOCATIONS.SESSION_ID);
         boolean userCharacterMovement = movedCharacterId == sessionService.getUserCharacterID(sessionID).orElseThrow();
 
+        // If the movement is from user character, we also update the message location.
         if (updated.assignsField(CURRENT_LOCATIONS.LOCATION_ID) && updated.assignsField(CURRENT_LOCATIONS.TICK_NUM)) {
             if (userCharacterMovement){
                 boolean success = messageService.update(
@@ -191,6 +202,20 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
                 return;
             }
         }
+    }
+
+    @EventListener
+    void onMessageDeletionRewindLocations(CRUDDraftEvent.@NotNull DeleteEntityDraft<?> rawEvent){
+        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
+        CRUDDraftEvent.DeleteEntityDraft<MessagesRecord> event = (CRUDDraftEvent.DeleteEntityDraft<MessagesRecord>) rawEvent;
+
+        EntityKey<MessagesRecord> deleted = event.key();
+        this.store.rollbackLocationsToBefore(
+                deleted.get(MESSAGES.SESSION_ID)
+                        .orElseThrow(() -> new UnexpectedException("This message key has no sessionID", Severity.SYSTEM)),
+                deleted.get(MESSAGES.TICK_NUM)
+                        .orElseThrow(() -> new UnexpectedException("This message key has no tick_num", Severity.SYSTEM))
+        );
     }
 
     @Contract("_, _ -> new")

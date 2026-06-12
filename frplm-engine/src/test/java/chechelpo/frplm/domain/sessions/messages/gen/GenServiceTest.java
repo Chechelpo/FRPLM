@@ -4,6 +4,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import chechelpo.frplm.domain.sessions.core.SessionTestContext;
+import chechelpo.frplm.domain.sessions.messages.core.MessageTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.*;
 import chechelpo.frplm.openai_compatible.ChatCompletionRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,14 +27,17 @@ import static org.junit.jupiter.api.Assertions.*;
         scripts = "classpath:db/schema.sql",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@Import({SessionTestContext.class, ResponsesTestContext.class})
+@Import({SessionTestContext.class, ResponsesTestContext.class, MessageTestContext.class})
 class GenServiceTest {
     @Autowired
     private StartingLocationTestContext startingLocations;
     @Autowired
+    private MessageTestContext messages;
+    @Autowired
     SessionTestContext sessions;
     @Autowired
     ResponsesTestContext responses;
+
 
     @BeforeEach
     void setUp() {
@@ -82,7 +86,7 @@ class GenServiceTest {
     }
 
     @Test
-    void generateNewResponse(){
+    void generateNewResponse_normalLifeCycle(){
         SessionTestContext.SessionContext sessionContext = sessions.createSession(10, 10);
         SessionsRecord session = sessionContext.session();
         CharactersRecord userCharacter = sessionContext.userCharacter();
@@ -114,6 +118,27 @@ class GenServiceTest {
             assertTrue(responsesRecord.isPresent(), "No active response for generated message");
 
             assertEquals(expectedContent, responsesRecord.get().getContent(), "Wrong message content");
+        }
+    }
+
+    @Test
+    void generateNewResponse_RejectsResponsesForOlderMessages(){
+        int messageAmount = 1000;
+        MessageTestContext.Context context = messages.createSessionWithMessages(100, messageAmount);
+
+        int sessionId = context.sessionContext().session().getId();
+        for (int i = 0; i < messageAmount - 1; i++) {
+            int finalI = i;
+            assertThrows(
+                    RuntimeException.class,
+                    () -> responses.genService.registerNewResponse(
+                    EntityKey.<LlmGenRecord>builder()
+                            .set(LLM_GEN.SESSION_ID, sessionId)
+                            .set(LLM_GEN.TICK_NUM, finalI)
+                            .build(),
+                    "Ignored"),
+                    "Could add a response to an older message"
+            );
         }
     }
 }

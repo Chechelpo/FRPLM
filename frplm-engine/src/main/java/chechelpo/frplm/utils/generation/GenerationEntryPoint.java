@@ -18,6 +18,7 @@ import chechelpo.frplm.openai_compatible.ChatCompletionRole;
 import chechelpo.frplm.pipelines.FullEngineContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.util.Optional;
@@ -27,6 +28,8 @@ import static chechelpo.frplm.utils.generation.OpenAICompatible.generateNonStrea
 
 public final class GenerationEntryPoint {
     static final Logger GENERATIONS_LOGGER = (Logger) LoggerFactory.getLogger("GENERATIONS");
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     static{
         GENERATIONS_LOGGER.setLevel(Level.TRACE);
     }
@@ -55,6 +58,7 @@ public final class GenerationEntryPoint {
                 EntityDataPayload.<MessagesRecord>builder()
                         .set(MESSAGES.SESSION_ID, session.getId())
                         .set(MESSAGES.CONTENT, response.choices().getFirst().message().content())
+                        .set(MESSAGES.REQUEST_JSON, OBJECT_MAPPER.writeValueAsString(request))
                         .set(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())
                         .build()
         );
@@ -68,6 +72,18 @@ public final class GenerationEntryPoint {
         if (request.configurationParameters().streaming())
             throw new IllegalArgumentException("Streaming is not supported via this function");
 
+        LLMBackend backendType = LLMBackend.get(connection.getHostId());
+        URI host = getBackendHost(connection, backendType);
+
+        return switch (backendType){
+            case NANOGPT, OPENAI_COMPATIBLE -> generateNonStreaming(host, connection, request, engine.secrets());
+        };
+    }
+    public static @NotNull ChatCompletionResponse generateNonStreamingResponse(
+            @NotNull String request,
+            @NotNull LlmConnectionRecord connection,
+            ExtensionContext engine
+    )  {
         LLMBackend backendType = LLMBackend.get(connection.getHostId());
         URI host = getBackendHost(connection, backendType);
 

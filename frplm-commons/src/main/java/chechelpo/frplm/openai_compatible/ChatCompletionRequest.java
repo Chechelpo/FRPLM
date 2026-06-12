@@ -45,10 +45,54 @@ public record ChatCompletionRequest(
         messages = List.copyOf(messages);
     }
 
+    @Override
+    public @NotNull String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("ChatCompletionRequest")
+                .append('\n')
+                .append("model: ")
+                .append(modelID)
+                .append('\n');
+
+        sb.append("message_count: ")
+                .append(messages.size())
+                .append('\n');
+
+        sb.append("generation_parameters: ")
+                .append(generationParameters)
+                .append('\n');
+
+        sb.append("configuration_parameters: ")
+                .append(configurationParameters)
+                .append('\n');
+
+        sb.append("response_format: ")
+                .append(responseFormat == null ? "<none>" : responseFormat)
+                .append('\n');
+
+        sb.append('\n')
+                .append("Messages")
+                .append('\n')
+                .append("========")
+                .append('\n');
+
+        for (int i = 0; i < messages.size(); i++) {
+            if (i > 0) {
+                sb.append('\n')
+                        .append("--------")
+                        .append('\n');
+            }
+
+            sb.append(messages.get(i).toString());
+        }
+
+        return sb.toString();
+    }
+
     public Optional<ResponseFormat> responseFormatOptional() {
         return Optional.ofNullable(responseFormat);
     }
-
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Builder builder(@NotNull String modelID) {
@@ -70,7 +114,7 @@ public record ChatCompletionRequest(
                                 .topK(0)
                                 .build()
                 )
-                .configurationParameters(new GenerationConfig(false, true, null))
+                .configurationParameters(new GenerationConfig(false, true, 1024,null))
                 .build();
     }
     @Contract(value="-> new", pure = true)
@@ -87,6 +131,7 @@ public record ChatCompletionRequest(
         private GenerationConfig configurationParameters = new GenerationConfig(
                 false,
                 true,
+                8192,
                 ReasoningEffort.Maximum
         );
 

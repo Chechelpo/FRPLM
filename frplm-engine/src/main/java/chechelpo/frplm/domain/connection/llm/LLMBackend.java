@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.net.URI;
@@ -23,24 +24,25 @@ import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
  * They are all assumed to be chat-completions.
  */
 public enum LLMBackend implements StableRecord<ApiHostsRecord> {
-    NANOGPT(0,
+    NANOGPT(
+            0,
             "NanoGPT",
             "https://nano-gpt.com",
-            WebClient.builder()
-                    .baseUrl("https://nano-gpt.com")
-                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                    .build()
+            createJsonClient("https://nano-gpt.com", 4 * 1024 * 1024)
     ),
+
     OPENAI_COMPATIBLE(null, "OpenAI Compatible", null, null),
     ;
 
-    private static final Int2ObjectArrayMap<LLMBackend> STABLE_IDS = new Int2ObjectArrayMap<>(LLMBackend.values().length);
+    private static final Int2ObjectArrayMap<LLMBackend> STABLE_IDS =
+            new Int2ObjectArrayMap<>(LLMBackend.values().length);
+
     private static final Logger log = LoggerFactory.getLogger(LLMBackend.class);
 
     static {
         for (LLMBackend backend : LLMBackend.values()) {
             if (backend.stable_id == null) continue;
+
             int stableId = backend.stable_id;
 
             if (STABLE_IDS.containsKey(stableId)) {
@@ -54,27 +56,49 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     }
 
     /**
-     * Stable id for services like anthropic, nanoGPT or OpenAI
+     * Stable id for services like anthropic, nanoGPT or OpenAI.
      */
     public final @Nullable Integer stable_id;
+
     /**
-     * Display name
+     * Display name.
      */
     public final String name;
+
     /**
-     * Host, may be null for custom or dynamic providers
+     * Host, may be null for custom or dynamic providers.
      */
     public final @Nullable URI host;
 
-    private final WebClient client;
+    private final @Nullable WebClient client;
 
-    LLMBackend(@Nullable Integer stable_id, String name, @Nullable String host, WebClient client) {
+    LLMBackend(
+            @Nullable Integer stable_id,
+            String name,
+            @Nullable String host,
+            @Nullable WebClient client
+    ) {
         this.name = name;
         this.stable_id = stable_id;
         this.client = client;
         this.host = host == null ? null : URI.create(host);
     }
 
+    private static WebClient createJsonClient(String baseUrl, int maxInMemoryBytes) {
+        ExchangeStrategies exchangeStrategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(maxInMemoryBytes)
+                )
+                .build();
+
+        return WebClient.builder()
+                .baseUrl(baseUrl)
+                .exchangeStrategies(exchangeStrategies)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
 
     public static int[] getIDs() {
         return STABLE_IDS.keySet().toIntArray();
@@ -84,6 +108,7 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     public static @NotNull LLMBackend get(int id) {
         return STABLE_IDS.containsKey(id) ? STABLE_IDS.get(id) : OPENAI_COMPATIBLE;
     }
+
     public static boolean isStandardBackend(int id) {
         return STABLE_IDS.containsKey(id);
     }
@@ -92,6 +117,7 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     @Contract(pure = true)
     public Optional<EntityDataPayload<ApiHostsRecord>> toPayload() {
         if (host == null || stable_id == null) return Optional.empty();
+
         return Optional.of(EntityDataPayload.<ApiHostsRecord>builder()
                 .set(API_HOSTS.HOST_URL, this.host.toString())
                 .set(API_HOSTS.ID, this.stable_id)
@@ -103,6 +129,7 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     @Contract(pure = true)
     public Optional<EntityKey<ApiHostsRecord>> toKey() {
         if (host == null || stable_id == null) return Optional.empty();
+
         return Optional.of(EntityKey.<ApiHostsRecord>builder()
                 .set(API_HOSTS.ID, this.stable_id)
                 .build()
@@ -110,7 +137,7 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     }
 
     @Contract(pure = true)
-    public @NotNull Optional<WebClient> getDefaultClient(){
+    public @NotNull Optional<WebClient> getDefaultClient() {
         return Optional.ofNullable(this.client);
     }
 }

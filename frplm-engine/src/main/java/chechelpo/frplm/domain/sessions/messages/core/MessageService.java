@@ -3,6 +3,7 @@ package chechelpo.frplm.domain.sessions.messages.core;
 import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.character.core.CharacterService;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
+import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.sessions.core.SessionService;
 import chechelpo.frplm.domain.sessions.messages.gen.GenService;
 import chechelpo.frplm.events.EventBus;
@@ -12,10 +13,14 @@ import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.jooq.generated.tables.Characters;
+import chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.records.*;
+import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import chechelpo.frplm.utils.generation.OpenAICompatible;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -24,6 +29,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -41,7 +47,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
             GenService genService,
             MessageStore store,
             EventBus eventBus,
-            SessionService sessionService
+            SessionService sessionService,
+            SecretService secretService
     ) {
         super(store, eventBus);
         this.characters = characters;
@@ -75,8 +82,54 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         return store.getLastMessage(sessionID);
     }
 
+
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<MessagesRecord> data, long operationID) {
+        applyDefaultsOfLastMessage(data);
+        if (data.assignsField(MESSAGES.REQUEST_JSON) && !data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())) {
+            log.error("Cannot assign request JSON as user role");
+            throw new InvalidValue("Cannot assign request JSON as user role");
+        }
+
+        data.set(MESSAGES.TICK_NUM,
+                sessionService.incrementAndGet(
+                                SESSIONS.CURRENT_TICK,
+                                EntityKey.of(SESSIONS.ID, data.requireValue(MESSAGES.SESSION_ID))
+                        )
+                        .orElseThrow(() -> {
+                            log.error("Could not fetch next message tick for new message \n {}", data.assignments());
+                            return new EntityNotFound("Could not fetch tick for new message", Severity.SYSTEM);
+                        })
+        );
+
+        super.beforeCreate(data, operationID);
+    }
+
+    @Override
+    protected void beforeDelete(EntityKey<MessagesRecord> id, long operationID) {
+        int sessionId = id.requireValue(MESSAGES.SESSION_ID);
+        int requestedTick = id.requireValue(MESSAGES.TICK_NUM);
+
+        MessagesRecord lastMessage = getLastOf(sessionId);
+        int lastTick = lastMessage.getTickNum();
+
+        if (requestedTick != lastTick) {
+            log.error(
+                    "Tried to delete message tick {} when last tick was {}",
+                    requestedTick,
+                    lastTick
+            );
+
+            throw new InvalidValue("Tried to delete some message that was not the last one");
+        }
+
+        /*
+         * Important: this emits the delete draft event only after the deletion is proved to be of the last message.
+         */
+        super.beforeDelete(id, operationID);
+    }
+
+    private void applyDefaultsOfLastMessage(@NotNull EntityDataPayload<MessagesRecord> data) {
         MessagesRecord lastMessage = getLastOf(data.requireValue(MESSAGES.SESSION_ID));
         if (lastMessage != null) {
             log.trace("Applying last message defaults");
@@ -96,20 +149,6 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                 throw new IllegalArgumentException("World id mismatch");
             }
         }
-
-        data.set(MESSAGES.TICK_NUM,
-                sessionService.incrementAndGet(
-                                SESSIONS.CURRENT_TICK,
-                                EntityKey.of(SESSIONS.ID, data.requireValue(MESSAGES.SESSION_ID))
-                        )
-                        .orElseThrow(() -> {
-                            log.error("Could not fetch next message tick for new message \n {}", data.assignments());
-                            return new EntityNotFound("Could not fetch tick for new message", Severity.SYSTEM);
-                        })
-        );
-
-
-        super.beforeCreate(data, operationID);
     }
 
     @Override
@@ -129,7 +168,6 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                         genService.createAndGet(EntityDataPayload.<LlmGenRecord>builder()
                                 .set(LLM_GEN.SESSION_ID, record.getSessionId())
                                 .set(LLM_GEN.TICK_NUM, record.getTickNum())
-                                .set(LLM_GEN.PROMPT, " ")
                                 .build()
                         )
                 );

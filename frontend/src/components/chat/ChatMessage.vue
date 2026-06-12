@@ -23,6 +23,7 @@ const props = defineProps<{
 
 const emits = defineEmits<{
   (e: "delete", value: Message): void;
+  (e: "regenerate", value: Message):void;
 }>();
 
 const location = shallowRef<Location>();
@@ -159,6 +160,13 @@ watch(
                 @click="cancelMessageEdit"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              class="chat-message-action-button"
+              @click="emits('regenerate', props.message)"
+            >
+              Regenerate
             </button>
           </template>
         </div>

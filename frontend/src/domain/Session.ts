@@ -1,4 +1,4 @@
-import {ABSEntity, createEntity, deleteEntity, fetchApi, fetchOne} from "@/frameworks/ABSEntity";
+import {ABSEntity, createEntity, deleteEntity, fetchApi, fetchMatching, fetchOne} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {Location, LocationData, LocationKey, World, WorldData, WorldKey} from "@/domain/World";
 import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
@@ -33,14 +33,13 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         return await fetchOne<CharacterKey, CharacterData, Character>({id:this.get('user_id')}, EntityTypes.CHARACTERS, Character)
     }
     public async getMessages() : Promise<Message[]>{
-        return fetchApi(
-            `${API_BASE}/${EntityTypes.MESSAGES}/ofSession/${this.get('id')}`,
+        return fetchMatching<MessagesKey, MessageData, Message>(
             {
-                method:'GET'
-            }
-        ).then(async response => (await response.json() as DTO[])
-                .map(DTO => new Message(DTO))
-        )
+                session_id: this.get('id')
+            },
+            EntityTypes.MESSAGES,
+            Message
+        );
     }
     public async getTemplate() : Promise<PromptTemplate | null>{
         if (this.get('template_id') == null) return null;
@@ -141,6 +140,7 @@ export type MessageData = {
     world_id:number,
     location_id:number,
     time: number,
+    prompt?: string,
     role:ChatCompletionRole,
     content:string
 }

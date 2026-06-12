@@ -58,6 +58,16 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
                         )
                         .build()
         );
+
+        register_field(
+                "max_tokens",
+                LlmConnection.LLM_CONNECTION.MAX_TOKENS,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .setMin(0l)
+                        )
+                        .build()
+        );
     }
 
 }
