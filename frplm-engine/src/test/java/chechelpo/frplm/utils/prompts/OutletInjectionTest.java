@@ -6,23 +6,20 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class OutletInjectionTest {
-    private static EntryRecord entry(String content) {
-        EntryRecord record = new EntryRecord();
-        record.setContent(content);
-        return record;
-    }
 
-    private static Int2ObjectMap<List<EntryRecord>> entriesByOutlet(
+    private static Int2ObjectMap<List<String>> entriesByOutlet(
             int outletId,
-            EntryRecord... entries
+            String... entries
     ) {
-        Int2ObjectMap<List<EntryRecord>> map = new Int2ObjectOpenHashMap<>();
-        map.put(outletId, List.of(entries));
+        Int2ObjectMap<List<String>> map = new Int2ObjectOpenHashMap<>();
+        map.put(outletId, Arrays.stream(entries).collect(Collectors.toList()));
         return map;
     }
 
@@ -34,8 +31,8 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
-                entriesByOutlet(10, entry("Injected lore"));
+        Int2ObjectMap<List<String>> activeEntries =
+                entriesByOutlet(10, "Injected lore");
 
         String rendered = OutletInjection.inject(
                 original,
@@ -54,12 +51,12 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
+        Int2ObjectMap<List<String>> activeEntries =
                 entriesByOutlet(
                         10,
-                        entry("Entry A"),
-                        entry("Entry B"),
-                        entry("Entry C")
+                        "Entry A",
+                        "Entry B",
+                        "Entry C"
                 );
 
         String rendered = OutletInjection.inject(
@@ -80,11 +77,11 @@ class OutletInjectionTest {
                 new DetectedOutlet(2, 0, "A {{first}} B ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
+        Int2ObjectMap<List<String>> activeEntries =
                 new Int2ObjectOpenHashMap<>();
 
-        activeEntries.put(1, List.of(entry("ONE")));
-        activeEntries.put(2, List.of(entry("TWO")));
+        activeEntries.put(1, List.of("ONE"));
+        activeEntries.put(2, List.of("TWO"));
 
         String rendered = OutletInjection.inject(
                 original,
@@ -104,11 +101,11 @@ class OutletInjectionTest {
                 new DetectedOutlet(2, 0, "A {{first}} B ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
+        Int2ObjectMap<List<String>> activeEntries =
                 new Int2ObjectOpenHashMap<>();
 
-        activeEntries.put(1, List.of(entry("A much longer replacement")));
-        activeEntries.put(2, List.of(entry("X")));
+        activeEntries.put(1, List.of("A much longer replacement"));
+        activeEntries.put(2, List.of("X"));
 
         String rendered = OutletInjection.inject(
                 original,
@@ -130,8 +127,8 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 1, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
-                entriesByOutlet(10, entry("Injected"));
+        Int2ObjectMap<List<String>> activeEntries =
+                entriesByOutlet(10, "Injected");
 
         String rendered = OutletInjection.inject(
                 original,
@@ -155,8 +152,8 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 1, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
-                entriesByOutlet(10, entry("Injected"));
+        Int2ObjectMap<List<String>> activeEntries =
+                entriesByOutlet(10, "Injected");
 
         String rendered = OutletInjection.inject(
                 original,
@@ -178,10 +175,10 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
+        Int2ObjectMap<List<String>> activeEntries =
                 new Int2ObjectOpenHashMap<>();
 
-        activeEntries.put(999, List.of(entry("Wrong outlet")));
+        activeEntries.put(999, List.of("Wrong outlet"));
 
         String rendered = OutletInjection.inject(
                 original,
@@ -200,7 +197,7 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
+        Int2ObjectMap<List<String>> activeEntries =
                 new Int2ObjectOpenHashMap<>();
 
         activeEntries.put(10, List.of());
@@ -215,13 +212,12 @@ class OutletInjectionTest {
     }
 
     @Test
-    void ignoresNullBlankAndWhitespaceOnlyEntryContent() {
-        List<EntryRecord> entries = List.of(
-                entry("A"),
-                entry(null),
-                entry(""),
-                entry("   "),
-                entry("B")
+    void ignoresBlankAndWhitespaceOnlyEntryContent() {
+        List<String> entries = List.of(
+                "A",
+                "",
+                "   ",
+                "B"
         );
 
         String rendered = OutletInjection.renderEntries(entries);
@@ -237,8 +233,8 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, 0)
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
-                entriesByOutlet(10, entry("Injected"));
+        Int2ObjectMap<List<String>> activeEntries =
+                entriesByOutlet(10, "Injected");
 
         String rendered = OutletInjection.inject(
                 original,
@@ -257,8 +253,8 @@ class OutletInjectionTest {
                 new DetectedOutlet(10, 0, "Before ".length())
         );
 
-        Int2ObjectMap<List<EntryRecord>> activeEntries =
-                entriesByOutlet(10, entry("Injected"));
+        Int2ObjectMap<List<String>> activeEntries =
+                entriesByOutlet(10, "Injected");
 
         String rendered = OutletInjection.inject(
                 original,
@@ -276,7 +272,7 @@ class OutletInjectionTest {
         String rendered = OutletInjection.inject(
                 original,
                 List.of(),
-                entriesByOutlet(10, entry("Injected"))
+                entriesByOutlet(10, "Injected")
         );
 
         assertSame(original, rendered);

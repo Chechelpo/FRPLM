@@ -5,7 +5,6 @@ import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
-import chechelpo.frplm.pipelines.FullEngineContext;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,13 +96,5 @@ public final class OpenAICompatible {
     }
 
 
-    @Contract(pure = true)
-    public static @Nullable Flux<ServerSentEvent<String>> generateStreaming(
-            URI host,
-            ChatCompletionRequest request,
-            FullEngineContext engine
-    ) {
-        return null;
-    }
 
 }

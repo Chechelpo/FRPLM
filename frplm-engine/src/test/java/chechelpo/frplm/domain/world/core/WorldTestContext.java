@@ -43,7 +43,7 @@ public class WorldTestContext implements DBReload {
         for (int i = 0; i < amount; i++)
             createdRecords.add(
                     service.createAndGet(
-                            EntityDataPayload.of(WORLDS.NAME, TestText.randomText(ThreadLocalRandom.current().nextLong(), 0 , 200))
+                            EntityDataPayload.of(WORLDS.NAME, TestText.randomText(ThreadLocalRandom.current().nextLong(), 3 , 200))
                     )
             );
 

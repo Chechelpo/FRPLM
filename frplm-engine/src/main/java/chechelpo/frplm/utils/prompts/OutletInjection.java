@@ -1,7 +1,6 @@
 package chechelpo.frplm.utils.prompts;
 
 import chechelpo.frplm.extensions.api.utils.DetectedOutlet;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -20,16 +19,16 @@ public final class OutletInjection {
     public static @NotNull String inject(
             @NotNull String originalContent,
             @NotNull List<DetectedOutlet> outlets,
-            @NotNull Int2ObjectMap<List<EntryRecord>> activeEntriesByOutlet
+            @NotNull Int2ObjectMap<List<String>> entriesByOutlet
     ) {
-        if (outlets.isEmpty() || activeEntriesByOutlet.isEmpty()) {
+        if (outlets.isEmpty() || entriesByOutlet.isEmpty()) {
             return originalContent;
         }
 
         List<PendingInjection> pending = new ArrayList<>();
 
         for (DetectedOutlet outlet : outlets) {
-            List<EntryRecord> entries = activeEntriesByOutlet.get(outlet.outletId());
+            List<String> entries = entriesByOutlet.get(outlet.outletId());
 
             if (entries == null || entries.isEmpty()) {
                 continue;
@@ -64,12 +63,10 @@ public final class OutletInjection {
         return stripUnresolvedMacros(rendered.toString());
     }
 
-    static @NotNull String renderEntries(@NotNull List<EntryRecord> entries) {
+    static @NotNull String renderEntries(@NotNull List<String> entries) {
         StringJoiner rendered = new StringJoiner("\n");
 
-        for (EntryRecord entry : entries) {
-            String content = entry.getContent();
-
+        for (String content : entries) {
             if (content != null && !content.isBlank()) {
                 rendered.add(content);
             }

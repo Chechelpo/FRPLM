@@ -6,6 +6,7 @@ import chechelpo.frplm.domain.connection.llm.LLMBackend;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.NotInitialized;
+import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
@@ -15,7 +16,6 @@ import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.openai_compatible.ChatCompletionRole;
-import chechelpo.frplm.pipelines.FullEngineContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
@@ -38,7 +38,8 @@ public final class GenerationEntryPoint {
     public static @NotNull MessagesRecord generateNonStreamingMessage(
             @NotNull ChatCompletionRequest request,
             SessionsRecord session,
-            FullEngineContext engine
+            ExtensionContext engine,
+            SessionContext sessionContext
     ) {
         if (request.configurationParameters().streaming())
             throw new IllegalArgumentException("Streaming is not supported via this function");
@@ -54,7 +55,7 @@ public final class GenerationEntryPoint {
         };
         GENERATIONS_LOGGER.info(response.toString());
 
-        return engine.messages().createAndGet(
+        return sessionContext.messages().createAndGet(
                 EntityDataPayload.<MessagesRecord>builder()
                         .set(MESSAGES.SESSION_ID, session.getId())
                         .set(MESSAGES.CONTENT, response.choices().getFirst().message().content())
@@ -95,12 +96,12 @@ public final class GenerationEntryPoint {
 
     private static @NotNull Optional<LlmConnectionRecord> getLLMConnection(
             SessionsRecord session,
-            @NotNull FullEngineContext engine
+            @NotNull ExtensionContext engine
     ) throws EntityNotFound {
         Optional<PromptTemplateRecord> template = engine.templates().getOf(session);
         if (template.isEmpty()) return Optional.empty();
 
-        return engine.llm().fromTemplate(template.get());
+        return engine.connections().fromTemplate(template.get());
     }
 
     private static @NotNull URI getBackendHost(LlmConnectionRecord connection, @NotNull LLMBackend backend) {

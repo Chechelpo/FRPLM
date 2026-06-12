@@ -50,77 +50,34 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class EngineHolder {
-    private final FullEngineContext engineContext;
     private final ExtensionContext standaloneContext;
     private final Logger log;
     private final ExtensionService extensionService;
     private final SessionContext sessionContext;
-    private final GenService genService;
 
     EngineHolder(
-            @NotNull CharacterService characters,
-            @NotNull ExtensionService extensionService,
-            @NotNull WorldService worlds,
-            @NotNull LocationsService locations,
-            @NotNull EdgeService edges,
-
-            @NotNull LorebookService lorebooks,
-            @NotNull EntryService entries,
-            @NotNull KeywordService keywords,
-
-            @NotNull CurrentLocationService currentLocations,
-            @NotNull MessageService messages,
-
-            @NotNull OutletService outlets,
-            @NotNull TemplateService templates,
-            @NotNull SectionService sections,
-
-            @NotNull LLMService llm,
-            @NotNull SecretService secrets,
-
-            @NotNull SessionService sessionService,
             ExtensionContext context,
-            SessionContext sessionContext, GenService genService) {
+            SessionContext sessionContext,
+            ExtensionService extensions
+    ) {
         this.log = (Logger) LoggerFactory.getLogger("ENGINE");
         log.setLevel(Level.TRACE);
-        engineContext = new FullEngineContext(
-                characters,
-
-                worlds,
-                locations,
-                edges,
-
-                lorebooks,
-                entries,
-                keywords,
-
-                currentLocations,
-                messages,
-                outlets,
-
-                templates,
-                sections,
-
-                llm,
-                secrets,
-                sessionService
-        );
         standaloneContext = context;
-        this.extensionService = extensionService;
         this.sessionContext = sessionContext;
-        this.genService = genService;
+        this.extensionService = extensions;
     }
 
     private SessionsRecord findOrThrowSession(int sessionID) {
-        return engineContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
+        return sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
                 .orElseThrow(() -> {
                     log.error("No session with id {} found", sessionID);
                     return new EntityNotFound("Could not find session with id " + sessionID, Severity.USER);
                 });
     }
+
     @Contract("_ -> new")
     public @NotNull ChatCompletionRequest getNewPrompt(int sessionID) {
-        SessionsRecord record = engineContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
+        SessionsRecord record = sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
                 .orElseThrow();
         SessionImpl session = new SessionImpl(record, standaloneContext, sessionContext);
 
@@ -146,10 +103,11 @@ final class EngineHolder {
             MessagesRecord generated = GenerationEntryPoint.generateNonStreamingMessage(
                     prompt.orElse(getNewPrompt(sessionID)),
                     session,
-                    engineContext
+                    standaloneContext,
+                    sessionContext
             );
             // The following line is needed cause of the deletion by the response service, otherwise content = null
-            generated = engineContext.messages().find(engineContext.messages().keyOf(generated)).orElseThrow();
+            generated = sessionContext.messages().find(sessionContext.messages().keyOf(generated)).orElseThrow();
 
             extensionService.runPostGeneration(session);
             return generated;
@@ -159,6 +117,7 @@ final class EngineHolder {
     }
 
     public MessagesRecord regenerate(int sessionID, int tick_num){
+        /*
         MessagesRecord previous = sessionContext.messages().find(EntityKey.<MessagesRecord>builder()
                 .set(MESSAGES.SESSION_ID, sessionID)
                 .set(MESSAGES.TICK_NUM, tick_num)
@@ -178,7 +137,7 @@ final class EngineHolder {
         ChatCompletionResponse response = con.generate(previous.getRequestJson());
         sessionContext.currentLocations().rollbackLocationsTo(sessionID, tick_num-1);
 
-        genService.registerNewResponse(
+        sessionContext.messages().registerNewResponse(
                 EntityKey.<LlmGenRecord>builder()
                         .set(LLM_GEN.SESSION_ID, sessionID)
                         .set(LLM_GEN.TICK_NUM, tick_num)
@@ -190,7 +149,8 @@ final class EngineHolder {
         extensionService.runPostGeneration(findOrThrowSession(sessionID));
         return sessionContext.messages().find(
                 sessionContext.messages().keyOf(previous)
-        ).orElseThrow();
+        ).orElseThrow();*/
+        return null;
     }
 
     public @NotNull ChatCompletionRequest generateSimple(

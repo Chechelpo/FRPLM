@@ -49,9 +49,14 @@ public record Prompt (
          */
         private Int2ObjectMap<List<DetectedOutlet>> detectedOutlets;
         /**
-         * outletID -> list of ACTIVE entries
+         * outletID -> list of contents to inject
          */
-        private Int2ObjectMap<List<EntryRecord>> activeEntriesByOutlet = new Int2ObjectArrayMap<>(100);
+        private Int2ObjectMap<List<String>> activeEntriesByOutlet = new Int2ObjectArrayMap<>(100);
+
+        /**
+         * Entries that were successfully activated
+         */
+        private Set<EntryRecord> activeEntries = new HashSet<>();
 
         private Builder() {}
 
@@ -125,14 +130,23 @@ public record Prompt (
             requestBuilder.insertAt(depth, message);
             return this;
         }
+        @Override
+        public Builder injectAtOutlet(int outletId, String content){
+            assertPreRender();
+            List<String> contents = activeEntriesByOutlet.get(outletId);
+            if (contents == null) {
+                contents = new ArrayList<>();
+                activeEntriesByOutlet.put(outletId, contents);
+            }
+            contents.add(content);
+            return this;
+        }
 
         public Prompt build(ExtensionContext context, String modelId){
             if (this.phase != Phase.RENDERED) throw new IllegalArgumentException("This prompt is not rendered yet");
-            List<EntryRecord> activated = new ArrayList<>();
-            for (List<EntryRecord> entries : activeEntriesByOutlet.values()) activated.addAll(entries);
             return new Prompt(
                     lorebooks.toArray(new LorebookSnapshot[0]),
-                    activated.stream()
+                    activeEntries.stream()
                             .map(record -> new EntryImpl(record, context))
                             .map(EntrySnapshot.class::cast)
                             .toArray(EntrySnapshot[]::new),
@@ -195,12 +209,10 @@ public record Prompt (
                     requestBuilder.getMessages().stream().map(ChatCompletionMessage::content).collect(Collectors.toList())
             );
 
-            Set<EntryRecord> detectedEntries = new HashSet<>(100);
             int recursionSteps = 10;
             for (int i = 0; i < recursionSteps; i++) {
                 int detectedKeywordsSize = this.detectedKeywords.size();
                 filterActivated(
-                        detectedEntries,
                         context.entries().getEntriesWith(
                                 lorebookIds,
                                 this.detectedKeywords.keySet()
@@ -217,7 +229,6 @@ public record Prompt (
         /**
          * Processes not yet activated entries. Mutates {@link #detectedKeywords} based on the new activated entries keywords.
          *
-         * @param processedEntries entries previously touched by this function
          * @param entries          all entries, including processed
          * @param allKeywords      all keywords detected throughout the entries lorebooks
          * @param recursionStep    a counter of how many times this function has been called
@@ -225,15 +236,14 @@ public record Prompt (
          */
         @Contract(mutates = "this, param1")
         private void filterActivated(
-                Set<EntryRecord> processedEntries,
                 @NotNull List<EntryRecord> entries,
                 List<IntObjectPair<String>> allKeywords,
                 int recursionStep,
                 ExtensionContext context
         ) {
             for (EntryRecord entryRecord : entries) {
-                if (processedEntries.contains(entryRecord)) continue;
-                processedEntries.add(entryRecord);
+                if (activeEntries.contains(entryRecord)) continue;
+                activeEntries.add(entryRecord);
 
                 int deepestKeywordDepth = getDeepestKeywordDepth(context, entryRecord);
 
@@ -241,7 +251,9 @@ public record Prompt (
                 if (isActive) {
                     if (!activeEntriesByOutlet.containsKey(entryRecord.getOutlet()))
                         throw new IllegalStateException("Outlet " + entryRecord.getOutlet() + " does not exist in active entries by outlet");
-                    activeEntriesByOutlet.get(entryRecord.getOutlet()).add(entryRecord);
+
+                    activeEntriesByOutlet.get(entryRecord.getOutlet()).add(entryRecord.getContent());
+                    activeEntries.add(entryRecord);
 
                     if (!entryRecord.getPreventFurtherRecursion()) {
                         KeywordDetection.DetectedKeyword detectedKeyword = new KeywordDetection.DetectedKeyword(-1, 0);
