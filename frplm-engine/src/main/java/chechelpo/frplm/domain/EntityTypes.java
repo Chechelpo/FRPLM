@@ -113,9 +113,9 @@ public final class EntityTypes {
 
         SESSIONS(SESSIONS_str, Level.DEBUG),
         MESSAGES(MESSAGES_str, Level.DEBUG),
-        LLM_GEN(LLM_GEN_str, Level.DEBUG),
         RESPONSES(RESPONSES_str, Level.DEBUG),
 
+        RESPONSE_MOVEMENTS(RESPONSES_str, Level.DEBUG),
         MOVEMENTS(MOVEMENTS_str, Level.DEBUG),
         CURRENT_LOCATIONS(CURRENT_LOCATIONS_str, Level.DEBUG),
         TEST_ENTITY("Test_Entity", Level.TRACE);

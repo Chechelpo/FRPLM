@@ -47,87 +47,115 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.MESSAGES.TIME</code>.
-     */
-    public void setTime(Integer value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.MESSAGES.TIME</code>.
-     */
-    public Integer getTime() {
-        return (Integer) get(2);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.MESSAGES.WORLD_ID</code>.
-     */
-    public void setWorldId(Integer value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.MESSAGES.WORLD_ID</code>.
-     */
-    public Integer getWorldId() {
-        return (Integer) get(3);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
-     */
-    public void setLocationId(Integer value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
-     */
-    public Integer getLocationId() {
-        return (Integer) get(4);
-    }
-
-    /**
      * Setter for <code>PUBLIC.MESSAGES.ROLE</code>.
      */
     public void setRole(String value) {
-        set(5, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.ROLE</code>.
      */
     public String getRole() {
-        return (String) get(5);
+        return (String) get(2);
     }
 
     /**
      * Setter for <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
      */
     public void setRequestJson(String value) {
-        set(6, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
      */
     public String getRequestJson() {
-        return (String) get(6);
+        return (String) get(3);
     }
 
     /**
      * Setter for <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
     public void setContent(String value) {
-        set(7, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.MESSAGES.CONTENT</code>.
      */
     public String getContent() {
-        return (String) get(7);
+        return (String) get(4);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.MESSAGES.TIME</code>.
+     */
+    public void setTime(Integer value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.TIME</code>.
+     */
+    public Integer getTime() {
+        return (Integer) get(5);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.MESSAGES.WORLD_ID</code>.
+     */
+    public void setWorldId(Integer value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.WORLD_ID</code>.
+     */
+    public Integer getWorldId() {
+        return (Integer) get(6);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
+     */
+    public void setLocationId(Integer value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.LOCATION_ID</code>.
+     */
+    public Integer getLocationId() {
+        return (Integer) get(7);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.MESSAGES.ACTIVE_RESPONSE</code>.
+     */
+    public void setActiveResponse(Short value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.ACTIVE_RESPONSE</code>.
+     */
+    public Short getActiveResponse() {
+        return (Short) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.MESSAGES.RESPONSE_NUM</code>.
+     */
+    public void setResponseNum(Short value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.MESSAGES.RESPONSE_NUM</code>.
+     */
+    public Short getResponseNum() {
+        return (Short) get(9);
     }
 
     // -------------------------------------------------------------------------
@@ -153,17 +181,19 @@ public class MessagesRecord extends UpdatableRecordImpl<MessagesRecord> {
     /**
      * Create a detached, initialised MessagesRecord
      */
-    public MessagesRecord(Integer sessionId, Integer tickNum, Integer time, Integer worldId, Integer locationId, String role, String requestJson, String content) {
+    public MessagesRecord(Integer sessionId, Integer tickNum, String role, String requestJson, String content, Integer time, Integer worldId, Integer locationId, Short activeResponse, Short responseNum) {
         super(Messages.MESSAGES);
 
         setSessionId(sessionId);
         setTickNum(tickNum);
-        setTime(time);
-        setWorldId(worldId);
-        setLocationId(locationId);
         setRole(role);
         setRequestJson(requestJson);
         setContent(content);
+        setTime(time);
+        setWorldId(worldId);
+        setLocationId(locationId);
+        setActiveResponse(activeResponse);
+        setResponseNum(responseNum);
         resetChangedOnNotNull();
     }
 }

@@ -15,7 +15,7 @@ import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @RestController
 @RequestMapping(ENTRIES_URL)
-final class EntryController extends EntityController<EntryRecord, EntryService> {
+public final class EntryController extends EntityController<EntryRecord, EntryService> {
     EntryController(EntryService service, LorebookService lorebookService) {
         super(service);
     }

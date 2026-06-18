@@ -24,7 +24,7 @@ public final class SessionCharacterImpl extends CharacterImpl implements Session
         this.world = world;
     }
 
-    CharactersRecord getRecord() {
+    public CharactersRecord getRecord() {
         return record;
     }
 

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
+/** This also impacts frontend chat completion request*/
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ChatCompletionRequest(
         @JsonProperty("model")

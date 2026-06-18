@@ -12,6 +12,7 @@ import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
@@ -191,9 +192,22 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public MessagesPath messages() {
         if (_messages == null)
-            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_13.getInverseKey());
+            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_131.getInverseKey());
 
         return _messages;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_314.getInverseKey());
+
+        return _responses;
     }
 
     private transient LocationsPath _locations;

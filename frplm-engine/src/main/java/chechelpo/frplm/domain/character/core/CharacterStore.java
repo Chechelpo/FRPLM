@@ -37,6 +37,19 @@ final class CharacterStore extends EntityStore<CharactersRecord> {
                 ).fetchInto(CharactersRecord.class);
     }
 
+    public @NotNull List<CharactersRecord> getStartingAtLocation(int locationId, int worldId){
+        return ctx.select()
+                .from(main_table)
+                .join(STARTING_LOCATIONS)
+                .on(
+                        CHARACTERS.ID.eq(STARTING_LOCATIONS.CHARACTER_ID)
+                )
+                .where(STARTING_LOCATIONS.WORLD_ID.eq(worldId)
+                        .and(STARTING_LOCATIONS.LOCATION_ID.eq(locationId))
+                )
+                .fetchInto(CharactersRecord.class);
+    }
+
     public @Nullable CharactersRecord getWithName(String name){
         return ctx.selectFrom(main_table)
                 .where(CHARACTERS.NAME.eq(name))

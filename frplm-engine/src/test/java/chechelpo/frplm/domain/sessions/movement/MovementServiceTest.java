@@ -5,7 +5,8 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import chechelpo.frplm.domain.sessions.core.SessionTestContext;
-import chechelpo.frplm.domain.sessions.messages.core.MessageTestContext;
+import chechelpo.frplm.domain.sessions.messages.MessageService;
+import chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.*;
@@ -17,9 +18,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
 import static chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -41,6 +46,8 @@ class MovementServiceTest {
     private MovementService movementService;
     @Autowired
     private MovementFieldsHelper fields;
+    @Autowired
+    private MessageService messageService;
 
     @BeforeEach
     void setUp() {
@@ -86,11 +93,165 @@ class MovementServiceTest {
             );
 
             assertTrue(movement.isPresent(), "No movement registered");
-            assertEquals(previousLocation.getId(), movement.get().getLocationId(), "Movement location id mismatch");
+            assertEquals(previousLocation.getId(), movement.get().getPreviousLocationId(), "Movement location id mismatch");
             assertEquals(userCharacter.getId(), movement.get().getCharacterId(), "Movement character id mismatch");
             assertEquals(newMessage.getTickNum(), movement.get().getAtTick(), "Movement at tick mismatch");
 
             previousLocation = nextLocation;
         }
+    }
+
+
+    @Test
+    void movements_inSameTickAreIgnored() {
+        int locationAmount = 100;
+        MessageTestContext.Context context = currentLocationTestContext.messages.createSessionWithMessages(locationAmount, 2);
+
+        SessionsRecord thisSession = context.sessionContext().session();
+        CharactersRecord userCharacter = context.sessionContext().userCharacter();
+
+        List<LocationsRecord> locations = context.sessionContext().sessionLocations();
+        edgeTestContext.linkLinear(locations);
+
+        LocationsRecord currentLocation = locations.getFirst();
+
+        CurrentLocationsRecord movementRecord = new CurrentLocationsRecord();
+
+        movementRecord.setSessionId(thisSession.getId());
+        movementRecord.setTickNum(FIRST_MESSAGE_TICK_NUM);
+        movementRecord.setWorldId(thisSession.getWorldId());
+        movementRecord.setLocationId(currentLocation.getId());
+        movementRecord.setCharacterId(userCharacter.getId());
+
+        //We first register that this character was moved
+        movementService.registerMovementChange(movementRecord, FIRST_MESSAGE_TICK_NUM);
+
+        for (int i = 1; i < locations.size(); i++) {
+            LocationsRecord nextLocation = locations.get(i);
+
+            movementRecord.setLocationId(currentLocation.getId());
+            // Next calls should preserve the first location (the one before this loop)
+            movementService.registerMovementChange(movementRecord, FIRST_MESSAGE_TICK_NUM);
+
+            currentLocation = nextLocation;
+        }
+
+        Optional<MovementsRecord> movementsRecord = movementService.find(
+                EntityKey.<MovementsRecord>builder()
+                        .set(MOVEMENTS.SESSION_ID, thisSession.getId())
+                        .set(MOVEMENTS.CHARACTER_ID, userCharacter.getId())
+                        .set(MOVEMENTS.AT_TICK, FIRST_MESSAGE_TICK_NUM)
+                        .build()
+        );
+
+        assertTrue(movementsRecord.isPresent(), "No movement record registered");
+        assertEquals(locations.getFirst().getId(), movementsRecord.get().getPreviousLocationId(), "Movement location id mismatch");
+    }
+
+    @Test
+    void rollbackLatestMovementsOf_singleCharacter() {
+        int locationAmount = 100;
+        MessageTestContext.Context context = currentLocationTestContext.messages.createSessionWithMessages(locationAmount, 2);
+
+        SessionsRecord thisSession = context.sessionContext().session();
+        CharactersRecord userCharacter = context.sessionContext().userCharacter();
+
+        List<LocationsRecord> locations = context.sessionContext().sessionLocations();
+        edgeTestContext.linkLinear(locations);
+
+        LocationsRecord currentLocation = locations.getFirst();
+
+        CurrentLocationsRecord movementRecord = new CurrentLocationsRecord();
+
+        movementRecord.setSessionId(thisSession.getId());
+        movementRecord.setTickNum(FIRST_MESSAGE_TICK_NUM);
+        movementRecord.setWorldId(thisSession.getWorldId());
+        movementRecord.setLocationId(currentLocation.getId());
+        movementRecord.setCharacterId(userCharacter.getId());
+
+        for (int i = 1; i < locations.size(); i++) {
+            LocationsRecord nextLocation = locations.get(i);
+
+            movementRecord.setLocationId(currentLocation.getId());
+            movementService.registerMovementChange(movementRecord, 2);
+
+            currentLocation = nextLocation;
+        }
+
+        movementService.rollbackLatestMovementsOf(thisSession.getId(), 2);
+        assertEquals(
+                currentLocationTestContext.service.getLocationOf(userCharacter, thisSession).getId(),
+                locations.getFirst().getId(),
+                "Movement location id mismatch"
+        );
+    }
+
+    @Test
+    void rollbackLatestMovementsOf_multipleCharacters() {
+        int locationAmount = 100;
+        int charactersPerLocation = 4;
+
+        MessageTestContext.Context context =
+                currentLocationTestContext.messages.createSessionWithMessages(
+                        locationAmount,
+                        2,
+                        charactersPerLocation
+                );
+
+        SessionsRecord session = context.sessionContext().session();
+        List<LocationsRecord> locations =
+                context.sessionContext().sessionLocations();
+
+        edgeTestContext.linkLinear(locations);
+
+        LocationsRecord initialLocation = locations.getFirst();
+
+        CharactersRecord[] characters =
+                currentLocationTestContext.service.getAtLocation(
+                        session.getId(),
+                        initialLocation.getId()
+                );
+
+        assertEquals(charactersPerLocation, characters.length);
+
+        for (CharactersRecord character : characters) {
+            CurrentLocationsRecord current = new CurrentLocationsRecord();
+
+            current.setSessionId(session.getId());
+            current.setTickNum(FIRST_MESSAGE_TICK_NUM);
+            current.setWorldId(session.getWorldId());
+            current.setCharacterId(character.getId());
+
+            LocationsRecord previousLocation = initialLocation;
+
+            for (int i = 1; i < locations.size(); i++) {
+                current.setLocationId(previousLocation.getId());
+
+                movementService.registerMovementChange(current, 2);
+
+                previousLocation = locations.get(i);
+            }
+        }
+
+        movementService.rollbackLatestMovementsOf(
+                session.getId(),
+                2
+        );
+
+        CharactersRecord[] rolledBackCharacters =
+                currentLocationTestContext.service.getAtLocation(
+                        session.getId(),
+                        initialLocation.getId()
+                );
+
+        Set<Integer> expectedCharacterIds = Arrays.stream(characters)
+                .map(CharactersRecord::getId)
+                .collect(Collectors.toSet());
+
+        Set<Integer> actualCharacterIds = Arrays.stream(rolledBackCharacters)
+                .map(CharactersRecord::getId)
+                .collect(Collectors.toSet());
+
+        assertEquals(expectedCharacterIds, actualCharacterIds);
     }
 }

@@ -12,8 +12,8 @@ import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.domain.prompts.section.SectionService;
 import chechelpo.frplm.domain.prompts.template.TemplateService;
 import chechelpo.frplm.domain.sessions.core.SessionService;
-import chechelpo.frplm.domain.sessions.messages.core.MessageService;
-import chechelpo.frplm.domain.sessions.movement.CurrentLocationService;
+import chechelpo.frplm.domain.sessions.messages.MessageService;
+import chechelpo.frplm.domain.sessions.movement.Movements;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
@@ -69,12 +69,12 @@ public class EngineContextConfiguration {
 
     @Bean
     public SessionContext sessionContext(
-            CurrentLocationService currentLocation,
+            Movements movements,
             MessageService messages,
             SessionService session
     ) {
         return new SessionContext(
-                currentLocation,
+                movements,
                 messages,
                 session
         );

@@ -363,21 +363,23 @@ CREATE TABLE IF NOT EXISTS sessions
 
 CREATE TABLE IF NOT EXISTS messages
 (
-    session_id   INT        NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num     INT        NOT NULL,
+    session_id      INT        NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
+    tick_num        INT        NOT NULL,
 
-    time         INT        NOT NULL,
-    world_id     INT        NOT NULL REFERENCES WORLDS (id),
-    location_id  INT        NOT NULL,
+    role            varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
+    request_json    TEXT,                          -- Stored, but it could also just be regen. Should only be there for assistant msgs
+    content         TEXT,                          -- Always derived
 
-    role         varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
-    request_json TEXT, -- Stored, but it could also just be regen. Should only be there for assistant msgs
+    time            INT        NOT NULL,
+    world_id        INT        NOT NULL REFERENCES WORLDS (id), -- Derived
+    location_id     INT        NOT NULL, -- Derived
 
-    content      TEXT DEFAULT NULL,
+    active_response SMALLINT   NOT NULL DEFAULT 0, -- ID of the response that's currently active
+    response_num    SMALLINT   NOT NULL DEFAULT 0, -- Response num counter to assign keys.
 
     PRIMARY KEY (session_id, tick_num),
     FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id),
-    CONSTRAINT request_json_only_for_generated_messages CHECK  (request_json IS NULL OR role = 'assistant')
+    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant')
 );
 
 CREATE TABLE IF NOT EXISTS extras
@@ -393,60 +395,87 @@ CREATE TABLE IF NOT EXISTS extras
     FOREIGN KEY (session_id, tick_num) references MESSAGES (session_id, tick_num)
 );
 
-
--- MESSAGE TYPES ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-CREATE TABLE IF NOT EXISTS LLM_GEN
-(
-    session_id      INT      NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num        INT      NOT NULL,
-
-    -- RESPONSES
-    active_response SMALLINT NOT NULL DEFAULT 0, -- ID of the response that's currently active
-    response_num    SMALLINT NOT NULL DEFAULT 0, -- Response num counter to assign keys.
-
-    PRIMARY KEY (session_id, tick_num),
-    FOREIGN KEY (session_id, tick_num) REFERENCES messages (session_id, tick_num) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS responses
 (
     session_id       INT      NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
     tick_num         INT      NOT NULL,
     response_num     SMALLINT NOT NULL,
 
+    location_id      INT      NOT NULL,
+    world_id         INT      NOT NULL REFERENCES WORLDS (id),
+
     advances_time_by INT      NOT NULL,
     content          TEXT     NOT NULL,
 
     PRIMARY KEY (session_id, tick_num, response_num),
+    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id) ON DELETE CASCADE,
 
     FOREIGN KEY (session_id, tick_num)
         REFERENCES messages (session_id, tick_num)
         ON DELETE CASCADE
 );
 
+-- MOVEMENT TRACKER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CREATE TABLE IF NOT EXISTS response_location_changes
+(
+    session_id   INT      NOT NULL,
+    tick_num     INT      NOT NULL,
+    response_num SMALLINT NOT NULL,
+
+    character_id INT      NOT NULL REFERENCES characters (id),
+
+    -- Location after applying this response
+    world_id     INT      NOT NULL,
+    location_id  INT      NOT NULL,
+
+    PRIMARY KEY (
+                 session_id,
+                 tick_num,
+                 response_num,
+                 character_id
+        ),
+
+    FOREIGN KEY (
+                 session_id,
+                 tick_num,
+                 response_num
+        )
+        REFERENCES responses (
+                              session_id,
+                              tick_num,
+                              response_num
+            )
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (location_id, world_id)
+        REFERENCES locations (id, world_id)
+);
+
 CREATE TABLE IF NOT EXISTS MOVEMENTS
 (
     session_id   INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
     at_tick      INT NOT NULL,
+
     character_id INT NOT NULL REFERENCES CHARACTERS (id),
 
+    -- Location before this particular response moved the character.
     world_id     INT NOT NULL REFERENCES WORLDS (id),
-    location_id  INT NOT NULL, --FROM location, not TO location. Its a backlog
+    previous_location_id  INT NOT NULL,
 
     PRIMARY KEY (session_id, at_tick, character_id),
-    FOREIGN KEY (location_id, world_id) references LOCATIONS (id, world_id),
+    FOREIGN KEY (previous_location_id, world_id) references LOCATIONS (id, world_id),
     FOREIGN KEY (session_id, at_tick) references MESSAGES (session_id, tick_num) ON DELETE CASCADE
 );
 
+-- CACHE TABLE, current linear history locations (only accounts for active responses)
 CREATE TABLE IF NOT EXISTS CURRENT_LOCATIONS
 (
     session_id   INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num     INT NOT NULL, -- When did this guy reach this location? (In message tick). Isn't necessarily the last message tick.
+    tick_num     INT NOT NULL,                            -- When did this guy reach this location? (In message tick). Isn't necessarily the last message tick.
 
     character_id INT NOT NULL REFERENCES CHARACTERS (id), -- who
 
-    world_id     INT NOT NULL REFERENCES WORLDS (id), -- where
+    world_id     INT NOT NULL REFERENCES WORLDS (id),     -- where
     location_id  INT NOT NULL,
 
     PRIMARY KEY (session_id, character_id),

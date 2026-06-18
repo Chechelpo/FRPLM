@@ -36,16 +36,6 @@ function clearSearch() {
           style="flex-grow:3"
           :placeholder="placeholder"
       />
-
-      <button
-          type="button"
-          @click="clearSearch"
-          :disabled="search.length === 0"
-          class=" disabled:opacity-40 disabled:hover:bg-stone-800/60 disabled:hover:border-stone-700/70"
-          aria-label="Clear search"
-      >
-        ×
-      </button>
     </div>
   </div>
 </template>
@@ -53,7 +43,7 @@ function clearSearch() {
 <style scoped>
 .searchBar-Container {
   width: 100%;
-
+  height: 30px;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;

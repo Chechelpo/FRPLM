@@ -106,12 +106,39 @@ onBeforeUnmount(() => {
   width: 100%;
 }
 
+.textBox,
+.expandedTextBox {
+  box-sizing: border-box;
+  font-family: var(--primary-text),serif;
+  font-size: 1.01rem; /* 18px */
+  padding: 5px;
+
+  color: #2f2418;
+  background-color: color-mix(
+      in srgb,
+      var(--secondary-background) 65%,
+      transparent
+  );
+
+  border: 1px solid color-mix(
+      in srgb,
+      var(--primary-accent) 60%,
+      transparent
+  );
+  border-radius: 8px;
+}
 .textBox {
-  background-color: sandybrown;
   width: 100%;
   height: 100%;
 }
 
+.expandedTextBox {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  resize: none;
+  font-size: 1.25rem; /* 20px in expanded mode */
+}
 .modalBackdrop {
   position: fixed;
   inset: 0;
@@ -144,12 +171,5 @@ onBeforeUnmount(() => {
   margin-bottom: 8px;
 }
 
-.expandedTextBox {
-  flex: 1;
-  width: 100%;
-  min-height: 0;
 
-  resize: none;
-  background-color: sandybrown;
-}
 </style>

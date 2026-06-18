@@ -14,4 +14,13 @@ final class TemplateStore extends EntityStore<PromptTemplateRecord> {
     TemplateStore(@NotNull DSLContext ctx) {
         super(ctx, PROMPT_TEMPLATE, EntityTypes.Types.PROMPT_TEMPLATES);
     }
+
+    boolean updateMaxTokens(int connectionId, int newMaxTokens) {
+        return ctx.update(main_table)
+                .set(PROMPT_TEMPLATE.MAX_TOKENS, newMaxTokens)
+                .where(PROMPT_TEMPLATE.CONNECTION_ID.eq(connectionId)
+                        .and(PROMPT_TEMPLATE.MAX_TOKENS.greaterThan(newMaxTokens))
+                )
+                .execute() == 1;
+    }
 }

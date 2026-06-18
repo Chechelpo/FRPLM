@@ -1,14 +1,22 @@
 <script setup lang="ts">
 import {Location} from "@/domain/World";
-import {computed} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {computedAsync} from "@vueuse/core";
 import {Lorebook} from "@/domain/Lorebook";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import {Character} from "@/domain/Characters";
+import {fetchApi} from "@/frameworks/ABSEntity";
+import {API_BASE} from "@/config";
+import {EntityTypes} from "@/domain/EntityTypes";
+import {DTO} from "@/types/DTOs";
+import List from "@/components/utils/list/List.vue";
+import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
+import CharacterEditor from "@/components/char/CharacterEditor.vue";
 
 const model = defineModel<{
   location: Location;
@@ -16,25 +24,18 @@ const model = defineModel<{
 }>({required: true})
 
 const lorebook = computedAsync<Lorebook>(async () => model.value.location.getLorebook())
+const charactersHere = ref<Character[]>([])
+const editingCharacter = ref<Character | null>(null);
 
-const name = computed<string>({
-  get() {
-    return model.value.location.get("name");
-  },
-  set(value: string) {
-    model.value.location.update("name", value);
-  }
+onMounted(async () => {
+  charactersHere.value = await fetchApi(
+      `${API_BASE}/${EntityTypes.CHARACTERS}/startingAt?worldId=${model.value.location.get('worldID')}&locationId=${model.value.location.get('id')}`
+      ,
+      {
+        method:'GET',
+      }
+  ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS)))
 })
-
-/*
-const description = computed<string>({
-  get() {
-    return model.value.location.get("description");
-  },
-  set(value: string) {
-    model.value.location.update("description", value);
-  }
-})*/
 </script>
 
 <template>
@@ -42,11 +43,11 @@ const description = computed<string>({
     <div class = "background-edit-box">
       <FieldEditorWrapper
         field-name="Name"
-        info="Location's name. Metadata, won't be injected by default unless the outlet is used"
+        info="Location's name."
       >
         <ShortTextBox
-            :model-value="name"
-            @edit="payload => name = payload"
+            :model-value="model.location.get('name')"
+            @edit="payload => model.location.update('name', payload)"
         />
       </FieldEditorWrapper>
       <FieldEditorWrapper
@@ -79,6 +80,23 @@ const description = computed<string>({
         <LocationEdgesEditor
             :model-value="{ parentLocation:model.location, all_locations:model.all_locations }"
         />
+      </Expandable>
+      <Expandable title="Characters starting here" info="Static starting here, not the session locations">
+        <split-panel storage-key="location-characters-editor">
+          <template #left>
+            <List
+              :elements="charactersHere as Character[]"
+              @edit = "value => editingCharacter = value"
+            />
+          </template>
+          <template #right>
+            <CharacterEditor
+                v-if="editingCharacter"
+                :model-value="editingCharacter as Character"
+                :edit-starting-locations="false"
+            />
+          </template>
+        </split-panel>
       </Expandable>
     </div>
   </div>

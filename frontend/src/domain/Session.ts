@@ -2,7 +2,7 @@ import {ABSEntity, createEntity, deleteEntity, fetchApi, fetchMatching, fetchOne
 import {EntityTypes} from "@/domain/EntityTypes";
 import {Location, LocationData, LocationKey, World, WorldData, WorldKey} from "@/domain/World";
 import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
-import {DTO} from "@/types/DTOs";
+import {DTO, PromptDTO} from "@/types/DTOs";
 import {PromptTemplate, PromptTemplateData, PromptTemplateKey} from "@/domain/Prompts";
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
 import {API_BASE} from "@/config";
@@ -84,8 +84,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         }
         return false;
     }
-    public async getNewPrompt(order:NewMessageOrder) : Promise<ChatCompletionRequest> {
-        if (!order.debugPrompt) throw new Error("Called for a new prompt without debug prompt being implemented")
+    public async getNewPrompt() : Promise<PromptDTO> {
         console.debug(`Asking for a new prompt for session ${this}`)
 
         return await fetchApi(
@@ -93,11 +92,11 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
             {
                 method:'GET'
             }
-        ).then(async response => await response.json() as ChatCompletionRequest)
+        ).then(async response => await response.json() as PromptDTO)
     }
-    public async generateNewMessage() : Promise<Message> {
+    public async generateNewMessage(request:ChatCompletionRequest) : Promise<Message> {
         return await fetchApi(
-            `${API_BASE}/engine/${this.get('id')}`,
+            `${API_BASE}/engine/generate/${this.get('id')}`,
             {
                 method:'POST',
                 headers: {
@@ -105,8 +104,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
                 },
                 body: JSON.stringify({
                     streaming:false,
-                    autoResponse:true,
-                    debugPrompt:false
+                    prompt:request
                 })
             }
         ).then(async response => {
@@ -131,8 +129,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
 }
 
 export interface NewMessageOrder {
-    message: string;
-    debugPrompt: boolean;
+    prompt: string;
 }
 
 export type MessagesKey = {session_id:number, tick_num:number};
@@ -142,15 +139,48 @@ export type MessageData = {
     time: number,
     prompt?: string,
     role:ChatCompletionRole,
-    content:string
+    content:string,
+    response_num:number,
+    active_response:number,
 }
 export class Message extends ABSEntity<MessagesKey, MessageData>{
     override getEntityType(): EntityTypes {
         return EntityTypes.MESSAGES;
     }
 
-    async regenerate() : Promise<void> {
+    async update<F extends keyof MessageData>(field: F, value: MessageData[F]): Promise<boolean> {
+        if (field == 'active_response'){
+            await super.update(field, value);
+            const newMessage = await fetchOne<MessagesKey, MessageData, Message>(this.key, EntityTypes.MESSAGES, Message)
+            this.dataMap = newMessage.dataMap
+            return true;
+        }
+        return super.update(field, value);
+    }
+
+    public async regenerate():Promise<void> {
         if (this.get('role') != ChatCompletionRole.ASSISTANT) return;
+        try{
+            const newMessage = await fetchApi(
+                `${API_BASE}/engine/regenerate?sessionID=${this.get('session_id')}&tick_num=${this.get("tick_num")}`,
+                {
+                    method: "POST",
+                }
+            ).then(async response => new Message(await response.json() as DTO, EntityTypes.MESSAGES))
+
+            if (newMessage.get('session_id') != this.get('session_id')) {
+                console.error("Regenerated a message of another session");
+                return;
+            }
+            if (newMessage.get('tick_num') != this.get('tick_num')){
+                console.error("Regenerated a message with another tick num");
+                return;
+            }
+
+            this.dataMap = newMessage.dataMap;
+        } catch (error) {
+            console.error(`Error regenerating response: \n ${error}`);
+        }
     }
 
     public async getLocation() : Promise<Location> {
@@ -172,4 +202,6 @@ export class Message extends ABSEntity<MessagesKey, MessageData>{
             }
         ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS)))
     }
+
+
 }

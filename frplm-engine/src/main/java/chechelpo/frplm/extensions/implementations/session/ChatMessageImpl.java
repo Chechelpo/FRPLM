@@ -23,7 +23,7 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
         this.world = world;
     }
 
-    MessagesRecord getRecord() {
+    public MessagesRecord getRecord() {
         return record;
     }
 

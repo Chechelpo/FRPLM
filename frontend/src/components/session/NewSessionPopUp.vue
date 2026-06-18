@@ -6,9 +6,9 @@ import {computed, ref, shallowRef} from "vue";
 import {computedAsync} from "@vueuse/core";
 import {fetch_all} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 
 const model = defineModel<boolean>({required:true, type: Boolean})
 const emit = defineEmits<{

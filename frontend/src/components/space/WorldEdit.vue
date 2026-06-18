@@ -5,7 +5,7 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import {World, Location} from "@/domain/World";
 import {computedAsync, get} from "@vueuse/core";
 import {Lorebook} from "@/domain/Lorebook";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";

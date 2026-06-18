@@ -200,9 +200,9 @@ function handleBackspace(e: KeyboardEvent) {
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--primary-accent);
   border-radius: 6px;
-  background: #fff;
+  background: var(--primary-background);
   transition: border-color 0.2s;
 }
 .is-focused .input-wrapper {
@@ -244,6 +244,6 @@ function handleBackspace(e: KeyboardEvent) {
   background: transparent;
 }
 .tag-input::placeholder {
-  color: #aaa;
+  color: black;
 }
 </style>

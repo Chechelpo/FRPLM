@@ -5,12 +5,11 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import chechelpo.frplm.domain.sessions.core.SessionTestContext;
-import chechelpo.frplm.domain.sessions.messages.core.MessageTestContext;
+import chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.interfaces.DBReload;
 import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
@@ -20,6 +19,7 @@ import static chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
 @TestComponent
 @Import({MessageTestContext.class, CharacterCoreTestContext.class, StartingLocationTestContext.class, SessionTestContext.class, LocationTestContext.class, EdgeTestContext.class})
 public class CurrentLocationTestContext implements DBReload {
+    @Autowired LocationsEventReactor locationsEventReactor;
     @Autowired
     public MessageTestContext messages;
     @Autowired

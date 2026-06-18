@@ -6,7 +6,7 @@ import List from "@/components/utils/list/List.vue";
 import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
 import {computedAsync} from "@vueuse/core";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 
 const model = defineModel<{
   parentLocation: Location;

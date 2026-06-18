@@ -60,7 +60,9 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
     public @NotNull List<CharactersRecord> getStartingAt(int worldID){
         return store.getStartingAtWorld(worldID);
     }
-
+    public @NotNull List<CharactersRecord> getStartingAt(int worldID, int locationId){
+        return store.getStartingAtLocation(worldID,locationId);
+    }
     @Transactional(readOnly = true)
     @CheckReturnValue
     public CharactersRecord getUserCharacter(@NotNull SessionsRecord record) throws EntityNotFound {

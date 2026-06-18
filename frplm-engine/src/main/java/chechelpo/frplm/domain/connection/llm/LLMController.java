@@ -9,7 +9,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
-import chechelpo.frplm.pipelines.extras.Models;
+import chechelpo.frplm.utils.integrations.Models;
 import chechelpo.frplm.utils.generation.OpenAICompatible;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

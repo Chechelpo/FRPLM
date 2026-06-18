@@ -16,6 +16,14 @@ html, body, #app {
   --primary-background: #dfae7c;
   --secondary-background: #b88f5a;
   --transparency: 50;
+  --primary-text: "Manrope", "Avenir Next", Avenir, Arial, sans-serif;
+  --muted-text: #6b5138;
+}
+
+.muted-text {
+  font-family: var(--primary-text), serif;
+  font-weight: 400;
+  color: var(--muted-text);
 }
 
 .std-Background {

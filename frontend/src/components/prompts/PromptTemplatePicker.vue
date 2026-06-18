@@ -6,7 +6,7 @@ import {PromptTemplate, PromptTemplateKey, PromptTemplateData} from "@/domain/Pr
 import {computed, ref} from "vue";
 import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import PromptTemplateEditor from "@/components/prompts/PromptTemplateEditor.vue";
 
 const allPrompts = computedAsync<PromptTemplate[]>(async () => await fetch_all<PromptTemplateKey,PromptTemplateData,PromptTemplate>(

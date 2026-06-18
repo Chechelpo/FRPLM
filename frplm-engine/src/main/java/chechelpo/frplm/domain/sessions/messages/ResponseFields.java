@@ -1,4 +1,4 @@
-package chechelpo.frplm.domain.sessions.messages.gen;
+package chechelpo.frplm.domain.sessions.messages;
 
 import chechelpo.frplm.core.entities.fields.FieldInfo;
 import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 import static chechelpo.frplm.jooq.generated.Tables.RESPONSES;
 
 @Component
-final class ResponseHelper extends ABSHelper<ResponsesRecord, ResponseService> {
-    ResponseHelper(ResponseService service) {
+final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
+    ResponseFields(ResponseService service) {
         super(service);
 
         register_field(
-            RESPONSES.SESSION_ID,
+                RESPONSES.SESSION_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
                                 .key()
@@ -44,21 +44,31 @@ final class ResponseHelper extends ABSHelper<ResponsesRecord, ResponseService> {
                         .require()
                         .build()
         );
-        register_field(
-                RESPONSES.ADVANCES_TIME_BY,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .readOnly()
-                        )
-                        .require()
-                        .build()
-        );
+
         register_field(
                 RESPONSES.CONTENT,
                 FieldInfo.stringField()
                         .require()
                         .build()
         );
-
+        register_field(
+                RESPONSES.ADVANCES_TIME_BY,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .require()
+                        .build(),
+                0
+        );
+        register_field(
+                RESPONSES.WORLD_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .require()
+                        .build()
+        );
+        register_field(
+                RESPONSES.LOCATION_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .require()
+                        .build()
+        );
     }
 }

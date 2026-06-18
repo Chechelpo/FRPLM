@@ -3,12 +3,12 @@
     <module name="frplm-engine" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="chechelpo.frplm.domain.sessions.messages.core.*" />
+        <option name="PATTERN" value="chechelpo.frplm.domain.sessions.messages.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
     <option name="PACKAGE_NAME" value="chechelpo.frplm.domain.sessions.messages.core" />
-    <option name="MAIN_CLASS_NAME" value="chechelpo.frplm.domain.sessions.messages.core.MessageServiceTest" />
+    <option name="MAIN_CLASS_NAME" value="chechelpo.frplm.domain.sessions.messages.MessageServiceTest" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="class" />
     <envs>

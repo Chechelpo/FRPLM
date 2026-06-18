@@ -8,9 +8,11 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.CharacterTags.CharacterTagsPath;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
-import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
+import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
+import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
@@ -200,6 +202,19 @@ public class Characters extends TableImpl<CharactersRecord> {
         return _lorebooks;
     }
 
+    private transient ResponseLocationChangesPath _responseLocationChanges;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     */
+    public ResponseLocationChangesPath responseLocationChanges() {
+        if (_responseLocationChanges == null)
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_37.getInverseKey());
+
+        return _responseLocationChanges;
+    }
+
     private transient SessionsPath _sessions;
 
     /**
@@ -275,10 +290,18 @@ public class Characters extends TableImpl<CharactersRecord> {
 
     /**
      * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.LLM_GEN</code> table
+     * <code>PUBLIC.MESSAGES</code> table
      */
-    public LlmGenPath llmGen() {
-        return movements().llmGen();
+    public MessagesPath messages() {
+        return movements().messages();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.RESPONSES</code> table
+     */
+    public ResponsesPath responses() {
+        return responseLocationChanges().responses();
     }
 
     /**

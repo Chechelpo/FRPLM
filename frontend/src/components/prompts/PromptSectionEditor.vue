@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
-import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
 import {PromptSection} from "@/domain/Prompts";
 import {computed, ref} from "vue";
-import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 const props = defineProps<{

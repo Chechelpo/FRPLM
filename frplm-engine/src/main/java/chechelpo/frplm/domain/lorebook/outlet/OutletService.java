@@ -34,7 +34,9 @@ public class OutletService extends EntityService<OutletRecord, OutletStore> {
     public Optional<Integer> getOutletID(String name) {
         return Optional.ofNullable(store.getOfName(name));
     }
-
+    public Optional<String> getOutletName(int id) {
+        return Optional.ofNullable(store.getName(id));
+    }
 
     @CheckReturnValue
     public IntObjectPair<String>[] getOutlets(LorebooksRecord[] records) {

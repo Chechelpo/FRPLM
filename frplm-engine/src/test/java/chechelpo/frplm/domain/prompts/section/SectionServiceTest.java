@@ -5,7 +5,6 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
-import it.unimi.dsi.fastutil.ints.IntComparators;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +44,7 @@ class SectionServiceTest {
                 .set(PROMPT_TEMPLATE.NAME, "Test")
                 .build();
 
-        PromptTemplateRecord prompt = sections.prompts.templates.createAndGet(createdData);
+        PromptTemplateRecord prompt = sections.prompts.service.createAndGet(createdData);
         List<PromptSectionRecord> sectionsOfPrompt = sections.sectionService.getMatching(
                 EntityKey.of(PROMPT_SECTION.PROMPT_ID, prompt.getId())
         );
@@ -68,7 +67,7 @@ class SectionServiceTest {
                 .set(PROMPT_TEMPLATE.NAME, "Test")
                 .build();
 
-        PromptTemplateRecord prompt = sections.prompts.templates.createAndGet(createdData);
+        PromptTemplateRecord prompt = sections.prompts.service.createAndGet(createdData);
         List<PromptSectionRecord> sectionsOfPrompt = sections.sectionService.getMatching(
                 EntityKey.of(PROMPT_SECTION.PROMPT_ID, prompt.getId())
         );
@@ -101,7 +100,7 @@ class SectionServiceTest {
                 .set(PROMPT_TEMPLATE.NAME, "Test")
                 .build();
 
-        PromptTemplateRecord prompt = sections.prompts.templates.createAndGet(createdData);
+        PromptTemplateRecord prompt = sections.prompts.service.createAndGet(createdData);
         List<PromptSectionRecord> sectionsOfPrompt = sections.sectionService.getMatching(
                 EntityKey.of(PROMPT_SECTION.PROMPT_ID, prompt.getId())
         );
@@ -119,7 +118,7 @@ class SectionServiceTest {
                 .set(PROMPT_TEMPLATE.NAME, "Test")
                 .build();
 
-        PromptTemplateRecord prompt = sections.prompts.templates.createAndGet(createdData);
+        PromptTemplateRecord prompt = sections.prompts.service.createAndGet(createdData);
         List<PromptSectionRecord> sectionsOfPrompt = sections.sectionService.getMatching(
                 EntityKey.of(PROMPT_SECTION.PROMPT_ID, prompt.getId())
         );

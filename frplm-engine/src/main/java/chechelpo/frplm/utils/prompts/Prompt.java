@@ -36,12 +36,12 @@ public record Prompt (
     public static class Builder implements PromptBuilder {
         private Phase phase = Phase.PRE_RENDER;
 
-        private List<LorebookSnapshot> lorebooks = new ArrayList<>(10);
-        private ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder();
+        private final List<LorebookSnapshot> lorebooks = new ArrayList<>(10);
+        private final ChatCompletionRequest.Builder requestBuilder = ChatCompletionRequest.builder();
         /**
          * Indexes of sections within the prompt
          */
-        private IntList sectionIndexes = new IntArrayList(10);
+        private final IntList sectionIndexes = new IntArrayList(10);
 
         private Int2ObjectMap<KeywordDetection.DetectedKeyword> detectedKeywords;
         /**
@@ -51,12 +51,12 @@ public record Prompt (
         /**
          * outletID -> list of contents to inject
          */
-        private Int2ObjectMap<List<String>> activeEntriesByOutlet = new Int2ObjectArrayMap<>(100);
+        private final Int2ObjectMap<List<String>> activeEntriesByOutlet = new Int2ObjectArrayMap<>(100);
 
         /**
          * Entries that were successfully activated
          */
-        private Set<EntryRecord> activeEntries = new HashSet<>();
+        private final Set<EntryRecord> activeEntries = new HashSet<>();
 
         private Builder() {}
 
@@ -249,9 +249,12 @@ public record Prompt (
 
                 boolean isActive = EntryEvaluator.activates(entryRecord, recursionStep, deepestKeywordDepth);
                 if (isActive) {
+                    //noinspection deprecation
                     if (!activeEntriesByOutlet.containsKey(entryRecord.getOutlet()))
-                        throw new IllegalStateException("Outlet " + entryRecord.getOutlet() + " does not exist in active entries by outlet");
+                        throw new IllegalStateException("Outlet " + context.outlets().getOutletName(entryRecord.getOutlet()).orElseThrow()
+                                + " does not exist in active entries by outlet");
 
+                    //noinspection deprecation
                     activeEntriesByOutlet.get(entryRecord.getOutlet()).add(entryRecord.getContent());
                     activeEntries.add(entryRecord);
 
@@ -264,7 +267,7 @@ public record Prompt (
             }
         }
 
-        private int getDeepestKeywordDepth(ExtensionContext context, EntryRecord entryRecord) {
+        private int getDeepestKeywordDepth(@NotNull ExtensionContext context, @NotNull EntryRecord entryRecord) {
             Set<Integer> keywords = context.entryKeywords().keywordIDsOfEntry(
                     entryRecord.getLorebookId(),
                     entryRecord.getEntryId()

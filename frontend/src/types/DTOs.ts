@@ -2,6 +2,7 @@
 // Character DTOs
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import {EntityTypes} from "@/domain/EntityTypes";
+import {ChatCompletionRequest} from "@/types/ChatCompletions";
 
 export type Primitives = string | number | boolean | null;
 export type KeyRecord = Record<string, Primitives>;
@@ -18,4 +19,10 @@ export interface DTO {
     type: EntityTypes;
     key: Record<string, Primitives>;
     payload: Record<string, Primitives>;
+}
+
+export interface PromptDTO {
+    lorebooks:DTO[];
+    activatedEntries:DTO[];
+    rawRequest:ChatCompletionRequest;
 }

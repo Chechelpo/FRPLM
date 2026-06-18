@@ -61,31 +61,59 @@ public class ResponsesRecord extends UpdatableRecordImpl<ResponsesRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.RESPONSES.LOCATION_ID</code>.
+     */
+    public void setLocationId(Integer value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.RESPONSES.LOCATION_ID</code>.
+     */
+    public Integer getLocationId() {
+        return (Integer) get(3);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.RESPONSES.WORLD_ID</code>.
+     */
+    public void setWorldId(Integer value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.RESPONSES.WORLD_ID</code>.
+     */
+    public Integer getWorldId() {
+        return (Integer) get(4);
+    }
+
+    /**
      * Setter for <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
      */
     public void setAdvancesTimeBy(Integer value) {
-        set(3, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
      */
     public Integer getAdvancesTimeBy() {
-        return (Integer) get(3);
+        return (Integer) get(5);
     }
 
     /**
      * Setter for <code>PUBLIC.RESPONSES.CONTENT</code>.
      */
     public void setContent(String value) {
-        set(4, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>PUBLIC.RESPONSES.CONTENT</code>.
      */
     public String getContent() {
-        return (String) get(4);
+        return (String) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -111,12 +139,14 @@ public class ResponsesRecord extends UpdatableRecordImpl<ResponsesRecord> {
     /**
      * Create a detached, initialised ResponsesRecord
      */
-    public ResponsesRecord(Integer sessionId, Integer tickNum, Short responseNum, Integer advancesTimeBy, String content) {
+    public ResponsesRecord(Integer sessionId, Integer tickNum, Short responseNum, Integer locationId, Integer worldId, Integer advancesTimeBy, String content) {
         super(Responses.RESPONSES);
 
         setSessionId(sessionId);
         setTickNum(tickNum);
         setResponseNum(responseNum);
+        setLocationId(locationId);
+        setWorldId(worldId);
         setAdvancesTimeBy(advancesTimeBy);
         setContent(content);
         resetChangedOnNotNull();

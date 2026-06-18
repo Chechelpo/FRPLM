@@ -13,7 +13,7 @@ import static chechelpo.frplm.domain.EntityTypes.LOREBOOKS_URL;
 
 @RestController
 @RequestMapping(LOREBOOKS_URL)
-final class LorebookController extends EntityController<LorebooksRecord, LorebookService> {
+public final class LorebookController extends EntityController<LorebooksRecord, LorebookService> {
     LorebookController(LorebookService service) {
         super(service);
     }

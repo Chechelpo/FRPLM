@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.TestComponent;
 @TestComponent
 public class PromptTemplateTestContext implements DBReload {
     @Autowired
-    public TemplateService templates;
+    public TemplateService service;
 
     @Autowired
     TemplateFieldsHelper fields;

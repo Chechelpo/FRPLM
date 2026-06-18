@@ -9,9 +9,9 @@ import {
 
 import {computed, onMounted, ref} from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import { computedAsync } from "@vueuse/core";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 
 const model = defineModel<LLMConnection>({
   required: true,

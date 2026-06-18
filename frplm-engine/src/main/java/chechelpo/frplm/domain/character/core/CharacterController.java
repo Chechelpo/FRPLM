@@ -26,4 +26,13 @@ public final class CharacterController extends EntityController<
         ));
     }
 
+    @GetMapping("/startingAt")
+    ResponseEntity<EntityDTO[]> getStartingAt(@RequestParam int worldId, @RequestParam int locationId) {
+        return ResponseEntity.ok(
+                wrapEntities(
+                        service.getStartingAt(worldId, locationId)
+                )
+        );
+    }
+
 }

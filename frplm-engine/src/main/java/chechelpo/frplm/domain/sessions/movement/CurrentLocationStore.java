@@ -76,11 +76,11 @@ final class CurrentLocationStore extends EntityStore<CurrentLocationsRecord> {
                             .set(CURRENT_LOCATIONS.TICK_NUM, tick)
                             .set(CURRENT_LOCATIONS.CHARACTER_ID, movement.getCharacterId())
                             .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
-                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getPreviousLocationId())
                             .onDuplicateKeyUpdate()
                             .set(CURRENT_LOCATIONS.TICK_NUM, tick)
                             .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
-                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getPreviousLocationId())
                             .execute();
                 }
 
@@ -119,11 +119,11 @@ final class CurrentLocationStore extends EntityStore<CurrentLocationsRecord> {
                             .set(CURRENT_LOCATIONS.TICK_NUM, previousTick)
                             .set(CURRENT_LOCATIONS.CHARACTER_ID, movement.getCharacterId())
                             .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
-                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getPreviousLocationId())
                             .onDuplicateKeyUpdate()
                             .set(CURRENT_LOCATIONS.TICK_NUM, previousTick)
                             .set(CURRENT_LOCATIONS.WORLD_ID, movement.getWorldId())
-                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getLocationId())
+                            .set(CURRENT_LOCATIONS.LOCATION_ID, movement.getPreviousLocationId())
                             .execute();
                 }
 

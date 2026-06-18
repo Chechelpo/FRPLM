@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Character} from "@/domain/Characters";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import {computed, onMounted, ref, shallowRef, watch} from "vue";
 import {Lorebook} from "@/domain/Lorebook";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
@@ -9,12 +9,19 @@ import {Tag} from "@/domain/Tag";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import StartingLocation from "@/components/char/StartingLocation.vue";
-import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
-import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
+import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 
 const model = defineModel<Character>({
   required: true
 });
+const props = withDefaults(defineProps<{
+  editStartingLocations: boolean
+}>(),
+    {
+      editStartingLocations:true
+    }
+)
 
 const embed_lorebook = ref<Lorebook>();
 const characterTags = ref<Tag[]>([]);
@@ -150,6 +157,7 @@ async function handleRemoveTag(tag: Tag) {
       />
     </Expandable>
     <Expandable
+        v-if="editStartingLocations"
         title="Starting locations"
         info="If a session is opened in this world, where this character may spawn"
     >

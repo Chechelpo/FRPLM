@@ -16,7 +16,6 @@ import chechelpo.frplm.jooq.generated.tables.Extension;
 import chechelpo.frplm.jooq.generated.tables.Extras;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
-import chechelpo.frplm.jooq.generated.tables.LlmGen;
 import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
 import chechelpo.frplm.jooq.generated.tables.Locations;
@@ -26,6 +25,7 @@ import chechelpo.frplm.jooq.generated.tables.Movements;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
 import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
+import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges;
 import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations;
@@ -101,11 +101,6 @@ public class Tables {
     public static final LlmConnection LLM_CONNECTION = LlmConnection.LLM_CONNECTION;
 
     /**
-     * The table <code>PUBLIC.LLM_GEN</code>.
-     */
-    public static final LlmGen LLM_GEN = LlmGen.LLM_GEN;
-
-    /**
      * The table <code>PUBLIC.LOCATION_NEIGHBORS</code>.
      */
     public static final LocationNeighbors LOCATION_NEIGHBORS = LocationNeighbors.LOCATION_NEIGHBORS;
@@ -149,6 +144,11 @@ public class Tables {
      * The table <code>PUBLIC.PROMPT_TEMPLATE</code>.
      */
     public static final PromptTemplate PROMPT_TEMPLATE = PromptTemplate.PROMPT_TEMPLATE;
+
+    /**
+     * The table <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code>.
+     */
+    public static final ResponseLocationChanges RESPONSE_LOCATION_CHANGES = ResponseLocationChanges.RESPONSE_LOCATION_CHANGES;
 
     /**
      * The table <code>PUBLIC.RESPONSES</code>.

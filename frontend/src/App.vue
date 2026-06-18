@@ -15,12 +15,13 @@
             <img src="/header/Characters.png" alt="Characters" />
           </RouterLink>
         </div>
-
+        <!--
         <div>
           <RouterLink to="/lorebook" class="nav-icon" aria-label="Lorebook">
             <img src="/header/lorebook.png" alt="Lorebook" />
           </RouterLink>
         </div>
+        -->
 
         <div>
           <RouterLink :to="route_to(EntityTypes.TEMPLATES)" class = "nav-icon" aria-lable="prompts">
@@ -101,8 +102,8 @@ import {EntityTypes} from "@/domain/EntityTypes";
   margin: 10px;
 
   border-radius: 30px;
-  border: 1px solid antiquewhite;
-  background-color: #dfae7c;
+  border: 1px solid var(--primary-accent);
+  background-color: var(--secondary-background);
 
   display: flex;
   align-items: center;

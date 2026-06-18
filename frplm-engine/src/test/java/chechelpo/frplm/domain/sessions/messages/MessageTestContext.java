@@ -1,11 +1,10 @@
-package chechelpo.frplm.domain.sessions.messages.core;
+package chechelpo.frplm.domain.sessions.messages;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.Messages;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRole;
@@ -21,10 +20,16 @@ import static chechelpo.frplm.jooq.generated.Tables.MESSAGES;
 @TestComponent
 @Import({SessionTestContext.class, LocationTestContext.class})
 public class MessageTestContext implements DBReload {
+
     @Autowired
     public SessionTestContext sessions;
     @Autowired
     public MessageService service;
+    @Autowired
+    ResponseFields responseFields;
+    @Autowired
+    ResponseService responseService;
+
     @Autowired
     MessageFieldsHelper fields;
     @Autowired
@@ -40,11 +45,15 @@ public class MessageTestContext implements DBReload {
     public record Context(SessionTestContext.SessionContext sessionContext, List<MessagesRecord> messages) {
     }
 
-    public Context createSessionWithMessages(int locationAmount, int messageAmount) {
-        SessionTestContext.SessionContext sessionContext = sessions.createSession(locationAmount, 3);
+    public Context createSessionWithMessages(int locationAmount, int messageAmount){
+        return createSessionWithMessages(locationAmount, messageAmount, 3);
+    }
+
+    public Context createSessionWithMessages(int locationAmount, int messageAmount, int charactersPerLocation) {
+        SessionTestContext.SessionContext sessionContext = sessions.createSession(locationAmount, charactersPerLocation);
         SessionsRecord session = sessionContext.session();
 
-        List<MessagesRecord> createdMessages = new ArrayList<>(messageAmount);
+        List<EntityKey<MessagesRecord>> createdMessagesKeys = new ArrayList<>(messageAmount);
         for (int i = 0; i < messageAmount; i++) {
             EntityDataPayload<MessagesRecord> newMessage = EntityDataPayload.<MessagesRecord>builder()
                     .set(MESSAGES.SESSION_ID, session.getId())
@@ -53,9 +62,13 @@ public class MessageTestContext implements DBReload {
             if (i % 2 == 0) newMessage.set(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue());
             else newMessage.set(MESSAGES.ROLE, ChatCompletionRole.USER.wireValue());
 
-            createdMessages.add(service.createAndGet(newMessage));
+            createdMessagesKeys.add(service.keyOf(service.createAndGet(newMessage)));
         }
 
-        return new Context(sessionContext, createdMessages);
+        return new Context(sessionContext,
+                createdMessagesKeys.stream()
+                        .map(key -> service.find(key).orElseThrow(() -> new IllegalStateException("Couldn't find message")))
+                        .toList()
+                );
     }
 }

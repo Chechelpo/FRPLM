@@ -167,7 +167,7 @@ public abstract class EntityService<
      * @apiNote super() call is advised at the end of your override. This function also contains the event emit as well as validation logic
      */
     protected void beforeCreate(EntityDataPayload<R> data, long operationID) {
-        throwIfInvalidData(data, false);
+
 
         for (Map.Entry<TableField<R, ?>, Object> defaultAssignment : defaultsOnCreate.entrySet()) {
             TableField<R, ?> field = defaultAssignment.getKey();
@@ -295,6 +295,7 @@ public abstract class EntityService<
     // UPDATE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Contract(mutates = "param2")
+    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeUpdate(@NotNull EntityKey<R> target, EntityDataPayload<R> data, long operationID) {
         throwIfInvalidKey(target, true);
         throwIfInvalidData(data, true);

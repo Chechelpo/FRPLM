@@ -87,4 +87,20 @@ public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStor
 
         return fromThisToOther || fromOtherToThis;
     }
+    public boolean isNeighbour(int worldID, int location1ID, int location2ID) {
+        boolean fromThisToOther = this.exists(EntityKey.<LocationNeighborsRecord>builder()
+                .set(LOCATION_NEIGHBORS.WORLD_ID, worldID)
+                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location1ID)
+                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location2ID)
+                .build()
+        );
+        boolean fromOtherToThis = this.exists(EntityKey.<LocationNeighborsRecord>builder()
+                .set(LOCATION_NEIGHBORS.WORLD_ID, worldID)
+                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location1ID)
+                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location2ID)
+                .build()
+        );
+
+        return fromThisToOther || fromOtherToThis;
+    }
 }

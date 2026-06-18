@@ -11,7 +11,7 @@ public abstract class StandaloneEntity<R extends TableRecord<R>> {
         this.context = context;
     }
 
-    R getRecord() {
+    public R getRecord() {
         return record;
     }
 }

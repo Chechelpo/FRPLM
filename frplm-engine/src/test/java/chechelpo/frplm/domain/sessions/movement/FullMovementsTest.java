@@ -1,0 +1,113 @@
+package chechelpo.frplm.domain.sessions.movement;
+
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
+import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
+import chechelpo.frplm.domain.sessions.core.SessionTestContext;
+import chechelpo.frplm.domain.sessions.messages.MessageTestContext;
+import chechelpo.frplm.domain.world.edge.EdgeTestContext;
+import chechelpo.frplm.domain.world.location.LocationTestContext;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import chechelpo.frplm.exceptions.runtime.InvalidValue;
+import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
+
+import javax.xml.stream.events.Characters;
+
+import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@SpringBootTest
+@Sql(
+        scripts = "classpath:db/schema.sql",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
+@Import({MessageTestContext.class, LocationTestContext.class, SessionTestContext.class,
+        StartingLocationTestContext.class, CharacterCoreTestContext.class, EdgeTestContext.class,
+        CurrentLocationTestContext.class
+})
+public class FullMovementsTest {
+    @Autowired
+    MessageTestContext messages;
+    @Autowired
+    private LocationTestContext locationTestContext;
+    @Autowired
+    private CharacterCoreTestContext characterCoreTestContext;
+    @Autowired
+    private StartingLocationTestContext startingLocationTestContext;
+    @Autowired
+    private SessionTestContext sessionTestContext;
+    @Autowired
+    private EdgeTestContext edgeTestContext;
+    @Autowired
+    private CurrentLocationTestContext currentLocationTestContext;
+    @Autowired
+    private Movements movements;
+
+    @BeforeEach
+    void setUp() {
+        messages.reload();
+        locationTestContext.reload();
+        characterCoreTestContext.reload();
+        startingLocationTestContext.reload();
+        sessionTestContext.reload();
+        edgeTestContext.reload();
+        currentLocationTestContext.reload();
+    }
+
+
+    @Test
+    void move_throwsOnNotNeighbours() {
+        MessageTestContext.Context context = messages.createSessionWithMessages(10, 3);
+        assertThrows(
+                InvalidValue.class,
+                () -> movements.move(
+                        context.sessionContext().session().getId(),
+                        context.sessionContext().session().getUserPersonaId(),
+                        context.sessionContext().sessionLocations().get(2).getId())
+        );
+    }
+    @Test
+    void move_throwsOnUnknownCharacter() {
+        MessageTestContext.Context context = messages.createSessionWithMessages(10, 3);
+        CharactersRecord randomCharacter = messages.sessions.characters.service.createAndGet(
+                EntityDataPayload.of(CHARACTERS.NAME, "test")
+        );
+        assertThrows(
+                EntityNotFound.class,
+                () -> movements.move(
+                        context.sessionContext().session().getId(),
+                        randomCharacter.getId(),
+                        context.sessionContext().sessionLocations().get(2).getId())
+        );
+    }
+    @Test
+    void move_throwsOnUnknownSessionId(){
+        MessageTestContext.Context context = messages.createSessionWithMessages(10, 3);
+        assertThrows(
+                EntityNotFound.class,
+                () -> movements.move(
+                        -1,
+                        context.sessionContext().session().getUserPersonaId(),
+                        context.sessionContext().sessionLocations().get(2).getId())
+        );
+    }
+    @Test
+    void move_doesNothingIfInFirstMessage(){
+        MessageTestContext.Context context = messages.createSessionWithMessages(10, 0);
+        assertFalse(
+                movements.move(
+                        context.sessionContext().session().getId(),
+                        context.sessionContext().session().getUserPersonaId(),
+                        2
+                )
+        );
+    }
+
+}

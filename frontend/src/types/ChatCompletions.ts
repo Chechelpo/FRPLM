@@ -8,6 +8,6 @@ export interface ChatCompletionMessage{
     content: string;
 }
 export interface ChatCompletionRequest{
-    modelId: string;
+    model: string;
     messages: ChatCompletionMessage[];
 }

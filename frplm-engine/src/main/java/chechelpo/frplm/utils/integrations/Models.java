@@ -1,8 +1,7 @@
-package chechelpo.frplm.pipelines.extras;
+package chechelpo.frplm.utils.integrations;
 
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatusCode;

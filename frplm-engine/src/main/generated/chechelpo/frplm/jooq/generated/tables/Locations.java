@@ -12,6 +12,8 @@ import chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
+import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
@@ -201,6 +203,32 @@ public class Locations extends TableImpl<LocationsRecord> {
             _messages = new MessagesPath(this, null, Keys.CONSTRAINT_131AF.getInverseKey());
 
         return _messages;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_31438.getInverseKey());
+
+        return _responses;
+    }
+
+    private transient ResponseLocationChangesPath _responseLocationChanges;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     */
+    public ResponseLocationChangesPath responseLocationChanges() {
+        if (_responseLocationChanges == null)
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_379EE.getInverseKey());
+
+        return _responseLocationChanges;
     }
 
     private transient LocationTagsPath _locationTags;

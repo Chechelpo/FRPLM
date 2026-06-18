@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Message, NewMessageOrder, Session} from "@/domain/Session";
+import {Message, Session} from "@/domain/Session";
 import {computed, nextTick, onMounted, ref, shallowRef, watch} from "vue";
 import {Location, World} from "@/domain/World";
 import {Character} from "@/domain/Characters";
@@ -9,17 +9,13 @@ import ChatBar from "@/components/chat/ChatBar.vue";
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import ConfigSidebar from "@/components/chat/ConfigSidebar.vue";
-import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
-import PromptDebug from "@/components/chat/PromptDebug.vue";
-import {fetchApi} from "@/frameworks/ABSEntity";
-import {API_BASE} from "@/config";
-import {DTO} from "@/types/DTOs";
-import {EntityTypes} from "@/domain/EntityTypes";
+
 
 const model = defineModel<Session>({
   required: true,
   type: Session,
 });
+
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -36,9 +32,6 @@ const messageScrollElement = ref<HTMLElement | null>(null);
 
 const loading = ref<boolean>(false);
 const loadError = ref<string | null>(null);
-
-const cachedPrompt = ref<ChatCompletionRequest | null>(null);
-const debuggingPrompt = ref<boolean>(false);
 
 const world_name = computed<string>(() => {
   if (!world.value) return "Loading world";
@@ -95,36 +88,45 @@ watch(
     {flush: "post"}
 );
 
-async function onNewMessage(order: NewMessageOrder): Promise<void> {
-  if (order.message != null) {
-    console.log("Sending new user message: ", order.message);
+const isGenerating = ref<boolean>(false);
 
+async function onNewUserMessage(content: string): Promise<boolean> {
+  if (isGenerating.value) return false;
+  console.log("Sending new user message: ", content);
+  try {
+    isGenerating.value = true;
     const previousMessage = messages.value.at(-1);
 
     if (!previousMessage) {
-      throw new Error("Cannot create a new message without a previous message.");
+      console.error("Cannot create a new message without a previous message.");
+      return false;
     }
 
     const newUserMessage = await model.value.newUserMessage(
         previousMessage as Message,
-        order.message
+        content
     );
-
     messages.value.push(newUserMessage);
     await scrollMessagesToBottom();
 
-    messages.value.push(await model.value.generateNewMessage())
+    return true;
+  } catch(e){
+    return false;
+  } finally {
+    isGenerating.value = false;
   }
-
-  debuggingPrompt.value = order.debugPrompt;
-  cachedPrompt.value = await model.value.getNewPrompt(order);
 }
 
 async function onDeleteMessage(message: Message) {
-  if (!model.value.isLastMessage(message)) {
-    console.debug("This is not the last message");
+  if (!isLastMessage(message)) {
+    console.error(`ATTEMPTED TO DELETE A NON LAST MESSAGE: \n ${message}`);
     return;
   }
+  if (isGenerating.value == true) {
+    console.warn("Attempted to delete a message while generating")
+    return;
+  }
+
   const confirmation = window.confirm("Are you sure you want to delete the last message?")
   if (!confirmation) return;
 
@@ -134,23 +136,45 @@ async function onDeleteMessage(message: Message) {
     return;
   }
 
-  console.debug(`${message} Deleted Filtering messages`)
   messages.value = messages.value.filter(other => !other.equals(message));
   void scrollMessagesToBottom();
 }
 
-async function onRegenerateMessage(message: Message): void {
-  console.debug("Regenerating message : ", message);
-  const newMessage = await fetchApi(
-      `${API_BASE}/engine/regenerate?sessionID=${model.value.get('id')}&tick_num=${message.get("tick_num")}`,
-      {
-        method: "POST",
-      }
-  ).then(async response => new Message(await response.json() as DTO, EntityTypes.MESSAGES))
+async function onRegenerate(message: Message): Promise<boolean> {
+  if (!isLastMessage(message)) {
+    console.error("Attempted to regenerate a non last message")
+    return false;
+  }
 
-  const toReplaceIndex = messages.value.findIndex(msg => msg.equals(newMessage));
-  if (toReplaceIndex == -1) throw new Error("Invalid message returned");
-  messages.value.splice(toReplaceIndex, 1, newMessage);
+  try {
+    isGenerating.value = true;
+    await message.regenerate();
+    return true;
+  } catch (e) {
+    return false;
+  } finally {
+    isGenerating.value = false;
+  }
+}
+
+async function onGenerate(request:ChatCompletionRequest): Promise<boolean> {
+  if (isGenerating.value) return false;
+  try{
+    isGenerating.value = true;
+
+    const newMessage = await model.value.generateNewMessage(request);
+    messages.value.push(newMessage)
+
+    return true;
+  } catch (e) {
+    return false;
+  } finally {
+    isGenerating.value = false;
+  }
+}
+
+function isLastMessage(message: Message): boolean {
+  return model.value.isLastMessage(message);
 }
 
 </script>
@@ -207,8 +231,9 @@ async function onRegenerateMessage(message: Message): void {
                     v-for="message in messages"
                     :key="String(message.get('tick_num'))"
                     :message="message as Message"
+                    :on-regenerate="onRegenerate"
+                    :is-last-message="model.isLastMessage(message as Message)"
                     @delete="onDeleteMessage"
-                    @regenerate="onRegenerateMessage"
                     :title="message.get('role') === ChatCompletionRole.USER
                     ? String(user_character?.get('name') ?? 'User')
                     : String(world?.get('name') ?? world_name)
@@ -217,20 +242,20 @@ async function onRegenerateMessage(message: Message): void {
               </div>
             </div>
 
-            <ChatBar @send="payload => onNewMessage(payload)"/>
+            <ChatBar
+                v-if="user_character"
+                :character-name="user_character.get('name')"
+                :new-user-message="onNewUserMessage"
+                :request-prompt="() => model.getNewPrompt()"
+                :generate-new-message="onGenerate"
+            />
           </div>
         </template>
       </SplitPanel>
     </main>
   </section>
 
-  <WindowPrompt
-      v-if="cachedPrompt"
-      title="Prompt"
-      @close="debuggingPrompt = false; cachedPrompt = null"
-  >
-    <PromptDebug :model-value="cachedPrompt"/>
-  </WindowPrompt>
+
 </template>
 
 <style scoped>

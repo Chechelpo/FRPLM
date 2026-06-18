@@ -273,21 +273,23 @@ CREATE TABLE sessions
 DROP TABLE IF EXISTS messages CASCADE;
 CREATE TABLE messages
 (
-    session_id  INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num    INT NOT NULL,
+    session_id      INT        NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
+    tick_num        INT        NOT NULL,
 
-    time        INT NOT NULL,
+    role            varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
+    request_json    TEXT,                          -- Stored, but it could also just be regen. Should only be there for assistant msgs
+    content         TEXT,                          -- Always derived
 
-    world_id    INT NOT NULL REFERENCES WORLDS (id),
-    location_id INT NOT NULL,
+    time            INT        NOT NULL,
+    world_id        INT        NOT NULL REFERENCES WORLDS (id), -- Derived
+    location_id     INT        NOT NULL, -- Derived
 
-    role        varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
-    request_json TEXT, -- Stored, but it could also just be regen. Should only be there for assistant msgs
-
-    content     TEXT DEFAULT NULL,
+    active_response SMALLINT   NOT NULL DEFAULT 0, -- ID of the response that's currently active
+    response_num    SMALLINT   NOT NULL DEFAULT 0, -- Response num counter to assign keys.
 
     PRIMARY KEY (session_id, tick_num),
-    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id)
+    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id),
+    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant')
 );
 
 DROP TABLE IF EXISTS extras CASCADE;
@@ -296,6 +298,7 @@ CREATE TABLE extras
     session_id   INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
     tick_num     INT NOT NULL,
     extension_id VARCHAR(255) REFERENCES EXTENSION (id),
+
     position     int NOT NULL,
     content      TEXT NOT NULL,
 
@@ -303,32 +306,61 @@ CREATE TABLE extras
     FOREIGN KEY (session_id, tick_num) references MESSAGES (session_id, tick_num)
 );
 
-DROP TABLE IF EXISTS LLM_GEN CASCADE;
-CREATE TABLE LLM_GEN
-(
-    session_id      INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num        INT NOT NULL,
-
-    active_response SMALLINT NOT NULL DEFAULT 0,
-    response_num    SMALLINT NOT NULL DEFAULT 0,
-
-    PRIMARY KEY (session_id, tick_num),
-    FOREIGN KEY (session_id, tick_num) REFERENCES messages (session_id, tick_num) ON DELETE CASCADE
-);
-
 DROP TABLE IF EXISTS responses CASCADE;
-CREATE TABLE responses
+CREATE TABLE IF NOT EXISTS responses
 (
-    session_id       INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num         INT NOT NULL,
+    session_id       INT      NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
+    tick_num         INT      NOT NULL,
     response_num     SMALLINT NOT NULL,
-    advances_time_by INT NOT NULL,
-    content          TEXT NOT NULL,
+
+    location_id      INT      NOT NULL,
+    world_id         INT      NOT NULL REFERENCES WORLDS (id),
+
+    advances_time_by INT      NOT NULL,
+    content          TEXT     NOT NULL,
 
     PRIMARY KEY (session_id, tick_num, response_num),
+    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id) ON DELETE CASCADE,
+
     FOREIGN KEY (session_id, tick_num)
         REFERENCES messages (session_id, tick_num)
         ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS response_location_changes;
+CREATE TABLE IF NOT EXISTS response_location_changes
+(
+    session_id   INT      NOT NULL,
+    tick_num     INT      NOT NULL,
+    response_num SMALLINT NOT NULL,
+
+    character_id INT      NOT NULL REFERENCES characters (id),
+
+    -- Location after applying this response
+    world_id     INT      NOT NULL,
+    location_id  INT      NOT NULL,
+
+    PRIMARY KEY (
+                 session_id,
+                 tick_num,
+                 response_num,
+                 character_id
+        ),
+
+    FOREIGN KEY (
+                 session_id,
+                 tick_num,
+                 response_num
+        )
+        REFERENCES responses (
+                              session_id,
+                              tick_num,
+                              response_num
+            )
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (location_id, world_id)
+        REFERENCES locations (id, world_id)
 );
 
 DROP TABLE IF EXISTS MOVEMENTS CASCADE;
@@ -336,12 +368,15 @@ CREATE TABLE MOVEMENTS
 (
     session_id   INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
     at_tick      INT NOT NULL,
+
     character_id INT NOT NULL REFERENCES CHARACTERS (id),
+
+    -- Location before this particular response moved the character.
     world_id     INT NOT NULL REFERENCES WORLDS (id),
-    location_id  INT NOT NULL,
+    previous_location_id  INT NOT NULL,
 
     PRIMARY KEY (session_id, at_tick, character_id),
-    FOREIGN KEY (location_id, world_id) references LOCATIONS (id, world_id),
+    FOREIGN KEY (previous_location_id, world_id) references LOCATIONS (id, world_id),
     FOREIGN KEY (session_id, at_tick) references MESSAGES (session_id, tick_num) ON DELETE CASCADE
 );
 
@@ -349,9 +384,11 @@ DROP TABLE IF EXISTS CURRENT_LOCATIONS CASCADE;
 CREATE TABLE CURRENT_LOCATIONS
 (
     session_id   INT NOT NULL REFERENCES SESSIONS (id) ON DELETE CASCADE,
-    tick_num     INT NOT NULL,
-    character_id INT NOT NULL REFERENCES CHARACTERS (id),
-    world_id     INT NOT NULL REFERENCES WORLDS (id),
+    tick_num     INT NOT NULL,                            -- When did this guy reach this location? (In message tick). Isn't necessarily the last message tick.
+
+    character_id INT NOT NULL REFERENCES CHARACTERS (id), -- who
+
+    world_id     INT NOT NULL REFERENCES WORLDS (id),     -- where
     location_id  INT NOT NULL,
 
     PRIMARY KEY (session_id, character_id),

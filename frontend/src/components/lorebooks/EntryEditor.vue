@@ -1,17 +1,17 @@
 TODO: Keywords dont get updated in between entries on addition/removal. They need a global state regarding them.
 <script setup lang="ts">
 import {ActivationStrategy, Entry, Outlet} from "@/domain/Lorebook";
-import LongTextBox from "@/components/utils/primitives/LongTextBox.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 import {computed, onMounted, ref, watch} from "vue";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import AutoCompleteBox from "@/components/utils/autocomplete/AutoCompleteBox.vue";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {createEntity} from "@/frameworks/ABSEntity";
 import SingleAutoComplete from "@/components/utils/autocomplete/SingleAutoComplete.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import NumberInput from "@/components/utils/primitives/NumberInput.vue";
-import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
+import NumberInput from "@/components/utils/primitiveEditors/NumberInput.vue";
+import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
 
 // ---- model / emit -------------------------------------------------------
 const props = defineProps<{

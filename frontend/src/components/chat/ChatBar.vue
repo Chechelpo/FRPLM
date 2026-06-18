@@ -1,34 +1,53 @@
 <script setup lang="ts">
-import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
+import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
 import { computed, ref } from "vue";
 import { NewMessageOrder } from "@/domain/Session";
+import {ChatCompletionRequest} from "@/types/ChatCompletions";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import PromptDebug from "@/components/chat/PromptDebug.vue";
+import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
+import {until} from "@vueuse/core";
+import {PromptDTO} from "@/types/DTOs";
 
 /**
  * In charge of making new user generated messages, as well as triggering new generations.
  */
 
-const emit = defineEmits<{
-  (e: "send", payload: NewMessageOrder): void;
+const props = defineProps<{
+  characterName: string;
+  newUserMessage: (content : string) => Promise<boolean>;
+  requestPrompt: () => Promise<PromptDTO>;
+  generateNewMessage: (request:ChatCompletionRequest) => Promise<boolean>;
 }>();
 
 const debugPrompt = ref<boolean>(false);
+const autoReply = ref<boolean>(true);
 const message = ref<string>("");
+const promptToDebug = ref<ChatCompletionRequest | null>(null);
 
-const canSend = computed<boolean>(() => message.value.trim().length > 0);
+const sendNewUserMessage = computed<boolean>(() => message.value.trim().length > 0);
+const waitingForMessage = ref<boolean>(false);
 
-function onSend(): void {
-  if (!canSend.value) return;
+async function onSend(): Promise<void> {
+  waitingForMessage.value = true;
+  if (sendNewUserMessage.value) {
+    const success = await props.newUserMessage(message.value)
+    if (success) message.value = "";
+  }
+  const prompt = (await props.requestPrompt());
+  if (debugPrompt.value){
+    console.debug("Requesting prompt");
+    promptToDebug.value = prompt.rawRequest;
+    await until(debugPrompt).toBe(false)
+    promptToDebug.value = null;
+  }
 
-  emit("send", {
-    debugPrompt: debugPrompt.value,
-    message: message.value,
-  });
+  if (autoReply.value){
+    const success = await props.generateNewMessage(prompt.rawRequest)
+    if (success) message.value = "";
+  }
 
-  message.value = "";
-}
-
-function onDebugPromptEdit(value: boolean): void {
-  debugPrompt.value = value;
+  waitingForMessage.value = false;
 }
 
 function onMessageInput(event: Event): void {
@@ -39,15 +58,20 @@ function onMessageInput(event: Event): void {
 <template>
   <section class="chat-bar">
     <div class="chat-bar-options">
+      <div class="chat-bar-character-name">{{ props.characterName }}</div>
       <label class="chat-bar-debug-option">
-        <span class="chat-bar-debug-label">
-          Debug prompt
-        </span>
-
-        <BooleanToggle
-            :model-value="debugPrompt"
-            @edit="onDebugPromptEdit"
-        />
+        <FieldEditorWrapper field-name="Debug prompt">
+          <BooleanToggle
+              :model-value="debugPrompt"
+              @edit="value => debugPrompt = value"
+          />
+        </FieldEditorWrapper>
+        <FieldEditorWrapper field-name="AutoReply">
+          <BooleanToggle
+            :model-value="autoReply"
+            @edit="value => autoReply = value"
+          />
+        </FieldEditorWrapper>
       </label>
     </div>
 
@@ -66,12 +90,22 @@ function onMessageInput(event: Event): void {
       <button
           type="button"
           class="chat-bar-send-button"
-          :disabled="!canSend"
+          :disabled="waitingForMessage"
+          :aria-label="waitingForMessage ? 'Waiting for message' : 'Send message'"
           @click="onSend"
       >
-        Send
+        <span v-if="waitingForMessage" aria-hidden="true">⏳</span>
+        <span v-else>Send</span>
       </button>
     </div>
+
+    <WindowPrompt
+        v-if="promptToDebug"
+        title="Prompt"
+        @close="debugPrompt = false; promptToDebug = null"
+    >
+      <PromptDebug :model-value="promptToDebug"/>
+    </WindowPrompt>
   </section>
 </template>
 
@@ -103,7 +137,16 @@ function onMessageInput(event: Event): void {
 
 .chat-bar-options {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.chat-bar-options {
+  display: flex;
+  font: var(--primary-text);
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .chat-bar-debug-option {

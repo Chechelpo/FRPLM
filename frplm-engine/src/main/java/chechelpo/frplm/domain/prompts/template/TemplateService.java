@@ -71,6 +71,15 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
     @TransactionalEventListener
     void updateToMaxTokens(CRUDCommittedEvent.@NotNull UpdatedEntity<?> rawEvent){
         if (rawEvent.type() != EntityTypes.Types.LLM_CONNECTION) return;
-        
+
+        CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord> event =
+                (CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord>) rawEvent;
+
+        if (!event.updatedData().assignsField(LLM_CONNECTION.MAX_TOKENS)) return;
+
+        this.store.updateMaxTokens(
+                event.target().requireValue(LLM_CONNECTION.ID),
+                event.updatedData().requireValue(LLM_CONNECTION.MAX_TOKENS)
+        );
     }
 }

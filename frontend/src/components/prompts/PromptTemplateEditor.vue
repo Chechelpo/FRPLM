@@ -6,10 +6,10 @@ import {
   REASONING_EFFORT_IDs,
   ReasoningEffortId
 } from "@/domain/Prompts";
-import ShortTextBox from "@/components/utils/primitives/ShortTextBox.vue";
-import NumberSlider from "@/components/utils/primitives/NumberSlider.vue";
-import BooleanToggle from "@/components/utils/primitives/BooleanToggle.vue";
-import SingleEnumInput from "@/components/utils/primitives/SingleEnumInput.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import NumberSlider from "@/components/utils/primitiveEditors/NumberSlider.vue";
+import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import { computed, onMounted, ref } from "vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import PromptSectionEditor from "@/components/prompts/PromptSectionEditor.vue";
@@ -91,7 +91,7 @@ async function createSection(): Promise<void> {
   const name = window.prompt("Enter new section name");
   if (!name) return;
 
-  const newSection = await model.value.createSection(name);
+  await model.value.createSection(name);
 
   //Acts up if not done this way.
   await reload()

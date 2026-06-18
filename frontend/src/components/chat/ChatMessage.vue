@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Message } from "@/domain/Session";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
-import { Location } from "@/domain/World";
-import { Character } from "@/domain/Characters";
+import {Message} from "@/domain/Session";
+import {computed, onMounted, ref, shallowRef, watch} from "vue";
+import {Location} from "@/domain/World";
+import {Character} from "@/domain/Characters";
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
+import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 const markdown = new MarkdownIt({
   html: true,
@@ -18,12 +19,14 @@ const markdown = new MarkdownIt({
 
 const props = defineProps<{
   message: Message;
+  isLastMessage: boolean;
   title: string;
+  onRegenerate: (message: Message) => Promise<boolean>;
 }>();
 
 const emits = defineEmits<{
   (e: "delete", value: Message): void;
-  (e: "regenerate", value: Message):void;
+  (e: "regenerate", value:Message): void;
 }>();
 
 const location = shallowRef<Location>();
@@ -31,7 +34,7 @@ const presentCharacters = shallowRef<Character[]>([]);
 const presentCharactersNames = shallowRef<string[]>([]);
 
 const editingLocation = ref<boolean>(false);
-
+const isAssistantMessage = computed<boolean>(() => props.message.get('role') == ChatCompletionRole.ASSISTANT);
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Message edit
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,6 +45,7 @@ const displayedContent = ref<string>("");
 const messageDraft = ref<string>("");
 
 const renderedContent = computed<string>(() => {
+  props.message.get("active_response");
   const html = markdown.render(displayedContent.value);
   return DOMPurify.sanitize(html);
 });
@@ -72,7 +76,24 @@ async function saveMessageEdit(): Promise<void> {
     savingMessage.value = false;
   }
 }
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Response
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+async function changeActiveResponse(offset: -1 | 1): Promise<void> {
+  const nextResponse = props.message.get('active_response') + offset;
 
+  if (nextResponse < 0 || nextResponse > props.message.get('response_num')) {
+    await onRegenerate()
+    return;
+  }
+
+  await props.message.update('active_response', nextResponse);
+
+  displayedContent.value = props.message.get('content');
+  console.log(`New content: ${displayedContent.value}`);
+  editingMessage.value = false;
+  await loadMessageContext();
+}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Character
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,6 +127,12 @@ async function loadMessageContext(): Promise<void> {
   );
 }
 
+async function onRegenerate(){
+  displayedContent.value = "...";
+  const success = await props.onRegenerate(props.message);
+  if (success) await loadMessageContext()
+}
+
 onMounted(loadMessageContext);
 
 watch(
@@ -129,10 +156,44 @@ watch(
           <button
               type="button"
               class="chat-message-action-button"
+              :disabled = "!props.isLastMessage"
               @click="emits('delete', props.message)"
           >
             D
           </button>
+
+          <div
+              class="chat-message-response-selector"
+              v-if="isAssistantMessage"
+              aria-label="Alternative response selector"
+          >
+            <button
+                type="button"
+                class="chat-message-response-button"
+                aria-label="Previous response"
+                :disabled="!props.isLastMessage || props.message.get('active_response') == 1"
+                @click="changeActiveResponse(-1)"
+            >
+              &lt;
+            </button>
+
+            <output
+                class="chat-message-response-counter"
+                aria-live="polite"
+            >
+              {{ props.message.get('active_response') }}/{{ props.message.get('response_num') }}
+            </output>
+
+            <button
+                type="button"
+                class="chat-message-response-button"
+                aria-label="Next response"
+                :disabled="!props.isLastMessage"
+                @click="changeActiveResponse(1)"
+            >
+              &gt;
+            </button>
+          </div>
 
           <button
               v-if="!editingMessage"
@@ -160,13 +221,6 @@ watch(
                 @click="cancelMessageEdit"
             >
               Cancel
-            </button>
-            <button
-              type="button"
-              class="chat-message-action-button"
-              @click="emits('regenerate', props.message)"
-            >
-              Regenerate
             </button>
           </template>
         </div>
@@ -204,6 +258,7 @@ watch(
 
     <div
         v-if="!editingMessage"
+        :key="message.get('active_response')"
         class="chat-message-content chat-message-content-readonly"
         v-html="renderedContent"
     />
@@ -232,7 +287,7 @@ watch(
       :title="String(selectedCharacter.get('name') ?? 'Character')"
       @close="editingCharacter = false"
   >
-    <CharacterEditor :model-value="selectedCharacter" />
+    <CharacterEditor :model-value="selectedCharacter" :edit-starting-locations="false" />
   </WindowPrompt>
 </template>
 
@@ -423,5 +478,70 @@ watch(
 
 .chat-message-content-editor:focus {
   box-shadow: inset 0 0 0 1px var(--primary-accent, #f59e0b);
+}
+
+.chat-message-response-selector {
+  display: inline-flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  border: 1px solid color-mix(
+      in srgb,
+      var(--primary-accent, #f59e0b) 55%,
+      transparent
+  );
+  border-radius: 0.35rem;
+}
+
+.chat-message-response-button {
+  width: 1.6rem;
+  min-height: 1.4rem;
+  padding: 0;
+
+  border: none;
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.chat-message-response-button:hover:not(:disabled) {
+  background: color-mix(
+      in srgb,
+      var(--primary-accent, #f59e0b) 18%,
+      transparent
+  );
+}
+
+.chat-message-response-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.chat-message-response-counter {
+  min-width: 3rem;
+  padding: 0 0.3rem;
+
+  border-right: 1px solid color-mix(
+      in srgb,
+      var(--primary-accent, #f59e0b) 35%,
+      transparent
+  );
+  border-left: 1px solid color-mix(
+      in srgb,
+      var(--primary-accent, #f59e0b) 35%,
+      transparent
+  );
+
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 </style>

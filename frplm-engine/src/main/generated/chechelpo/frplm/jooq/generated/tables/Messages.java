@@ -6,11 +6,12 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Extension.ExtensionPath;
 import chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
-import chechelpo.frplm.jooq.generated.tables.LlmGen.LlmGenPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
+import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
@@ -76,6 +77,21 @@ public class Messages extends TableImpl<MessagesRecord> {
     public final TableField<MessagesRecord, Integer> TICK_NUM = createField(DSL.name("TICK_NUM"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.MESSAGES.ROLE</code>.
+     */
+    public final TableField<MessagesRecord, String> ROLE = createField(DSL.name("ROLE"), SQLDataType.VARCHAR(9).nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
+     */
+    public final TableField<MessagesRecord, String> REQUEST_JSON = createField(DSL.name("REQUEST_JSON"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>PUBLIC.MESSAGES.CONTENT</code>.
+     */
+    public final TableField<MessagesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR, this, "");
+
+    /**
      * The column <code>PUBLIC.MESSAGES.TIME</code>.
      */
     public final TableField<MessagesRecord, Integer> TIME = createField(DSL.name("TIME"), SQLDataType.INTEGER.nullable(false), this, "");
@@ -91,19 +107,14 @@ public class Messages extends TableImpl<MessagesRecord> {
     public final TableField<MessagesRecord, Integer> LOCATION_ID = createField(DSL.name("LOCATION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.MESSAGES.ROLE</code>.
+     * The column <code>PUBLIC.MESSAGES.ACTIVE_RESPONSE</code>.
      */
-    public final TableField<MessagesRecord, String> ROLE = createField(DSL.name("ROLE"), SQLDataType.VARCHAR(9).nullable(false), this, "");
+    public final TableField<MessagesRecord, Short> ACTIVE_RESPONSE = createField(DSL.name("ACTIVE_RESPONSE"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
-     * The column <code>PUBLIC.MESSAGES.REQUEST_JSON</code>.
+     * The column <code>PUBLIC.MESSAGES.RESPONSE_NUM</code>.
      */
-    public final TableField<MessagesRecord, String> REQUEST_JSON = createField(DSL.name("REQUEST_JSON"), SQLDataType.VARCHAR, this, "");
-
-    /**
-     * The column <code>PUBLIC.MESSAGES.CONTENT</code>.
-     */
-    public final TableField<MessagesRecord, String> CONTENT = createField(DSL.name("CONTENT"), SQLDataType.VARCHAR.defaultValue(DSL.field(DSL.raw("NULL"), SQLDataType.VARCHAR)), this, "");
+    public final TableField<MessagesRecord, Short> RESPONSE_NUM = createField(DSL.name("RESPONSE_NUM"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     private Messages(Name alias, Table<MessagesRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -179,7 +190,7 @@ public class Messages extends TableImpl<MessagesRecord> {
 
     @Override
     public List<ForeignKey<MessagesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_13, Keys.CONSTRAINT_131AF);
+        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_131, Keys.CONSTRAINT_131AF);
     }
 
     private transient SessionsPath _sessions;
@@ -201,7 +212,7 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_13, null);
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_131, null);
 
         return _worlds;
     }
@@ -226,22 +237,9 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public ResponsesPath responses() {
         if (_responses == null)
-            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_3143.getInverseKey());
+            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_314384.getInverseKey());
 
         return _responses;
-    }
-
-    private transient LlmGenPath _llmGen;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.LLM_GEN</code>
-     * table
-     */
-    public LlmGenPath llmGen() {
-        if (_llmGen == null)
-            _llmGen = new LlmGenPath(this, null, Keys.CONSTRAINT_3A73.getInverseKey());
-
-        return _llmGen;
     }
 
     private transient ExtrasPath _extras;
@@ -270,6 +268,19 @@ public class Messages extends TableImpl<MessagesRecord> {
         return _currentLocations;
     }
 
+    private transient MovementsPath _movements;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
+     * table
+     */
+    public MovementsPath movements() {
+        if (_movements == null)
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686258.getInverseKey());
+
+        return _movements;
+    }
+
     /**
      * Get the implicit many-to-many join path to the
      * <code>PUBLIC.EXTENSION</code> table
@@ -278,10 +289,18 @@ public class Messages extends TableImpl<MessagesRecord> {
         return extras().extension();
     }
 
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.CHARACTERS</code> table
+     */
+    public CharactersPath characters() {
+        return movements().characters();
+    }
+
     @Override
     public List<Check<MessagesRecord>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("CONSTRAINT_131"), "\"ROLE\" IN('user', 'assistant')", true),
+            Internal.createCheck(this, DSL.name("CONSTRAINT_13"), "\"ROLE\" IN('user', 'assistant')", true),
             Internal.createCheck(this, DSL.name("REQUEST_JSON_ONLY_FOR_GENERATED_MESSAGES"), "(\"REQUEST_JSON\" IS NULL)\n    OR (\"ROLE\" = 'assistant')", true)
         );
     }

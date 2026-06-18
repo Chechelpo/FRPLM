@@ -32,6 +32,12 @@ final class OutletStore extends EntityStore<OutletRecord> {
                         .where(OUTLET.OUTLET_.eq(name))
         );
     }
+    public String getName(int outletId) {
+        return ctx.select(OUTLET.OUTLET_)
+                .from(main_table)
+                .where(OUTLET.ID.eq(outletId))
+                .fetchOne(OUTLET.OUTLET_);
+    }
 
     public IntObjectPair<String> @NotNull [] getOutletsOfLorebooks(IntSet lorebookIDs){
         return ctx.selectDistinct(OUTLET.OUTLET_, OUTLET.ID)

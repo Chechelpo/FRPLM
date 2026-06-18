@@ -6,8 +6,12 @@ package chechelpo.frplm.jooq.generated.tables;
 
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
+import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
+import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
+import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
+import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 
 import java.util.Arrays;
@@ -71,6 +75,16 @@ public class Responses extends TableImpl<ResponsesRecord> {
      * The column <code>PUBLIC.RESPONSES.RESPONSE_NUM</code>.
      */
     public final TableField<ResponsesRecord, Short> RESPONSE_NUM = createField(DSL.name("RESPONSE_NUM"), SQLDataType.SMALLINT.nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.RESPONSES.LOCATION_ID</code>.
+     */
+    public final TableField<ResponsesRecord, Integer> LOCATION_ID = createField(DSL.name("LOCATION_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.RESPONSES.WORLD_ID</code>.
+     */
+    public final TableField<ResponsesRecord, Integer> WORLD_ID = createField(DSL.name("WORLD_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.RESPONSES.ADVANCES_TIME_BY</code>.
@@ -151,12 +165,12 @@ public class Responses extends TableImpl<ResponsesRecord> {
 
     @Override
     public UniqueKey<ResponsesRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_314;
+        return Keys.CONSTRAINT_3143;
     }
 
     @Override
     public List<ForeignKey<ResponsesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_31, Keys.CONSTRAINT_3143);
+        return Arrays.asList(Keys.CONSTRAINT_31, Keys.CONSTRAINT_314, Keys.CONSTRAINT_31438, Keys.CONSTRAINT_314384);
     }
 
     private transient SessionsPath _sessions;
@@ -171,6 +185,30 @@ public class Responses extends TableImpl<ResponsesRecord> {
         return _sessions;
     }
 
+    private transient WorldsPath _worlds;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
+     */
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_314, null);
+
+        return _worlds;
+    }
+
+    private transient LocationsPath _locations;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.LOCATIONS</code> table.
+     */
+    public LocationsPath locations() {
+        if (_locations == null)
+            _locations = new LocationsPath(this, Keys.CONSTRAINT_31438, null);
+
+        return _locations;
+    }
+
     private transient MessagesPath _messages;
 
     /**
@@ -178,9 +216,30 @@ public class Responses extends TableImpl<ResponsesRecord> {
      */
     public MessagesPath messages() {
         if (_messages == null)
-            _messages = new MessagesPath(this, Keys.CONSTRAINT_3143, null);
+            _messages = new MessagesPath(this, Keys.CONSTRAINT_314384, null);
 
         return _messages;
+    }
+
+    private transient ResponseLocationChangesPath _responseLocationChanges;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     */
+    public ResponseLocationChangesPath responseLocationChanges() {
+        if (_responseLocationChanges == null)
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_379E.getInverseKey());
+
+        return _responseLocationChanges;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.CHARACTERS</code> table
+     */
+    public CharactersPath characters() {
+        return responseLocationChanges().characters();
     }
 
     @Override

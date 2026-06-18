@@ -1,15 +1,11 @@
 package chechelpo.frplm.domain.sessions.movement;
 
-import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.character.core.CharacterService;
-import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import chechelpo.frplm.domain.sessions.core.SessionService;
-import chechelpo.frplm.domain.sessions.messages.core.MessageService;
+import chechelpo.frplm.domain.sessions.messages.MessageService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.events.crud.CRUDCommittedEvent;
-import chechelpo.frplm.events.crud.CRUDDraftEvent;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -19,24 +15,17 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.*;
 import org.jetbrains.annotations.CheckReturnValue;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 import java.util.Objects;
 
-import static chechelpo.frplm.domain.sessions.messages.core.MessageService.FIRST_MESSAGE_TICK_NUM;
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
-public class CurrentLocationService extends EntityService<CurrentLocationsRecord, CurrentLocationStore> {
-    private final StartingLocationsService startingLocations;
-    private final EdgeService neighbours;
+class CurrentLocationService extends EntityService<CurrentLocationsRecord, CurrentLocationStore> {
     private final MovementService movementService;
     private final LocationsService locationsService;
     private final CharacterService characterService;
@@ -47,13 +36,9 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
             @NotNull CurrentLocationStore store,
             @NotNull LocationsService locationsService,
             @NotNull EventBus eventBus,
-            @NotNull StartingLocationsService startingLocations,
-            @NotNull EdgeService neighbours,
             @NotNull MovementService movements,
             CharacterService characterService, MessageService messageService, SessionService sessionService) {
         super(store, eventBus);
-        this.neighbours = neighbours;
-        this.startingLocations = startingLocations;
         this.movementService = movements;
         this.locationsService = locationsService;
         this.characterService = characterService;
@@ -64,6 +49,7 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
     public void rollbackLocationsTo(int sessionID, int tick){
         store.rollbackSessionTo(sessionID, tick);
     }
+    public void rollbackLocationsToBefore(int sessionID, int tick){store.rollbackLocationsToBefore(sessionID, tick);}
 
     public CharactersRecord[] getAtLocation(int sessionID, int locationID) {
         List<CurrentLocationsRecord> records = store.getAtLocation(sessionID, locationID);
@@ -80,24 +66,32 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
         return characterService.getCharacters(records);
     }
 
+
     @Transactional(readOnly = true)
     @CheckReturnValue
     public @NotNull LocationsRecord getLocationOf(@NotNull CharactersRecord character, @NotNull SessionsRecord session) throws EntityNotFound {
+        return getLocationOf(character.getId(), session.getId());
+    }
+
+    @Transactional(readOnly = true)
+    @CheckReturnValue
+    public @NotNull LocationsRecord getLocationOf(int characterId, int sessionId) throws EntityNotFound {
         EntityKey<CurrentLocationsRecord> key = EntityKey.<CurrentLocationsRecord>builder()
-                .set(CURRENT_LOCATIONS.CHARACTER_ID, character.getId())
-                .set(CURRENT_LOCATIONS.SESSION_ID, session.getId())
+                .set(CURRENT_LOCATIONS.CHARACTER_ID, characterId)
+                .set(CURRENT_LOCATIONS.SESSION_ID, sessionId)
                 .build();
 
         List<CurrentLocationsRecord> records = store.getAllMatching(key);
         if (records.isEmpty()) {
-            log.error("No current location for character {} in session {}", character, session);
+            log.error("No current location for character {} in session {}", characterId, sessionId);
             throw new EntityNotFound("Character has no active location", Severity.USER);
         }
         if (records.size() > 1)
-            log.warn("Multiple current locations for character {} in session {}", character, session);
+            log.warn("Multiple current locations for character {} in session {}", characterId, sessionId);
 
         return locationsService.getLocationBy(records.getFirst());
     }
+
 
     /** @implNote check the movement is valid */
     @Override
@@ -108,6 +102,7 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
     ) {
         CurrentLocationsRecord previous;
 
+        //noinspection SpringTransactionalMethodCallsInspection
         previous = this.find(target)
                 .orElseThrow(() -> {
                     log.error("No previous location for character {} in session {}", target, target.requireValue(CURRENT_LOCATIONS.SESSION_ID));
@@ -128,10 +123,6 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
 
         if (nextLocation.requireValue(LOCATIONS.ID) == previousLocation.requireValue(LOCATIONS.ID))
             data.set(CURRENT_LOCATIONS.TICK_NUM, previous.getTickNum());
-        else if (!neighbours.isNeighbour(previousLocation, nextLocation)){
-            log.error("Location {} and {} are not neighbours", previousLocation, nextLocation);
-            throw new InvalidValue("Location " + previousLocation + " and " + nextLocation + " are not neighbours");
-        }
         else { //This is a legitimate movement
             int sessionID = target.requireValue(CURRENT_LOCATIONS.SESSION_ID);
             data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastOf(sessionID).getTickNum());
@@ -145,7 +136,7 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
     }
 
     @Override
-    protected void afterSuccessfulUpdate(EntityKey<CurrentLocationsRecord> key, @NotNull EntityDataPayload<CurrentLocationsRecord> updated, long operationID) {
+    protected void afterSuccessfulUpdate(@NotNull EntityKey<CurrentLocationsRecord> key, @NotNull EntityDataPayload<CurrentLocationsRecord> updated, long operationID) {
         int movedCharacterId = key.requireValue(CURRENT_LOCATIONS.CHARACTER_ID);
         int sessionID = key.requireValue(CURRENT_LOCATIONS.SESSION_ID);
         boolean userCharacterMovement = movedCharacterId == sessionService.getUserCharacterID(sessionID).orElseThrow();
@@ -167,67 +158,5 @@ public class CurrentLocationService extends EntityService<CurrentLocationsRecord
 
         }
         super.afterSuccessfulUpdate(key, updated, operationID);
-    }
-
-    /**
-     * Registers starting locations for all characters.
-     * @implSpec Session must be created before this runs, but is a necessary side effect.
-     * That's why it's a listener and not in beforeUpdate
-     */
-    @EventListener
-    void registerStartingLocations(CRUDCommittedEvent.@NotNull CreatedEntity<?> rawEvent){
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
-
-        CRUDCommittedEvent.CreatedEntity<MessagesRecord> creationEvent =
-                (CRUDCommittedEvent.CreatedEntity<MessagesRecord>) rawEvent;
-
-        if (creationEvent.record().getTickNum() != FIRST_MESSAGE_TICK_NUM) return;
-
-        log.debug("Registering starting locations for session id {}", creationEvent.key());
-
-        MessagesRecord message = creationEvent.record();
-        List<StartingLocationsRecord> startings = startingLocations.getMatching(
-                EntityKey.of(STARTING_LOCATIONS.WORLD_ID, message.getWorldId())
-        );
-        log.trace("Starting locations \n{}", startings);
-
-        EntityDataPayload<CurrentLocationsRecord> toInsert;
-        for (StartingLocationsRecord startingLocation : startings) {
-            try{
-                toInsert = getFirstBuilt(startingLocation, message);
-                this.unsafeCreate(toInsert);
-
-            } catch (Exception e){
-                log.error("Error while inserting starting locations for session id {}, deleting it", creationEvent.key(), e);
-                return;
-            }
-        }
-    }
-
-    @EventListener
-    void onMessageDeletionRewindLocations(CRUDDraftEvent.@NotNull DeleteEntityDraft<?> rawEvent){
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
-        CRUDDraftEvent.DeleteEntityDraft<MessagesRecord> event = (CRUDDraftEvent.DeleteEntityDraft<MessagesRecord>) rawEvent;
-
-        EntityKey<MessagesRecord> deleted = event.key();
-        this.store.rollbackLocationsToBefore(
-                deleted.get(MESSAGES.SESSION_ID)
-                        .orElseThrow(() -> new UnexpectedException("This message key has no sessionID", Severity.SYSTEM)),
-                deleted.get(MESSAGES.TICK_NUM)
-                        .orElseThrow(() -> new UnexpectedException("This message key has no tick_num", Severity.SYSTEM))
-        );
-    }
-
-    @Contract("_, _ -> new")
-    private static @NotNull EntityDataPayload<CurrentLocationsRecord> getFirstBuilt(
-            @NotNull StartingLocationsRecord startingLocation,
-            @NotNull MessagesRecord record) {
-        return EntityDataPayload.<CurrentLocationsRecord>builder()
-                .set(CURRENT_LOCATIONS.SESSION_ID, record.getSessionId())
-                .set(CURRENT_LOCATIONS.CHARACTER_ID, startingLocation.getCharacterId())
-                .set(CURRENT_LOCATIONS.TICK_NUM, record.getTickNum())
-                .set(CURRENT_LOCATIONS.WORLD_ID, record.getWorldId())
-                .set(CURRENT_LOCATIONS.LOCATION_ID, startingLocation.getLocationId())
-                .build();
     }
 }

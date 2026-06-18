@@ -11,7 +11,6 @@ public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implem
         super(record, context);
     }
 
-
     @Override
     public ConnectionSnapshot.Reference reference(){
         return new ConnectionSnapshot.Reference(record.getId());

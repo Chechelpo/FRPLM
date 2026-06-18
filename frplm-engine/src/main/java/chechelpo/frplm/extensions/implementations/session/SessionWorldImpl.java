@@ -43,17 +43,10 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
         if (!areNeighbours(characterLocation, location))
             return MoveResult.notNeighbours(character, characterLocation, location);
 
-        boolean success = session.context().currentLocations().update(
-                EntityKey.<CurrentLocationsRecord>builder()
-                        .set(CURRENT_LOCATIONS.SESSION_ID, session.getRecord().getId())
-                        .set(CURRENT_LOCATIONS.CHARACTER_ID, character.getRecord().getId())
-                        .build()
-                ,
-                EntityDataPayload.<CurrentLocationsRecord>builder()
-                        .set(CURRENT_LOCATIONS.WORLD_ID, session.getRecord().getWorldId())
-                        .set(CURRENT_LOCATIONS.LOCATION_ID, location.getRecord().getId())
-                        .set(CURRENT_LOCATIONS.TICK_NUM, ((ChatMessageImpl) session.getLastMessage()).getRecord().getTickNum())
-                        .build()
+        boolean success = session.context().movements().move(
+                session.getRecord().getId(),
+                character.getRecord().getId(),
+                location.getRecord().getId()
         );
 
         if (!success)
@@ -72,12 +65,9 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
 
         int currentLocationID;
         try {
-            currentLocationID = session.context().currentLocations().getValueOf(CURRENT_LOCATIONS.LOCATION_ID,
-                    EntityKey.<CurrentLocationsRecord>builder()
-                            .set(CURRENT_LOCATIONS.SESSION_ID, session.getRecord().getId())
-                            .set(CURRENT_LOCATIONS.CHARACTER_ID, record.getId())
-                            .build()
-            ).orElseThrow( );
+            currentLocationID = session.context().movements().getLocationOf(
+                    character.getRecord(), session.getRecord()
+            ).getId();
         } catch (EntityNotFound ignored) {
             throw new RuntimeException("Character " + character + " does not have a current location");
         }
@@ -111,7 +101,7 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     public SessionLocationImpl locationOf(@NotNull SessionCharacterImpl character) {
         try {
             return new SessionLocationImpl(
-                    session.context().currentLocations().getLocationOf(character.getRecord(), session.getRecord()),
+                    session.context().movements().getLocationOf(character.getRecord(), session.getRecord()),
                     context,
                     this
             );
@@ -122,7 +112,7 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
 
     public SessionCharacterImpl @NotNull [] getAtLocation(@NotNull SessionLocationImpl location) {
         return Arrays
-                .stream(session.context().currentLocations().getAtLocation(location.getRecord(), session.getRecord()))
+                .stream(session.context().movements().getAtLocation(location.getRecord(), session.getRecord()))
                 .map(record -> new SessionCharacterImpl(record, this.context, session, this))
                 .toArray(SessionCharacterImpl[]::new);
     }

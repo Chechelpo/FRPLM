@@ -1,4 +1,4 @@
-package chechelpo.frplm.domain.sessions.messages.core;
+package chechelpo.frplm.domain.sessions.messages;
 
 import chechelpo.frplm.annotations.Store;
 import chechelpo.frplm.domain.EntityTypes;
