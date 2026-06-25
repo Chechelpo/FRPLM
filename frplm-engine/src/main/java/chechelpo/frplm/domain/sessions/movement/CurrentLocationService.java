@@ -83,7 +83,8 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
 
         List<CurrentLocationsRecord> records = store.getAllMatching(key);
         if (records.isEmpty()) {
-            log.error("No current location for character {} in session {}", characterId, sessionId);
+            String characterName = characterService.find(EntityKey.of(CHARACTERS.ID, characterId)).orElseThrow().getName();
+            log.error("No current location for character {} in session {}", characterName, sessionId);
             throw new EntityNotFound("Character has no active location", Severity.USER);
         }
         if (records.size() > 1)

@@ -114,6 +114,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 Entry.ENTRY.DELAY,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .nullable()
                                 .setMin(0L)
                                 .build()
                         )
@@ -125,6 +126,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 Entry.ENTRY.COOLDOWN,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .nullable()
                                 .setMin(0L)
                                 .build()
                         )
@@ -135,6 +137,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 Entry.ENTRY.STICK_THROUGH,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .nullable()
                                 .setMin(0L)
                                 .build()
                         )
@@ -146,7 +149,10 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 "injection_order",
                 Entry.ENTRY.INJECTION_ORDER,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER).build())
+                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .nullable()
+                                .build()
+                        )
                         .build()
         );
 
@@ -168,7 +174,9 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 Entry.ENTRY.EMBED_TEXT,
                 FieldInfo.stringField()
                         .setConstraints(
-                                StringConstraint.builder().build()
+                                StringConstraint.builder()
+                                        .nullable()
+                                        .build()
                         )
                         .build()
         );
@@ -199,6 +207,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                 FieldInfo.numberField(FieldType.SHORT)
                         .setConstraints(
                                 NumberConstraint.builder(FieldType.SHORT)
+                                        .nullable()
                                         .setMin((long) Short.MAX_VALUE)
                                         .setMin(0L)
                                         .build()

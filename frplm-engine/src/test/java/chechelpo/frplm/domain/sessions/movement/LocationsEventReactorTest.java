@@ -111,6 +111,7 @@ class LocationsEventReactorTest {
         assertNotEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
         assertEquals(previousLocation.getId(), actualLocation.get().getLocationId(), "Didn't move back to previous location");
     }
+
     @Test
     void rewindLocationsOnMessageDeleted_doesNothingOnWrongMessageDeletion() {
         int messageAmount = 10;
@@ -186,7 +187,10 @@ class LocationsEventReactorTest {
         LocationsRecord currentUserLocation = movements.getLocationOf(userCharacter, context.sessionContext().session());
 
         MessagesRecord lastMessage = messages.service.getLastOf(context.sessionContext().session());
+        EntityKey<MessagesRecord> lastMessageKey = messages.service.keyOf(lastMessage);
 
+        //Necessary cause you can't add responses to user messages
+        messages.service.update(lastMessageKey, EntityDataPayload.of(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue()));
         messages.service.registerNewResponse(sessionsRecord.getId(), lastMessage.getTickNum(), "A");
 
         ResponsesRecord activeResponse = messages.service.getActiveResponseOf(lastMessage);
@@ -203,6 +207,11 @@ class LocationsEventReactorTest {
         List<LocationsRecord> locationsRecordList = context.sessionContext().sessionLocations();
         LocationsRecord startingUserLocation = movements.getLocationOf(userCharacter, sessionsRecord);
         MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        messages.service.update(
+                messages.service.keyOf(lastMessage),
+                EntityDataPayload.of(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())
+        );
+
         ResponsesRecord firstResponse = messages.service.getActiveResponseOf(lastMessage);
         edgeTestContext.linkLinear(context.sessionContext().sessionLocations());
 
@@ -215,7 +224,6 @@ class LocationsEventReactorTest {
         movements.move(sessionId, characterId, location1.getId());
         movements.move(sessionId, characterId, location2.getId());
         assertEquals(location2.getId(), movements.getLocationOf(userCharacter, sessionsRecord).getId());
-
 
         messages.service.registerNewResponse(sessionsRecord.getId(), lastMessage.getTickNum(), "A");
         LocationsRecord actualRollbackLocation = movements.getLocationOf(userCharacter, sessionsRecord);
@@ -243,18 +251,9 @@ class LocationsEventReactorTest {
 
         //Change response to second
         messages.service.update(messageKey,
-                EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE,  (short) (firstResponse.getResponseNum() + 1))
+                EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, (short) (firstResponse.getResponseNum() + 1))
         );
         assertEquals(location1.getId(), movements.getLocationOf(userCharacter, sessionsRecord).getId());
     }
 
-    @Test
-    void onResponseChangeMessageLocation() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Test
-    void applyLocationChangesOfResponse() {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
 }

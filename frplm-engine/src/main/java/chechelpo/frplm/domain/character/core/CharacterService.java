@@ -35,12 +35,14 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
 
     @Override
     protected void beforeCreate(EntityDataPayload<CharactersRecord> data, long operationID) {
-        EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-        lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.CHARACTER_INFO.stable_id);
-        lorebookData.set(LOREBOOKS.NAME, data.requireValue(CHARACTERS.NAME));
+        if (!data.assignsField(CHARACTERS.LOREBOOK_ID)){
+            EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
+            lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.CHARACTER_INFO.stable_id);
+            lorebookData.set(LOREBOOKS.NAME, data.requireValue(CHARACTERS.NAME));
 
-        LorebooksRecord record = lorebookService.createAndGet(lorebookData);
-        data.set(CHARACTERS.LOREBOOK_ID, record.getId());
+            LorebooksRecord record = lorebookService.createAndGet(lorebookData);
+            data.set(CHARACTERS.LOREBOOK_ID, record.getId());
+        }
 
         super.beforeCreate(data, operationID);
     }

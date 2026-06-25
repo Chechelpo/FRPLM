@@ -1,8 +1,9 @@
-package chechelpo.frplm.utils.importers.lorebooks;
+package chechelpo.frplm.utils.importers.sillytavern;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

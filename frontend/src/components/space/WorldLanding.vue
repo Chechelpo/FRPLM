@@ -4,14 +4,18 @@ import {World, WorldData, WorldKey} from "@/domain/World";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {computed, onMounted, ref, shallowRef} from "vue";
 import WorldEdit from "@/components/space/WorldEdit.vue";
-import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {createEntity, deleteEntity, fetch_all, fetchApi} from "@/frameworks/ABSEntity";
 import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import {API_BASE} from "@/config";
 
 const worlds = ref<World[]>([]);
 const worldNames = computed<string[]>(() => worlds.value.map(world => world.get('name')))
 
 const isEditing = ref<boolean>(false);
 const editingWorld = shallowRef<World | null>(null);
+
+const importInput = ref<HTMLInputElement | null>(null);
+const importing = ref<boolean>(false);
 
 async function onCreate() {
   const input_name = window.prompt('Enter new world name:');
@@ -35,19 +39,87 @@ function onEdit(new_world: World) {
   editingWorld.value = new_world;
 }
 
+function openImportPicker(): void {
+  importInput.value?.click();
+}
+
+async function onImportFileSelected(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    importing.value = true;
+
+    const text = await file.text();
+
+    const response = await fetchApi(`${API_BASE}/import/world`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: text,
+    });
+
+    const dto = await response.json();
+    const importedWorld = new World(dto, EntityTypes.WORLDS);
+
+    worlds.value.push(importedWorld);
+    onEdit(importedWorld);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    importing.value = false;
+
+    // Allows selecting the same file again.
+    input.value = '';
+  }
+}
+
+async function onDelete(){
+  if (!isEditing.value || !editingWorld) return;
+  const confirm = window.confirm("Are you sure you want to delete this world?");
+  if (!confirm) return;
+
+  const success = await deleteEntity<WorldKey>(editingWorld.value?.key!, EntityTypes.WORLDS);
+
+  if (success) {
+    isEditing.value = false;
+    editingWorld.value = null;
+  }
+}
+
 onMounted(async () => {
   worlds.value = await fetch_all<WorldKey, WorldData, World>(EntityTypes.WORLDS, World);
 })
 </script>
 
 <template>
-  <div>
+  <div class="full_visor">
     <button
         v-if="!isEditing"
         type="button"
         @click="onCreate"
     >
       New
+    </button>
+    <input
+        ref="importInput"
+        type="file"
+        class="hidden-file-input"
+        accept=".json"
+        @change="onImportFileSelected"
+    />
+    <button
+        v-if="!isEditing"
+        type="button"
+        :disabled="importing"
+        @click="openImportPicker"
+    >
+      {{ importing ? 'Importing…' : 'Import' }}
     </button>
     <SingleEnumInput
         v-if="!isEditing"
@@ -58,11 +130,18 @@ onMounted(async () => {
     <WorldEdit
         v-if="isEditing && editingWorld != null"
         v-model="editingWorld!"
+        @delete="onDelete"
         @stop-editing="isEditing = false; editingWorld = null"
     />
   </div>
 </template>
 
 <style scoped>
+.full_visor{
+  height:100dvh;
+}
 
+.hidden-file-input {
+  display: none;
+}
 </style>

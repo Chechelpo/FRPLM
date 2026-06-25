@@ -38,12 +38,11 @@ final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord
         );
 
         register_field(
-                "type",
+                "host_id",
                 LlmConnection.LLM_CONNECTION.HOST_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(
                                 NumberConstraint.builder(FieldType.INTEGER)
-                                        .setPossibleValues(LLMBackend.getIDs())
                                         .nullable()
                         )
                         .build()

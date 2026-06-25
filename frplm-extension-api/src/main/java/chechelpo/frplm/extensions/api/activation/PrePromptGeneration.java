@@ -4,7 +4,7 @@ package chechelpo.frplm.extensions.api.activation;
 import chechelpo.frplm.extensions.api.session.Session;
 import chechelpo.frplm.extensions.api.utils.PromptBuilder;
 
-public interface PreGeneration {
+public interface PrePromptGeneration {
     /**
      * Runs after the engine has assembled the initial prompt draft but before
      * lorebook outlet resolution, entry activation, and provider dispatch.

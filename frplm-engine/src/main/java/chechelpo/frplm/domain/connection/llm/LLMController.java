@@ -1,35 +1,40 @@
 package chechelpo.frplm.domain.connection.llm;
 
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.domain.connection.api_hosts.HostService;
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.NotInitialized;
 import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.exceptions.runtime.UnexpectedException;
+import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
-import chechelpo.frplm.utils.integrations.Models;
-import chechelpo.frplm.utils.generation.OpenAICompatible;
+import chechelpo.frplm.utils.integrations.ModelResponses;
+import chechelpo.frplm.utils.integrations.T2TClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 import static chechelpo.frplm.domain.EntityTypes.LLM_CONNECTION_URL;
+import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
 @RestController
+@Component
 @RequestMapping(LLM_CONNECTION_URL)
 final class LLMController extends EntityController<LlmConnectionRecord, LLMService> {
-    private final SecretService secretService;
-
-    LLMController(LLMService service, SecretService secretService) {
+    private final T2TClient textToTextClient;
+    private final HostService hosts;
+    LLMController(LLMService service, SecretService secretService, HostService hostService) {
         super(service);
-        this.secretService = secretService;
+        textToTextClient = new T2TClient(secretService, hostService);
+        this.hosts = hostService;
     }
 
     record TestResponse(boolean status, String message){}
@@ -37,32 +42,42 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
     public ResponseEntity<TestResponse> test(@RequestParam Map<String, Object> params) throws EntityNotFound {
         EntityKey<LlmConnectionRecord> key = extractKey(params);
 
-        LlmConnectionRecord record = service.find(key)
+        LlmConnectionRecord connection = service.find(key)
                 .orElseThrow(() -> new EntityNotFound("Could not find connection to test", Severity.USER));
         ChatCompletionRequest request = ChatCompletionRequest.getTestMessage(
                 service.getValueOf(LLM_CONNECTION.MODEL, key)
                         .orElseThrow(() -> new NotInitialized("Connection model not configured", Severity.USER))
         );
 
-        LLMBackend backend = LLMBackend.get(record.getHostId());
         log.debug("Testing connection");
-        ChatCompletionResponse response =  OpenAICompatible.generateNonStreaming(
-                backend.host,
-                record,
-                request,
-                secretService
-        );
+        ChatCompletionResponse response =  textToTextClient.generate(request, connection).orElseThrow();
         return ResponseEntity.ok(
             new TestResponse(true, response.choices().getFirst().message().content())
         );
     }
 
     @GetMapping("/models")
-    public ResponseEntity<Models.ModelResponses> models(@RequestParam Map<String, Object> params) throws EntityNotFound {
+    public ResponseEntity<ModelResponses> models(@RequestParam Map<String, Object> params) throws EntityNotFound {
         EntityKey<LlmConnectionRecord> key = extractKey(params);
         LlmConnectionRecord llm = service.find(key)
                     .orElseThrow(() -> new EntityNotFound("Could not find connection to fetch models from", Severity.USER));
 
-        return ResponseEntity.ok(Models.fetch(llm, secretService));
+        return ResponseEntity.ok(textToTextClient.modelsOf(llm));
+    }
+
+    record Host(int hostId, String url){}
+
+    @GetMapping("/host/{hostId}")
+    public ResponseEntity<Host> getCustomHost(@PathVariable int hostId){
+        ApiHostsRecord hostsRecord = hosts.find(EntityKey.of(API_HOSTS.ID, hostId))
+                .orElseThrow(() -> new EntityNotFound("No host with id " + hostId, Severity.EXPECTED));
+        return ResponseEntity.ok(
+                new Host(hostsRecord.getId(), hostsRecord.getHostUrl())
+        );
+    }
+    @PutMapping("/{conId}/assignHost")
+    public ResponseEntity<Host> createAndAssignHost(@PathVariable int conId, @RequestParam("url") String url){
+        ApiHostsRecord hostsRecord = service.assignHost(conId, url);
+        return ResponseEntity.ok(new Host(hostsRecord.getId(), hostsRecord.getHostUrl()));
     }
 }

@@ -318,7 +318,7 @@ function isLastMessage(message: Message): boolean {
   display: flex;
   flex-direction: column;
 
-  overflow: hidden;
+  overflow: clip;
 
   padding: 1rem;
 }

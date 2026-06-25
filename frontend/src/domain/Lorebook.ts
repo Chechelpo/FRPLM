@@ -78,7 +78,7 @@ export enum ActivationStrategy {
     /** Keyword/Regex activation */
     COMMON = 1,
     /** Common keyword activation and embedding vector matching */
-    EMBEDDING = 2,
+    //EMBEDDING = 2,
 }
 
 type EntryKey = { lorebook_id: number, entry_id: number }
@@ -103,7 +103,7 @@ export type EntryData = {
     prevent_further_recursion: boolean;
     non_recursable: boolean;
     delay_until_recursion: boolean;
-    scan_depth: number | null;
+    scan_depth: number;
 };
 
 export class Entry extends ABSEntity<EntryKey, EntryData> {
@@ -202,7 +202,7 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
     }
 }
 
-async function getAllKeywords() : Promise<string[]>{
+export async function getAllKeywords() : Promise<string[]>{
     return await fetchApi(
         `${API_BASE}/${EntityTypes.KEYWORD}`,
         {

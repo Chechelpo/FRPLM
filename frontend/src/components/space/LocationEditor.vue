@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import {Location} from "@/domain/World";
-import {computed, onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import {computedAsync} from "@vueuse/core";
 import {Lorebook} from "@/domain/Lorebook";
 import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import {Character} from "@/domain/Characters";
-import {fetchApi} from "@/frameworks/ABSEntity";
+import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
+import {createEntity, deleteEntity, fetchApi} from "@/frameworks/ABSEntity";
 import {API_BASE} from "@/config";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
@@ -27,19 +26,57 @@ const lorebook = computedAsync<Lorebook>(async () => model.value.location.getLor
 const charactersHere = ref<Character[]>([])
 const editingCharacter = ref<Character | null>(null);
 
-onMounted(async () => {
+async function createCharacterInLocation(){
+  const name = window.prompt("Enter new character name");
+  if (!name) return;
+
+  const newCharacter = await createEntity<CharacterKey,CharacterData,Character>(
+      null,
+      {
+        name:name
+      },
+      EntityTypes.CHARACTERS,
+      Character
+  )
+  await newCharacter.markStartingAt(model.value.location);
+  charactersHere.value.push(newCharacter);
+}
+async function onDeleteCharacter(character: Character) {
+  const confirm = window.confirm(`Delete ${character.get('name')}`)
+  if (!confirm) return;
+
+  const success = await deleteEntity<CharacterKey>(character.key, EntityTypes.CHARACTERS);
+  if (!success) {
+    console.error("Could not delete character");
+    return;
+  }
+
+  charactersHere.value = charactersHere.value.filter(other => other.get('id') != character.get('id'));
+}
+
+watch(
+    model.value.location,
+    () => {
+      fetchCharacters()
+      editingCharacter.value = null;
+    }
+)
+async function fetchCharacters() {
   charactersHere.value = await fetchApi(
       `${API_BASE}/${EntityTypes.CHARACTERS}/startingAt?worldId=${model.value.location.get('worldID')}&locationId=${model.value.location.get('id')}`
       ,
       {
-        method:'GET',
+        method: 'GET',
       }
   ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS)))
+}
+onMounted(async () => {
+  await fetchCharacters();
 })
 </script>
 
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col" style = "height:100dvh" :key="model.location.get('id')">
     <div class = "background-edit-box">
       <FieldEditorWrapper
         field-name="Name"
@@ -82,15 +119,18 @@ onMounted(async () => {
         />
       </Expandable>
       <Expandable title="Characters starting here" info="Static starting here, not the session locations">
-        <split-panel storage-key="location-characters-editor">
+        <split-panel storage-key="location-characters-editor" style="height:100dvh">
           <template #left>
             <List
               :elements="charactersHere as Character[]"
               @edit = "value => editingCharacter = value"
+              @create ="createCharacterInLocation()"
+              @remove = "value => onDeleteCharacter(value)"
             />
           </template>
           <template #right>
             <CharacterEditor
+                style = "height:100dvh"
                 v-if="editingCharacter"
                 :model-value="editingCharacter as Character"
                 :edit-starting-locations="false"

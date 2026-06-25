@@ -18,10 +18,14 @@ final class ExtensionStore {
         this.ctx = ctx;
     }
 
-    public void createExtension(String extensionID, @NotNull JsonNode defaultConfig){
+    public void createExtension(String extensionID, JsonNode defaultConfig){
+        JSON value = null;
+        if (defaultConfig != null)
+            value = JSON.valueOf(defaultConfig.toString());
+
         this.ctx.insertInto(EXTENSION)
                 .set(EXTENSION.ID, extensionID)
-                .set(EXTENSION.CONFIG, JSON.valueOf(defaultConfig.toString()))
+                .set(EXTENSION.CONFIG, value)
                 .execute();
     }
     public void updateConfig(String extensionID, @NotNull JsonNode newConfig){

@@ -62,7 +62,7 @@ public class SecretService extends EntityService<ApiKeysRecord, SecretStore> {
             return Optional.empty();
         }
 
-        ApiKeysRecord apiKeysRecord = records.getFirst();
+        ApiKeysRecord apiKeysRecord = records.getLast();
         return Optional.of(encryptor.decrypt(
                         apiKeysRecord.getApiKeyCiphertext(),
                         apiKeysRecord.getApiKeyNonce(),

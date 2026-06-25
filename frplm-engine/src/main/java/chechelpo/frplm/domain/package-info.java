@@ -14,42 +14,23 @@
  *
  * <ul>
  *     <li>{@code *Store}: persistence access using jOOQ records and tables;</li>
- *     <li>{@code *Service}: domain operations, creation rules, deletion rules,
- *     and cross-entity coordination;</li>
- *     <li>{@code *Controller}: REST-facing access to the entity service;</li>
- *     <li>{@code *FieldsHelper}: registration of exposed fields, validation
- *     constraints, key fields, read-only fields, and UI-oriented format
- *     metadata.</li>
- * </ul>
- *
- * <h2>Domain modules</h2>
- *
- * <p>The package is organised into several domain areas:</p>
- *
- * <ul>
- *     <li>{@code character}: character records, character tags, character
- *     assets, avatars, and starting locations;</li>
- *     <li>{@code lorebook}: lorebook records and lorebook entries used for
- *     structured world or character knowledge;</li>
- *     <li>{@code space}: worlds, locations, and edges between locations;</li>
- *     <li>{@code tags}: reusable tag definitions and tag lifecycle behaviour.</li>
+ *     <li>{@code *Service}: domain operations, data validation, creation rules, deletion rules,
+ *     and cross-entity coordination via events or calling other services;</li>
+ *     <li>{@code *Controller}: REST-facing access to the entity service, defines DTOs, coerces incoming REST calls;</li>
+ *     <li>{@code *FieldsHelper}: helpers for initiating fields of services and controllers.</li>
  * </ul>
  *
  * <h2>Relationship with the framework layer</h2>
  *
- * <p>Domain classes generally extend the generic abstractions from
- * {@code chechelpo.demo.frameworks.entities.microservices}, such as
- * {@code ABSEntityStore}, {@code ABSEntityService},
- * {@code ABSEntityController}, and {@code ABSFieldInstantiationHelper}.
+ * <p>Domain classes generally extend the generic abstractions, such as
+ * {@code EntityStore}, {@code ABSEntityService},
+ * {@code EntityController}, and {@code ABSFieldInstantiationHelper}.
  * The framework layer defines the reusable entity machinery; this domain
  * layer supplies the concrete entity types, jOOQ tables, field definitions,
  * and domain-specific behaviours.</p>
  *
  * <h2>Visibility convention</h2>
- *
- * <p>Most implementation classes are package-private or {@code final} where
- * possible. Public types should normally be exposed only when they must be
- * consumed by other domain modules or by Spring dependency injection across
- * package boundaries.</p>
+ * Domain services/ controllers must be kept unaware of whatever is outside the domain folder. There are obvious exceptions
+ * such as some utils and the base classes.
  */
 package chechelpo.frplm.domain;

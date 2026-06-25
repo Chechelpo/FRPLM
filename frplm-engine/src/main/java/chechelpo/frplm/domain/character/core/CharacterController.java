@@ -20,7 +20,7 @@ public final class CharacterController extends EntityController<
     }
 
     @GetMapping( "/{worldID}")
-    ResponseEntity<EntityDTO[]> getStartingAt(@PathVariable("worldID") int worldID) {
+    ResponseEntity<EntityDTO[]> getStartingAt(@PathVariable int worldID) {
         return ResponseEntity.ok(wrapEntities(
                 service.getStartingAt(worldID)
         ));

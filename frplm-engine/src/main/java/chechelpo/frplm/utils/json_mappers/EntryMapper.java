@@ -1,0 +1,102 @@
+package chechelpo.frplm.utils.json_mappers;
+
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
+import chechelpo.frplm.domain.lorebook.outlet.OutletService;
+import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import org.jspecify.annotations.NonNull;
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Set;
+
+import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+
+@Component
+public class EntryMapper {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private final EntryKeywordService entryKeywordService;
+    private final OutletService outletService;
+
+    public EntryMapper(EntryKeywordService entryKeywordService, OutletService outletService) {
+        this.entryKeywordService = entryKeywordService;
+        this.outletService = outletService;
+    }
+
+    record EntryJSON(
+            String name,
+            String content,
+            Set<String> keywords,
+            String outlet,
+
+            Boolean enabled,
+
+            Short probability,
+            Integer delay,
+            Integer cooldown,
+            Integer stick_through,
+            Short injection_order,
+            short strategy,
+            Boolean prevent_further_recursion,
+            Boolean non_recursable,
+            Short scan_depth
+    ){}
+
+    public JsonNode jsonFrom(@NonNull EntryRecord entry){
+        return MAPPER.valueToTree(new EntryJSON(
+                entry.getName(),
+                entry.getContent(),
+                fetchKeywords(entry),
+                fetchOutlet(entry),
+
+                entry.getEnabled(),
+                entry.getProbability(),
+                entry.getDelay(),
+                entry.getCooldown(),
+                entry.getStickThrough(),
+                entry.getInjectionOrder(),
+                entry.getStrategy(),
+                entry.getPreventFurtherRecursion(),
+                entry.getNonRecursable(),
+                entry.getScanDepth()
+        )
+        );
+    }
+
+    Set<String> fetchKeywords(@NonNull EntryRecord entry){
+        return entryKeywordService.keywordsOfEntry(entry.getLorebookId(), entry.getEntryId());
+    }
+    String fetchOutlet(@NonNull EntryRecord entry){
+        return outletService.getOutletName(entry.getOutlet())
+                .orElseThrow(() -> new EntityNotFound("No outlet name with id: " + entry.getOutlet(), Severity.SYSTEM));
+    }
+
+    NewEntryOrder orderFrom(JsonNode node){
+        EntryJSON json = MAPPER.treeToValue(node, EntryJSON.class);
+        int outletId = outletService.getOrCreateOutlet(json.outlet);
+
+        return new NewEntryOrder(
+                json.keywords,
+                EntityDataPayload.<EntryRecord>builder()
+                        .set(ENTRY.NAME, json.name)
+                        .set(ENTRY.CONTENT, json.content)
+                        .set(ENTRY.OUTLET, outletId)
+
+                        .set(ENTRY.ENABLED, json.enabled)
+                        .set(ENTRY.PROBABILITY, json.probability)
+                        .set(ENTRY.DELAY, json.delay)
+                        .set(ENTRY.COOLDOWN, json.cooldown)
+                        .set(ENTRY.STICK_THROUGH, json.stick_through)
+                        .set(ENTRY.INJECTION_ORDER, (short) json.injection_order)
+                        .set(ENTRY.STRATEGY, (short) json.strategy)
+                        .set(ENTRY.PREVENT_FURTHER_RECURSION, json.prevent_further_recursion)
+                        .set(ENTRY.NON_RECURSABLE, json.non_recursable)
+                        .set(ENTRY.SCAN_DEPTH, json.scan_depth)
+                        .build()
+        );
+    }
+}

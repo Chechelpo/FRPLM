@@ -20,7 +20,7 @@ async function onCreate(){
       null,
       {
         name:name,
-        type:LLMBackends.NANOGPT.id, // Default type
+        host_id:LLMBackends.NANOGPT.id, // Default type
       },
       EntityTypes.LLM,
       LLMConnection
@@ -43,25 +43,29 @@ async function reload(){
 </script>
 
 <template>
-  <SplitPanel storage-key="LLMConnectionsOuter">
-    <template #left >
-      <List
-        v-if="allConnections"
-        :elements="allConnections"
-        @edit="i => edit(i!)"
-        @create ="onCreate"
-        @remove="deleteConnection"
-      />
-    </template>
-    <template #right>
-      <LLMEditor
-        v-if="editingConnection"
-        v-model="editingConnection!"
-      />
-    </template>
-  </SplitPanel>
+  <div>
+    <SplitPanel storage-key="LLMConnectionsOuter" class = "full_visor">
+      <template #left >
+        <List
+          v-if="allConnections"
+          :elements="allConnections"
+          @edit="i => edit(i!)"
+          @create ="onCreate"
+          @remove="deleteConnection"
+        />
+      </template>
+      <template #right>
+        <LLMEditor
+          v-if="editingConnection"
+          v-model="editingConnection!"
+        />
+      </template>
+    </SplitPanel>
+  </div>
 </template>
 
 <style scoped>
-
+.full_visor{
+  height:100dvh;
+}
 </style>

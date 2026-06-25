@@ -1,10 +1,12 @@
 package chechelpo.frplm.extensions;
 
 import ch.qos.logback.classic.Logger;
-import chechelpo.frplm.extensions.api.activation.PostGenerationActivated;
+import chechelpo.frplm.extensions.api.activation.PostResponseGeneration;
+import chechelpo.frplm.extensions.api.activation.PrePromptGeneration;
 import chechelpo.frplm.extensions.api.types.ConfigurableExtension;
 import chechelpo.frplm.extensions.api.types.Extension;
 import chechelpo.frplm.extensions.api.utils.ExtensionDBBridge;
+import chechelpo.frplm.extensions.api.utils.PromptBuilder;
 import chechelpo.frplm.extensions.api.utils.io;
 import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.session.SessionImpl;
@@ -13,7 +15,6 @@ import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -59,16 +60,34 @@ public final class ExtensionService implements ExtensionDBBridge {
                 });
     }
 
+    private void logExtensionError(Extension e, String errorMessage){
+        logger.error("Extension {} error : \n {}", e.extensionId(), errorMessage);
+    }
+
+    public void runPrePromptGeneration(SessionsRecord session, PromptBuilder builder){
+        SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
+        extensions.stream()
+                .filter(PrePromptGeneration.class::isInstance)
+                .map(PrePromptGeneration.class::cast)
+                .forEach(ext -> {
+                    try{
+                        ext.run(impl, builder);
+                    }catch(RuntimeException e){
+                        logExtensionError((Extension) ext, e.getMessage());
+                    }
+                });
+    }
+
     public void runPostGeneration(SessionsRecord session){
         SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
         extensions.stream()
-                .filter(PostGenerationActivated.class::isInstance)
-                .map(PostGenerationActivated.class::cast)
+                .filter(PostResponseGeneration.class::isInstance)
+                .map(PostResponseGeneration.class::cast)
                 .forEach(ext -> {
                         try{
                             ext.onNewGeneration(impl);
                         } catch (RuntimeException e) {
-                            logger.error("Extension {} error : \n {}", ((Extension) ext).extensionId(), e.getMessage());
+                            logExtensionError((Extension) ext, e.getMessage());
                         }
                 }
         );
@@ -114,10 +133,10 @@ public final class ExtensionService implements ExtensionDBBridge {
     }
 
 
-    public List<PostGenerationActivated> getPostGenerationExtensions(){
+    public List<PostResponseGeneration> getPostGenerationExtensions(){
         return extensions.stream()
-                .filter(PostGenerationActivated.class::isInstance)
-                .map(PostGenerationActivated.class::cast)
+                .filter(PostResponseGeneration.class::isInstance)
+                .map(PostResponseGeneration.class::cast)
                 .toList();
     }
 }

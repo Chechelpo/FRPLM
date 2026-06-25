@@ -43,17 +43,19 @@ public class WorldService extends EntityService<
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<WorldsRecord> data, long operationID) {
-        EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-        lorebookData.set(LOREBOOKS.NAME, data.requireValue(WORLDS.NAME));
-        lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id);
+        if (!data.assignsField(WORLDS.LOREBOOK_ID)){
+            EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
+            lorebookData.set(LOREBOOKS.NAME, data.requireValue(WORLDS.NAME));
+            lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id);
 
-        data.set(
-                Worlds.WORLDS.LOREBOOK_ID,
-                lorebooks.createAndGet(
-                        lorebookData,
-                        Lorebooks.LOREBOOKS.ID
-                )
-        );
+            data.set(
+                    Worlds.WORLDS.LOREBOOK_ID,
+                    lorebooks.createAndGet(
+                            lorebookData,
+                            Lorebooks.LOREBOOKS.ID
+                    )
+            );
+        }
 
         super.beforeCreate(data, operationID);
     }

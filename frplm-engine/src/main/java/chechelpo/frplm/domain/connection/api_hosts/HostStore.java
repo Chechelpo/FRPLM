@@ -14,4 +14,10 @@ final class HostStore extends EntityStore<ApiHostsRecord> {
     HostStore(@NotNull DSLContext ctx) {
         super(ctx, API_HOSTS, EntityTypes.Types.API_HOSTS);
     }
+
+    ApiHostsRecord getWithName(String url){
+        return ctx.selectFrom(main_table)
+                .where(API_HOSTS.HOST_URL.eq(url))
+                .fetchOne();
+    }
 }

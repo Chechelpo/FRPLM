@@ -35,7 +35,7 @@ class SecretServiceTest {
     @Test
     void throwsOnNormalOperation() {
         String apiKey = EncryptorService.generateBase64Key();
-        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANOGPT.stable_id, apiKey);
+        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);
         EntityKey<ApiKeysRecord> apiEntityKey = EntityKey.of(API_KEYS.KEY_ID, record.getKeyId());
 
         assertThrows(UnsupportedOperationException.class, () -> secrets.secretService.createAndGet(
@@ -50,10 +50,10 @@ class SecretServiceTest {
     @Test
     void getKeyForConnectionHost() {
         String apiKey = EncryptorService.generateBase64Key();
-        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANOGPT.stable_id, apiKey);
+        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);
         LlmConnectionRecord llmConnectionRecord = new LlmConnectionRecord();
 
-        llmConnectionRecord.setHostId(LLMBackend.NANOGPT.stable_id.shortValue());
+        llmConnectionRecord.setHostId(LLMBackend.NANO_GPT.stable_id.shortValue());
 
         Optional<String> fectchedOptional = secrets.secretService.getKeyForConnectionHost(llmConnectionRecord);
         assertTrue(fectchedOptional.isPresent());
@@ -63,10 +63,10 @@ class SecretServiceTest {
     @Test
     void hasApiKey() {
         String apiKey = EncryptorService.generateBase64Key();
-        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANOGPT.stable_id, apiKey);
+        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);
         LlmConnectionRecord llmConnectionRecord = new LlmConnectionRecord();
 
-        llmConnectionRecord.setHostId(LLMBackend.NANOGPT.stable_id.shortValue());
+        llmConnectionRecord.setHostId(LLMBackend.NANO_GPT.stable_id.shortValue());
 
         assertTrue(secrets.secretService.hasApiKey(llmConnectionRecord));
     }

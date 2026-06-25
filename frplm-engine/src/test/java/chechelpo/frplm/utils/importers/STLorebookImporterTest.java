@@ -1,7 +1,7 @@
 package chechelpo.frplm.utils.importers;
 
-import chechelpo.frplm.utils.importers.lorebooks.NewEntryOrder;
-import chechelpo.frplm.utils.importers.lorebooks.STLorebookImporter;
+import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;

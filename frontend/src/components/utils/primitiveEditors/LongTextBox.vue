@@ -58,6 +58,7 @@ onBeforeUnmount(() => {
           ref="inlineRef"
           v-model="text"
           class="textBox"
+          style="min-height: 200px"
           @input="schedule_edit_emit"
       />
 

@@ -1,8 +1,13 @@
 package chechelpo.frplm.domain.connection.llm;
 
+import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import chechelpo.frplm.domain.connection.api_hosts.HostService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.UnexpectedException;
+import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.jetbrains.annotations.NotNull;
@@ -15,12 +20,26 @@ import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
 @Service
 public class LLMService extends EntityService<LlmConnectionRecord, LLMStore> {
-    LLMService(LLMStore store, EventBus eventBus) {
+    private final HostService hostService;
+
+    LLMService(LLMStore store, EventBus eventBus, HostService hostService) {
         super(store, eventBus);
+        this.hostService = hostService;
     }
 
     @Transactional(readOnly = true)
     public Optional<LlmConnectionRecord> fromTemplate(@NotNull PromptTemplateRecord template) {
         return this.find(EntityKey.of(LLM_CONNECTION.ID, template.getConnectionId()));
+    }
+
+    @Transactional
+    public ApiHostsRecord assignHost(int conId, String url){
+        ApiHostsRecord hostsRecord = hostService.createOrGetWithHost(url);
+        if (!this.update(
+                EntityKey.of(LLM_CONNECTION.ID, conId),
+                EntityDataPayload.of(LLM_CONNECTION.HOST_ID, hostsRecord.getId().shortValue())
+        )) throw new UnexpectedException("Couldn't assign host", Severity.SYSTEM);
+
+        return hostsRecord;
     }
 }

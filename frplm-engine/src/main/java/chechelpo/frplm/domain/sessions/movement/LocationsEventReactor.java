@@ -10,6 +10,7 @@ import chechelpo.frplm.domain.sessions.messages.MessageService;
 import chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import chechelpo.frplm.events.crud.CRUDDraftEvent;
 import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.jooq.generated.tables.records.*;
 import org.jetbrains.annotations.Contract;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
 import static chechelpo.frplm.jooq.generated.Tables.*;
@@ -124,19 +126,18 @@ class LocationsEventReactor {
 
         LocationsRecord userCharacterLocation;
         if (messageService.isFirstMessage(event.initialData().requireValue(MESSAGES.TICK_NUM)))
-            userCharacterLocation = getStartingLocation(userCharacterId, sessionId);
+            userCharacterLocation = getStartingLocationBySession(userCharacterId, sessionId);
         else userCharacterLocation = movements.getLocationOf(userCharacterId, sessionId);
 
         event.initialData().set(MESSAGES.WORLD_ID, userCharacterLocation.getWorldId());
         event.initialData().set(MESSAGES.LOCATION_ID, userCharacterLocation.getId());
     }
 
-    private LocationsRecord getStartingLocation(int userCharacterId, int sessionId) {
-        return startingLocationsService.startingLocationAt(
+    private LocationsRecord getStartingLocationBySession(int userCharacterId, int sessionId) {
+            return startingLocationsService.startingLocationAt(
                 EntityKey.of(CHARACTERS.ID, userCharacterId),
-                sessionService.getValueOf(SESSIONS.WORLD_ID,
-                        EntityKey.of(SESSIONS.ID, sessionId)
-                ).orElseThrow()
+                sessionService.getValueOf(SESSIONS.WORLD_ID, EntityKey.of(SESSIONS.ID, sessionId))
+                        .orElseThrow(() -> new EntityNotFound("Could not find session with id " + sessionId, Severity.SYSTEM))
         ).getFirst();
     }
 
@@ -150,9 +151,15 @@ class LocationsEventReactor {
         int tickNum = event.initialData().requireValue(RESPONSES.TICK_NUM);
 
         LocationsRecord userCharacterLocation;
-        if (messageService.isFirstMessage(tickNum))
-            userCharacterLocation = getStartingLocation(sessionId, tickNum);
-        else userCharacterLocation = getCurrentUserLocation(sessionId);
+        if (messageService.isFirstMessage(tickNum)){
+            /*
+            In charge of the system, ignore this one.
+            int world_id = event.initialData().getValue(RESPONSES.WORLD_ID)
+                    .orElseThrow(() -> new IllegalStateException("This event reactor needs world id to be supplied manually, as the session is not yet created"));
+            userCharacterLocation = getStartingLocationByWorld(sessionId, world_id)
+                    .orElseThrow(() -> new EntityNotFound("Could not fetch the starting location of user character", Severity.SYSTEM));*/
+            return;
+        } else userCharacterLocation = getCurrentUserLocation(sessionId);
 
         EntityDataPayload<ResponsesRecord> response = event.initialData();
         response.set(RESPONSES.WORLD_ID, userCharacterLocation.getWorldId());
@@ -161,9 +168,9 @@ class LocationsEventReactor {
 
     private @NotNull LocationsRecord getCurrentUserLocation(int sessionId) {
         return movements.getLocationOf(
-                sessionId,
                 sessionService.getUserCharacterID(sessionId)
-                        .orElseThrow(() -> new UnexpectedException("Session with no user character", Severity.SYSTEM))
+                        .orElseThrow(() -> new UnexpectedException("Session with no user character", Severity.SYSTEM)),
+                sessionId
         );
     }
 
@@ -192,7 +199,7 @@ class LocationsEventReactor {
         short newActiveResponseNum = data.requireValue(MESSAGES.ACTIVE_RESPONSE);
         ResponsesRecord newActiveResponse = messageService.getActiveResponseOf(target);
 
-        onResponseChangeMessageLocation(newActiveResponse, event.updatedData());
+        //onResponseChangeMessageLocation(newActiveResponse, event.updatedData());
 
         movementService.rollbackLatestMovementsOf(sessionId, tickNum);
         List<ResponseLocationChangesRecord> newLocations = responseMovementService.getResponseMovements(

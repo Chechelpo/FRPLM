@@ -5,14 +5,13 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
-import chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import chechelpo.frplm.domain.lorebook.keywords.KeywordTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.test_utils.TestText;
 import chechelpo.frplm.utils.collections.IntSetFactory;
-import chechelpo.frplm.utils.importers.lorebooks.NewEntryOrder;
-import chechelpo.frplm.utils.importers.lorebooks.STLorebookImporter;
+import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +24,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;

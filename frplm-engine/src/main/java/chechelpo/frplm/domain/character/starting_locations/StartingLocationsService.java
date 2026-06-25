@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+
 @Component
 public class StartingLocationsService extends EntityService<
         StartingLocationsRecord,
@@ -38,6 +40,6 @@ public class StartingLocationsService extends EntityService<
         return startingLocationAt(characterService.keyOf(character), worldID);
     }
     public @NotNull List<LocationsRecord> startingLocationAt(EntityKey<CharactersRecord> key, int worldID) {
-        return store.getStartingLocationAt(key, worldID);
+        return store.getStartingLocationAt(key.requireValue(CHARACTERS.ID), worldID);
     }
 }

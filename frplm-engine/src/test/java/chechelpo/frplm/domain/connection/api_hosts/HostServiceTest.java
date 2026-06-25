@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,5 +50,16 @@ class HostServiceTest {
             if (backend.toKey().isPresent())
                 assertFalse(hostTestContext.service.delete(backend.toKey().get()), "Could delete backend: " + backend);
         }
+    }
+
+    @Test
+    void createOrGetWithHost_DoesNotDuplicate(){
+        String newHostUrl = "https://host.com";
+
+        hostTestContext.service.createOrGetWithHost(newHostUrl);
+        hostTestContext.service.createOrGetWithHost(newHostUrl);
+
+        List<ApiHostsRecord> allCon = hostTestContext.service.getAll();
+        assertEquals(LLMBackend.getIDs().length + 1, allCon.size());
     }
 }

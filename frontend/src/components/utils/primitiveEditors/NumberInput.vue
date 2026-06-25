@@ -6,7 +6,15 @@ import {onBeforeUnmount, ref} from "vue";
 const EDIT_EMIT_MS = 250;
 
 const model = defineModel<number>({required:true});
-
+const props = withDefaults(
+    defineProps<
+        {
+  nullable? : boolean
+}>(),    
+    {
+      nullable:true
+    }
+);
 const lastEmitted = ref(model.value);
 const value = ref(lastEmitted.value);
 let timer: number | null = null;

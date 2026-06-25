@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import {ref, onMounted, computed, watch} from 'vue'
-import {Entry, getAllKeywords, Lorebook, Outlet} from '@/domain/Lorebook'
+import {Entry, Lorebook, Outlet} from '@/domain/Lorebook'
 import EntryEditor from "@/components/lorebooks/EntryEditor.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
-import {fetchApi} from "@/frameworks/ABSEntity";
 import {API_BASE} from "@/config";
 import {EntityTypes} from "@/domain/EntityTypes";
 
@@ -72,7 +71,8 @@ async function onImportFileSelected(event: Event): Promise<void> {
     );
 
     if (!response.ok) {
-      throw new Error(`Import failed with status ${response.status}`);
+      console.error(`Import failed with status ${response.status}`);
+      return;
     }
 
     await load();
@@ -106,7 +106,6 @@ watch(model, load)
 async function addEntry() {
   try {
     const newEntry = await model.value.newEntry();
-
     entries.value.push(newEntry);
   } catch (e) {
     console.error(e);

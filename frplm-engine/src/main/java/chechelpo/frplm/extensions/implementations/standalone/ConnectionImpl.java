@@ -2,9 +2,12 @@ package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import chechelpo.frplm.openai_compatible.ChatCompletionMessage;
 import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
 import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
-import chechelpo.frplm.utils.generation.GenerationEntryPoint;
+import chechelpo.frplm.utils.integrations.T2TClient;
+
+import java.util.Optional;
 
 public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implements ConnectionSnapshot {
     public ConnectionImpl(LlmConnectionRecord record, ExtensionContext context) {
@@ -31,16 +34,22 @@ public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implem
     }
 
     @Override
-    public ChatCompletionResponse generate(String rawRequest) {
-        return GenerationEntryPoint.generateNonStreamingResponse(rawRequest, this.record, context);
+    public Optional<ChatCompletionResponse> generate(String rawRequest) {
+        T2TClient client = new T2TClient(context.secrets(), context.hosts());
+        return client.generate(
+                ChatCompletionRequest.builder()
+                        .append(ChatCompletionMessage.user(rawRequest))
+                        .build(),
+                this.record
+        );
     }
 
     @Override
-    public ChatCompletionResponse generate(ChatCompletionRequest request) {
-        return GenerationEntryPoint.generateNonStreamingResponse(
+    public Optional<ChatCompletionResponse> generate(ChatCompletionRequest request) {
+        T2TClient client = new T2TClient(context.secrets(), context.hosts());
+        return client.generate(
                 request,
-                this.record,
-                context
+                this.record
         );
     }
 

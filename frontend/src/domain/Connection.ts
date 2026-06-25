@@ -5,7 +5,7 @@ import {API_BASE} from "@/config";
 
 export type LLMConnectionKeys = {id:number}
 export type LLMConnectionData = {
-    type: number;
+    host_id: number;
     name:string,
     modelID:string | null,
     max_tokens: number
@@ -16,7 +16,7 @@ export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionDat
         return EntityTypes.LLM;
     }
     public async assignNewKey(key:string){
-        const newItem:ApiKey = await ApiKey.create(key, LLMBackends.NANOGPT.id)
+        const newItem:ApiKey = await ApiKey.create(key, this.get('host_id'))
     }
 
     public async testConnection(): Promise<boolean> {
@@ -75,9 +75,9 @@ export class ApiKey extends ABSEntity<APIKeys, any>{
     }
 }
 export type LLMBackend = {
-    readonly id: number;
+    readonly id: number | null;
     readonly name: string;
-    readonly host: string;
+    readonly host: string | null;
 };
 export const LLMBackends = {
     NANOGPT: {
@@ -85,10 +85,24 @@ export const LLMBackends = {
         name: "NanoGPT",
         host: "https://nano-gpt.com",
     },
+    OPENROUTER: {
+        id: 1 ,
+        name: "OpenRouter",
+        host: "https://openrouter.ai"
+    },
+    CUSTOM_OPENAI:{
+        id: null,
+        name: "OpenAI - Compatible",
+        host: null
+    }
 } as const satisfies Record<string, LLMBackend>;
+export const LLMBackendList: readonly LLMBackend[] =
+    Object.values(LLMBackends);
 
 export function getBackendFromID(id: number): LLMBackend {
-    return LLMBackends.NANOGPT
+    let backend = LLMBackendList.find(back => back.id === id);
+    if (!backend) backend = LLMBackends.CUSTOM_OPENAI;
+    return backend;
 }
 export interface ModelResponses {
     object: string;

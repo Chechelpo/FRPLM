@@ -1,48 +1,42 @@
 package chechelpo.frplm.utils.integrations;
 
-import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import org.jetbrains.annotations.NotNull;
+import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
+import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
 import static chechelpo.frplm.config.Constants.DEFAULT_LLM_TIMEOUT;
 
-public final class Models {
-    private Models() {}
+final class NanoGPT implements LLMKnownHost {
     private final static String MODEL_ENDPOINT = "/api/v1/models";
-    public record ModelResponses(String object, ModelResponse[] data){};
-    public record ModelResponse(String id, String object, String name, Integer context_length){}
+    private final OpenAICompatible openAIClient;
 
-    public static ModelResponses fetch(@NotNull LlmConnectionRecord record, SecretService secretService) {
-        LLMBackend backend = LLMBackend.get(record.getHostId());
-        return switch (backend){
-            case NANOGPT -> {
-                Optional<String> apiKey = secretService.getKeyForConnectionHost(record);
-
-                yield getNanoModels(apiKey);
-            }
-            case null, default -> throw new IllegalArgumentException("Couldn't fetch models");
-        };
+    public NanoGPT() {
+        this.openAIClient = new OpenAICompatible(LLMBackend.NANO_GPT.host.toString());
     }
 
-    private static ModelResponses getNanoModels(Optional<String> apiKey) {
-        return LLMBackend.NANOGPT.getDefaultClient().orElseThrow(() -> new IllegalStateException("NANOGPT has no default client configured"))
+    @Override
+    public Optional<ChatCompletionResponse> generate(ChatCompletionRequest request, String apiKey) {
+        return openAIClient.generateNonStreaming(request, apiKey);
+    }
+
+    @Override
+    public ModelResponses models(String apiKey) {
+        var client = this.openAIClient.getRestClient()
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(MODEL_ENDPOINT)
                         .queryParam("detailed", true)
                         .build()
-                )
-                .headers(headers -> apiKey
-                        .map(String::trim)
-                        .filter(key -> !key.isEmpty())
-                        .ifPresent(headers::setBearerAuth)
-                )
-                .retrieve()
+                );
+        if (apiKey != null) client.header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
+
+        return client.retrieve()
                 .onStatus(
                         HttpStatusCode::isError,
                         clientResponse -> clientResponse
@@ -59,5 +53,11 @@ public final class Models {
                 )
                 .bodyToMono(ModelResponses.class)
                 .block(DEFAULT_LLM_TIMEOUT);
+    }
+
+
+    @Override
+    public Integer tokenize(String modelId, String text, String apiKey) {
+        return null;
     }
 }

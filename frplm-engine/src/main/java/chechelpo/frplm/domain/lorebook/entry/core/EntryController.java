@@ -6,6 +6,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
@@ -14,6 +15,7 @@ import static chechelpo.frplm.domain.EntityTypes.ENTRIES_URL;
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @RestController
+@Component
 @RequestMapping(ENTRIES_URL)
 public final class EntryController extends EntityController<EntryRecord, EntryService> {
     EntryController(EntryService service, LorebookService lorebookService) {

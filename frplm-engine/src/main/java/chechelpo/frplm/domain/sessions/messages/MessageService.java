@@ -160,7 +160,13 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
     @Override
     protected void afterSuccessfulCreate(MessagesRecord data, long operationID) {
-        registerNewResponse(data.getSessionId(), data.getTickNum(), data.getContent(), keyOf(data));
+        registerNewResponse(EntityDataPayload.<ResponsesRecord>builder()
+                .set(RESPONSES.SESSION_ID, data.getSessionId())
+                .set(RESPONSES.TICK_NUM, data.getTickNum())
+                .set(RESPONSES.WORLD_ID, data.getWorldId())
+                .set(RESPONSES.LOCATION_ID, data.getLocationId())
+                .set(RESPONSES.CONTENT, data.getContent())
+                .build());
         super.afterSuccessfulCreate(data, operationID);
     }
 
@@ -188,30 +194,31 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         if (messageRole != ChatCompletionRole.ASSISTANT)
             throw new InvalidValue("Tried to register a new response of a user message");
 
-        registerNewResponse(sessionId, tick_num, content, messageKey);
+        int world_id = sessionService.getValueOf(SESSIONS.WORLD_ID, EntityKey.of(SESSIONS.ID, sessionId))
+                .orElseThrow(() -> new EntityNotFound("Could not session with id " + sessionId, Severity.SYSTEM));
+        registerNewResponse(EntityDataPayload.<ResponsesRecord>builder()
+                .set(RESPONSES.SESSION_ID, sessionId)
+                .set(RESPONSES.TICK_NUM, tick_num)
+
+                .set(RESPONSES.WORLD_ID, world_id)
+                .set(RESPONSES.CONTENT, content)
+                .build());
     }
 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
-    private void registerNewResponse(int sessionId, int tick_num, String content, EntityKey<MessagesRecord> messageKey) {
+    private void registerNewResponse(EntityDataPayload<ResponsesRecord> payload) {
+        EntityKey<MessagesRecord> messageKey = EntityKey.<MessagesRecord>builder()
+                .set(MESSAGES.SESSION_ID, payload.requireValue(RESPONSES.SESSION_ID))
+                .set(MESSAGES.TICK_NUM, payload.requireValue(RESPONSES.TICK_NUM))
+                .build();
         short newActiveResponseNum = this.incrementAndGet(MESSAGES.RESPONSE_NUM, messageKey)
                 .orElseThrow(() -> new UnexpectedException("Couldn't increment response num", Severity.SYSTEM));
 
-        ResponsesRecord newResponse = responseService.createAndGet(EntityDataPayload.<ResponsesRecord>builder()
-                .set(RESPONSES.SESSION_ID, sessionId)
-                .set(RESPONSES.TICK_NUM, tick_num)
-                .set(RESPONSES.RESPONSE_NUM, newActiveResponseNum)
+        payload.set(RESPONSES.RESPONSE_NUM, newActiveResponseNum);
 
-                .set(RESPONSES.CONTENT, content)
-
-                .build()
-        );
-        assert newResponse.getContent().equals(content);
-        assert newResponse.getSessionId().equals(sessionId);
-        assert newResponse.getTickNum() == tick_num;
-        assert newResponse.getResponseNum() == newActiveResponseNum;
+        ResponsesRecord newResponse = responseService.createAndGet(payload);
 
         this.update(messageKey, EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, newActiveResponseNum));
-        assert (getValueOf(MESSAGES.ACTIVE_RESPONSE, messageKey).orElseThrow().equals(newActiveResponseNum));
     }
 
     /**

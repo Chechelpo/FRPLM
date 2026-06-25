@@ -121,4 +121,8 @@ public class LocationNeighborsRecord extends UpdatableRecordImpl<LocationNeighbo
         setEdgedescription(edgedescription);
         resetChangedOnNotNull();
     }
+
+    public Object getD() {
+        return null;
+    }
 }

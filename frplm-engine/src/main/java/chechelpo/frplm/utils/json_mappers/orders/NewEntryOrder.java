@@ -1,10 +1,9 @@
-package chechelpo.frplm.utils.importers.lorebooks;
+package chechelpo.frplm.utils.json_mappers.orders;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;

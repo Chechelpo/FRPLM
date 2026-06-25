@@ -171,7 +171,7 @@ input:focus {
   top: calc(100% + 4px);
 
   width: 100%;
-  max-height: 220px;
+  max-height: 200px;
   overflow-y: auto;
 
   padding: 4px;
@@ -187,7 +187,7 @@ input:focus {
 .options button {
   display: block;
   width: 100%;
-  padding: 7px 9px;
+  padding: 2px 3px;
 
   font: inherit;
   text-align: left;

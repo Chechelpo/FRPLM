@@ -2,6 +2,7 @@ package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.domain.character.core.CharacterService;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
+import chechelpo.frplm.domain.connection.api_hosts.HostService;
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMService;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 public record ExtensionContext(
         @NotNull LLMService connections,
+        @NotNull HostService hosts,
         @NotNull SecretService secrets,
 
         @NotNull CharacterService characters,

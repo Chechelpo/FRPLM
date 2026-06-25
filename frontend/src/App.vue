@@ -6,7 +6,7 @@
       <nav class="nav-links" aria-label="Main navigation">
         <div>
           <RouterLink to="/" class="nav-icon" aria-label="Characters">
-            Sess
+            <img src="/header/session.png" alt = "Sessions">
           </RouterLink>
         </div>
 
@@ -22,12 +22,6 @@
           </RouterLink>
         </div>
         -->
-
-        <div>
-          <RouterLink :to="route_to(EntityTypes.TEMPLATES)" class = "nav-icon" aria-lable="prompts">
-            Prompts
-          </RouterLink>
-        </div>
 
         <div>
           <RouterLink :to="route_to(EntityTypes.WORLDS)" class="nav-icon" aria-label="Worlds">

@@ -37,7 +37,7 @@ final class CharacterStore extends EntityStore<CharactersRecord> {
                 ).fetchInto(CharactersRecord.class);
     }
 
-    public @NotNull List<CharactersRecord> getStartingAtLocation(int locationId, int worldId){
+    public @NotNull List<CharactersRecord> getStartingAtLocation(int worldId, int locationId){
         return ctx.select()
                 .from(main_table)
                 .join(STARTING_LOCATIONS)

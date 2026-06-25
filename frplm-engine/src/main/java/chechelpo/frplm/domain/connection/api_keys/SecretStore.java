@@ -38,6 +38,7 @@ final class SecretStore extends EntityStore<ApiKeysRecord> {
     public @NotNull List<ApiKeysRecord> ofHostID(int host_id){
         return ctx.selectFrom(API_KEYS)
                 .where(API_KEYS.HOST_ID.eq(host_id))
+                .orderBy(API_KEYS.KEY_ID.desc())
                 .fetch();
     }
 

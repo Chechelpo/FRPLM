@@ -3,6 +3,7 @@ package chechelpo.frplm.domain.sessions.core;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
+import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
@@ -19,8 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.SESSIONS;
-import static chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
+import static chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -38,6 +38,8 @@ class SessionServiceTest {
     LocationTestContext locations;
     @Autowired
     SessionTestContext sessions;
+    @Autowired
+    private StartingLocationsService startingLocationsService;
 
     @BeforeEach
     void setUp() {
@@ -46,7 +48,7 @@ class SessionServiceTest {
     }
 
     @Test
-    void throwsOnNonUserCharacter() {
+    void create_throwsOnNonUserCharacter() {
         LocationsRecord locationRecord = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
         CharactersRecord characterRecord = characters.createAndGetRecords(1).getFirst();
 
@@ -68,6 +70,63 @@ class SessionServiceTest {
                                 .build()
                 ),
                 "Could create a session with a non user character"
+        );
+    }
+    @Test
+    void create_throwsOnNonStartingLocationCharacter(){
+        LocationsRecord locationRecord = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
+        CharactersRecord characterRecord = characters.createAndGetRecords(1).getFirst();
+
+        characters.service.update(
+                characters.service.keyOf(characterRecord),
+                EntityDataPayload.<CharactersRecord>builder()
+                        .set(CHARACTERS.CAN_BE_USER, true)
+                        .set(CHARACTERS.WELCOME_MESSAGE, "A")
+                        .build()
+        );
+
+        assertThrows(
+                InvalidValue.class,
+                () -> sessions.service.createAndGet(
+                        EntityDataPayload.<SessionsRecord>builder()
+                                .set(SESSIONS.NAME, "test")
+                                .set(SESSIONS.WORLD_ID, locationRecord.getWorldId())
+                                .set(SESSIONS.USER_PERSONA_ID, characterRecord.getId())
+                                .build()
+                ),
+                "Created a session with a user character with no starting location"
+        );
+    }
+
+    @Test
+    void create_DoesNotThrowOnValidInput(){
+        LocationsRecord locationRecord = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
+        CharactersRecord characterRecord = characters.createAndGetRecords(1).getFirst();
+
+        startingLocationsService.createAndGet(
+                EntityDataPayload.<StartingLocationsRecord>builder()
+                        .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
+                        .set(STARTING_LOCATIONS.WORLD_ID, locationRecord.getWorldId())
+                        .set(STARTING_LOCATIONS.LOCATION_ID, locationRecord.getId())
+                        .build()
+        );
+        characters.service.update(
+                characters.service.keyOf(characterRecord),
+                EntityDataPayload.<CharactersRecord>builder()
+                        .set(CHARACTERS.CAN_BE_USER, true)
+                        .set(CHARACTERS.WELCOME_MESSAGE, "A")
+                        .build()
+        );
+
+        assertDoesNotThrow(
+                () -> sessions.service.createAndGet(
+                EntityDataPayload.<SessionsRecord>builder()
+                        .set(SESSIONS.NAME, "test")
+                        .set(SESSIONS.WORLD_ID, locationRecord.getWorldId())
+                        .set(SESSIONS.USER_PERSONA_ID, characterRecord.getId())
+                        .build()
+            ),
+                "Could not create a session"
         );
     }
 }

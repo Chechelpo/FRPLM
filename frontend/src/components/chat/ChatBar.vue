@@ -23,31 +23,33 @@ const props = defineProps<{
 const debugPrompt = ref<boolean>(false);
 const autoReply = ref<boolean>(true);
 const message = ref<string>("");
-const promptToDebug = ref<ChatCompletionRequest | null>(null);
+const promptToDebug = ref<PromptDTO | null>(null);
 
 const sendNewUserMessage = computed<boolean>(() => message.value.trim().length > 0);
 const waitingForMessage = ref<boolean>(false);
 
 async function onSend(): Promise<void> {
   waitingForMessage.value = true;
-  if (sendNewUserMessage.value) {
-    const success = await props.newUserMessage(message.value)
-    if (success) message.value = "";
-  }
-  const prompt = (await props.requestPrompt());
-  if (debugPrompt.value){
-    console.debug("Requesting prompt");
-    promptToDebug.value = prompt.rawRequest;
-    await until(debugPrompt).toBe(false)
-    promptToDebug.value = null;
-  }
+  try{
+    if (sendNewUserMessage.value) {
+      const success = await props.newUserMessage(message.value)
+      if (success) message.value = "";
+    }
+    const prompt = (await props.requestPrompt());
+    if (debugPrompt.value){
+      console.debug("Requesting prompt");
+      promptToDebug.value = prompt;
+      await until(debugPrompt).toBe(false)
+      promptToDebug.value = null;
+    }
 
-  if (autoReply.value){
-    const success = await props.generateNewMessage(prompt.rawRequest)
-    if (success) message.value = "";
+    if (autoReply.value){
+      const success = await props.generateNewMessage(prompt.rawRequest)
+      if (success) message.value = "";
+    }
+  }finally{
+    waitingForMessage.value = false
   }
-
-  waitingForMessage.value = false;
 }
 
 function onMessageInput(event: Event): void {

@@ -53,11 +53,6 @@ class LLMBackendTest {
 
     }
     @Test
-    void unknownIdReturnsOpenAICompatibleFallback() {
-        assertSame(LLMBackend.OPENAI_COMPATIBLE, LLMBackend.get(-1));
-        assertSame(LLMBackend.OPENAI_COMPATIBLE, LLMBackend.get(Integer.MAX_VALUE));
-    }
-    @Test
     void getIdsContainsExactlyStandardBackendIds() {
         Set<Integer> expected = Arrays.stream(LLMBackend.values())
                 .filter(backend -> backend.stable_id != null)

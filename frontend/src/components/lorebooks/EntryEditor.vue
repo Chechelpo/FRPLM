@@ -36,7 +36,8 @@ const strategy = computed<ActivationStrategy>({
   }
 })
 const isEmbeddingStrategy = computed<boolean>(() => {
-  return strategy.value === ActivationStrategy.EMBEDDING;
+  return false;
+  //return strategy.value === ActivationStrategy.EMBEDDING;
 });
 const embed_text = computed<string | null>({
   get() {
@@ -69,7 +70,7 @@ const activationStrategyValues = Object.values(ActivationStrategy)
 const activationStrategyLabels: Record<ActivationStrategy, string> = {
   [ActivationStrategy.CONSTANT]: "CONSTANT",
   [ActivationStrategy.COMMON]: "COMMON",
-  [ActivationStrategy.EMBEDDING]: "EMBEDDING",
+  //[ActivationStrategy.EMBEDDING]: "EMBEDDING",
 };
 
 // ---- Edit handlers -------------------------------------------------------
@@ -118,7 +119,7 @@ async function load() {
     <ShortTextBox
         :model-value="props.entry.get('name')"
         @edit="txt => props.entry.update('name', txt)"
-    ></ShortTextBox>
+    />
     <button
         class="expandButton"
         type="button"
@@ -184,6 +185,30 @@ async function load() {
               :clearable="true"
               @select="txt => handleOutletChange(txt)"
               @clear = "clearOutlet()"
+          />
+        </FieldEditorWrapper>
+
+        <FieldEditorWrapper field-name="Prevent further recursion">
+          <BooleanToggle
+            :model-value="props.entry.get('prevent_further_recursion')"
+            @edit = "value => {
+              props.entry.update('prevent_further_recursion', value)
+              props.entry.update('non_recursable', false)
+            }"
+          />
+        </FieldEditorWrapper>
+        <FieldEditorWrapper field-name="Non-Recursable">
+          <BooleanToggle
+            :model-value="props.entry.get('non_recursable')"
+            @edit = "value => {
+              props.entry.update('non_recursable', value)
+            }"
+          />
+        </FieldEditorWrapper>
+        <FieldEditorWrapper field-name="Scan depth">
+          <NumberInput
+            :model-value="props.entry.get('scan_depth')"
+            @edit="payload => props.entry.update('scan_depth', payload)"
           />
         </FieldEditorWrapper>
       </div>

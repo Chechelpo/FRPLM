@@ -130,6 +130,7 @@ async function handleRemoveTag(tag: Tag) {
         </FieldEditorWrapper>
       </div>
       <!-- Tag editor -->
+      <!--
       <div v-if="model">
         <FieldEditorWrapper
             field-name="Tags"
@@ -144,6 +145,7 @@ async function handleRemoveTag(tag: Tag) {
           />
         </FieldEditorWrapper>
       </div>
+      -->
     </div>
     <!-- Embed lorebook entry editor -->
     <Expandable

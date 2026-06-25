@@ -1,6 +1,6 @@
 package intentclassifier;
 
-import chechelpo.frplm.extensions.api.activation.PostGenerationActivated;
+import chechelpo.frplm.extensions.api.activation.PostResponseGeneration;
 import chechelpo.frplm.extensions.api.annotations.FrplmExtension;
 import chechelpo.frplm.extensions.api.results.MoveResult;
 import chechelpo.frplm.extensions.api.session.ChatMessage;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 
 @FrplmExtension
-public class IntentClassifier extends ConfigurableExtension implements PostGenerationActivated {
+public class IntentClassifier extends ConfigurableExtension implements PostResponseGeneration {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public IntentClassifier() {

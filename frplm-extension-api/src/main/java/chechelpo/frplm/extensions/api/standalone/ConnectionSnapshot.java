@@ -6,6 +6,8 @@ import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 @Ephemeral
 public non-sealed interface ConnectionSnapshot extends Snapshot {
     record Reference(int id) implements StableReference {
@@ -34,8 +36,8 @@ public non-sealed interface ConnectionSnapshot extends Snapshot {
     boolean hasApiKey();
 
     String getName();
-    ChatCompletionResponse generate(ChatCompletionRequest request);
+    Optional<ChatCompletionResponse> generate(ChatCompletionRequest request);
     /**@apiNote validation must be made by caller */
-    ChatCompletionResponse generate(String rawRequest);
+    Optional<ChatCompletionResponse> generate(String rawRequest);
     String getModelID();
 }

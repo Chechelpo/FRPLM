@@ -25,8 +25,7 @@ const props = defineProps<{
 }>();
 
 const emits = defineEmits<{
-  (e: "delete", value: Message): void;
-  (e: "regenerate", value:Message): void;
+  (e: "delete", value: Message): void
 }>();
 
 const location = shallowRef<Location>();

@@ -39,17 +39,19 @@ public class LocationsService extends EntityService<
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<LocationsRecord> data, long operationID) {
-        EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-        lorebookData.set(LOREBOOKS.NAME, data.requireValue(LOCATIONS.NAME));
-        lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.LOCATION_INFO.stable_id);
+        if (!data.assignsField(LOCATIONS.LOREBOOK_ID)){
+            EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
+            lorebookData.set(LOREBOOKS.NAME, data.requireValue(LOCATIONS.NAME));
+            lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.LOCATION_INFO.stable_id);
 
-        data.set(
-                Locations.LOCATIONS.LOREBOOK_ID,
-                lorebooks.createAndGet(
-                        lorebookData,
-                        Lorebooks.LOREBOOKS.ID
-                )
-        );
+            data.set(
+                    Locations.LOCATIONS.LOREBOOK_ID,
+                    lorebooks.createAndGet(
+                            lorebookData,
+                            Lorebooks.LOREBOOKS.ID
+                    )
+            );
+        }
 
         EntityKey<WorldsRecord> worldKey = EntityKey.of(Worlds.WORLDS.ID, data.requireValue(Locations.LOCATIONS.WORLD_ID));
         int locationID = worlds.incrementAndGet(

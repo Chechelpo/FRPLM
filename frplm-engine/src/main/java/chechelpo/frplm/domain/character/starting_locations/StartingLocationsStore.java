@@ -21,17 +21,18 @@ final class StartingLocationsStore extends EntityStore<StartingLocationsRecord>
         super(ctx, STARTING_LOCATIONS, EntityTypes.Types.STARTING_LOCATIONS);
     }
 
-    public @NotNull List<LocationsRecord> getStartingLocationAt(@NotNull EntityKey<CharactersRecord> key, int worldID){
+    public @NotNull List<LocationsRecord> getStartingLocationAt(int characterId, int worldID){
         return ctx.select()
                 .from(STARTING_LOCATIONS)
                 .join(LOCATIONS)
                 .on(
                         STARTING_LOCATIONS.LOCATION_ID.eq(LOCATIONS.ID)
                                 .and(STARTING_LOCATIONS.WORLD_ID.eq(LOCATIONS.WORLD_ID))
-                                .and(STARTING_LOCATIONS.CHARACTER_ID.eq(key.getValue(CHARACTERS.ID)))
                 )
-                .where(STARTING_LOCATIONS.WORLD_ID.eq(worldID))
-                .fetchInto(LocationsRecord.class);
+                .where(
+                        STARTING_LOCATIONS.WORLD_ID.eq(worldID)
+                        .and(STARTING_LOCATIONS.CHARACTER_ID.eq(characterId))
+                ).fetchInto(LocationsRecord.class);
     }
 
     public @NotNull List<LocationsRecord> getStartingLocations(@NotNull EntityKey<CharactersRecord> key){

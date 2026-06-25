@@ -51,7 +51,7 @@ public final class SessionImpl implements Session {
         return this.sessionContext;
     }
 
-    SessionsRecord getRecord() {
+    public SessionsRecord getRecord() {
         return record;
     }
 

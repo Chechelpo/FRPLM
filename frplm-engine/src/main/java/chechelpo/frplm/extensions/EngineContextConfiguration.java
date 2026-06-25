@@ -2,6 +2,7 @@ package chechelpo.frplm.extensions;
 
 import chechelpo.frplm.domain.character.core.CharacterService;
 import chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
+import chechelpo.frplm.domain.connection.api_hosts.HostService;
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.domain.connection.llm.LLMService;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
@@ -28,6 +29,7 @@ public class EngineContextConfiguration {
     @Bean
     public ExtensionContext standaloneContext(
             LLMService llmService,
+            HostService hosts,
             SecretService secretService,
 
             CharacterService characters,
@@ -46,6 +48,7 @@ public class EngineContextConfiguration {
     ) {
         return new ExtensionContext(
                 llmService,
+                hosts,
                 secretService,
 
                 characters,

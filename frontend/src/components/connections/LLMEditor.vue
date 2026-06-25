@@ -4,7 +4,7 @@ import {
   LLMConnection,
   type LLMBackend,
   getBackendFromID,
-  ModelResponse,
+  ModelResponse, LLMBackendList,
 } from "@/domain/Connection";
 
 import {computed, onMounted, ref} from "vue";
@@ -12,48 +12,65 @@ import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
 import { computedAsync } from "@vueuse/core";
 import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import {fetchApi} from "@/frameworks/ABSEntity";
+import {API_BASE} from "@/config";
+import {EntityTypes} from "@/domain/EntityTypes";
 
 const model = defineModel<LLMConnection>({
   required: true,
-  type: LLMConnection,
 });
 
-const editingName = computed<string>({
-  get() {
-    return model.value.get("name")!;
-  },
-  set(value: string) {
-    model.value.update("name", value);
-  },
-});
+const connectionType = computed<LLMBackend>(() => getBackendFromID(model.value.get('host_id')))
+const llmBackendNames = computed<string[]>(() => LLMBackendList.map(back => back.name))
 
-const connectionType = computed<number>({
-  get() {
-    return model.value.get("type") ?? LLMBackends.NANOGPT.id;
-  },
-  set(value: number) {
-    model.value.update("type", value);
-  },
-});
+async function updateBackend(typeName:string){
+  const newCon = LLMBackendList.find(back => back.name == typeName)!;
+  if (newCon != LLMBackends.CUSTOM_OPENAI){
+    model.value.update('host_id', newCon.id!);
+    model.value.update('modelID', "");
+    await loadModels();
+    return;
+  }
 
-const llmBackendValues = Object.values(LLMBackends) as readonly LLMBackend[];
+  await assignCustomBackend("")
+}
 
-const selectedBackend = computed<LLMBackend>(() => {
-  return (
-      llmBackendValues.find((backend) => backend.id === connectionType.value) ??
-      LLMBackends.NANOGPT
-  );
-});
+interface HostDto {
+  hostId:number,
+  url:string
+}
+async function assignCustomBackend(hostUrl:string){
+  const newHost = await fetchApi(
+      `${API_BASE}/${EntityTypes.LLM}/${model.value.get('id')}/assignHost?url=${hostUrl}`,
+      {
+        method:'PUT'
+      }
+  ).then(async response => await response.json() as HostDto)
+  await model.value.update('host_id', newHost.hostId);
+  customHost.value = newHost;
+}
+const customHost = ref<HostDto | null>(null);
+async function getCustomHost(){
+  if (connectionType.value != LLMBackends.CUSTOM_OPENAI){
+    return;
+  }
+  customHost.value = await fetchApi(
+      `${API_BASE}/${EntityTypes.LLM}/host/${model.value.get('host_id')}`,
+      {
+        method:'GET'
+      }
+  ).then(async response => await response.json() as HostDto)
+}
 
-const llmBackendIDs = computed<number[]>(() => {
-  return llmBackendValues.map((backend) => backend.id);
-});
-
-const llmBackendNames = computed<Record<number, string>>(() => {
-  return Object.fromEntries(
-      llmBackendValues.map((backend) => [backend.id, backend.name])
-  ) as Record<number, string>;
-});
+const api_key = ref<string>("");
+async function createKey(key: string) {
+  try{
+    await model.value.assignNewKey(key);
+    await loadModels() //Some providers change the available model list based on the key
+  } finally {
+    api_key.value = "";
+  }
+}
 
 const llm_model = computed<string | null>({
   get() {
@@ -67,19 +84,10 @@ const llm_model = computed<string | null>({
 });
 
 const modelOptions = ref<ModelResponse[]>([]);
-
 const modelNames = computed<string[]>(() => modelOptions.value.map((i) => i.id));
 
 async function loadModels() : Promise<void> {
   modelOptions.value = await model.value.getModels();
-}
-
-const api_key = ref<string | null>(null);
-
-async function createKey(key: string) {
-  await model.value.assignNewKey(key);
-  api_key.value = "";
-  await loadModels() //Some providers change the available model list based on the key
 }
 
 const testingConnection = ref(false);
@@ -100,21 +108,23 @@ async function testConnection(): Promise<void> {
     testingConnection.value = false;
   }
 }
-onMounted( () => {loadModels()})
+onMounted( () => {
+  loadModels()
+  getCustomHost()
+})
 </script>
 
 <template>
   <div class="background-edit-box">
     <FieldEditorWrapper field-name="name">
-      <div>{{ editingName }}</div>
+      <div>{{ model.get('name') }}</div>
     </FieldEditorWrapper>
 
     <FieldEditorWrapper field-name="type" info="Connection type">
       <SingleEnumInput
-          :value="connectionType"
-          :possible_values="llmBackendIDs"
-          :labels="llmBackendNames"
-          @edit="connectionType = $event"
+          :value="connectionType.name"
+          :possible_values="llmBackendNames"
+          @edit="value => updateBackend(value)"
       />
     </FieldEditorWrapper>
 
@@ -126,12 +136,18 @@ onMounted( () => {loadModels()})
             @edit="i => llm_model = i"
         />
       </FieldEditorWrapper>
-
+      <FieldEditorWrapper v-if="connectionType == LLMBackends.CUSTOM_OPENAI && customHost" field-name="Host">
+        <ShortTextBox
+          :model-value="customHost.url"
+          @edit="value => assignCustomBackend(value)"
+        />
+      </FieldEditorWrapper>
       <FieldEditorWrapper
           field-name="api_key"
           info="Will be hidden as soon as its inputted, copy paste it"
       >
         <ShortTextBox
+            :key="api_key"
             :model-value="api_key"
             @edit="createKey"
         />
