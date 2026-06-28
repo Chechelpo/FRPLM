@@ -76,7 +76,7 @@ public class WorldMapper {
                 result.add(new NewEdgeOrder(
                         record.getName(),
                         neighbour.getName(),
-                        edgeInfo.getEdgedescription(),
+                        edgeInfo.getEdgedescription() == null ? "" : edgeInfo.getEdgedescription(),
                         edgeInfo.getTravelcost()
                 ));
             }

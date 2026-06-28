@@ -30,14 +30,12 @@ A reusable Vue 3 component that provides a multi‑tag autocomplete input. It is
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 
-interface Props {
+const props = withDefaults(defineProps<{
   suggestions: string[]
   modelValue?: string[]
   placeholder?: string
   allowCustom?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   modelValue: () => [],
   placeholder: 'Type and press Tab to add…',
   allowCustom: false,
@@ -153,7 +151,7 @@ function handleBackspace(e: KeyboardEvent) {
           ref="inputRef"
           v-model="inputText"
           class="tag-input"
-          :placeholder="placeholder"
+          :placeholder="internalTags.length > 0? '' : placeholder "
           @keydown.tab.prevent="applySuggestion"
           @keydown.enter.prevent="applySuggestion"
           @keydown.delete="handleBackspace"

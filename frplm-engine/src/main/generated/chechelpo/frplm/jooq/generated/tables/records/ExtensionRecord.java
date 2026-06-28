@@ -47,6 +47,20 @@ public class ExtensionRecord extends UpdatableRecordImpl<ExtensionRecord> {
         return (JSON) get(1);
     }
 
+    /**
+     * Setter for <code>PUBLIC.EXTENSION.IS_ENABLED</code>.
+     */
+    public void setIsEnabled(Boolean value) {
+        set(2, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.EXTENSION.IS_ENABLED</code>.
+     */
+    public Boolean getIsEnabled() {
+        return (Boolean) get(2);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -70,11 +84,12 @@ public class ExtensionRecord extends UpdatableRecordImpl<ExtensionRecord> {
     /**
      * Create a detached, initialised ExtensionRecord
      */
-    public ExtensionRecord(String id, JSON config) {
+    public ExtensionRecord(String id, JSON config, Boolean isEnabled) {
         super(Extension.EXTENSION);
 
         setId(id);
         setConfig(config);
+        setIsEnabled(isEnabled);
         resetChangedOnNotNull();
     }
 }

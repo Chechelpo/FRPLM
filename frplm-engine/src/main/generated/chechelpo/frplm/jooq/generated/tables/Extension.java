@@ -66,6 +66,11 @@ public class Extension extends TableImpl<ExtensionRecord> {
      */
     public final TableField<ExtensionRecord, JSON> CONFIG = createField(DSL.name("CONFIG"), SQLDataType.JSON, this, "");
 
+    /**
+     * The column <code>PUBLIC.EXTENSION.IS_ENABLED</code>.
+     */
+    public final TableField<ExtensionRecord, Boolean> IS_ENABLED = createField(DSL.name("IS_ENABLED"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("TRUE"), SQLDataType.BOOLEAN)), this, "");
+
     private Extension(Name alias, Table<ExtensionRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

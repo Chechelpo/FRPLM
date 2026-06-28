@@ -47,31 +47,59 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.LOCATIONS.REGION_ID</code>.
+     */
+    public void setRegionId(Integer value) {
+        set(2, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.LOCATIONS.REGION_ID</code>.
+     */
+    public Integer getRegionId() {
+        return (Integer) get(2);
+    }
+
+    /**
      * Setter for <code>PUBLIC.LOCATIONS.NAME</code>.
      */
     public void setName(String value) {
-        set(2, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOCATIONS.NAME</code>.
      */
     public String getName() {
-        return (String) get(2);
+        return (String) get(3);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
+     */
+    public void setDescription(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
+     */
+    public String getDescription() {
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
      */
     public void setLorebookId(Integer value) {
-        set(3, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
      */
     public Integer getLorebookId() {
-        return (Integer) get(3);
+        return (Integer) get(5);
     }
 
     // -------------------------------------------------------------------------
@@ -97,12 +125,14 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     /**
      * Create a detached, initialised LocationsRecord
      */
-    public LocationsRecord(Integer id, Integer worldId, String name, Integer lorebookId) {
+    public LocationsRecord(Integer id, Integer worldId, Integer regionId, String name, String description, Integer lorebookId) {
         super(Locations.LOCATIONS);
 
         setId(id);
         setWorldId(worldId);
+        setRegionId(regionId);
         setName(name);
+        setDescription(description);
         setLorebookId(lorebookId);
         resetChangedOnNotNull();
     }

@@ -131,7 +131,7 @@ public class IntentClassifier extends ConfigurableExtension implements PostRespo
                         ))
                         .responseFormat(movementIntentFormat(characterNames, neighbourNames))
                         .build()
-        );
+        ).orElseThrow();
         this.logger().setLevel(Level.FINEST);
         MovementIntentResult result = parseMovementIntent(response);
         this.logger().info("""

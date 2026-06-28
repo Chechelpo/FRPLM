@@ -62,5 +62,11 @@ public final class WorldFieldsHelper extends ABSControllerAwareHelper<
                 FieldInfo.numberField(FieldType.INTEGER)
                         .build()
         );
+        register_field(
+                null,
+                WORLDS.NEXT_REGION_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .build()
+        );
     }
 }

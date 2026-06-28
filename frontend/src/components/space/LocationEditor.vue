@@ -111,8 +111,7 @@ onMounted(async () => {
         />
       </Expandable>
       <Expandable
-        title="Edges editor"
-        info="Controls which locations"
+        title="Connected locations"
       >
         <LocationEdgesEditor
             :model-value="{ parentLocation:model.location, all_locations:model.all_locations }"

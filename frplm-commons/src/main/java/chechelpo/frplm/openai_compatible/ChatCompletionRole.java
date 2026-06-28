@@ -35,6 +35,6 @@ public enum ChatCompletionRole {
         }
         @Contract(pure=true)
         public @NotNull ChatCompletionMessage withContent(String content) {
-            return new ChatCompletionMessage(this, content);
+            return new ChatCompletionMessage(this, null,content);
         }
     }

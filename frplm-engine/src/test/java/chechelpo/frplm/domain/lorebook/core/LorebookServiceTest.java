@@ -36,7 +36,7 @@ class LorebookServiceTest {
     }
 
     @Test
-    void getAllDoesNotReturnAssociatedLorebooks() {
+    void getIndependent_doesNotReturnAssociatedLorebooks() {
         int characterAmount = 150;
         List<CharactersRecord> createdCharacters = characters.createAndGetRecords(characterAmount);
         Set<Integer> associatedLorebookIDs = new IntOpenHashSet(characterAmount);
@@ -53,7 +53,7 @@ class LorebookServiceTest {
 
 
 
-        List<LorebooksRecord> lorebooks = testContext.service.getAll();
+        List<LorebooksRecord> lorebooks = testContext.service.getIndependent();
         assertEquals(lorebookAmount, lorebooks.size());
         lorebooks.forEach(lorebook -> assertFalse(associatedLorebookIDs.contains(lorebook.getId()),
                         "Found associated lorebook in getAll call"

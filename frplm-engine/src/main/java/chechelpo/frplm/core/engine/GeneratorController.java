@@ -43,9 +43,7 @@ final class GeneratorController {
     public record GenerationOptions(
             boolean streaming,
             ChatCompletionRequest prompt
-    ) {
-    }
-
+    ) {}
 
     public record PromptDTO(
             EntityController.EntityDTO[] lorebooks,

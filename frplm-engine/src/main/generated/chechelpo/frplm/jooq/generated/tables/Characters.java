@@ -84,6 +84,11 @@ public class Characters extends TableImpl<CharactersRecord> {
     public final TableField<CharactersRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
+     */
+    public final TableField<CharactersRecord, String> DESCRIPTION = createField(DSL.name("DESCRIPTION"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("''"), SQLDataType.VARCHAR)), this, "");
+
+    /**
      * The column <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
      */
     public final TableField<CharactersRecord, Boolean> IS_ARCHETYPE = createField(DSL.name("IS_ARCHETYPE"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");

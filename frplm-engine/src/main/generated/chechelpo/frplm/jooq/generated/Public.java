@@ -25,6 +25,7 @@ import chechelpo.frplm.jooq.generated.tables.Movements;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
 import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
+import chechelpo.frplm.jooq.generated.tables.Region;
 import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges;
 import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
@@ -160,6 +161,11 @@ public class Public extends SchemaImpl {
     public final PromptTemplate PROMPT_TEMPLATE = PromptTemplate.PROMPT_TEMPLATE;
 
     /**
+     * The table <code>PUBLIC.REGION</code>.
+     */
+    public final Region REGION = Region.REGION;
+
+    /**
      * The table <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code>.
      */
     public final ResponseLocationChanges RESPONSE_LOCATION_CHANGES = ResponseLocationChanges.RESPONSE_LOCATION_CHANGES;
@@ -231,6 +237,7 @@ public class Public extends SchemaImpl {
             Outlet.OUTLET,
             PromptSection.PROMPT_SECTION,
             PromptTemplate.PROMPT_TEMPLATE,
+            Region.REGION,
             ResponseLocationChanges.RESPONSE_LOCATION_CHANGES,
             Responses.RESPONSES,
             Sessions.SESSIONS,

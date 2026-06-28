@@ -17,6 +17,7 @@ export enum EntityTypes{
 
     //Space controllers
     WORLDS = "worlds",
+    REGIONS = "regions",
     LOCATIONS = "locations",
     EDGES = "edges",
 

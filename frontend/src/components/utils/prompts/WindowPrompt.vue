@@ -129,6 +129,7 @@ onUnmounted(() => {
 .window-prompt {
   width: min(720px, 100%);
   max-height: min(85vh, 720px);
+  min-height: 30dvh;
 
   display: flex;
   flex-direction: column;

@@ -1,28 +1,30 @@
 package chechelpo.frplm.domain.world.location;
 
+import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.events.EventBus;
+import chechelpo.frplm.events.crud.CRUDDraftEvent;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.Worlds;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.*;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import java.util.List;
+
+import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 public class LocationsService extends EntityService<
@@ -87,4 +89,20 @@ public class LocationsService extends EntityService<
         );
     }
 
+    @EventListener
+    void checkRegionDeletion(CRUDDraftEvent.DeleteEntityDraft<?> rawEvent){
+        if (rawEvent.type() != EntityTypes.Types.REGIONS) return;
+
+        CRUDDraftEvent.DeleteEntityDraft<RegionRecord> event = (CRUDDraftEvent.DeleteEntityDraft<RegionRecord>) rawEvent;
+        int worldId = event.key().requireValue(REGION.WORLD_ID);
+        int regionId = event.key().requireValue(REGION.ID);
+
+        if (!store.getLocationsOfRegion(worldId,regionId).isEmpty())
+            throw new UnsupportedAction("This region still has associated locations", Severity.USER);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LocationsRecord> getLocationsOfRegion(RegionRecord region){
+        return store.getLocationsOfRegion(region);
+    }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from "vue";
+import {ref, watch, onBeforeUnmount} from "vue";
 
 /**
  * Debounce interval for emitting edit events (ms).
@@ -10,7 +10,14 @@ const EDIT_EMIT_MS = 250;
 const model = defineModel<string | null>({
   required: true,
 });
-
+const props = withDefaults(
+    defineProps<{
+      disabled?: boolean
+    }>(),
+    {
+      disabled: false
+    }
+)
 const emit = defineEmits<{
   (e: "edit", payload: string): void;
 }>();
@@ -63,6 +70,7 @@ onBeforeUnmount(() => {
       v-model="text"
       type="text"
       class="noBackground"
+      :disabled="props.disabled"
       @input="scheduleEditEmit"
   />
 </template>

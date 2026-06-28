@@ -29,7 +29,7 @@ public class PromptSectionImpl extends StandaloneEntity<PromptSectionRecord> imp
 
     @Override
     public ChatCompletionMessage asCompletionMessage() {
-        return new ChatCompletionMessage(role(), content());
+        return new ChatCompletionMessage(role(), null, content());
     }
 
     @Override

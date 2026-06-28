@@ -47,17 +47,17 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     * Setter for <code>PUBLIC.WORLDS.DESCRIPTION</code>.
      */
-    public void setNextLocationId(Integer value) {
+    public void setDescription(String value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     * Getter for <code>PUBLIC.WORLDS.DESCRIPTION</code>.
      */
-    public Integer getNextLocationId() {
-        return (Integer) get(2);
+    public String getDescription() {
+        return (String) get(2);
     }
 
     /**
@@ -72,6 +72,34 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
      */
     public Integer getLorebookId() {
         return (Integer) get(3);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     */
+    public void setNextLocationId(Integer value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     */
+    public Integer getNextLocationId() {
+        return (Integer) get(4);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
+     */
+    public void setNextRegionId(Integer value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
+     */
+    public Integer getNextRegionId() {
+        return (Integer) get(5);
     }
 
     // -------------------------------------------------------------------------
@@ -97,13 +125,15 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     /**
      * Create a detached, initialised WorldsRecord
      */
-    public WorldsRecord(Integer id, String name, Integer nextLocationId, Integer lorebookId) {
+    public WorldsRecord(Integer id, String name, String description, Integer lorebookId, Integer nextLocationId, Integer nextRegionId) {
         super(Worlds.WORLDS);
 
         setId(id);
         setName(name);
-        setNextLocationId(nextLocationId);
+        setDescription(description);
         setLorebookId(lorebookId);
+        setNextLocationId(nextLocationId);
+        setNextRegionId(nextRegionId);
         resetChangedOnNotNull();
     }
 }

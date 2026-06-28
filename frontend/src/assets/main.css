@@ -14,8 +14,14 @@ html, body, #app {
   --primary: #af8218;
   --primary-accent: #ffc600;
   --primary-background: #dfae7c;
+
+  --danger-color: #dc2626;
+  --danger-text: #ffffff;
+
   --secondary-background: #b88f5a;
   --transparency: 50;
+
+
   --primary-text: "Manrope", "Avenir Next", Avenir, Arial, sans-serif;
   --muted-text: #6b5138;
 }

@@ -1,9 +1,12 @@
 import {
     ABSEntity,
-    createEntity, deleteEntity,
+    createEntity,
+    deleteEntity,
     EntityField,
-    fetchApi, fetchMatching,
+    fetchApi,
+    fetchMatching,
     fetchOne,
+    getEntityController,
     UpdateEntityField
 } from "@/frameworks/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
@@ -57,7 +60,12 @@ export class World extends ABSEntity<WorldKey, WorldData> {
         if (this.locations == null)
             this.locations = await this.getLocations();
 
-        const location: Location = await createLocation(this, name)
+        const location: Location = await createEntity<LocationKey, LocationData, Location>(
+            {worldID: this.get('id')},
+            {name: name},
+            EntityTypes.LOCATIONS,
+            Location
+        );
         this.locations.push(location);
 
         return location;
@@ -79,18 +87,6 @@ export class World extends ABSEntity<WorldKey, WorldData> {
 
         return success;
     }
-}
-async function createLocation(world:World, name:string): Promise<Location> {
-    return await createEntity<LocationKey, LocationData, Location>(
-        {
-            worldID: world.get('id')
-        },
-        {
-            name: name,
-        },
-        EntityTypes.LOCATIONS,
-        Location
-    );
 }
 
 export type LocationKey = { worldID: number, id?: number }
@@ -130,7 +126,7 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
     public async getNeighbours(): Promise<Location[]>{
         if (this.neighbors == null)
             this.neighbors = await getNeighbours(this.key)
-
+        console.log(`Neighbours: \n ${this.neighbors}`)
         return this.neighbors;
     }
     public async isNeighbour(other:Location): Promise<boolean> {
@@ -221,6 +217,37 @@ async function getNeighbours(key:LocationKey): Promise<Location[]> {
     const dtos = await response.json() as DTO[];
     console.log(dtos);
     return dtos.map(dto => new Location(dto, EntityTypes.LOCATIONS));
+}
+
+export type RegionKey = {world_id: number, id:number}
+export type RegionData = {parent_region_id:number, lorebook_id:number, name:string}
+
+export class Region extends ABSEntity<RegionKey, RegionData>{
+    getEntityType(): EntityTypes {
+        return EntityTypes.REGIONS;
+    }
+
+    public async getLocations() : Promise<Location[]> {
+        return await fetchApi(
+            `${getEntityController(EntityTypes.REGIONS)}/ofRegion?worldId=${this.get('world_id')}&regionId=${this.get('id')}`,
+            {
+                method:'GET'
+            }
+        ).then(
+            async response => (await response.json() as DTO[]).map(dto => new Location(dto, EntityTypes.LOCATIONS))
+        );
+    }
+
+    public async getFirstChildren() : Promise<Region[]> {
+        return await fetchApi(
+            `${getEntityController(EntityTypes.REGIONS)}/ofRegion?worldId=${this.get('world_id')}&regionId=${this.get('id')}`,
+            {
+                method:'GET'
+            }
+        ).then(
+            async response => (await response.json() as DTO[]).map(dto => new Region(dto, EntityTypes.REGIONS))
+        )
+    }
 }
 
 export type EdgeKey = { world_id: number, location1_id: number, location2_id: number }

@@ -12,6 +12,7 @@ import chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
 import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
@@ -77,9 +78,19 @@ public class Locations extends TableImpl<LocationsRecord> {
     public final TableField<LocationsRecord, Integer> WORLD_ID = createField(DSL.name("WORLD_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.LOCATIONS.REGION_ID</code>.
+     */
+    public final TableField<LocationsRecord, Integer> REGION_ID = createField(DSL.name("REGION_ID"), SQLDataType.INTEGER, this, "");
+
+    /**
      * The column <code>PUBLIC.LOCATIONS.NAME</code>.
      */
     public final TableField<LocationsRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.LOCATIONS.DESCRIPTION</code>.
+     */
+    public final TableField<LocationsRecord, String> DESCRIPTION = createField(DSL.name("DESCRIPTION"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("''"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>PUBLIC.LOCATIONS.LOREBOOK_ID</code>.
@@ -155,29 +166,17 @@ public class Locations extends TableImpl<LocationsRecord> {
 
     @Override
     public UniqueKey<LocationsRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_5EB;
+        return Keys.CONSTRAINT_5EBC;
     }
 
     @Override
     public List<UniqueKey<LocationsRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.CONSTRAINT_5EBC6);
+        return Arrays.asList(Keys.UNIQUE_LOCATION_NAME_PER_WORLD);
     }
 
     @Override
     public List<ForeignKey<LocationsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_5E, Keys.CONSTRAINT_5EBC);
-    }
-
-    private transient LorebooksPath _lorebooks;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.LOREBOOKS</code> table.
-     */
-    public LorebooksPath lorebooks() {
-        if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_5E, null);
-
-        return _lorebooks;
+        return Arrays.asList(Keys.CONSTRAINT_5E, Keys.CONSTRAINT_5EB, Keys.FK_REGION);
     }
 
     private transient WorldsPath _worlds;
@@ -187,9 +186,33 @@ public class Locations extends TableImpl<LocationsRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_5EBC, null);
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_5E, null);
 
         return _worlds;
+    }
+
+    private transient LorebooksPath _lorebooks;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.LOREBOOKS</code> table.
+     */
+    public LorebooksPath lorebooks() {
+        if (_lorebooks == null)
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_5EB, null);
+
+        return _lorebooks;
+    }
+
+    private transient RegionPath _region;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.REGION</code> table.
+     */
+    public RegionPath region() {
+        if (_region == null)
+            _region = new RegionPath(this, Keys.FK_REGION, null);
+
+        return _region;
     }
 
     private transient MessagesPath _messages;

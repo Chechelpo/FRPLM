@@ -12,6 +12,7 @@ import Expandable from "@/components/utils/panels/Expandable.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import {API_BASE} from "@/config";
 import {fetchApi} from "@/frameworks/ABSEntity";
+import IconButton from "@/components/utils/buttons/IconButton.vue";
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`
 // MODEL & EMITS
@@ -96,84 +97,153 @@ async function load() {
 </script>
 
 <template>
-  <div class="flex flex-col flex-1 min-h-0 gap-4">
-
+  <div>
     <!-- Go back to world list -->
-    <button
-        type="button"
-        class="px-3 py-1 rounded border"
-        @click="emit('stopEditing')"
-    >
-      Back
-    </button>
-    <button
-        type="button"
-        @click="onExportWorld"
-    >
-      Export
-    </button>
-    <button
-      type="button"
-      @click="emit('delete')"
+    <div class="world-editor-actions">
+      <IconButton
+          title="Back to world list"
+          @click="emit('stopEditing')"
       >
-      delete
-    </button>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19 12H5"/>
+          <path d="m12 19-7-7 7-7"/>
+        </svg>
+      </IconButton>
 
-  <Expandable
-      info="Logical groupings of locations"
-      title="World Editor"
-  >
-    <!-- World editor (natural height, scrolls away) -->
-    <div class="background-edit-box">
-      World info edit
-      <FieldEditorWrapper
-          field-name="World's Name "
-          info="Purely metadata, won't be injected at runtime unless you use the outlet {{worldname}}"
-      >
+      <div class="world-editor-actions__name">
         <ShortTextBox
-            class="opacity-100"
             :model-value="worldName"
+            aria-label="World name"
             @edit="payload => worldName = payload"
         />
-      </FieldEditorWrapper>
-      <Expandable
-          title="World Info"
-          info="Lorebook active throughout an entire session, regardless of location"
-          :initially-open="false"
+      </div>
+
+      <IconButton
+          title="Export world as JSON"
+          variant="accent"
+          @click="onExportWorld"
       >
-        <LorebookEditor
-            class="opacity-100"
-            v-if="lorebook"
-            :model-value="lorebook"
-        />
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12"/>
+          <path d="m7 10 5 5 5-5"/>
+          <path d="M5 21h14"/>
+        </svg>
+      </IconButton>
+
+      <IconButton
+          title="Delete world"
+          variant="danger"
+          @click="emit('delete')"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18"/>
+          <path d="M8 6V4h8v2"/>
+          <path d="M19 6 18 21H6L5 6"/>
+          <path d="M10 11v6"/>
+          <path d="M14 11v6"/>
+        </svg>
+      </IconButton>
+    </div>
+
+    <div class="background-edit-box">
+      <Expandable
+          style="max-height: 100dvh;overflow:scroll"
+          info="Logical groupings of locations"
+          title="World Editor"
+      >
+        <!-- World editor (natural height, scrolls away) -->
+        <div class="background-edit-box">
+          <Expandable
+              title="World Info"
+              info="Lorebook active throughout an entire session, regardless of location"
+              :initially-open="false"
+          >
+            <LorebookEditor
+                class="opacity-100"
+                v-if="lorebook"
+                :model-value="lorebook"
+            />
+          </Expandable>
+        </div>
       </Expandable>
     </div>
-  </Expandable>
 
-  <!-- Locations editor (full-screen section) -->
-  <div class="flex-1 min-h-0 flex">
-    <SplitPanel storage-key="WorldEdit" class="flex-1 min-h-0">
-      <template #left>
-        <List
-            v-if="locations"
-            :elements="locations!"
-            @create="onCreate"
-            @edit="(element) => onEdit(element as Location)"
-            @remove="element => model.deleteLocation(element.get('id')!)"
-        />
-      </template>
+    <!-- Locations editor (full-screen section) -->
+    <div>
+      <SplitPanel storage-key="WorldEdit">
+        <template #left>
+          <List
+              v-if="locations"
+              :elements="locations!"
+              @create="onCreate"
+              @edit="(element) => onEdit(element as Location)"
+              @remove="element => model.deleteLocation(element.get('id')!)"
+          />
+        </template>
 
-      <template #right>
-        <LocationEditor
-            v-if="locationToEdit"
-            :model-value="{location: locationToEdit, all_locations: locations!}"
-        />
-      </template>
-    </SplitPanel>
-  </div>
+        <template #right>
+          <LocationEditor
+              v-if="locationToEdit"
+              :model-value="{location: locationToEdit, all_locations: locations!}"
+          />
+        </template>
+      </SplitPanel>
+    </div>
   </div>
 </template>
 
 
 <style scoped>
+.world-editor-actions {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  width: 100%;
+  min-width: 0;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem;
+
+  background: color-mix(
+      in srgb,
+      var(--primary-background, #1c1917) 92%,
+      transparent
+  );
+
+  border: 1px solid color-mix(
+      in srgb,
+      currentColor 18%,
+      transparent
+  );
+
+  border-radius: 0.55rem;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.14);
+
+  backdrop-filter: blur(8px);
+}
+
+.world-editor-actions__name {
+  flex: 1 1 auto;
+  min-width: 8rem;
+  max-width: 30rem;
+}
+
+.world-editor-actions__name :deep(input) {
+  width: 100%;
+  min-width: 0;
+
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .world-editor-actions__name {
+    min-width: 0;
+    max-width: none;
+  }
+}
 </style>

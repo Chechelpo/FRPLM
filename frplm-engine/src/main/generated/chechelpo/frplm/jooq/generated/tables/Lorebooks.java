@@ -11,6 +11,7 @@ import chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
 import chechelpo.frplm.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
+import chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 
@@ -215,7 +216,7 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5E.getInverseKey());
+            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5EB.getInverseKey());
 
         return _locations;
     }
@@ -231,6 +232,19 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
             _characters = new CharactersPath(this, null, Keys.CONSTRAINT_6725.getInverseKey());
 
         return _characters;
+    }
+
+    private transient RegionPath _region;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.REGION</code>
+     * table
+     */
+    public RegionPath region() {
+        if (_region == null)
+            _region = new RegionPath(this, null, Keys.CONSTRAINT_8FD.getInverseKey());
+
+        return _region;
     }
 
     private transient WorldsPath _worlds;

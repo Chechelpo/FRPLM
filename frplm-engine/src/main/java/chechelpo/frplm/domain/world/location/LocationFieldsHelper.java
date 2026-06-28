@@ -44,7 +44,16 @@ final class LocationFieldsHelper extends ABSControllerAwareHelper<
                                 .build()
                         )
                         .build()
+        );
 
+        register_field(
+                "region_id",
+                Locations.LOCATIONS.REGION_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
+                                .nullable()
+                        )
+                        .build()
         );
 
         register_field(

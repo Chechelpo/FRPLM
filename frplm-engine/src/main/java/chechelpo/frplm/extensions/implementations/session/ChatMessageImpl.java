@@ -43,7 +43,7 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
     }
     public @NotNull ChatCompletionMessage asCompletionMessage() {
         ChatCompletionRole role = ChatCompletionRole.fromWireValue(record.getRole());
-        return new ChatCompletionMessage(role, record.getContent());
+        return new ChatCompletionMessage(role,null, record.getContent());
     }
     @Contract(" -> new")
     public @NotNull SessionLocationImpl getLocation() {
@@ -53,6 +53,6 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
     @Contract(" -> new")
     @Override
     public @NotNull ChatCompletionMessage asChatCompletion() {
-        return new ChatCompletionMessage(ChatCompletionRole.fromWireValue(record.getRole()), record.getContent());
+        return new ChatCompletionMessage(ChatCompletionRole.fromWireValue(record.getRole()),null, record.getContent());
     }
 }

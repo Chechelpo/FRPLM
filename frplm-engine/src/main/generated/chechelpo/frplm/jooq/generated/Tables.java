@@ -25,6 +25,7 @@ import chechelpo.frplm.jooq.generated.tables.Movements;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
 import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.PromptTemplate;
+import chechelpo.frplm.jooq.generated.tables.Region;
 import chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges;
 import chechelpo.frplm.jooq.generated.tables.Responses;
 import chechelpo.frplm.jooq.generated.tables.Sessions;
@@ -144,6 +145,11 @@ public class Tables {
      * The table <code>PUBLIC.PROMPT_TEMPLATE</code>.
      */
     public static final PromptTemplate PROMPT_TEMPLATE = PromptTemplate.PROMPT_TEMPLATE;
+
+    /**
+     * The table <code>PUBLIC.REGION</code>.
+     */
+    public static final Region REGION = Region.REGION;
 
     /**
      * The table <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code>.

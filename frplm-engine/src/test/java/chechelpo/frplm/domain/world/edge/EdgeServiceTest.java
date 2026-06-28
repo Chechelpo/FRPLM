@@ -3,6 +3,7 @@ package chechelpo.frplm.domain.world.edge;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
+import chechelpo.frplm.exceptions.runtime.Duplicate;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
+import java.util.Objects;
 
 import static chechelpo.frplm.jooq.generated.Tables.LOCATION_NEIGHBORS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,10 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
         scripts = "classpath:db/schema.sql",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@Import(LocationTestContext.class)
+@Import({LocationTestContext.class, EdgeTestContext.class})
 class EdgeServiceTest {
     @Autowired
     LocationTestContext locations;
+    @Autowired
+    EdgeTestContext edges;
     @Autowired
     EdgeService edgeService;
     @Autowired
@@ -138,4 +142,34 @@ class EdgeServiceTest {
             assertFalse(edgeService.isNeighbour(fromKey, toKey), "Neighbours are still connected");
         }
     }
+
+    @Test
+    void createEdges_throwsOnIdempotentOrders(){
+        int testAmount = 4;
+        List<LocationsRecord> createdRecords = locations.createAndGetTestLocationsOfSameWorld(testAmount);
+
+        LocationsRecord parent = createdRecords.getFirst();
+        LocationsRecord first = createdRecords.get(1);
+        LocationsRecord second = createdRecords.get(2);
+        int worldId = parent.getWorldId();
+        assert worldId == first.getWorldId() && Objects.equals(first.getWorldId(), second.getWorldId());
+
+        assertDoesNotThrow(() -> edges.link(worldId, parent.getId(), first.getId()));
+        assertDoesNotThrow(() -> edges.link(worldId, second.getId(), parent.getId()));
+
+        assertThrows(
+                Duplicate.class,
+                () -> edges.link(worldId, first.getId(), parent.getId()),
+                "Could link duplicate"
+        );
+        assertThrows(
+                Duplicate.class,
+                () -> edges.link(worldId, parent.getId(), second.getId()),
+                "Could link duplicate"
+        );
+
+        List<LocationsRecord> actualNeighbours = edges.service.getNeighboursOf(parent);
+        assertEquals(2, actualNeighbours.size(), "Found more neighbours than expected");
+    }
+
 }

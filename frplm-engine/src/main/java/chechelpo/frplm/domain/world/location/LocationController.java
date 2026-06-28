@@ -5,28 +5,30 @@ import chechelpo.frplm.domain.character.starting_locations.StartingLocationsServ
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.domain.world.region.RegionService;
+import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static chechelpo.frplm.config.controllers.ControllerPaths.ENTITY_PATH;
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @RestController
 @RequestMapping(EntityTypes.LOCATIONS_URL)
 final class LocationController extends EntityController<LocationsRecord, LocationsService> {
     private final EdgeService edgeService;
     private final StartingLocationsService startLocService;
+    private final RegionService regionService;
 
-    LocationController(LocationsService service, EdgeService edgeService, StartingLocationsService startLocService) {
+    LocationController(LocationsService service, EdgeService edgeService, StartingLocationsService startLocService, RegionService regionService) {
         super(service);
         this.edgeService = edgeService;
         this.startLocService = startLocService;
+        this.regionService = regionService;
     }
 
     @GetMapping(ENTITY_PATH + "/ofWorld/{worldID}")
@@ -65,6 +67,21 @@ final class LocationController extends EntityController<LocationsRecord, Locatio
                                         .set(CHARACTERS.ID, characterID)
                                         .build()
                         )
+                )
+        );
+    }
+
+    @GetMapping("/ofRegion")
+    public ResponseEntity<EntityDTO[]> getOfRegion(@RequestParam int worldId, @RequestParam int regionId){
+        RegionRecord region = regionService.find(EntityKey.<RegionRecord>builder()
+                .set(REGION.WORLD_ID, worldId)
+                .set(REGION.ID, regionId)
+                .build()
+        ).orElseThrow(() -> new EntityNotFound("No such region", Severity.USER));
+
+        return ResponseEntity.ok(
+                wrapEntities(
+                        service.getLocationsOfRegion(region)
                 )
         );
     }

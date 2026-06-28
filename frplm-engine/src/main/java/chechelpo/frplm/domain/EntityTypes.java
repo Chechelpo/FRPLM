@@ -36,6 +36,7 @@ public final class EntityTypes {
 
     // Space
     private static final String WORLDS_str             = "worlds";
+    private static final String REGION_str             = "regions";
     private static final String LOCATIONS_str          = "locations";
     private static final String EDGES_str              = "edges";
 
@@ -78,6 +79,7 @@ public final class EntityTypes {
 
     // Space controllers
     public static final String WORLDS_URL             = API_BASE + "/" + WORLDS_str;
+    public static final String REGIONS_URL            = API_BASE + "/" + REGION_str;
     public static final String LOCATIONS_URL          = API_BASE + "/" + LOCATIONS_str;
     public static final String EDGES_URL              = API_BASE + "/" + EDGES_str;
 
@@ -108,16 +110,17 @@ public final class EntityTypes {
         OUTLET(OUTLET_str),
 
         WORLDS(WORLDS_str),
+        REGIONS(REGION_str),
         LOCATIONS(LOCATIONS_str),
         EDGES(EDGES_str),
 
-        SESSIONS(SESSIONS_str, Level.DEBUG),
-        MESSAGES(MESSAGES_str, Level.DEBUG),
-        RESPONSES(RESPONSES_str, Level.DEBUG),
+        SESSIONS(SESSIONS_str),
+        MESSAGES(MESSAGES_str),
+        RESPONSES(RESPONSES_str),
 
-        RESPONSE_MOVEMENTS(RESPONSES_str, Level.DEBUG),
-        MOVEMENTS(MOVEMENTS_str, Level.DEBUG),
-        CURRENT_LOCATIONS(CURRENT_LOCATIONS_str, Level.DEBUG),
+        RESPONSE_MOVEMENTS(RESPONSES_str),
+        MOVEMENTS(MOVEMENTS_str),
+        CURRENT_LOCATIONS(CURRENT_LOCATIONS_str),
         TEST_ENTITY("Test_Entity", Level.TRACE);
         ;
 

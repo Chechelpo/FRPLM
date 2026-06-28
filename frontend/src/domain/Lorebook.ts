@@ -4,7 +4,8 @@ import {
     deleteEntity,
     EntityField,
     fetch_all,
-    fetchApi, fetchMatching,
+    fetchApi,
+    fetchMatching,
     fetchOne,
     getEntityController
 } from "@/frameworks/ABSEntity";
@@ -103,7 +104,7 @@ export type EntryData = {
     prevent_further_recursion: boolean;
     non_recursable: boolean;
     delay_until_recursion: boolean;
-    scan_depth: number;
+    scan_depth: number | null;
 };
 
 export class Entry extends ABSEntity<EntryKey, EntryData> {
@@ -199,6 +200,22 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
     }
     public async clearOutlet(): Promise<void> {
         await super.update('outlet_id', null)
+    }
+    /**
+     * Moves this entry to another lorebook.
+     * Callers must be aware that <b> this essentially destroys the current reference </b> as entity keys are read-only.
+     * As such, it must be discarded after calling this function.
+     */
+    public async moveToLorebook(id:number) : Promise<boolean> {
+        const response = await fetchApi(
+            `${getEntityController(EntityTypes.ENTRY)}/exchange?fromLorebookId=${this.get('lorebook_id')}&toLorebookId=${id}&entryId=${this.get('entry_id')}`,
+            {
+                method:'POST'
+            }
+        ).then(async response => new Entry((await response.json() as DTO), EntityTypes.ENTRY))
+        this.dataMap = response.dataMap;
+
+        return true;
     }
 }
 

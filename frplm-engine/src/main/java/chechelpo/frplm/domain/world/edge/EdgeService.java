@@ -5,6 +5,9 @@ import chechelpo.frplm.domain.world.location.LocationsService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.Duplicate;
+import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 import static chechelpo.frplm.jooq.generated.Tables.LOCATION_NEIGHBORS;
@@ -33,10 +37,22 @@ public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStor
         return this.store.getNeighboursOf(key);
     }
 
+    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     @Override
     protected void beforeCreate(EntityDataPayload<LocationNeighborsRecord> data, long operationID) {
-        if (data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID) == data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID))
+        int worldId = data.requireValue(LOCATION_NEIGHBORS.WORLD_ID);
+        int location1 = data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID);
+        int location2 = data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID);
+
+        if (Objects.equals(data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID), data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID)))
             throw new IllegalArgumentException("Locations neighbours must have the same ID");
+
+        if (exists(EntityKey.<LocationNeighborsRecord>builder()
+                .set(LOCATION_NEIGHBORS.WORLD_ID, worldId)
+                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location2)
+                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location1)
+                .build())
+        ) throw new Duplicate("Edge from id %s to id %s already exists".formatted(location1, location2), Severity.EXPECTED);
 
         super.beforeCreate(data, operationID);
     }

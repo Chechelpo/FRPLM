@@ -89,4 +89,14 @@ public final class EntryStore extends EntityStore<EntryRecord> {
                 )
                 .fetch();
     }
+
+    boolean move(int fromLorebookId, int toLorebookId, int entryId){
+        return this.ctx.update(ENTRY)
+                .set(ENTRY.LOREBOOK_ID, toLorebookId)
+                .where(
+                        ENTRY.LOREBOOK_ID.eq(fromLorebookId)
+                                .and(ENTRY.ENTRY_ID.eq(entryId))
+                )
+                .execute() == 1;
+    }
 }

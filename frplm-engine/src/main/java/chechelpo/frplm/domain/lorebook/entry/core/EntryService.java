@@ -5,6 +5,8 @@ import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.Severity;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -14,12 +16,14 @@ import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import chechelpo.frplm.utils.CRUDActionResult;
 import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
@@ -41,6 +45,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         this.outlets = outlets;
         this.entryKeywordService = entryKeywordService;
     }
+
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<EntryRecord> data, long operationID) {
@@ -78,6 +83,51 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
                 )
         );
     }
+    @Transactional
+    public EntryRecord exchangeEntry(EntityKey<EntryRecord> entryKey, int toLorebookId){
+        Objects.requireNonNull(entryKey, "Entry key is null");
+        EntryRecord entry = this.find(entryKey).orElseThrow(() -> {
+            log.error("No such entry with key: {} \n when exchanging lorebooks", entryKey);
+            return new EntityNotFound("No such entry with key " + entryKey.toString(), Severity.SYSTEM);
+        });
+        LorebooksRecord newLorebook = lorebooks.find(EntityKey.of(LOREBOOKS.ID, toLorebookId)).orElseThrow(() -> {
+            log.error("No such destination lorebook with id {} when exchanging entry: {}", toLorebookId, entry.getName());
+            return new EntityNotFound("No such lorebook with id " + toLorebookId, Severity.SYSTEM);
+        });
+        if (entry.getLorebookId() == toLorebookId) throw new InvalidValue("Tried to change to same lorebook");
+
+        Set<String> keywords = entryKeywordService.keywordsOfEntry(entry.getLorebookId(), entry.getEntryId());
+
+        EntityDataPayload<EntryRecord> relevantData = getRelevantData(entry, newLorebook);
+        relevantData.set(ENTRY.LOREBOOK_ID, toLorebookId);
+
+        boolean deleted = this.delete(entryKey);
+        if (!deleted) throw new UnexpectedException("Couldn't delete old entry on exchange", Severity.SYSTEM);
+
+        EntryRecord newEntry = this.createAndGet(relevantData);
+        keywords.forEach(key -> entryKeywordService.associate(newEntry.getLorebookId(), newEntry.getEntryId(), key));
+
+        return newEntry;
+    }
+
+    private @NonNull EntityDataPayload<EntryRecord> getRelevantData(EntryRecord entry, LorebooksRecord newLorebook) {
+        return EntityDataPayload.<EntryRecord>builder()
+                .set(ENTRY.NAME, entry.getName())
+                .set(ENTRY.CONTENT, entry.getContent())
+                .set(ENTRY.OUTLET, lorebooks.getValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, lorebooks.keyOf(newLorebook)).orElseThrow())
+
+                .set(ENTRY.ENABLED, entry.getEnabled())
+                .set(ENTRY.PROBABILITY, entry.getProbability())
+                .set(ENTRY.DELAY, entry.getDelay())
+                .set(ENTRY.COOLDOWN, entry.getCooldown())
+                .set(ENTRY.STICK_THROUGH, entry.getStickThrough())
+                .set(ENTRY.INJECTION_ORDER, (short) entry.getInjectionOrder())
+                .set(ENTRY.STRATEGY, (short) entry.getStrategy())
+                .set(ENTRY.PREVENT_FURTHER_RECURSION, entry.getPreventFurtherRecursion())
+                .set(ENTRY.NON_RECURSABLE, entry.getNonRecursable())
+                .set(ENTRY.SCAN_DEPTH, entry.getScanDepth())
+                .build();
+    }
 
     /**
      * @param lorebookIDs to query
@@ -114,19 +164,6 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
             Set<Integer> keywordIDs
     ) {
         return store.getEntriesWith(lorebookIDs, keywordIDs);
-    }
-    /**
-     * @param lorebookIDs to query
-     * @param alreadySeenIds ids of entries to ignore
-     * @param keywordIDs to detect
-     * @return currently enabled entries of these lorebooks that contain ALL the keywordIDs (Logical AND of keywords = return)
-     */
-    public @NotNull List<EntryRecord> getEntriesWith(
-            IntSet lorebookIDs,
-            IntSet alreadySeenIds,
-            Set<Integer> keywordIDs
-    ) {
-        return store.getEntriesWith(lorebookIDs, alreadySeenIds, keywordIDs);
     }
     /**
      * @param toLorebookID lorebook to import this JSON entries to

@@ -32,8 +32,7 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
     /**
      * @return list of global (not related to characters/worlds/locations) lorebook records
      */
-    @Override
-    public @NotNull List<LorebooksRecord> getAll() {
+    public @NotNull List<LorebooksRecord> getIndependent(){
         return this.store.getGlobalLorebooks();
     }
 

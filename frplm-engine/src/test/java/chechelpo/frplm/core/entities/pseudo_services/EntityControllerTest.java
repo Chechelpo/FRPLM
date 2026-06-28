@@ -28,6 +28,7 @@ class EntityControllerTest {
     private TestService service;
     private TestController controller;
     private TestControllerFields fields;
+
     enum DTOFields{
         FirstID("first_id"),
         SecondID("second_id"),

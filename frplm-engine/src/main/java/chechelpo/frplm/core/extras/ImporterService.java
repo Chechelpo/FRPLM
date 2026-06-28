@@ -110,7 +110,7 @@ class ImporterService {
                             .set(LOCATION_NEIGHBORS.WORLD_ID, worldId)
                             .set(LOCATION_NEIGHBORS.LOCATION1_ID, fromId)
                             .set(LOCATION_NEIGHBORS.LOCATION2_ID, toId)
-                            .set(LOCATION_NEIGHBORS.EDGEDESCRIPTION, edgeOrder.description())
+                            .set(LOCATION_NEIGHBORS.EDGEDESCRIPTION, edgeOrder.description() == null ? "" : edgeOrder.description())
                             .set(LOCATION_NEIGHBORS.TRAVELCOST, edgeOrder.travel_cost())
                             .build()
             );

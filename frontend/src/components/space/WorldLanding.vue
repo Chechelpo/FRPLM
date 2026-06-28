@@ -88,6 +88,7 @@ async function onDelete(){
 
   if (success) {
     isEditing.value = false;
+    worlds.value = worlds.value.filter(other => !other.equals(editingWorld.value))
     editingWorld.value = null;
   }
 }
@@ -98,7 +99,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="full_visor">
+  <div style="height: 200dvh; max-height: 200dvh">
     <button
         v-if="!isEditing"
         type="button"
@@ -128,6 +129,7 @@ onMounted(async () => {
         @edit="value => onEdit(worlds.find(i => i.get('name') == value)! as World)"
     />
     <WorldEdit
+        style="height:100dvh; width: 100dvw; overflow:hidden"
         v-if="isEditing && editingWorld != null"
         v-model="editingWorld!"
         @delete="onDelete"

@@ -169,7 +169,7 @@ public record Prompt (
                 ChatCompletionMessage original = requestBuilder.getAt(toInjectIndex);
                 String newContent = OutletInjection.inject(original.content(), outletPlace.getValue(), activeEntriesByOutlet);
 
-                requestBuilder.setAt(toInjectIndex, new ChatCompletionMessage(original.role(), newContent));
+                requestBuilder.setAt(toInjectIndex, new ChatCompletionMessage(original.role(), null, newContent));
             }
             this.phase = Phase.RENDERED;
 

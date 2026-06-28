@@ -5,7 +5,10 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
+import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordsTestContext;
 import chechelpo.frplm.domain.lorebook.keywords.KeywordTestContext;
+import chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.test_utils.TestText;
@@ -31,7 +34,7 @@ import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Import({LorebookTestContext.class, EntryTestContext.class})
+@Import({LorebookTestContext.class, EntryTestContext.class, EntryKeywordsTestContext.class})
 class EntryServiceTest {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -47,6 +50,8 @@ class EntryServiceTest {
     EntryFieldsHelper fields;
     @Autowired
     KeywordTestContext keywordTestContext;
+    @Autowired
+    private EntryKeywordsTestContext entryKeywordsTestContext;
 
     @BeforeEach
     void setUp() {
@@ -226,5 +231,65 @@ class EntryServiceTest {
         }
     }
 
+    @Test
+    void exchangeEntry(){
+        int entriesPerLorebook = 20;
+        Map<LorebooksRecord, List<EntryRecord>> entries = entryTestContext.createEntries(10L, 2, entriesPerLorebook);
+        LorebooksRecord initialLorebook = entries.keySet().stream().toList().getFirst();
+        LorebooksRecord secondLorebook = entries.keySet().stream().toList().get(1);
+
+        List<EntryRecord> toExchange = entries.get(initialLorebook);
+        for (EntryRecord entry : toExchange){
+            EntityKey<EntryRecord> initialKey = entryService.keyOf(entry);
+            Set<String> expectedKeywords = entryKeywordsTestContext.entryKeywordsService.keywordsOfEntry(entry.getLorebookId(), entry.getEntryId());
+
+            EntryRecord exchangedEntry = entryService.exchangeEntry(initialKey, secondLorebook.getId());
+            Set<String> actualKeywords = entryKeywordsTestContext.entryKeywordsService
+                    .keywordsOfEntry(exchangedEntry.getLorebookId(), exchangedEntry.getEntryId());
+
+            assertNotNull(exchangedEntry, "Exchange entry returned null");
+            assertTrue(entryService.find(initialKey).isEmpty(), "Stale reference: Could find entry with previous key after exchange");
+            assertEquals(secondLorebook.getId(), exchangedEntry.getLorebookId(), "Mismatch in lorebook id");
+            assertEquals(exchangedEntry.getContent(), entry.getContent(), "Different content");
+            assertEquals(expectedKeywords, actualKeywords, "Mismatch in keywords after exchange");
+        }
+        List<EntryRecord> newSecondLorebookEntries = entryService.getMatching(EntityKey.of(ENTRY.LOREBOOK_ID, secondLorebook.getId()));
+        assertEquals(entriesPerLorebook * 2, newSecondLorebookEntries.size());
+    }
+
+    @Test
+    void exchangeEntry_throwsEntityNotFoundOnFalseLorebookOrFalseEntryOrSameLorebook() {
+        Map<LorebooksRecord, List<EntryRecord>> entries = entryTestContext.createEntries(10L, 2, 20);
+        LorebooksRecord actualLorebook = entries.keySet().stream().toList().getFirst();
+        LorebooksRecord secondLorebook = entries.keySet().stream().toList().get(1);
+
+        int falseLorebookId = actualLorebook.getId() + secondLorebook.getId();
+        EntryRecord legitimateEntry = entries.get(actualLorebook).getFirst();
+        EntityKey<EntryRecord> legitimateEntryKey = entryService.keyOf(legitimateEntry);
+        assertThrows(
+                EntityNotFound.class,
+                () -> entryService.exchangeEntry(legitimateEntryKey, falseLorebookId),
+                "Moved to unknown lorebook"
+        );
+        assertThrows(
+                InvalidValue.class,
+                () -> entryService.exchangeEntry(legitimateEntryKey, actualLorebook.getId()),
+                "Could move to same lorebook"
+        );
+
+        int falseEntryId = entries.get(actualLorebook).stream().mapToInt(EntryRecord::getEntryId).sum();
+
+        assertThrows(
+                EntityNotFound.class,
+                () -> entryService.exchangeEntry(
+                        EntityKey.<EntryRecord>builder()
+                                .set(ENTRY.LOREBOOK_ID, actualLorebook.getId())
+                                .set(ENTRY.ENTRY_ID, falseEntryId)
+                                .build(),
+                        secondLorebook.getId()
+                        ),
+                "Could exchange false entry"
+        );
+    }
 
 }

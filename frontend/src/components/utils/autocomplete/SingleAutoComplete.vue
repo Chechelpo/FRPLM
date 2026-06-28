@@ -256,12 +256,22 @@ function handleKeydown(event: KeyboardEvent): void {
 <style scoped>
 .single-autocomplete {
   position: relative;
+
   width: 100%;
+  min-width: 0;
+  max-width: 100px;
+
+  box-sizing: border-box;
 }
 
 .single-autocomplete-box {
   min-height: 2.25rem;
+
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+
+  box-sizing: border-box;
 
   display: flex;
   align-items: center;
@@ -280,7 +290,10 @@ function handleKeydown(event: KeyboardEvent): void {
 
   color: var(--primary-text, #e2e8f0);
   cursor: text;
+
+  overflow: hidden;
 }
+
 
 .single-autocomplete-box--focused {
   outline: 2px solid color-mix(
@@ -297,8 +310,13 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 .single-autocomplete-input {
-  width: 100%;
+  flex: 1 1 auto;
+
+  width: 0;
   min-width: 0;
+  max-width: 100%;
+
+  box-sizing: border-box;
 
   border: none;
   outline: none;
@@ -308,7 +326,6 @@ function handleKeydown(event: KeyboardEvent): void {
 
   font: inherit;
 }
-
 .single-autocomplete-input::placeholder {
   color: color-mix(in srgb, currentColor 55%, transparent);
 }

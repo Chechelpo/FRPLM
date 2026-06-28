@@ -34,6 +34,10 @@
             <img src="/header/Connection.png" alt="Connections" />
           </RouterLink>
         </div>
+
+        <div>
+          ⚙
+        </div>
       </nav>
     </header>
 

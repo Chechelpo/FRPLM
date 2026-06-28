@@ -12,6 +12,7 @@ import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
+import chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
@@ -76,14 +77,24 @@ public class Worlds extends TableImpl<WorldsRecord> {
     public final TableField<WorldsRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     * The column <code>PUBLIC.WORLDS.DESCRIPTION</code>.
      */
-    public final TableField<WorldsRecord, Integer> NEXT_LOCATION_ID = createField(DSL.name("NEXT_LOCATION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+    public final TableField<WorldsRecord, String> DESCRIPTION = createField(DSL.name("DESCRIPTION"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("''"), SQLDataType.VARCHAR)), this, "");
 
     /**
      * The column <code>PUBLIC.WORLDS.LOREBOOK_ID</code>.
      */
     public final TableField<WorldsRecord, Integer> LOREBOOK_ID = createField(DSL.name("LOREBOOK_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
+     */
+    public final TableField<WorldsRecord, Integer> NEXT_LOCATION_ID = createField(DSL.name("NEXT_LOCATION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
+     */
+    public final TableField<WorldsRecord, Integer> NEXT_REGION_ID = createField(DSL.name("NEXT_REGION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     private Worlds(Name alias, Table<WorldsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -218,7 +229,7 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5EBC.getInverseKey());
+            _locations = new LocationsPath(this, null, Keys.CONSTRAINT_5E.getInverseKey());
 
         return _locations;
     }
@@ -234,6 +245,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_826.getInverseKey());
 
         return _sessions;
+    }
+
+    private transient RegionPath _region;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.REGION</code>
+     * table
+     */
+    public RegionPath region() {
+        if (_region == null)
+            _region = new RegionPath(this, null, Keys.CONSTRAINT_8F.getInverseKey());
+
+        return _region;
     }
 
     private transient CurrentLocationsPath _currentLocations;
