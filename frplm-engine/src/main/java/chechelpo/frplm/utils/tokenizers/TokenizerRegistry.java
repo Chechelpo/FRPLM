@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+/** Inspired on silly tavern's tokenizer.js */
 @Component
 public final class TokenizerRegistry {
 
@@ -22,7 +23,7 @@ public final class TokenizerRegistry {
 
     public TokenizerRegistry() {
         this.factories = Map.ofEntries(
-                // SentencePiece tokenizers
+                // SentencePiece models
                 Map.entry(
                         "llama",
                         () -> sentencePiece("llama.model")
@@ -52,7 +53,7 @@ public final class TokenizerRegistry {
                         () -> sentencePiece("nerdstash_v2.model")
                 ),
 
-                // Hugging Face-compatible tokenizer JSON files
+                // Hugging Face tokenizer JSON files
                 Map.entry(
                         "claude",
                         () -> huggingFaceJson("claude.json")
@@ -61,8 +62,16 @@ public final class TokenizerRegistry {
                         "llama3",
                         () -> huggingFaceJson("llama3.json")
                 ),
+                Map.entry(
+                        "deepseekv4",
+                        () -> huggingFaceJson("deepseekv4.json")
+                ),
+                Map.entry(
+                        "glm",
+                        () -> huggingFaceJson("glm.json")
+                ),
 
-                // Standard TikToken encodings from JTokkit
+                // Built-in JTokkit encodings
                 Map.entry(
                         "cl100k_base",
                         () -> new JTokkitTokenizer(
@@ -84,8 +93,8 @@ public final class TokenizerRegistry {
         );
     }
 
-    public Tokenizer getForModel(String id) {
-        String tokenizerId = resolveTokenizerId(id);
+    public Tokenizer getForModel(String modelId) {
+        String tokenizerId = resolveTokenizerId(modelId);
 
         return loadedTokenizers.computeIfAbsent(
                 tokenizerId,
@@ -132,10 +141,35 @@ public final class TokenizerRegistry {
         }
 
         /*
-         * More-specific names must be checked before broad names.
+         * Specific model families must be checked before generic ones.
          */
 
-        if (containsAny(model, "nerdstash_v2", "nerdstash-v2")) {
+        if (containsAny(
+                model,
+                "deepseek-v4",
+                "deepseek_v4",
+                "deepseekv4",
+                "deepseek/v4"
+        )) {
+            return "deepseekv4";
+        }
+
+        if (containsAny(
+                model,
+                "glm-5",
+                "glm5",
+                "glm_5",
+                "zai-org/glm",
+                "zhipu/glm"
+        )) {
+            return "glm";
+        }
+
+        if (containsAny(
+                model,
+                "nerdstash_v2",
+                "nerdstash-v2"
+        )) {
             return "nerdstash_v2";
         }
 
@@ -143,7 +177,11 @@ public final class TokenizerRegistry {
             return "nerdstash";
         }
 
-        if (containsAny(model, "llama3", "llama-3")) {
+        if (containsAny(
+                model,
+                "llama3",
+                "llama-3"
+        )) {
             return "llama3";
         }
 
@@ -159,11 +197,12 @@ public final class TokenizerRegistry {
             return "jamba";
         }
 
-        if (model.contains("yi")) {
-            return "yi";
-        }
-
-        if (containsAny(model, "gemma", "gemini", "learnlm")) {
+        if (containsAny(
+                model,
+                "gemma",
+                "gemini",
+                "learnlm"
+        )) {
             return "gemma";
         }
 
@@ -171,10 +210,10 @@ public final class TokenizerRegistry {
             return "claude";
         }
 
-        /*
-         * Newer OpenAI-family models generally use the
-         * o200k_base vocabulary family.
-         */
+        if (model.contains("yi")) {
+            return "yi";
+        }
+
         if (containsAny(
                 model,
                 "gpt-5",
@@ -188,9 +227,6 @@ public final class TokenizerRegistry {
             return "o200k_base";
         }
 
-        /*
-         * GPT-3.5 and older GPT-4-family models.
-         */
         if (containsAny(
                 model,
                 "gpt-4",
@@ -207,6 +243,56 @@ public final class TokenizerRegistry {
                 "text-davinci"
         )) {
             return "r50k_base";
+        }
+        
+        /*
+         * Distilled R1 models use their underlying Qwen or Llama tokenizer.
+         * Check these before the generic "deepseek" branch.
+         */
+        if (containsAny(
+                model,
+                "deepseek-r1-distill-qwen",
+                "r1-distill-qwen"
+        )) {
+            throw new IllegalArgumentException(
+                    "DeepSeek R1 Qwen distill requires a Qwen tokenizer: "
+                            + modelId
+            );
+        }
+
+        if (containsAny(
+                model,
+                "deepseek-r1-distill-llama",
+                "r1-distill-llama"
+        )) {
+            return "llama3";
+        }
+
+        /*
+         * DeepSeek Coder has its own ByteLevel-BPE tokenizer and
+         * should not be mapped to the mainline DeepSeek tokenizer.
+         */
+        if (containsAny(
+                model,
+                "deepseek-coder",
+                "deepseekcoder"
+        )) {
+            throw new IllegalArgumentException(
+                    "DeepSeek Coder requires its own tokenizer: "
+                            + modelId
+            );
+        }
+
+        /*
+         * Mainline DeepSeek fallback:
+         *
+         * DeepSeek V2/V2.5/V3/V3.1/V3.2/V4
+         * DeepSeek Chat
+         * DeepSeek Reasoner
+         * Full-size DeepSeek R1/R1-Zero
+         */
+        if (model.contains("deepseek")) {
+            return "deepseekv4";
         }
 
         throw new IllegalArgumentException(
@@ -234,7 +320,7 @@ public final class TokenizerRegistry {
                 try {
                     closeable.close();
                 } catch (Exception ignored) {
-                    // Application is already shutting down.
+                    // Application is shutting down.
                 }
             }
         }
