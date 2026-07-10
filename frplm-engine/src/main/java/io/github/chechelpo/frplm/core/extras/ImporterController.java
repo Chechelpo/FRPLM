@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.API_BASE;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController
 @RequestMapping(API_BASE + "/import")

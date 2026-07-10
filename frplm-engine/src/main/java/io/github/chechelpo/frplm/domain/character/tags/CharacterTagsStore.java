@@ -1,10 +1,10 @@
 package io.github.chechelpo.frplm.domain.character.tags;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import static chechelpo.frplm.jooq.generated.tables.Tags.TAGS;
 @Component
 final class CharacterTagsStore extends EntityStore<CharacterTagsRecord> {
     public CharacterTagsStore(@NotNull DSLContext ctx) {
-        super(ctx, CHARACTER_TAGS, EntityTypes.Types.CHARACTER_TAGS);
+        super(ctx, CHARACTER_TAGS, EntityConfigs.Types.CHARACTER_TAGS);
     }
 
     @NotNull List<TagsRecord> getCharacterTags(@NotNull EntityKey<CharacterTagsRecord> id) {

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.events.crud.CRUDDraftEvent;
@@ -11,6 +11,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.*;
 import io.github.chechelpo.frplm.exceptions.runtime.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.Constraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,7 @@ public abstract class EntityService<
         R extends TableRecord<R>,
         Store extends EntityStore<R>
         > {
-    private final static EnumSet<EntityTypes.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityTypes.Types.class);
+    private final static EnumSet<EntityConfigs.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final EventBus eventBus;
     // Fields
     private final Set<TableField<R, ?>> required_instantiation_fields = new HashSet<>();
@@ -35,10 +36,10 @@ public abstract class EntityService<
 
     protected final Store store;    
     protected final Logger log;
-    private final EntityTypes.Types entityType;
+    private final EntityConfigs.Types entityType;
 
     public EntityService(@NotNull Store store, @NotNull EventBus eventBus) {
-        EntityTypes.Types types = store.getType();
+        EntityConfigs.Types types = store.getType();
         //if(REGISTERED_TYPES.contains(types))
         //    throw new IllegalStateException("Type " + types + " is already registered");
 
@@ -47,10 +48,10 @@ public abstract class EntityService<
         this.eventBus = eventBus;
         this.store = store;
         log = (Logger) LoggerFactory.getLogger(types + "_Service");
-        log.setLevel(types.getLoggerLevel());
+        log.setLevel(Level.convertAnSLF4JLevel(types.getLoggerLevel()));
     }
     public EntityService(@NotNull Store store, @NotNull EventBus eventBus, boolean registerSingleton) {
-        EntityTypes.Types types = store.getType();
+        EntityConfigs.Types types = store.getType();
         //if(!registerSingleton && REGISTERED_TYPES.contains(types))
         //    throw new IllegalStateException("Type " + types + " is already registered");
 
@@ -59,10 +60,10 @@ public abstract class EntityService<
         this.eventBus = eventBus;
         this.store = store;
         log = (Logger) LoggerFactory.getLogger(types + "_Service");
-        log.setLevel(types.getLoggerLevel());
+        log.setLevel(Level.convertAnSLF4JLevel(types.getLoggerLevel()));
     }
 
-    public EntityTypes.Types getType(){
+    public EntityConfigs.Types getType(){
         return this.entityType;
     }
     public boolean isKey(TableField<R, ?> field) {

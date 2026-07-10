@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.connection.api_keys;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.encryption.EncryptedSecret;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ import static chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 final class SecretStore extends EntityStore<ApiKeysRecord> {
 
     SecretStore(@NotNull DSLContext dsl) {
-        super(dsl, API_KEYS, EntityTypes.Types.API_KEYS);
+        super(dsl, API_KEYS, EntityConfigs.Types.API_KEYS);
     }
 
     public ApiKeysRecord newKey(int host_id, @NotNull EncryptedSecret secret){

@@ -1,7 +1,6 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
@@ -15,6 +14,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -70,7 +70,7 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     @TransactionalEventListener
     void updateToMaxTokens(CRUDCommittedEvent.@NotNull UpdatedEntity<?> rawEvent){
-        if (rawEvent.type() != EntityTypes.Types.LLM_CONNECTION) return;
+        if (rawEvent.type() != EntityConfigs.Types.LLM_CONNECTION) return;
 
         CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord> event =
                 (CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord>) rawEvent;

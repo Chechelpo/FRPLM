@@ -5,7 +5,7 @@ import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.CHARACTER_TAGS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.CHARACTER_TAGS_URL;
 
 @RestController
 @RequestMapping(CHARACTER_TAGS_URL)

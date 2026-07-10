@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.MESSAGES_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.MESSAGES_URL;
 
 @RestController
 @RequestMapping(MESSAGES_URL)

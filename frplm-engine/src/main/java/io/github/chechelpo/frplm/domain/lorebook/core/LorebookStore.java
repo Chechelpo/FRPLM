@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -16,7 +16,7 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 @Component
 final class LorebookStore extends EntityStore<LorebooksRecord> {
     LorebookStore(@NotNull DSLContext ctx) {
-        super(ctx, Lorebooks.LOREBOOKS, EntityTypes.Types.LOREBOOKS);
+        super(ctx, Lorebooks.LOREBOOKS, EntityConfigs.Types.LOREBOOKS);
     }
 
     /**

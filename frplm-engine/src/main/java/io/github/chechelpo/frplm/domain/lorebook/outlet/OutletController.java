@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.OUTLET_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.OUTLET_URL;
+
 
 @RestController
 @RequestMapping(OUTLET_URL)

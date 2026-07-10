@@ -1,7 +1,8 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import io.github.chechelpo.frplm.domain.EntityTypes;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.*;
@@ -12,14 +13,14 @@ import java.util.List;
 
 public abstract class EntityStore<R extends TableRecord<R>>
 {
-    private final static EnumSet<EntityTypes.Types> registeredStores = EnumSet.noneOf(EntityTypes.Types.class);
+    private final static EnumSet<EntityConfigs.Types> registeredStores = EnumSet.noneOf(EntityConfigs.Types.class);
 
     protected final DSLContext ctx;
     protected final Table<R> main_table;
-    private final EntityTypes.Types type;
+    private final EntityConfigs.Types type;
     protected final Logger log;
 
-    protected EntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityTypes.Types type) {
+    protected EntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityConfigs.Types type) {
         //if(registeredStores.contains(type))
          //   throw new IllegalStateException(type + " is already registered for store");
 
@@ -28,9 +29,9 @@ public abstract class EntityStore<R extends TableRecord<R>>
         this.main_table = main_table;
         this.type = type;
         this.log = (Logger) LoggerFactory.getLogger(type + "_Store");
-        this.log.setLevel(type.getLoggerLevel());
+        this.log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
     }
-    protected EntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityTypes.Types type, boolean registerSingleton) {
+    protected EntityStore(@NotNull DSLContext ctx, @NotNull Table<R> main_table, @NotNull EntityConfigs.Types type, boolean registerSingleton) {
         if(registerSingleton && registeredStores.contains(type))
             throw new IllegalStateException(type + " is already registered for store");
 
@@ -39,10 +40,10 @@ public abstract class EntityStore<R extends TableRecord<R>>
         this.main_table = main_table;
         this.type = type;
         this.log = (Logger) LoggerFactory.getLogger(type + "_Store");
-        this.log.setLevel(type.getLoggerLevel());
+        this.log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
     }
 
-    public EntityTypes.Types getType(){
+    public EntityConfigs.Types getType(){
         return this.type;
     }
 

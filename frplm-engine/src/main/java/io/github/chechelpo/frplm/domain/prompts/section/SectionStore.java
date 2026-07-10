@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
 import io.github.chechelpo.frplm.annotations.Store;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -15,7 +15,7 @@ import static chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 @Store
 final class SectionStore extends EntityStore<PromptSectionRecord> {
     SectionStore(@NotNull DSLContext ctx) {
-        super(ctx, PROMPT_SECTION, EntityTypes.Types.SECTIONS);
+        super(ctx, PROMPT_SECTION, EntityConfigs.Types.SECTIONS);
     }
 
     @NotNull List<PromptSectionRecord> getOrderedSections(short promptTemplateID) {

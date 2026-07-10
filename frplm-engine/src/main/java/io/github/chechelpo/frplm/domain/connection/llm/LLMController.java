@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.LLM_CONNECTION_URL;
 import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LLM_CONNECTION_URL;
 
 @RestController
 @Component

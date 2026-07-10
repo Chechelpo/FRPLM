@@ -1,11 +1,11 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
@@ -21,7 +21,7 @@ final class LocationStore extends EntityStore<LocationsRecord> {
     private final WorldService worlds;
 
     public LocationStore(DSLContext ctx, WorldService worlds) {
-        super(ctx, LOCATIONS, EntityTypes.Types.LOCATIONS);
+        super(ctx, LOCATIONS, EntityConfigs.Types.LOCATIONS);
         this.ctx = ctx;
         this.worlds = worlds;
     }

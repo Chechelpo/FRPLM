@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
 import static io.github.chechelpo.frplm.config.controllers.ControllerPaths.ENTITY_PATH;
-import static io.github.chechelpo.frplm.domain.EntityTypes.ENTRIES_URL;
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRIES_URL;
 
 @RestController
 @Component

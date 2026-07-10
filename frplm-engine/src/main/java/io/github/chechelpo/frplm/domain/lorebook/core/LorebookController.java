@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.LOREBOOKS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LOREBOOKS_URL;
 
 @RestController
 @Component

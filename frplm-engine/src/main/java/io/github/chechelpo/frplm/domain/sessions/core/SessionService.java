@@ -1,6 +1,5 @@
 package io.github.chechelpo.frplm.domain.sessions.core;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.events.EventBus;
@@ -13,6 +12,7 @@ import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +62,7 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
 
     @TransactionalEventListener
     void onDeleteMessage(CRUDCommittedEvent.@NotNull DeletedEntity<?> rawEvent) {
-        if (rawEvent.type()!= EntityTypes.Types.MESSAGES) return;
+        if (rawEvent.type()!= EntityConfigs.Types.MESSAGES) return;
 
         CRUDCommittedEvent.DeletedEntity<MessagesRecord> event = (CRUDCommittedEvent.DeletedEntity<MessagesRecord>) rawEvent;
         log.debug("Message deleted, updating tick num");

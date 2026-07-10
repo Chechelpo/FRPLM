@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.API_BASE;
 import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController
 @RequestMapping(API_BASE + "/tokenizer")

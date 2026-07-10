@@ -1,6 +1,5 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
@@ -11,6 +10,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @RestController
 @Component
-@RequestMapping(EntityTypes.LOCATIONS_URL)
+@RequestMapping(EntityConfigs.LOCATIONS_URL)
 public final class LocationController extends EntityController<LocationsRecord, LocationsService> {
     private final EdgeService edgeService;
     private final StartingLocationsService startLocService;

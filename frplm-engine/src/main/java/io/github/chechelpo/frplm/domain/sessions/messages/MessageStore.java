@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.annotations.Store;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jspecify.annotations.NonNull;
@@ -16,7 +16,7 @@ import static chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 @Store
 final class MessageStore extends EntityStore<MessagesRecord> {
     MessageStore(@NotNull DSLContext ctx) {
-        super(ctx, MESSAGES, EntityTypes.Types.MESSAGES);
+        super(ctx, MESSAGES, EntityConfigs.Types.MESSAGES);
     }
 
     @NotNull List<MessagesRecord> getMessagesOf(int sessionID){

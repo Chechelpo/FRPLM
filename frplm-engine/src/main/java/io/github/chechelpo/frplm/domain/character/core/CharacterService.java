@@ -48,6 +48,11 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
     }
 
     @Override
+    protected void beforeUpdate(@NotNull EntityKey<CharactersRecord> target, EntityDataPayload<CharactersRecord> data, long operationID) {
+        super.beforeUpdate(target, data, operationID);
+    }
+
+    @Override
     protected void afterSuccessfulDelete(EntityKey<CharactersRecord> id, long operationID, CharactersRecord record) {
         lorebookService.delete(
                 lorebookService.keyOf(lorebookService.getLorebookOf(record))

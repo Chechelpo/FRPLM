@@ -1,10 +1,10 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -20,7 +20,7 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 @Component
 final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
     public EntryKeywordStore(@NotNull DSLContext ctx) {
-        super(ctx, ENTRY_KEYWORDS, EntityTypes.Types.ENTRY_KEYWORDS);
+        super(ctx, ENTRY_KEYWORDS, EntityConfigs.Types.ENTRY_KEYWORDS);
     }
 
     public @NotNull Set<String> getOfEntry(int lorebookId, int entryId) {

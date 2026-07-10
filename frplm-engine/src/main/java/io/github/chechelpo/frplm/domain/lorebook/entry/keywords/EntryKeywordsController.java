@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.ENTRIES_KEYWORDS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRIES_KEYWORDS_URL;
 
 @RestController
 @RequestMapping(ENTRIES_KEYWORDS_URL)

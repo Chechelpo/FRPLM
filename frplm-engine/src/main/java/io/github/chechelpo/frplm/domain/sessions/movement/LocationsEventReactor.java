@@ -3,7 +3,6 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
@@ -13,6 +12,7 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -52,7 +52,7 @@ class LocationsEventReactor {
 
     @EventListener
     public void onMessageDeletionRewindLocations(CRUDDraftEvent.DeleteEntityDraft<?> rawEvent) {
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
+        if (rawEvent.type() != EntityConfigs.Types.MESSAGES) return;
         CRUDDraftEvent.DeleteEntityDraft<MessagesRecord> event = (CRUDDraftEvent.DeleteEntityDraft<MessagesRecord>) rawEvent;
 
         EntityKey<MessagesRecord> deleted = event.key();
@@ -72,7 +72,7 @@ class LocationsEventReactor {
      */
     @EventListener
     void onNewSessionRegisterStartingLocations(CRUDCommittedEvent.@NotNull CreatedEntity<?> rawEvent) {
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
+        if (rawEvent.type() != EntityConfigs.Types.MESSAGES) return;
 
         CRUDCommittedEvent.CreatedEntity<MessagesRecord> creationEvent =
                 (CRUDCommittedEvent.CreatedEntity<MessagesRecord>) rawEvent;
@@ -115,7 +115,7 @@ class LocationsEventReactor {
 
     @EventListener
     void onNewMessageInjectUserLocation(CRUDDraftEvent.CreateEntityDraft<?> rawEvent) {
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
+        if (rawEvent.type() != EntityConfigs.Types.MESSAGES) return;
 
         CRUDDraftEvent.CreateEntityDraft<MessagesRecord> event = (CRUDDraftEvent.CreateEntityDraft<MessagesRecord>) rawEvent;
 
@@ -143,7 +143,7 @@ class LocationsEventReactor {
     /** Applies the current location of user character as this response location */
     @EventListener
     void onNewResponseRegisterLocation(CRUDDraftEvent.@NotNull CreateEntityDraft<?> rawEvent) {
-        if (rawEvent.type() != EntityTypes.Types.RESPONSES) return;
+        if (rawEvent.type() != EntityConfigs.Types.RESPONSES) return;
 
         CRUDDraftEvent.CreateEntityDraft<ResponsesRecord> event = (CRUDDraftEvent.CreateEntityDraft<ResponsesRecord>) rawEvent;
         int sessionId = event.initialData().requireValue(RESPONSES.SESSION_ID);
@@ -185,7 +185,7 @@ class LocationsEventReactor {
     @EventListener
     @Transactional
     void onActiveResponseChange(CRUDCommittedEvent.@NotNull UpdatedEntity<?> rawEvent) {
-        if (rawEvent.type() != EntityTypes.Types.MESSAGES) return;
+        if (rawEvent.type() != EntityConfigs.Types.MESSAGES) return;
 
         CRUDCommittedEvent.UpdatedEntity<MessagesRecord> event = (CRUDCommittedEvent.UpdatedEntity<MessagesRecord>) rawEvent;
         if (!event.updatedData().assignsField(MESSAGES.ACTIVE_RESPONSE)) return;

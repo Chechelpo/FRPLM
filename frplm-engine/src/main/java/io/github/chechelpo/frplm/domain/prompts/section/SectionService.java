@@ -1,6 +1,5 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
@@ -13,6 +12,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.PromptSection;
 import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,7 +95,7 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
      */
     @TransactionalEventListener
     protected void addStandardSections(CRUDCommittedEvent.@NotNull CreatedEntity<?> createdTemplateEvent) {
-        if (createdTemplateEvent.type() != EntityTypes.Types.PROMPT_TEMPLATES) return;
+        if (createdTemplateEvent.type() != EntityConfigs.Types.PROMPT_TEMPLATES) return;
 
         CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord> createdTemplateEntity =
                 (CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord>) createdTemplateEvent;

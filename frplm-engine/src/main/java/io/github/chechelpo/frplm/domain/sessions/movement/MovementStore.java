@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.annotations.Store;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -17,7 +17,7 @@ import static chechelpo.frplm.jooq.generated.Tables.MOVEMENTS;
 @Store
 final class MovementStore extends EntityStore<MovementsRecord> {
     MovementStore(@NotNull DSLContext ctx) {
-        super(ctx, MOVEMENTS, EntityTypes.Types.MOVEMENTS);
+        super(ctx, MOVEMENTS, EntityConfigs.Types.MOVEMENTS);
     }
 
     public Integer getLocationBeforeTick(int characterId, int sessionId, int tick) {

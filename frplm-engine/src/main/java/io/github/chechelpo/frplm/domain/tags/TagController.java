@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.CHARACTER_TAGS_str;
-import static io.github.chechelpo.frplm.domain.EntityTypes.TAGS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.CHARACTER_TAGS_str;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.TAGS_URL;
 
 @RestController
 @RequestMapping(TAGS_URL)

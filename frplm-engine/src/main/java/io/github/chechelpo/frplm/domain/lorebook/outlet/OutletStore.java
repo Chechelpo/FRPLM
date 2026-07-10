@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.annotations.Store;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +17,7 @@ import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
 @Store
 final class OutletStore extends EntityStore<OutletRecord> {
     OutletStore(@NotNull DSLContext ctx) {
-        super(ctx, OUTLET, EntityTypes.Types.OUTLET);
+        super(ctx, OUTLET, EntityConfigs.Types.OUTLET);
     }
 
     public @Nullable Integer getOfName(@NotNull String name) {

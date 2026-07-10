@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.KEYWORDS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.KEYWORDS_URL;
 
 @RestController
 @RequestMapping(KEYWORDS_URL)

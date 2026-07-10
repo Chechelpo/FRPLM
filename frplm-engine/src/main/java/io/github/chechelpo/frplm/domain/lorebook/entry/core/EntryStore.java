@@ -1,10 +1,10 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -19,7 +19,7 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 public final class EntryStore extends EntityStore<EntryRecord> {
 
     EntryStore(@NotNull DSLContext ctx) {
-        super(ctx, Entry.ENTRY, EntityTypes.Types.ENTRIES);
+        super(ctx, Entry.ENTRY, EntityConfigs.Types.ENTRIES);
     }
 
     public Result<EntryRecord> getActiveOfLorebooks(IntSet lorebookIds){

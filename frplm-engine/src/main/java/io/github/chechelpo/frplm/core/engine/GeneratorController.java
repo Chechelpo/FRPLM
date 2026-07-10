@@ -8,7 +8,7 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatComp
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.API_BASE;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController
 @RequestMapping(API_BASE + "/engine")

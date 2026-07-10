@@ -1,12 +1,12 @@
 package io.github.chechelpo.frplm.domain.tags;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -25,7 +25,7 @@ public class TagService extends EntityService<TagsRecord, TagStore> {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @TransactionalEventListener
     public void onDeleteCharacterTag(CRUDCommittedEvent.@NotNull DeletedEntity<?> event) {
-        if (event.type() != EntityTypes.Types.CHARACTER_TAGS) return;
+        if (event.type() != EntityConfigs.Types.CHARACTER_TAGS) return;
 
         CRUDCommittedEvent.DeletedEntity<CharacterTagsRecord> del = (CRUDCommittedEvent.DeletedEntity<CharacterTagsRecord>) event;
         EntityKey.Builder<TagsRecord> builder = new EntityKey.Builder<>();

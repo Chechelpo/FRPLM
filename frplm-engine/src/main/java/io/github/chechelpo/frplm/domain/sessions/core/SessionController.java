@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static io.github.chechelpo.frplm.config.controllers.ControllerPaths.ENTITY_PATH;
-import static io.github.chechelpo.frplm.domain.EntityTypes.SESSIONS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SESSIONS_URL;
 
 @RestController
 @RequestMapping(SESSIONS_URL)

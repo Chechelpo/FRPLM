@@ -1,6 +1,5 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.events.EventBus;
@@ -16,6 +15,7 @@ import chechelpo.frplm.jooq.generated.tables.Worlds;
 import chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,7 +92,7 @@ public class LocationsService extends EntityService<
 
     @EventListener
     void checkRegionDeletion(CRUDDraftEvent.DeleteEntityDraft<?> rawEvent){
-        if (rawEvent.type() != EntityTypes.Types.REGIONS) return;
+        if (rawEvent.type() != EntityConfigs.Types.REGIONS) return;
 
         CRUDDraftEvent.DeleteEntityDraft<RegionRecord> event = (CRUDDraftEvent.DeleteEntityDraft<RegionRecord>) rawEvent;
         int worldId = event.key().requireValue(REGION.WORLD_ID);

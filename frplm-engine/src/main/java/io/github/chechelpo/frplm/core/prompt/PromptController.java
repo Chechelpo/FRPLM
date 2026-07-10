@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.API_BASE;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController
 @Component

@@ -7,8 +7,8 @@ import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.SECTIONS_URL;
 import static chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SECTIONS_URL;
 
 @RestController
 @RequestMapping(SECTIONS_URL)

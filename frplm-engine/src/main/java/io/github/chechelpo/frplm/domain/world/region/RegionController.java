@@ -8,8 +8,8 @@ import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.REGIONS_URL;
 import static chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.REGIONS_URL;
 
 @RestController
 @RequestMapping(REGIONS_URL)

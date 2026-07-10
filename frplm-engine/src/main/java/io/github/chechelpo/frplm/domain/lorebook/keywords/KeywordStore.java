@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.lorebook.keywords;
 
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ import static chechelpo.frplm.jooq.generated.Tables.*;
 @Component
 final class KeywordStore extends EntityStore<KeywordRecord> {
     KeywordStore(@NotNull DSLContext ctx) {
-        super(ctx, KEYWORD, EntityTypes.Types.KEYWORDS);
+        super(ctx, KEYWORD, EntityConfigs.Types.KEYWORDS);
     }
 
 

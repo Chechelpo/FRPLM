@@ -1,12 +1,13 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.fields.coercers.Coercer;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +33,7 @@ public abstract class EntityController<
         R extends TableRecord<R>,
         S extends EntityService<R, ?>
         > {
-    private static final EnumSet<EntityTypes.Types> REGISTERED_CONTROLLERS_TYPES = EnumSet.noneOf(EntityTypes.Types.class);
+    private static final EnumSet<EntityConfigs.Types> REGISTERED_CONTROLLERS_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final Logger log;
 
     private final HashMap<String, TableField<R, ?>> to_table_field = new HashMap<>();
@@ -40,14 +41,14 @@ public abstract class EntityController<
     private final HashMap<TableField<R, ?>, Coercer<?>> field_coercers = new HashMap<>();
 
     protected final S service;
-    private final EntityTypes.Types type;
+    private final EntityConfigs.Types type;
 
     protected EntityController(S service) {
         this.type = service.getType();
         //if (REGISTERED_CONTROLLERS_TYPES.contains(type))
         //    throw new IllegalStateException("Duplicate controller for type " + type);
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
-        log.setLevel(type.getLoggerLevel());
+        log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
         log.trace("Controller {} created", type);
 
         this.service = service;
@@ -59,7 +60,7 @@ public abstract class EntityController<
         if (isSingleton && REGISTERED_CONTROLLERS_TYPES.contains(type))
             throw new IllegalStateException("Duplicate controller for type " + type);
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
-        log.setLevel(type.getLoggerLevel());
+        log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
         log.trace("Controller {} created", type);
 
         this.service = service;

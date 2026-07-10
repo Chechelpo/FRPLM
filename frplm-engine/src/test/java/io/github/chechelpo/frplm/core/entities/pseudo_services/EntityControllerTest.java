@@ -2,11 +2,11 @@ package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.domain.EntityTypes;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +51,7 @@ class EntityControllerTest {
     void setUp() {
         service = mock(TestService.class);
 
-        when(service.getType()).thenReturn(EntityTypes.Types.TEST_ENTITY);
+        when(service.getType()).thenReturn(EntityConfigs.Types.TEST_ENTITY);
         when(service.isKey(TEST_TABLE.FIRST_ID)).thenReturn(true);
         when(service.isKey(TEST_TABLE.SECOND_ID)).thenReturn(true);
         when(service.isKey(TEST_TABLE.NAME)).thenReturn(false);
@@ -193,7 +193,7 @@ class EntityControllerTest {
         EntityController.EntityDTO dto = controller.wrapEntity(record);
 
         assertNotNull(dto);
-        assertEquals(EntityTypes.Types.TEST_ENTITY.getEntityType(), dto.type());
+        assertEquals(EntityConfigs.Types.TEST_ENTITY.getEntityType(), dto.type());
 
         assertEquals(2, dto.key().size());
         assertEquals(1, dto.key().get(DTOFields.FirstID.toString()));

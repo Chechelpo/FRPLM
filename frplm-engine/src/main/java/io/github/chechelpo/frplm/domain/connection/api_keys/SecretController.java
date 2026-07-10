@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import static io.github.chechelpo.frplm.domain.EntityTypes.API_KEYS_URL;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_KEYS_URL;
 
 @RestController
 @RequestMapping(API_KEYS_URL)
