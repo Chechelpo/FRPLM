@@ -8,11 +8,11 @@ import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLoc
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.Characters;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.github.chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
-import static chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
 
 @Component
 final class MessageEvents {

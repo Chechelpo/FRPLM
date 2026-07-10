@@ -6,8 +6,8 @@ import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @Service
 public class EdgeService extends EntityService<LocationEdgesRecord, EdgeStore> {

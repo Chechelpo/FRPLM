@@ -8,10 +8,10 @@ import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import java.util.List;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 public class SessionService extends EntityService<SessionsRecord, SessionStore> {

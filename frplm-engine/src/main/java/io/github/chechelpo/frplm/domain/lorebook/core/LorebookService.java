@@ -6,7 +6,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
 public class LorebookService extends EntityService<LorebooksRecord, LorebookStore> {

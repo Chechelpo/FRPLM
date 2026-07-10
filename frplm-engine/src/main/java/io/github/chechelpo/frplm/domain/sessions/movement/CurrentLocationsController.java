@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

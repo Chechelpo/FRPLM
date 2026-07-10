@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class LorebookEvents {

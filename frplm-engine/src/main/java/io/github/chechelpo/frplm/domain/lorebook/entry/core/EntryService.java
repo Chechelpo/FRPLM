@@ -11,10 +11,10 @@ import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.Entry;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import io.github.chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -29,8 +29,8 @@ import tools.jackson.databind.JsonNode;
 
 import java.util.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
 public class EntryService extends EntityService<EntryRecord, EntryStore> {

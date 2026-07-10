@@ -7,7 +7,7 @@ import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UneditableField;
-import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.*;
@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;

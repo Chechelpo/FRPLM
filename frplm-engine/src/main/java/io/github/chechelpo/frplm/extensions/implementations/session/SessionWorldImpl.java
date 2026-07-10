@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.WorldImpl;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.results.MoveResult;
 import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 
 public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     private final SessionImpl session;

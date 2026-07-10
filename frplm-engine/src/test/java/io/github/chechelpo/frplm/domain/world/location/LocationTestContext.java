@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.world.location;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import java.util.ArrayList;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestComponent

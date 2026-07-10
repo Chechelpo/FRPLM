@@ -9,7 +9,7 @@ import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import org.jooq.impl.UpdatableRecordImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
-import static chechelpo.frplm.jooq.generated.tables.Entry.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

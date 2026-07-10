@@ -13,7 +13,7 @@ import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.utils.json_mappers.LorebookMapper;
 import io.github.chechelpo.frplm.utils.json_mappers.WorldMapper;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.*;
@@ -26,7 +26,7 @@ import tools.jackson.databind.JsonNode;
 
 import java.util.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class ImporterService {

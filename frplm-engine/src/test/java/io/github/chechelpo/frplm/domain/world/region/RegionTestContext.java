@@ -4,9 +4,9 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.junit.jupiter.params.shadow.de.siegmar.fastcsv.util.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestComponent

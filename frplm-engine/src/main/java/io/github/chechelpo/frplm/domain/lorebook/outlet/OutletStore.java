@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -11,8 +11,8 @@ import org.jooq.DSLContext;
 import org.jooq.Record2;
 import org.jooq.Result;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
-import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 
 @Store
 final class OutletStore extends EntityStore<OutletRecord> {

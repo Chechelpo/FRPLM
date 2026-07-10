@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import static chechelpo.frplm.jooq.generated.Tables.SESSIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 @Component
 public class PromptService {

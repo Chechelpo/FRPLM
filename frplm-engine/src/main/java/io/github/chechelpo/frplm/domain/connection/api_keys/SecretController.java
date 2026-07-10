@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.domain.connection.api_keys;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

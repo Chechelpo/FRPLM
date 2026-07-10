@@ -4,8 +4,8 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +16,8 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

@@ -4,7 +4,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
@@ -13,8 +13,8 @@ import io.github.chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
 import java.util.List;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.REGION;
-import static chechelpo.frplm.jooq.generated.Tables.WORLDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
 public class RegionImpl extends StandaloneEntity<RegionRecord> implements RegionSnapshot {
     protected RegionImpl(RegionRecord record, ExtensionContext context) {

@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.utils.importers.sillytavern;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.Contract;
@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 public final class STLorebookImporter {
     private STLorebookImporter() {}

@@ -6,8 +6,8 @@ import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordsTestContext;
 import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @TestComponent
 @Import({LorebookTestContext.class, KeywordTestContext.class, EntryKeywordsTestContext.class})

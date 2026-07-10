@@ -3,14 +3,14 @@ package io.github.chechelpo.frplm.domain.world.edge;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @TestComponent
 public class EdgeTestContext implements DBReload {

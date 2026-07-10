@@ -1,8 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
@@ -18,8 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
-import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.Types.REGIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -89,9 +87,6 @@ class LorebookServiceTest {
 
         LorebooksRecord lorebook1 = testContext.service.getLorebookOf(location1);
         LorebooksRecord lorebook2 = testContext.service.getLorebookOf(location2);
-
-        System.out.println(lorebook1);
-        System.out.println(lorebook2);
 
         assertNotEquals(lorebook1.getId(), lorebook2.getId());
     }

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
@@ -13,7 +13,7 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.Reasonin
 import java.util.List;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
 public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implements PromptSnapshot {
     public PromptImpl(PromptTemplateRecord record, ExtensionContext context) {

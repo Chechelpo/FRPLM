@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.extensions;
 import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.activation.PostResponseGeneration;
 import io.github.chechelpo.frplm.extensions.api.activation.PrePromptGeneration;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptBuilder;

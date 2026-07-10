@@ -2,14 +2,14 @@ package io.github.chechelpo.frplm.utils.json_mappers;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewCharacterOrder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 
 @Component
 public class CharacterMapper {

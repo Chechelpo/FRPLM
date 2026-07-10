@@ -9,7 +9,7 @@ import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.github.chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

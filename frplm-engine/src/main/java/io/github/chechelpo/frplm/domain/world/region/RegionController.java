@@ -4,11 +4,11 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.REGIONS_URL;
 
 @RestController

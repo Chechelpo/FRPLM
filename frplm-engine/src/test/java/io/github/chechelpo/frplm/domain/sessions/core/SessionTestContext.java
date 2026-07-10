@@ -5,9 +5,9 @@ import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
@@ -16,8 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
-import static chechelpo.frplm.jooq.generated.Tables.SESSIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @TestComponent
 @Import({CharacterCoreTestContext.class, StartingLocationTestContext.class, LocationTestContext.class})

@@ -7,11 +7,11 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ReasoningEffort;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 
 @Component
 final class TemplateFieldsHelper extends ABSControllerAwareHelper<

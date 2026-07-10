@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 
 @Component
 public class EntryKeywordService extends EntityService<EntryKeywordsRecord, EntryKeywordStore> {

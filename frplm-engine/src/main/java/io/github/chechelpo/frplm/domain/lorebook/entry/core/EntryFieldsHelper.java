@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.BoolConstraint;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.Entry;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.core.entities.fields.CommonFields;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
@@ -12,7 +12,7 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstrai
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @Component
 final class EntryFieldsHelper extends ABSControllerAwareHelper<

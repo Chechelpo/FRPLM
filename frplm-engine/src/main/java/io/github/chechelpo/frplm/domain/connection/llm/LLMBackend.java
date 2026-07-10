@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.domain.connection.llm;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.interfaces.StableRecord;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.net.URI;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 
 /**
  * They are all assumed to be chat-completions.

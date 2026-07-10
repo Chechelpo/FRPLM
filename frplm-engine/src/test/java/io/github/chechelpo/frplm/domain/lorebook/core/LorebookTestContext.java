@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.lorebook.core;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
 

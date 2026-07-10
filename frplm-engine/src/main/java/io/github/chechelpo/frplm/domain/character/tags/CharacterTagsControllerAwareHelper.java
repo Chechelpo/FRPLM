@@ -4,8 +4,8 @@ import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.CharacterTags;
-import chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import org.springframework.stereotype.Component;
 
 @Component

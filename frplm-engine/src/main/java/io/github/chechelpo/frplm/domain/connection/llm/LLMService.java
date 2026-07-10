@@ -7,16 +7,16 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
 @Service
 public class LLMService extends EntityService<LlmConnectionRecord, LLMStore> {

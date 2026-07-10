@@ -9,12 +9,12 @@ import io.github.chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
 
-import static chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
 
 @TestComponent
 @Import({MessageTestContext.class, CharacterCoreTestContext.class, StartingLocationTestContext.class, SessionTestContext.class, LocationTestContext.class, EdgeTestContext.class})

@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.junit.jupiter.api.BeforeEach;

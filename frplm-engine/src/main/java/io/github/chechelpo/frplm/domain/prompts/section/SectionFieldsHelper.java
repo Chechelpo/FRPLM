@@ -5,11 +5,11 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 
 @Component
 final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRecord, SectionService, SectionController> {

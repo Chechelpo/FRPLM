@@ -8,7 +8,7 @@ import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

@@ -3,11 +3,11 @@ package io.github.chechelpo.frplm.domain.character.starting_locations;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 
-import static chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
 
 @TestComponent
 public class StartingLocationTestContext implements DBReload {

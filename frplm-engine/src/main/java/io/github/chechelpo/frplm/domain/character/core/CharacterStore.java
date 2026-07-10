@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.domain.character.core;
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +13,8 @@ import org.jooq.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
-import static chechelpo.frplm.jooq.generated.tables.Characters.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.tables.Characters.CHARACTERS;
 
 @Store
 final class CharacterStore extends EntityStore<CharactersRecord> {

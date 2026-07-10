@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.core.prompt.building;
 
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import it.unimi.dsi.fastutil.ints.*;

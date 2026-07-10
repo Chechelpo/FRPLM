@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -11,8 +11,8 @@ import org.jooq.impl.DSL;
 import java.util.List;
 
 import static io.github.chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
-import static chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.MOVEMENTS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.MOVEMENTS;
 
 @Store
 final class MovementStore extends EntityStore<MovementsRecord> {

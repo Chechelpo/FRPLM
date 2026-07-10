@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.core.prompt.building;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;

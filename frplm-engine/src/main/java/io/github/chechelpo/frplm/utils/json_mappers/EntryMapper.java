@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.utils.json_mappers;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 @Component
 public class EntryMapper {

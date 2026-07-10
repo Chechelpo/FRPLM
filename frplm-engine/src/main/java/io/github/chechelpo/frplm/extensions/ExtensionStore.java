@@ -7,7 +7,7 @@ import org.jooq.JSON;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import static chechelpo.frplm.jooq.generated.Tables.EXTENSION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.EXTENSION;
 
 @Store
 final class ExtensionStore {

@@ -6,7 +6,7 @@ import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewLorebookOrder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
@@ -15,8 +15,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
 public final class LorebookMapper {

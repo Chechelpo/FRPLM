@@ -4,8 +4,8 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
-import static chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

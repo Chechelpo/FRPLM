@@ -11,9 +11,9 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +23,8 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
-import static chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 
 
 @Service

@@ -3,13 +3,13 @@ package io.github.chechelpo.frplm.extensions.implementations.standalone;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.extensions.api.standalone.EntrySnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 public class LorebookImpl extends StandaloneEntity<LorebooksRecord> implements LorebookSnapshot {
     LorebookImpl(LorebooksRecord record, ExtensionContext context) {

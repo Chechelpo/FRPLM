@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import io.github.chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

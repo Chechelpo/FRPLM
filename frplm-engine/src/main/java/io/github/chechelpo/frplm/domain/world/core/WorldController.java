@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 

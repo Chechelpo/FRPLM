@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.utils.json_mappers;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordsTestContext;
 import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordService;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Sql(

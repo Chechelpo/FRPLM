@@ -7,11 +7,11 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.Worlds;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.Worlds;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import org.jetbrains.annotations.CheckReturnValue;
@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
-import static chechelpo.frplm.jooq.generated.Tables.WORLDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
 @Service
 public class WorldService extends EntityService<

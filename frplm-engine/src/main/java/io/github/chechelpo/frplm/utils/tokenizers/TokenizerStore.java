@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.OptionalInt;
 
-import static chechelpo.frplm.jooq.generated.Tables.TOKENIZER_CACHE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.TOKENIZER_CACHE;
 
 @Store
 class TokenizerStore {

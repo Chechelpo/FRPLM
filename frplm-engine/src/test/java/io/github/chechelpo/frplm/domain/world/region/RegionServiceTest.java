@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.world.region;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.ArrayList;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

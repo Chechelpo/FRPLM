@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -5,12 +5,12 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.ApiHosts;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 
 @Service
 public class HostService extends EntityService<ApiHostsRecord, HostStore> {

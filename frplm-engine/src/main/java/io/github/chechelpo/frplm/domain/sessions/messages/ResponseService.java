@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.domain.sessions.messages;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.events.EventBus;
-import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 

@@ -9,10 +9,10 @@ import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.jooq.generated.tables.Locations;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.Worlds;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.Worlds;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 public class LocationsService extends EntityService<

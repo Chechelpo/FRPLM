@@ -2,8 +2,8 @@ package io.github.chechelpo.frplm.domain.world.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.ArrayList;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.WORLDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Sql(

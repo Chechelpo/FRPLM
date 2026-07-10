@@ -2,14 +2,14 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
 
 @Store
 final class ResponseMovementStore extends EntityStore<ResponseLocationChangesRecord> {

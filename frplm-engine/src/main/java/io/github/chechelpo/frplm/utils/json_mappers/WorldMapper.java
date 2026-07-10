@@ -6,8 +6,8 @@ import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewWorldOrder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 public class WorldMapper {

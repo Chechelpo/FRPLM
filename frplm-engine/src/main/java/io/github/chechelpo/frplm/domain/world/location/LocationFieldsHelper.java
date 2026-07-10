@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.Locations;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;

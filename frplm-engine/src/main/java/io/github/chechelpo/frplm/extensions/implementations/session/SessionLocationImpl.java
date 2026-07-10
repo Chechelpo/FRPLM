@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.extensions.implementations.session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.LocationImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;

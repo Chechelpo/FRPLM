@@ -11,15 +11,15 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 public class RegionService extends EntityService<RegionRecord, RegionStore> {

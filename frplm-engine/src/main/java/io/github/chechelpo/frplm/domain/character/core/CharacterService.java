@@ -6,12 +6,12 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.CheckReturnValue;
@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
 public class CharacterService extends EntityService<CharactersRecord, CharacterStore>  {

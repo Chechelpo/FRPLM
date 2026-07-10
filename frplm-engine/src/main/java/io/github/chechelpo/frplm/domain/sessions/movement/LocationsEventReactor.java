@@ -11,7 +11,7 @@ import io.github.chechelpo.frplm.events.crud.CRUDDraftEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -23,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static io.github.chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
-import static chechelpo.frplm.jooq.generated.Tables.*;
-import static chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 /**
  * Class in charge of centralizing logic regarding events that should change/initialize/delete character locations.

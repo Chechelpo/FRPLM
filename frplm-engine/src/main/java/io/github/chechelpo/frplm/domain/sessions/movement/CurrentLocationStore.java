@@ -2,8 +2,8 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -12,7 +12,7 @@ import org.jooq.impl.DSL;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Store
 final class CurrentLocationStore extends EntityStore<CurrentLocationsRecord> {

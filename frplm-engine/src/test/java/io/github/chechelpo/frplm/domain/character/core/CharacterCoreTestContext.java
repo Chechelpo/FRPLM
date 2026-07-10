@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.character.core;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 
 @TestComponent
 @Import(EntryTestContext.class)

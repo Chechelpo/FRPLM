@@ -2,8 +2,8 @@ package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {

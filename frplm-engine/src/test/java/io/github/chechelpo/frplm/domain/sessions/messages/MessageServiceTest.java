@@ -7,7 +7,7 @@ import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLoc
 import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

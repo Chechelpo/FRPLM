@@ -4,7 +4,7 @@ import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordServ
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
 import static io.github.chechelpo.frplm.config.controllers.ControllerPaths.ENTITY_PATH;
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRIES_URL;
 
 @RestController

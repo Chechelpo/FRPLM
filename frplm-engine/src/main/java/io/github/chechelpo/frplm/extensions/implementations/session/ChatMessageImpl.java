@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.StandaloneEntity;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;

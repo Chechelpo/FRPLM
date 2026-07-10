@@ -5,8 +5,8 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEdgeOrder;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -14,8 +14,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @Component
 public class EdgeMapper {

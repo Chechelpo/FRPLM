@@ -2,8 +2,8 @@ package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
-import chechelpo.frplm.jooq.generated.tables.Entry;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 public final class EntryStore extends EntityStore<EntryRecord> {

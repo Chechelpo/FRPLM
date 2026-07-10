@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.core.prompt.TextType;
 import io.github.chechelpo.frplm.domain.lorebook.LorebookContext;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import io.github.chechelpo.frplm.extensions.api.prompts.LorebookManager;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;

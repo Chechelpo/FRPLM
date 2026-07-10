@@ -4,10 +4,10 @@ import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 
 @Component
 final class EntryKeywordsFieldHelper extends ABSControllerAwareHelper<

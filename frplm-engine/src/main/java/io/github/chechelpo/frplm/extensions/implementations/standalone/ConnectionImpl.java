@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.integrations.T2TClient;
 import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;

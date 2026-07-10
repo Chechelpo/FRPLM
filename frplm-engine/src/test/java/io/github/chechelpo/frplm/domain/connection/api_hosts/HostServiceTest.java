@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.connection.api_hosts;
 
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

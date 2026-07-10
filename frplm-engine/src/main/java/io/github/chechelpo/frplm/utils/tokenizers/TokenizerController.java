@@ -5,13 +5,13 @@ import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.WebAsyncTask;
 
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController

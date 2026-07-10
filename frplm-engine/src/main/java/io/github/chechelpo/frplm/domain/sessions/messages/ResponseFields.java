@@ -4,10 +4,10 @@ import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
-import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.RESPONSES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSES;
 
 @Component
 final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {

@@ -3,11 +3,11 @@ package io.github.chechelpo.frplm.domain.prompts.section;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SECTIONS_URL;
 
 @RestController

@@ -5,10 +5,10 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.KEYWORD;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 
 @Component
 final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, KeywordService, KeywordController> {

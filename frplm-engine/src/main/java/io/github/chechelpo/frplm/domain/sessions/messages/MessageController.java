@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

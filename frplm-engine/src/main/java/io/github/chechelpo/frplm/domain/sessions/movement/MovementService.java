@@ -5,13 +5,13 @@ import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidMove;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 class MovementService extends EntityService<MovementsRecord, MovementStore> {

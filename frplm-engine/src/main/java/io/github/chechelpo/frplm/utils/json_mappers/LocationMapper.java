@@ -9,8 +9,8 @@ import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewLocationOrder;
 import org.jetbrains.annotations.TestOnly;
 import org.jspecify.annotations.NonNull;
@@ -20,8 +20,8 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
 
 @Component
 public class LocationMapper {

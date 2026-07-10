@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.character.starting_locations;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.StartingLocations;
-import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.BoolConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;

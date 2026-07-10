@@ -7,8 +7,8 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.integrations.ModelResponses;
 import io.github.chechelpo.frplm.utils.integrations.T2TClient;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
-import static chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LLM_CONNECTION_URL;
 
 @RestController

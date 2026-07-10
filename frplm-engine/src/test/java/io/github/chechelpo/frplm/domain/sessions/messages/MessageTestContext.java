@@ -5,8 +5,8 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import java.util.ArrayList;
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
 
 @TestComponent
 @Import({SessionTestContext.class, LocationTestContext.class})

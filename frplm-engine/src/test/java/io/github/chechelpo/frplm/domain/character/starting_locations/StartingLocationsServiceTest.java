@@ -3,9 +3,9 @@ package io.github.chechelpo.frplm.domain.character.starting_locations;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.STARTING_LOCATIONS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

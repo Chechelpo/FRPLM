@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.PromptImpl;
-import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptBuilder;
 import io.github.chechelpo.frplm.extensions.api.session.Session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;

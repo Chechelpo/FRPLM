@@ -5,14 +5,14 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.jetbrains.annotations.TestOnly;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 import static org.jooq.impl.DSL.max;
 
 @Component

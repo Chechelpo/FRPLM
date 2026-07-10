@@ -6,14 +6,14 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
-import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.jetbrains.annotations.TestOnly;
 import org.jooq.impl.DefaultDSLContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 import static org.jooq.impl.DSL.max;
 
 @Component

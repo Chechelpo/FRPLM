@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.Characters;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.core.entities.fields.CommonFields;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
@@ -10,7 +10,7 @@ import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 
 @Component
 final class CharacterFieldsHelper extends ABSControllerAwareHelper<

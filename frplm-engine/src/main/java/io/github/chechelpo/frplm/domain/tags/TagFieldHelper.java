@@ -5,10 +5,10 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.TAGS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.TAGS;
 
 @Component
 final class TagFieldHelper extends ABSControllerAwareHelper<TagsRecord, TagService, TagController> {

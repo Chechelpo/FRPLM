@@ -1,12 +1,12 @@
 package io.github.chechelpo.frplm.utils.json_mappers.orders;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 public record NewEntryOrder(Set<String> keywords, EntityDataPayload<EntryRecord> entryInfo){
     @Override

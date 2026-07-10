@@ -7,9 +7,9 @@ import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
 
 @Component
 public class ResponseMovementService extends EntityService<ResponseLocationChangesRecord, ResponseMovementStore> {

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,8 +10,9 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @Sql(
         scripts = "classpath:db/schema.sql",

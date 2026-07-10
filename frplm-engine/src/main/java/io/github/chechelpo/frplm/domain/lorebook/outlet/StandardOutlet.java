@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.domain.lorebook.outlet;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.interfaces.StableRecord;
-import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 
 public enum StandardOutlet implements StableRecord<OutletRecord> {
     CHARACTER_INFO(1, "character_info"),

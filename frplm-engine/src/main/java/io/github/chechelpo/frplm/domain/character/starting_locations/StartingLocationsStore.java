@@ -2,9 +2,9 @@ package io.github.chechelpo.frplm.domain.character.starting_locations;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class StartingLocationsStore extends EntityStore<StartingLocationsRecord>

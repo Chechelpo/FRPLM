@@ -23,7 +23,7 @@ public final class GenerateJooq {
                                         .withIncludes(".*")
                                 )
                                 .withTarget(new Target()
-                                        .withPackageName("chechelpo.frplm.jooq.generated")
+                                        .withPackageName("io.github.chechelpo.frplm.jooq.generated")
                                         .withDirectory("frplm-engine/src/main/generated")
                                 )
                         );

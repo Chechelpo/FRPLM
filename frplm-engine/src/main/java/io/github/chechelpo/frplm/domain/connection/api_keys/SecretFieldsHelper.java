@@ -5,10 +5,10 @@ import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstrai
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import org.springframework.stereotype.Component;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_KEYS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 
 @Component
 final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, SecretService, SecretController> {

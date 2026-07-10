@@ -13,8 +13,8 @@ import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ConnectionImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.utils.integrations.T2TClient;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
@@ -25,7 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 @Component
 final class EngineHolder {

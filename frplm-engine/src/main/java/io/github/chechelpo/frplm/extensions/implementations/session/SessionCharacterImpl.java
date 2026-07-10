@@ -2,7 +2,7 @@ package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.CharacterImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.extensions.api.results.MoveResult;
 import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;

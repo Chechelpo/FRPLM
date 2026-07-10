@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.session.Session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;

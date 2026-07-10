@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
 import io.github.chechelpo.frplm.domain.prompts.section.DefaultSections;
-import chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;

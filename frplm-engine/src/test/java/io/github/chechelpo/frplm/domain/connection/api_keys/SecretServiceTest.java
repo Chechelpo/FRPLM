@@ -3,8 +3,8 @@ package io.github.chechelpo.frplm.domain.connection.api_keys;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.encryption.EncryptorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.API_KEYS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

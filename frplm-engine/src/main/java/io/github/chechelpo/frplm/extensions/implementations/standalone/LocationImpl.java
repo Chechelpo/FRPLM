@@ -3,9 +3,9 @@ package io.github.chechelpo.frplm.extensions.implementations.standalone;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 public class LocationImpl extends StandaloneEntity<LocationsRecord> implements LocationSnapshot {
     public LocationImpl(LocationsRecord record, ExtensionContext context) {

@@ -3,9 +3,9 @@ package io.github.chechelpo.frplm.domain.lorebook.keywords;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 import java.util.List;
 import java.util.Map;
 
-import static chechelpo.frplm.jooq.generated.Tables.KEYWORD;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

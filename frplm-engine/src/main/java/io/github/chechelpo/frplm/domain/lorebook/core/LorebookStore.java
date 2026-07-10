@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import chechelpo.frplm.jooq.generated.tables.Lorebooks;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class LorebookStore extends EntityStore<LorebooksRecord> {

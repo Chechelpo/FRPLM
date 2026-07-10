@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.core.prompt.building;
 
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
-import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 

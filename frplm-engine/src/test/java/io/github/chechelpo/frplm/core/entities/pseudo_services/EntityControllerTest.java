@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
