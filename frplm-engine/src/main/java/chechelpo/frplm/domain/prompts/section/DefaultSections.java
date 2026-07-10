@@ -1,7 +1,7 @@
 package chechelpo.frplm.domain.prompts.section;
 
 import chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.NotNull;
 
 public enum DefaultSections {
@@ -44,8 +44,8 @@ public enum DefaultSections {
     CHAT_HISTORY(5,
             ChatCompletionRole.USER,
             "Chat history",
-            StandardOutlet.CHAT_HISTORY,
-            StandardOutlet.CHAT_HISTORY.asMacro(),
+            null,
+            "unimportant",
             false
     ),
     ;

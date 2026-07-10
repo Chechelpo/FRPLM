@@ -1,4 +1,5 @@
-import {fetchApi} from "@/frameworks/ABSEntity";
+//src/extensions/extensions.ts!
+import {fetchApi} from "@/core/ABSEntity";
 import {API_BASE} from "@/config";
 
 export type ExtensionDTO = {
@@ -16,21 +17,19 @@ export async function fetchExtensions() : Promise<ExtensionDTO[]> {
         }
     ).then(async response => await response.json() as ExtensionDTO[])
 }
-export async function fetchConfigPanel(extensionId: string): Promise<string | null> {
-    const response = await fetch(`/api/extensions/${extensionId}/config-panel`, {
-        method: "GET",
-        headers: {
-            Accept: "text/html",
-        },
-    });
 
-    if (response.status === 404) {
-        return null;
-    }
+// src/extensions/extensionSdk.ts
 
-    if (!response.ok) {
-        throw new Error(`Failed to fetch config panel for ${extensionId}`);
-    }
-
-    return await response.text();
+export interface ExtensionField {
+    name: string;
+    description: string | null;
+    kind: 'String' | 'Number' | 'Double' | 'Boolean';
+    value: unknown;
+    possible_values: string[];
 }
+
+export interface ExtensionConfig {
+    [key: string]: unknown;
+}
+
+

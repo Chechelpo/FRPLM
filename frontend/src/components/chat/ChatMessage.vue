@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import {Message} from "@/domain/Session";
-import {computed, onMounted, ref, shallowRef, watch} from "vue";
-import {Location} from "@/domain/World";
-import {Character} from "@/domain/Characters";
+import {
+  computed,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
+
+import MarkdownIt from "markdown-it";
+import DOMPurify from "dompurify";
+
+import { Message } from "@/domain/Session";
+import { Location } from "@/domain/World";
+import { Character } from "@/domain/Characters";
+import { ChatCompletionRole } from "@/types/ChatCompletions";
+
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import MarkdownIt from "markdown-it";
-import DOMPurify from "dompurify";
-import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 const markdown = new MarkdownIt({
   html: true,
@@ -24,33 +33,60 @@ const props = defineProps<{
   onRegenerate: (message: Message) => Promise<boolean>;
 }>();
 
-const emits = defineEmits<{
-  (e: "delete", value: Message): void
+const emit = defineEmits<{
+  (event: "delete", value: Message): void;
 }>();
+
+/* -------------------------------------------------------------------------- */
+/* Message metadata                                                           */
+/* -------------------------------------------------------------------------- */
 
 const location = shallowRef<Location>();
 const presentCharacters = shallowRef<Character[]>([]);
-const presentCharactersNames = shallowRef<string[]>([]);
+const presentCharacterNames = computed<string[]>(() =>
+    presentCharacters.value
+        .map((character) => String(character.get("name") ?? ""))
+        .filter(Boolean),
+);
 
-const editingLocation = ref<boolean>(false);
-const isAssistantMessage = computed<boolean>(() => props.message.get('role') == ChatCompletionRole.ASSISTANT);
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Message edit
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const editingMessage = ref<boolean>(false);
-const savingMessage = ref<boolean>(false);
+const editingLocation = ref(false);
+const editingCharacter = ref(false);
+const selectedCharacter = shallowRef<Character | null>(null);
 
-const displayedContent = ref<string>("");
-const messageDraft = ref<string>("");
+const isAssistantMessage = computed(
+    () =>
+        props.message.get("role") ===
+        ChatCompletionRole.ASSISTANT,
+);
+
+const activeResponse = computed<number>(() =>
+    Number(props.message.get("active_response") ?? 1),
+);
+
+const responseCount = computed<number>(() =>
+    Number(props.message.get("response_num") ?? 1),
+);
+
+/* -------------------------------------------------------------------------- */
+/* Message content                                                            */
+/* -------------------------------------------------------------------------- */
+
+const editingMessage = ref(false);
+const savingMessage = ref(false);
+const regeneratingMessage = ref(false);
+
+const displayedContent = ref("");
+const messageDraft = ref("");
 
 const renderedContent = computed<string>(() => {
-  props.message.get("active_response");
-  const html = markdown.render(displayedContent.value);
-  return DOMPurify.sanitize(html);
+  const renderedHtml = markdown.render(displayedContent.value);
+
+  return DOMPurify.sanitize(renderedHtml);
 });
 
 function getMessageContent(): string {
   const content = props.message.get("content");
+
   return content == null ? "" : String(content);
 }
 
@@ -68,479 +104,1054 @@ async function saveMessageEdit(): Promise<void> {
   savingMessage.value = true;
 
   try {
-    await props.message.update("content", messageDraft.value);
+    await props.message.update(
+        "content",
+        messageDraft.value,
+    );
+
     displayedContent.value = messageDraft.value;
     editingMessage.value = false;
   } finally {
     savingMessage.value = false;
   }
 }
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Response
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-async function changeActiveResponse(offset: -1 | 1): Promise<void> {
-  const nextResponse = props.message.get('active_response') + offset;
 
-  if (nextResponse < 0 || nextResponse > props.message.get('response_num')) {
-    await onRegenerate()
+/* -------------------------------------------------------------------------- */
+/* Alternative responses                                                      */
+/* -------------------------------------------------------------------------- */
+
+async function changeActiveResponse(
+    offset: -1 | 1,
+): Promise<void> {
+  if (regeneratingMessage.value) {
     return;
   }
 
-  await props.message.update('active_response', nextResponse);
+  const nextResponse = activeResponse.value + offset;
 
-  displayedContent.value = props.message.get('content');
-  console.log(`New content: ${displayedContent.value}`);
-  editingMessage.value = false;
-  await loadMessageContext();
-}
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Character
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-const editingCharacter = ref<boolean>(false);
-const selectedCharacter = shallowRef<Character | null>(null);
+  if (nextResponse < 1) {
+    return;
+  }
 
-function onCharacterClick(name: string): void {
-  const character = presentCharacters.value.find(
-      character => character.get("name") === name
+  if (nextResponse > responseCount.value) {
+    await regenerateMessage();
+    return;
+  }
+
+  await props.message.update(
+      "active_response",
+      nextResponse,
   );
 
-  if (!character) return;
+  displayedContent.value = getMessageContent();
+  messageDraft.value = displayedContent.value;
+  editingMessage.value = false;
+
+  await loadMessageContext();
+}
+
+async function regenerateMessage(): Promise<void> {
+  if (regeneratingMessage.value) {
+    return;
+  }
+
+  regeneratingMessage.value = true;
+  editingMessage.value = false;
+  displayedContent.value = "";
+
+  try {
+    const success = await props.onRegenerate(
+        props.message,
+    );
+
+    if (success) {
+      await loadMessageContext();
+    } else {
+      displayedContent.value = getMessageContent();
+    }
+  } finally {
+    regeneratingMessage.value = false;
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Context editors                                                            */
+/* -------------------------------------------------------------------------- */
+
+function openCharacterEditor(name: string): void {
+  const character = presentCharacters.value.find(
+      (candidate) =>
+          candidate.get("name") === name,
+  );
+
+  if (!character) {
+    return;
+  }
 
   selectedCharacter.value = character;
   editingCharacter.value = true;
 }
 
-async function loadMessageContext(): Promise<void> {
-  location.value = await props.message.getLocation();
+function closeCharacterEditor(): void {
+  editingCharacter.value = false;
+  selectedCharacter.value = null;
+}
 
-  presentCharacters.value = await props.message.getCharacters();
-  presentCharactersNames.value = presentCharacters.value.map(character =>
-      String(character.get("name") ?? "")
-  );
+let contextLoadSequence = 0;
+
+async function loadMessageContext(): Promise<void> {
+  const loadSequence = ++contextLoadSequence;
+
+  const [
+    nextLocation,
+    nextCharacters,
+  ] = await Promise.all([
+    props.message.getLocation(),
+    props.message.getCharacters(),
+  ]);
+
+  if (loadSequence !== contextLoadSequence) {
+    return;
+  }
+
+  location.value = nextLocation;
+  presentCharacters.value = nextCharacters;
 
   displayedContent.value = getMessageContent();
   messageDraft.value = displayedContent.value;
 
   console.debug(
-      `${props.message.get("tick_num")} : ${location.value.get("name")} with present characters ${presentCharactersNames.value}`
+      `${props.message.get("tick_num")} : ` +
+      `${nextLocation?.get("name") ?? "Unknown location"} ` +
+      `with present characters ` +
+      `${presentCharacterNames.value.join(", ")}`,
   );
 }
 
-async function onRegenerate(){
-  displayedContent.value = "...";
-  const success = await props.onRegenerate(props.message);
-  if (success) await loadMessageContext()
-}
-
-onMounted(loadMessageContext);
+onMounted(() => {
+  void loadMessageContext();
+});
 
 watch(
     () => props.message,
     () => {
       editingMessage.value = false;
+      selectedCharacter.value = null;
+      editingCharacter.value = false;
+
       void loadMessageContext();
-    }
+    },
 );
 </script>
 
 <template>
-  <article class="chat-message-box">
-    <header class="chat-message-header">
-      <div class="chat-message-header-main">
-        <span class="chat-message-title">
-          {{ props.title }}
-        </span>
+  <article
+      :class="[
+      'edit-box',
+      'chat-message',
+      isAssistantMessage
+        ? 'edit-box--accent'
+        : 'edit-box--primary',
+    ]"
+      :aria-busy="
+      savingMessage || regeneratingMessage
+    "
+  >
+    <header
+        class="
+        edit-box__header
+        chat-message__header
+      "
+    >
+      <div class="chat-message__header-row">
+        <div class="edit-box__header-main">
+          <div class="edit-box__title-row">
+            <h2 class="edit-box__title">
+              {{ props.title }}
+            </h2>
+          </div>
+        </div>
 
-        <div class="chat-message-actions">
-          <button
-              type="button"
-              class="chat-message-action-button"
-              :disabled = "!props.isLastMessage"
-              @click="emits('delete', props.message)"
-          >
-            D
-          </button>
-
+        <div
+            class="
+            edit-box__actions
+            chat-message__actions
+          "
+        >
           <div
-              class="chat-message-response-selector"
               v-if="isAssistantMessage"
+              class="chat-message__response-selector"
               aria-label="Alternative response selector"
           >
             <button
                 type="button"
-                class="chat-message-response-button"
+                class="chat-message__response-button"
                 aria-label="Previous response"
-                :disabled="!props.isLastMessage || props.message.get('active_response') == 1"
+                title="Previous response"
+                :disabled="
+                !props.isLastMessage ||
+                activeResponse <= 1 ||
+                regeneratingMessage
+              "
                 @click="changeActiveResponse(-1)"
             >
-              &lt;
+              <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+              >
+                <path d="m15 18-6-6 6-6" />
+              </svg>
             </button>
 
             <output
-                class="chat-message-response-counter"
+                class="chat-message__response-counter"
                 aria-live="polite"
             >
-              {{ props.message.get('active_response') }}/{{ props.message.get('response_num') }}
+              {{ activeResponse }}/{{ responseCount }}
             </output>
 
             <button
                 type="button"
-                class="chat-message-response-button"
+                class="chat-message__response-button"
                 aria-label="Next response"
-                :disabled="!props.isLastMessage"
+                title="Next response"
+                :disabled="
+                !props.isLastMessage ||
+                regeneratingMessage
+              "
                 @click="changeActiveResponse(1)"
             >
-              &gt;
+              <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+              >
+                <path d="m9 18 6-6-6-6" />
+              </svg>
             </button>
           </div>
 
           <button
               v-if="!editingMessage"
               type="button"
-              class="chat-message-action-button"
+              class="
+              edit-box__action
+              chat-message__action
+            "
+              :disabled="regeneratingMessage"
               @click="beginMessageEdit"
           >
+            <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+              <path d="M12 20h9" />
+              <path
+                  d="
+                  M16.5 3.5
+                  a2.1 2.1 0 0 1 3 3
+                  L8 18l-4 1 1-4Z
+                "
+              />
+            </svg>
+
             Edit
           </button>
 
           <template v-else>
             <button
                 type="button"
-                class="chat-message-action-button"
+                class="
+                edit-box__action
+                edit-box__action--accent
+                chat-message__action
+              "
                 :disabled="savingMessage"
                 @click="saveMessageEdit"
             >
-              Save
+              <span
+                  v-if="savingMessage"
+                  class="edit-box__spinner"
+                  aria-hidden="true"
+              />
+
+              <svg
+                  v-else
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+
+              {{ savingMessage ? "Saving..." : "Save" }}
             </button>
 
             <button
                 type="button"
-                class="chat-message-action-button"
+                class="
+                edit-box__action
+                chat-message__action
+              "
                 :disabled="savingMessage"
                 @click="cancelMessageEdit"
             >
               Cancel
             </button>
           </template>
+
+          <button
+              type="button"
+              class="
+              edit-box__action
+              edit-box__action--danger
+              chat-message__icon-action
+            "
+              title="Delete message"
+              aria-label="Delete message"
+              :disabled="
+              !props.isLastMessage ||
+              savingMessage ||
+              regeneratingMessage
+            "
+              @click="emit('delete', props.message)"
+          >
+            <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="m19 6-1 14H6L5 6" />
+              <path d="M10 11v5" />
+              <path d="M14 11v5" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      <div class="chat-message-context">
-        <FieldEditorWrapper field-name="Location">
+      <div class="chat-message__context">
+        <div
+            v-if="location"
+            class="chat-message__context-group"
+        >
+          <span class="chat-message__context-label">
+            Location
+          </span>
+
           <button
-              v-if="location"
-              class="chat-message-context-button"
               type="button"
+              class="chat-message__context-button"
               @click="editingLocation = true"
           >
+            <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+            >
+              <path
+                  d="
+                  M20 10
+                  c0 5-8 11-8 11
+                  S4 15 4 10
+                  a8 8 0 1 1 16 0Z
+                "
+              />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg>
+
             {{ location.get("name") }}
           </button>
-        </FieldEditorWrapper>
+        </div>
 
-        <span class="chat-message-context-separator">•</span>
+        <div
+            v-if="presentCharacterNames.length"
+            class="chat-message__context-group"
+        >
+          <span class="chat-message__context-label">
+            Characters
+          </span>
 
-        <div class="chat-message-context-item">
-          <FieldEditorWrapper field-name="Characters">
+          <div class="chat-message__character-list">
             <button
-                v-for="characterName in presentCharactersNames"
+                v-for="characterName in presentCharacterNames"
                 :key="characterName"
                 type="button"
-                class="chat-message-context-button"
-                @click="onCharacterClick(characterName)"
+                class="chat-message__context-button"
+                @click="openCharacterEditor(characterName)"
             >
               {{ characterName }}
             </button>
-          </FieldEditorWrapper>
+          </div>
         </div>
       </div>
     </header>
 
     <div
-        v-if="!editingMessage"
-        :key="message.get('active_response')"
-        class="chat-message-content chat-message-content-readonly"
-        v-html="renderedContent"
-    />
+        class="
+        edit-box__body
+        chat-message__body
+      "
+    >
+      <div
+          v-if="regeneratingMessage"
+          class="
+          edit-box__state
+          edit-box__state--vertical
+          chat-message__loading-state
+        "
+          role="status"
+          aria-live="polite"
+      >
+        <span
+            class="edit-box__spinner"
+            aria-hidden="true"
+        />
 
-    <textarea
-        v-else
-        v-model="messageDraft"
-        class="chat-message-content chat-message-content-editor"
-        spellcheck="true"
-        aria-label="Message content"
-    />
+        <div class="edit-box__state-content">
+          <strong class="edit-box__state-title">
+            Generating response
+          </strong>
+
+          <p class="edit-box__state-description">
+            The assistant is producing another response.
+          </p>
+        </div>
+      </div>
+
+      <div
+          v-else-if="!editingMessage"
+          :key="activeResponse"
+          class="
+          chat-message__content
+          chat-message__content--readonly
+        "
+          v-html="renderedContent"
+      />
+
+      <textarea
+          v-else
+          v-model="messageDraft"
+          class="
+          chat-message__content
+          chat-message__content--editor
+        "
+          spellcheck="true"
+          aria-label="Message content"
+      />
+    </div>
   </article>
 
   <WindowPrompt
       v-if="location && editingLocation"
-      :title="String(location.get('name') ?? 'Location')"
+      :title="
+      String(
+        location.get('name') ??
+        'Location',
+      )
+    "
       @close="editingLocation = false"
   >
     <LocationEditor
-        :model-value="{ location: location, all_locations: [] }"
+        :model-value="{
+        location,
+        all_locations: [],
+      }"
     />
   </WindowPrompt>
 
   <WindowPrompt
-      v-if="editingCharacter && selectedCharacter"
-      :title="String(selectedCharacter.get('name') ?? 'Character')"
-      @close="editingCharacter = false"
+      v-if="
+      editingCharacter &&
+      selectedCharacter
+    "
+      :title="
+      String(
+        selectedCharacter.get('name') ??
+        'Character',
+      )
+    "
+      @close="closeCharacterEditor"
   >
-    <CharacterEditor :model-value="selectedCharacter" :edit-starting-locations="false" />
+    <CharacterEditor
+        :model-value="selectedCharacter"
+        :edit-starting-locations="false"
+    />
   </WindowPrompt>
 </template>
 
 <style scoped>
-.chat-message-box {
+.chat-message {
   width: 100%;
-  min-height: 200px;
+  min-width: 0;
+  min-height: 12.5rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Header                                                                     */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__header {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chat-message__header-row {
+  width: 100%;
+  min-width: 0;
 
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.chat-message__actions {
+  max-width: 100%;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Actions                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__action {
+  min-height: 2rem;
+
+  padding: 0.4rem 0.65rem;
+
+  font-size: 0.74rem;
+}
+
+.chat-message__action svg,
+.chat-message__icon-action svg {
+  width: 1rem;
+  height: 1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-message__icon-action {
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
+
+  padding: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Response selector                                                          */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__response-selector {
+  min-height: 2rem;
+
+  display: inline-flex;
+  align-items: stretch;
 
   overflow: hidden;
 
-  border: 1px solid var(--primary-accent, #f59e0b);
-  border-radius: 0.75rem;
+  color: rgb(var(--c-fg));
 
-  background: var(--primary-background, #1c1917);
-  color: var(--primary-text, #e2e8f0);
+  background: rgb(var(--c-surface-raised) / 0.55);
+  border: 1px solid rgb(var(--c-border) / 0.3);
+  border-radius: var(--radius-sm);
 
-  box-shadow:
-      0 10px 15px rgb(0 0 0 / 0.18),
-      inset 0 1px 0 rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.28);
 }
 
-.chat-message-header {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.chat-message__response-button {
+  width: 2rem;
+  min-height: 2rem;
+  flex: 0 0 auto;
 
-  padding: 0.75rem 0.9rem;
+  display: grid;
+  place-items: center;
 
-  background: var(--secondary-background, #44403c);
-  border-bottom: 1px solid var(--primary-accent, #f59e0b);
-}
-
-.chat-message-header-main {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.chat-message-title {
-  flex: 1;
-  min-width: 0;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.3;
-
-  color: var(--primary-text, #e2e8f0);
-}
-
-.chat-message-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-
-  margin-left: auto;
-}
-
-.chat-message-action-button {
-  padding: 0.15rem 0.4rem;
-
-  border: 1px solid color-mix(
-      in srgb,
-      var(--primary-accent, #f59e0b) 55%,
-      transparent
-  );
-  border-radius: 0.35rem;
-
-  background: transparent;
-  color: inherit;
-
-  font: inherit;
-  font-size: 0.75rem;
-  line-height: 1.2;
-
-  cursor: pointer;
-}
-
-.chat-message-action-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.chat-message-context {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
-
-  font-size: 0.8rem;
-  line-height: 1.35;
-
-  color: var(--muted-text, #94a3b8);
-}
-
-.chat-message-context-item {
-  min-width: 0;
-}
-
-.chat-message-context-separator {
-  color: var(--primary-accent, #f59e0b);
-  opacity: 0.75;
-}
-
-.chat-message-context-button {
   padding: 0;
 
-  border: none;
-  background: transparent;
-
   color: inherit;
-  font: inherit;
-  text-decoration: underline;
+
+  background: transparent;
+  border: 0;
 
   cursor: pointer;
+
+  transition:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard);
 }
 
-.chat-message-content {
-  width: 100%;
-  min-height: 9rem;
-
-  padding: 0.9rem;
-
-  background: color-mix(
-      in srgb,
-      var(--primary-background, #1c1917) 88%,
-      black 12%
-  );
-
-  color: var(--primary-text, #e2e8f0);
-
-  font: inherit;
-  font-size: 0.95rem;
-  line-height: 1.55;
+.chat-message__response-button:hover:not(:disabled) {
+  color: rgb(var(--c-on-accent));
+  background: rgb(var(--c-accent) / 0.24);
 }
 
-.chat-message-content-readonly {
-  cursor: default;
-  overflow-wrap: anywhere;
-  user-select: text;
+.chat-message__response-button:focus-visible {
+  position: relative;
+  z-index: 1;
+
+  outline:
+      var(--focus-ring-width)
+      solid
+      rgb(var(--focus-ring-color) / 0.28);
+
+  outline-offset: -3px;
 }
 
-.chat-message-content-readonly :deep(p) {
-  margin: 0 0 0.75rem;
+.chat-message__response-button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
 }
 
-.chat-message-content-readonly :deep(p:last-child) {
-  margin-bottom: 0;
+.chat-message__response-button svg {
+  width: 1rem;
+  height: 1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.chat-message-content-readonly :deep(a) {
-  color: var(--primary-accent, #f59e0b);
-  text-decoration: underline;
-}
+.chat-message__response-counter {
+  min-width: 3.25rem;
 
-.chat-message-content-readonly :deep(pre) {
-  overflow-x: auto;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  background: rgb(0 0 0 / 0.25);
-}
-
-.chat-message-content-readonly :deep(code) {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-
-.chat-message-content-readonly :deep(blockquote) {
-  margin: 0.75rem 0;
-  padding-left: 0.75rem;
-  border-left: 3px solid var(--primary-accent, #f59e0b);
-  color: var(--muted-text, #94a3b8);
-}
-
-.chat-message-content-editor {
-  resize: vertical;
-
-  border: none;
-  outline: none;
-
-  cursor: text;
-}
-
-.chat-message-content-editor:focus {
-  box-shadow: inset 0 0 0 1px var(--primary-accent, #f59e0b);
-}
-
-.chat-message-response-selector {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
-  overflow: hidden;
+  padding: 0 var(--space-2);
 
-  border: 1px solid color-mix(
-      in srgb,
-      var(--primary-accent, #f59e0b) 55%,
-      transparent
-  );
-  border-radius: 0.35rem;
+  color: rgb(var(--c-muted));
+
+  border-right: 1px solid rgb(var(--c-border) / 0.24);
+  border-left: 1px solid rgb(var(--c-border) / 0.24);
+
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-.chat-message-response-button {
-  width: 1.6rem;
-  min-height: 1.4rem;
-  padding: 0;
+/* -------------------------------------------------------------------------- */
+/* Message context                                                            */
+/* -------------------------------------------------------------------------- */
 
-  border: none;
-  background: transparent;
-  color: inherit;
+.chat-message__context {
+  width: 100%;
+  min-width: 0;
 
-  font: inherit;
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap:
+      var(--space-2)
+      var(--space-4);
+
+  padding: var(--space-2) var(--space-3);
+
+  background: rgb(var(--c-surface-raised) / 0.34);
+  border: 1px solid rgb(var(--c-border) / 0.2);
+  border-radius: var(--radius-md);
+
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.24);
+}
+
+.chat-message__context-group {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.chat-message__context-label {
+  color: rgb(var(--c-muted));
+
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chat-message__character-list {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.chat-message__context-button {
+  min-height: 1.75rem;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  padding: 0.25rem 0.55rem;
+
+  color: rgb(var(--edit-box-accent-strong));
+
+  background: rgb(var(--edit-box-accent) / 0.1);
+  border: 1px solid rgb(var(--edit-box-accent) / 0.22);
+  border-radius: var(--radius-round);
+
+  font-family: var(--font-primary);
+  font-size: 0.74rem;
   font-weight: 700;
   line-height: 1;
 
   cursor: pointer;
+
+  transition:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
 }
 
-.chat-message-response-button:hover:not(:disabled) {
-  background: color-mix(
-      in srgb,
-      var(--primary-accent, #f59e0b) 18%,
-      transparent
-  );
+.chat-message__context-button:hover {
+  color: rgb(var(--c-on-accent));
+
+  background: rgb(var(--edit-box-accent) / 0.26);
+  border-color: rgb(var(--edit-box-accent) / 0.46);
 }
 
-.chat-message-response-button:disabled {
-  opacity: 0.35;
-  cursor: default;
+.chat-message__context-button:focus-visible {
+  outline:
+      var(--focus-ring-width)
+      solid
+      rgb(var(--focus-ring-color) / 0.3);
+
+  outline-offset: 2px;
 }
 
-.chat-message-response-counter {
-  min-width: 3rem;
-  padding: 0 0.3rem;
+.chat-message__context-button svg {
+  width: 0.9rem;
+  height: 0.9rem;
 
-  border-right: 1px solid color-mix(
-      in srgb,
-      var(--primary-accent, #f59e0b) 35%,
-      transparent
-  );
-  border-left: 1px solid color-mix(
-      in srgb,
-      var(--primary-accent, #f59e0b) 35%,
-      transparent
-  );
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
-  font-size: 0.75rem;
-  line-height: 1.4;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+/* -------------------------------------------------------------------------- */
+/* Content                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__body {
+  min-height: 9rem;
+
+  display: flex;
+
+  padding: 0;
+
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-surface) / 0.74),
+          rgb(var(--c-surface-2) / 0.48)
+      );
+}
+
+.chat-message__content {
+  width: 100%;
+  min-width: 0;
+  min-height: 11rem;
+  box-sizing: border-box;
+
+  padding: var(--space-4);
+
+  color: rgb(var(--c-fg));
+
+  background: transparent;
+  border: 0;
+  outline: 0;
+
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.chat-message__content--readonly {
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.chat-message__content--editor {
+  display: block;
+
+  caret-color: rgb(var(--c-accent-2));
+
+  resize: vertical;
+
+  transition:
+      background-color var(--duration-normal) var(--ease-standard),
+      box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.chat-message__content--editor:focus {
+  background: rgb(var(--c-surface-raised) / 0.24);
+
+  box-shadow:
+      inset 0 0 0 var(--focus-ring-width)
+      rgb(var(--focus-ring-color) / 0.18);
+}
+
+.chat-message__content--editor::selection {
+  color: rgb(var(--c-on-accent));
+  background: rgb(var(--c-accent) / 0.46);
+}
+
+.chat-message__loading-state {
+  width: 100%;
+  min-height: 11rem;
+
+  margin: var(--space-4);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Rendered markdown                                                          */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__content--readonly :deep(p) {
+  margin: 0 0 var(--space-3);
+}
+
+.chat-message__content--readonly :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.chat-message__content--readonly :deep(h1),
+.chat-message__content--readonly :deep(h2),
+.chat-message__content--readonly :deep(h3),
+.chat-message__content--readonly :deep(h4),
+.chat-message__content--readonly :deep(h5),
+.chat-message__content--readonly :deep(h6) {
+  margin:
+      var(--space-5)
+      0
+      var(--space-2);
+
+  color: rgb(var(--c-fg-strong));
+
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+.chat-message__content--readonly :deep(h1:first-child),
+.chat-message__content--readonly :deep(h2:first-child),
+.chat-message__content--readonly :deep(h3:first-child) {
+  margin-top: 0;
+}
+
+.chat-message__content--readonly :deep(a) {
+  color: rgb(var(--c-primary-strong));
+
+  text-decoration-color:
+      rgb(var(--c-primary) / 0.55);
+  text-underline-offset: 0.16em;
+}
+
+.chat-message__content--readonly :deep(a:hover) {
+  color: rgb(var(--c-accent-2));
+
+  text-decoration-color:
+      rgb(var(--c-accent) / 0.8);
+}
+
+.chat-message__content--readonly :deep(ul),
+.chat-message__content--readonly :deep(ol) {
+  margin:
+      var(--space-3)
+      0;
+
+  padding-left: var(--space-6);
+}
+
+.chat-message__content--readonly :deep(li + li) {
+  margin-top: var(--space-1);
+}
+
+.chat-message__content--readonly :deep(blockquote) {
+  margin:
+      var(--space-4)
+      0;
+
+  padding:
+      var(--space-2)
+      var(--space-3);
+
+  color: rgb(var(--c-muted));
+
+  background: rgb(var(--edit-box-accent) / 0.055);
+  border-left:
+      3px solid
+      rgb(var(--edit-box-accent) / 0.68);
+  border-radius:
+      0
+      var(--radius-sm)
+      var(--radius-sm)
+      0;
+}
+
+.chat-message__content--readonly :deep(pre) {
+  max-width: 100%;
+  overflow-x: auto;
+
+  margin:
+      var(--space-4)
+      0;
+
+  padding: var(--space-3);
+
+  color: rgb(var(--c-fg));
+
+  background: rgb(var(--c-surface-3) / 0.48);
+  border: 1px solid rgb(var(--c-border) / 0.25);
+  border-radius: var(--radius-md);
+
+  box-shadow: inset 0 1px 3px rgb(var(--c-shadow) / 0.07);
+
+  scrollbar-width: thin;
+  scrollbar-color:
+      rgb(var(--edit-box-accent) / 0.45)
+      transparent;
+}
+
+.chat-message__content--readonly :deep(code) {
+  padding: 0.1rem 0.3rem;
+
+  color: rgb(var(--c-fg-strong));
+
+  background: rgb(var(--c-surface-3) / 0.5);
+  border-radius: var(--radius-xs);
+
+  font-family: var(--font-monospace);
+  font-size: 0.88em;
+}
+
+.chat-message__content--readonly :deep(pre code) {
+  padding: 0;
+
+  color: inherit;
+
+  background: transparent;
+  border-radius: 0;
+}
+
+.chat-message__content--readonly :deep(hr) {
+  height: 1px;
+
+  margin: var(--space-5) 0;
+
+  background:
+      linear-gradient(
+          90deg,
+          transparent,
+          rgb(var(--c-border) / 0.48),
+          transparent
+      );
+
+  border: 0;
+}
+
+.chat-message__content--readonly :deep(table) {
+  width: 100%;
+  max-width: 100%;
+
+  margin: var(--space-4) 0;
+
+  border-collapse: collapse;
+
+  font-size: 0.9rem;
+}
+
+.chat-message__content--readonly :deep(th),
+.chat-message__content--readonly :deep(td) {
+  padding:
+      var(--space-2)
+      var(--space-3);
+
+  border: 1px solid rgb(var(--c-border) / 0.3);
+
+  text-align: left;
+  vertical-align: top;
+}
+
+.chat-message__content--readonly :deep(th) {
+  color: rgb(var(--c-fg-strong));
+
+  background: rgb(var(--c-surface-2) / 0.55);
+
+  font-weight: 750;
+}
+
+.chat-message__content--readonly :deep(img) {
+  height: auto;
+  max-width: 100%;
+
+  margin: var(--space-4) auto;
+
+  border-radius: var(--radius-md);
+
+  box-shadow: 0 5px 18px rgb(var(--c-shadow) / 0.1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Responsive                                                                 */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .chat-message__header-row {
+    flex-direction: column;
+  }
+
+  .chat-message__actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .chat-message__context {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-message__actions {
+    justify-content: flex-start;
+  }
+
+  .chat-message__response-selector {
+    margin-right: auto;
+  }
+
+  .chat-message__content {
+    padding: var(--space-3);
+  }
+
+  .chat-message__context-group {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-message__response-button,
+  .chat-message__context-button,
+  .chat-message__content--editor {
+    transition: none;
+  }
 }
 </style>

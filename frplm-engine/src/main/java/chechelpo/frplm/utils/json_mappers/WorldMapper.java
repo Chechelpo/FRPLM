@@ -5,19 +5,15 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
-import chechelpo.frplm.exceptions.Severity;
-import chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
+import chechelpo.frplm.domain.world.region.RegionService;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import chechelpo.frplm.utils.json_mappers.orders.NewEdgeOrder;
 import chechelpo.frplm.utils.json_mappers.orders.NewWorldOrder;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static chechelpo.frplm.jooq.generated.Tables.*;
@@ -30,20 +26,27 @@ public class WorldMapper {
     private final LorebookService lorebookService;
     private final LorebookMapper lorebookExporter;
     private final EdgeService edgeService;
+    private final RegionService regionService;
+    private final RegionMapper regionMapper;
+    private final EdgeMapper edgeMapper;
 
-    public WorldMapper(LocationsService locationsService, LocationMapper locationExporter, LorebookService lorebookService, LorebookMapper lorebookExporter, EdgeService edgeService) {
+    public WorldMapper(LocationsService locationsService, LocationMapper locationExporter, LorebookService lorebookService, LorebookMapper lorebookExporter, EdgeService edgeService, RegionService regionService, RegionMapper regionMapper, EdgeMapper edgeMapper) {
         this.locationsService = locationsService;
         this.locationMapper = locationExporter;
         this.lorebookService = lorebookService;
         this.lorebookExporter = lorebookExporter;
         this.edgeService = edgeService;
+        this.regionService = regionService;
+        this.regionMapper = regionMapper;
+        this.edgeMapper = edgeMapper;
     }
 
     private record WorldJson(
             String name,
             JsonNode lorebook,
+            List<JsonNode> regions,
             List<JsonNode> locations,
-            List<NewEdgeOrder> neighbours
+            List<JsonNode> edges
     ) {}
 
     public JsonNode jsonFrom(@NonNull WorldsRecord record) {
@@ -53,44 +56,23 @@ public class WorldMapper {
         return MAPPER.valueToTree(new WorldJson(
                 record.getName(),
                 lorebookFrom(record),
+                regionService.getMatching(EntityKey.of(REGION.WORLD_ID, record.getId())).stream()
+                        .map(regionMapper::toJson)
+                        .toList(),
                 locationsOfWorld.stream()
                         .map(locationMapper::jsonFrom)
                         .toList(),
-                fetchNeighbours(locationsOfWorld)
+                edgeService.getMatching(EntityKey.of(LOCATION_EDGES.WORLD_ID, record.getId())).stream()
+                        .map(edgeMapper::fromRecord)
+                        .toList()
         ));
-    }
-
-    List<NewEdgeOrder> fetchNeighbours(@NonNull List<LocationsRecord> records) {
-        List<NewEdgeOrder> result = new ArrayList<>(records.size());
-
-        for (LocationsRecord record : records){
-            List<LocationsRecord> neighbours = edgeService.getNeighboursOf(record);
-
-            for (LocationsRecord neighbour : neighbours){
-                LocationNeighborsRecord edgeInfo = edgeService.find(EntityKey.<LocationNeighborsRecord>builder()
-                                .set(LOCATION_NEIGHBORS.WORLD_ID, record.getWorldId())
-                                .set(LOCATION_NEIGHBORS.LOCATION1_ID, record.getId())
-                                .set(LOCATION_NEIGHBORS.LOCATION2_ID, neighbour.getId())
-                                .build()
-                ).orElseThrow(() -> new UnexpectedException("Couldn't find edge", Severity.SYSTEM));
-                result.add(new NewEdgeOrder(
-                        record.getName(),
-                        neighbour.getName(),
-                        edgeInfo.getEdgedescription() == null ? "" : edgeInfo.getEdgedescription(),
-                        edgeInfo.getTravelcost()
-                ));
-            }
-        }
-
-        return result;
     }
 
     JsonNode lorebookFrom(WorldsRecord record) {
         return lorebookExporter.jsonFrom(lorebookService.getLorebookOf(record));
     }
 
-
-    public NewWorldOrder orderFrom(JsonNode node){
+    public NewWorldOrder orderFrom(JsonNode node) {
         WorldJson json = MAPPER.treeToValue(node, WorldJson.class);
 
         return new NewWorldOrder(
@@ -101,7 +83,12 @@ public class WorldMapper {
                 json.locations.stream()
                         .map(locationMapper::orderFrom)
                         .toList(),
-                json.neighbours
+                json.regions.stream()
+                        .map(regionMapper::fromJson)
+                        .toList(),
+                json.edges.stream()
+                        .map(edgeMapper::fromJSON)
+                        .toList()
         );
     }
 }

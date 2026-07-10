@@ -77,11 +77,6 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     public final TableField<PromptTemplateRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(300).nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
-     */
-    public final TableField<PromptTemplateRecord, Integer> MAX_TOKENS = createField(DSL.name("MAX_TOKENS"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("8192"), SQLDataType.INTEGER)), this, "");
-
-    /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
      */
     public final TableField<PromptTemplateRecord, Boolean> STREAMING = createField(DSL.name("STREAMING"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
@@ -125,6 +120,21 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
      * The column <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
      */
     public final TableField<PromptTemplateRecord, Short> REASONING_EFFORT = createField(DSL.name("REASONING_EFFORT"), SQLDataType.SMALLINT.nullable(false), this, "");
+
+    /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
+     */
+    public final TableField<PromptTemplateRecord, Integer> MAX_TOKENS = createField(DSL.name("MAX_TOKENS"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("8192"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.LOREBOOKS_BUDGET</code>.
+     */
+    public final TableField<PromptTemplateRecord, Float> LOREBOOKS_BUDGET = createField(DSL.name("LOREBOOKS_BUDGET"), SQLDataType.REAL.nullable(false).defaultValue(DSL.field(DSL.raw("0.3"), SQLDataType.REAL)), this, "");
+
+    /**
+     * The column <code>PUBLIC.PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET</code>.
+     */
+    public final TableField<PromptTemplateRecord, Float> CHAT_HISTORY_BUDGET = createField(DSL.name("CHAT_HISTORY_BUDGET"), SQLDataType.REAL.nullable(false).defaultValue(DSL.field(DSL.raw("0.4"), SQLDataType.REAL)), this, "");
 
     /**
      * The column <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
@@ -260,6 +270,8 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
     @Override
     public List<Check<PromptTemplateRecord>> getChecks() {
         return Arrays.asList(
+            Internal.createCheck(this, DSL.name("CHK_HISTORY_BUDGET"), "\"CHAT_HISTORY_BUDGET\" BETWEEN 0.0 AND 1.0", true),
+            Internal.createCheck(this, DSL.name("CHK_LOREBOOK_BUDGET"), "\"LOREBOOKS_BUDGET\" BETWEEN 0.0 AND 1.0", true),
             Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_FREQUENCY_PENALTY"), "(\"FREQUENCY_PENALTY\" >= CAST(-2.0 AS DOUBLE PRECISION))\n    AND (\"FREQUENCY_PENALTY\" <= CAST(2.0 AS DOUBLE PRECISION))", true),
             Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_MAX_TOKENS"), "\"MAX_TOKENS\" > 0", true),
             Internal.createCheck(this, DSL.name("CHK_PROMPT_TEMPLATE_NEXT_SECTION_ID"), "\"NEXT_SECTION_ID\" >= 0", true),

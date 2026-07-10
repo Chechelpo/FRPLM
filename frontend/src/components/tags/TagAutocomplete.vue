@@ -41,7 +41,7 @@ import { computed, onMounted, ref } from 'vue'
 import { Tag, TagData, TagKey } from '@/domain/Tag'
 import { EntityTypes } from '@/domain/EntityTypes'
 import AutoCompleteBox from '@/components/utils/autocomplete/AutoCompleteBox.vue'
-import {createEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {createEntity, fetch_all} from "@/core/ABSEntity";
 
 const model = defineModel<Tag[]>({
   default: () => []

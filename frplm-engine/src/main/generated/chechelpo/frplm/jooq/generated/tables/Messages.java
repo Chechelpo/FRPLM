@@ -185,12 +185,12 @@ public class Messages extends TableImpl<MessagesRecord> {
 
     @Override
     public UniqueKey<MessagesRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_131A;
+        return Keys.PK_MESSAGES;
     }
 
     @Override
     public List<ForeignKey<MessagesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_131, Keys.CONSTRAINT_131AF);
+        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_131, Keys.FK_MESSAGE_LOCATION);
     }
 
     private transient SessionsPath _sessions;
@@ -224,35 +224,9 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, Keys.CONSTRAINT_131AF, null);
+            _locations = new LocationsPath(this, Keys.FK_MESSAGE_LOCATION, null);
 
         return _locations;
-    }
-
-    private transient ResponsesPath _responses;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
-     * table
-     */
-    public ResponsesPath responses() {
-        if (_responses == null)
-            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_314384.getInverseKey());
-
-        return _responses;
-    }
-
-    private transient ExtrasPath _extras;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
-     * table
-     */
-    public ExtrasPath extras() {
-        if (_extras == null)
-            _extras = new ExtrasPath(this, null, Keys.CONSTRAINT_7ABDE.getInverseKey());
-
-        return _extras;
     }
 
     private transient CurrentLocationsPath _currentLocations;
@@ -263,9 +237,22 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public CurrentLocationsPath currentLocations() {
         if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5AF8F.getInverseKey());
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_MESSAGE.getInverseKey());
 
         return _currentLocations;
+    }
+
+    private transient ExtrasPath _extras;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
+     * table
+     */
+    public ExtrasPath extras() {
+        if (_extras == null)
+            _extras = new ExtrasPath(this, null, Keys.FK_EXTRAS_MESSAGE.getInverseKey());
+
+        return _extras;
     }
 
     private transient MovementsPath _movements;
@@ -276,9 +263,22 @@ public class Messages extends TableImpl<MessagesRecord> {
      */
     public MovementsPath movements() {
         if (_movements == null)
-            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686258.getInverseKey());
+            _movements = new MovementsPath(this, null, Keys.FK_MOVEMENTS_MESSAGES.getInverseKey());
 
         return _movements;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_MESSAGES.getInverseKey());
+
+        return _responses;
     }
 
     /**

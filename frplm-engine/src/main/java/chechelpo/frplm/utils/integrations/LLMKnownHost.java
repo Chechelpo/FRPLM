@@ -1,8 +1,8 @@
 package chechelpo.frplm.utils.integrations;
 
-import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
-import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
+
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
 
 import java.util.Optional;
 

@@ -10,7 +10,7 @@ import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
 import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
 import NumberInput from "@/components/utils/primitiveEditors/NumberInput.vue";
-import {deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {deleteEntity, fetch_all} from "@/core/ABSEntity";
 
 const model = defineModel<Character>({ required: true });
 

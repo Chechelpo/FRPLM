@@ -78,15 +78,27 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeDelete(EntityKey<RegionRecord> id, long operationID) {
         RegionRecord toDelete = this.find(id).orElseThrow(() -> new EntityNotFound("Not found with id " + id, Severity.USER));
-
         if (!getDepthOneChildrenOf(toDelete).isEmpty())
             throw new UnsupportedAction("Cannot delete a region when it has children", Severity.EXPECTED);
 
         super.beforeDelete(id, operationID);
     }
 
+    @Override
+    protected void afterSuccessfulDelete(EntityKey<RegionRecord> id, long operationID, @NonNull RegionRecord record) {
+        boolean lorebookDeleted = lorebookService.delete(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()));
+        if (lorebookDeleted)
+            log.error("Could not delete associated lorebook when deleting \n {}", record);
+
+        super.afterSuccessfulDelete(id, operationID, record);
+    }
+
     public List<RegionRecord> getDepthOneChildrenOf(RegionRecord record){
         return store.getDepthOneChildrenOf(record);
+    }
+
+    public List<RegionRecord> getRoots(int worldId){
+        return store.getRoots(worldId);
     }
 
     private static EntityKey<RegionRecord> getKey(int worldId, int fromRegionId) {

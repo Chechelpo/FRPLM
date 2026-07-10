@@ -15,6 +15,7 @@ import chechelpo.frplm.domain.prompts.template.TemplateService;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
+import chechelpo.frplm.domain.world.region.RegionService;
 import org.jetbrains.annotations.NotNull;
 
 public record ExtensionContext(
@@ -26,6 +27,7 @@ public record ExtensionContext(
         @NotNull StartingLocationsService startingLocations,
 
         @NotNull WorldService worlds,
+        @NotNull RegionService regions,
         @NotNull LocationsService locations,
         @NotNull EdgeService edges,
 

@@ -165,12 +165,12 @@ public class Responses extends TableImpl<ResponsesRecord> {
 
     @Override
     public UniqueKey<ResponsesRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_3143;
+        return Keys.PK_RESPONSES;
     }
 
     @Override
     public List<ForeignKey<ResponsesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_31, Keys.CONSTRAINT_314, Keys.CONSTRAINT_31438, Keys.CONSTRAINT_314384);
+        return Arrays.asList(Keys.CONSTRAINT_31, Keys.CONSTRAINT_314, Keys.FK_RESPONSES_LOCATIONS, Keys.FK_RESPONSES_MESSAGES);
     }
 
     private transient SessionsPath _sessions;
@@ -204,7 +204,7 @@ public class Responses extends TableImpl<ResponsesRecord> {
      */
     public LocationsPath locations() {
         if (_locations == null)
-            _locations = new LocationsPath(this, Keys.CONSTRAINT_31438, null);
+            _locations = new LocationsPath(this, Keys.FK_RESPONSES_LOCATIONS, null);
 
         return _locations;
     }
@@ -216,7 +216,7 @@ public class Responses extends TableImpl<ResponsesRecord> {
      */
     public MessagesPath messages() {
         if (_messages == null)
-            _messages = new MessagesPath(this, Keys.CONSTRAINT_314384, null);
+            _messages = new MessagesPath(this, Keys.FK_RESPONSES_MESSAGES, null);
 
         return _messages;
     }
@@ -229,7 +229,7 @@ public class Responses extends TableImpl<ResponsesRecord> {
      */
     public ResponseLocationChangesPath responseLocationChanges() {
         if (_responseLocationChanges == null)
-            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_379E.getInverseKey());
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.FK_RESPONSE_LOCATION_CHANGES_RESPONSE.getInverseKey());
 
         return _responseLocationChanges;
     }

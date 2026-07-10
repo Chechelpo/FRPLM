@@ -29,7 +29,7 @@ final class HuggingFaceJsonTokenizer
 
             String filename = resource.getFilename();
             if (filename == null || filename.isBlank()) {
-                filename = "tokenizer.json";
+                filename = "glm.json";
             }
 
             this.temporaryDirectory =

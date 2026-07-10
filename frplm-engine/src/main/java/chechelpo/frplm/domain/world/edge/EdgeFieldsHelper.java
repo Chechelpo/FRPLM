@@ -1,17 +1,18 @@
 package chechelpo.frplm.domain.world.edge;
 
 import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
-import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import chechelpo.frplm.core.entities.fields.FieldInfo;
 import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import org.springframework.stereotype.Component;
 
+import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
+
 @Component
 final class EdgeFieldsHelper extends ABSControllerAwareHelper<
-        LocationNeighborsRecord,
+        LocationEdgesRecord,
         EdgeService,
         EdgeController
         > {
@@ -23,34 +24,8 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
         super(service, controller);
 
         register_field(
-                "location1_id",
-                LocationNeighbors.LOCATION_NEIGHBORS.LOCATION1_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
-                        .require()
-                        .build()
-        );
-        register_field(
-                "location2_id",
-                LocationNeighbors.LOCATION_NEIGHBORS.LOCATION2_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
-                        .require()
-                        .build()
-        );
-        register_field(
-                "world_id",
-                LocationNeighbors.LOCATION_NEIGHBORS.WORLD_ID,
+                "from_id",
+                LOCATION_EDGES.FROM_LOCATION_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(
                                 NumberConstraint.builder(FieldType.INTEGER)
@@ -63,8 +38,36 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
         );
 
         register_field(
-                "description",
-                LocationNeighbors.LOCATION_NEIGHBORS.EDGEDESCRIPTION,
+                "to_id",
+                LOCATION_EDGES.TO_LOCATION_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(
+                                NumberConstraint.builder(FieldType.INTEGER)
+                                        .readOnly()
+                                        .key()
+                                        .build()
+                        )
+                        .require()
+                        .build()
+        );
+
+        register_field(
+                "world_id",
+                LOCATION_EDGES.WORLD_ID,
+                FieldInfo.numberField(FieldType.INTEGER)
+                        .setConstraints(
+                                NumberConstraint.builder(FieldType.INTEGER)
+                                        .readOnly()
+                                        .key()
+                                        .build()
+                        )
+                        .require()
+                        .build()
+        );
+
+        register_field(
+                "edge_description",
+                LOCATION_EDGES.EDGEDESCRIPTION,
                 FieldInfo.stringField()
                         .setConstraints(
                                 StringConstraint.builder()
@@ -74,16 +77,24 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
                         .build()
         );
 
+        register_field(
+                "show_destination_name",
+                LOCATION_EDGES.SHOW_DESTINATION_NAME,
+                FieldInfo.booleanField()
+                        .build()
+        );
 
         register_field(
-                "travel_cost",
-                LocationNeighbors.LOCATION_NEIGHBORS.TRAVELCOST,
-                FieldInfo.numberField(FieldType.LONG)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.LONG)
-                                        .setMin(0L)
-                                        .build()
-                        )
+                "show_destination_description",
+                LOCATION_EDGES.SHOW_DESTINATION_DESCRIPTION,
+                FieldInfo.booleanField()
+                        .build()
+        );
+
+        register_field(
+                "is_traversable",
+                LOCATION_EDGES.TRAVERSABLE,
+                FieldInfo.booleanField()
                         .build()
         );
     }

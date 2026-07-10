@@ -1,17 +1,13 @@
 package chechelpo.frplm.extensions.implementations.session;
 
-import chechelpo.frplm.extensions.api.session.ChatMessage;
-import chechelpo.frplm.extensions.api.utils.DetectedOutlet;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.extensions.implementations.standalone.StandaloneEntity;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionMessage;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
 
 public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> implements ChatMessage {
     private final MessagesRecord record;
@@ -32,15 +28,6 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
         return record.getContent();
     }
 
-    @Override
-    public List<DetectedOutlet> getDetectedOutlets() {
-        return null;
-    }
-
-    @Override
-    public int getMessageNumber() {
-        return record.getTickNum();
-    }
     public @NotNull ChatCompletionMessage asCompletionMessage() {
         ChatCompletionRole role = ChatCompletionRole.fromWireValue(record.getRole());
         return new ChatCompletionMessage(role,null, record.getContent());
@@ -54,5 +41,10 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
     @Override
     public @NotNull ChatCompletionMessage asChatCompletion() {
         return new ChatCompletionMessage(ChatCompletionRole.fromWireValue(record.getRole()),null, record.getContent());
+    }
+
+    @Override
+    public Reference asReference() {
+        return new ChatMessage.Reference(this.record.getSessionId(), this.record.getTickNum());
     }
 }

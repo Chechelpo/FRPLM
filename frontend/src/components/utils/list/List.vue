@@ -3,7 +3,7 @@ import {computed, ref} from "vue";
 
 import SearchBar from "@/components/utils/SearchBar.vue";
 import Card from "@/components/utils/list/Card.vue";
-import {ABSEntity} from "@/frameworks/ABSEntity";
+import {ABSEntity} from "@/core/ABSEntity";
 import {CommonFields} from "@/utils/CommonFields";
 import {DataRecord, KeyRecord} from "@/types/DTOs";
 

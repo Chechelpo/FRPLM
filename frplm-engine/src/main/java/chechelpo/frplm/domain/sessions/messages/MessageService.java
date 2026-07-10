@@ -12,7 +12,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.jooq.generated.tables.records.*;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -53,6 +53,13 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
     public MessagesRecord getLastOf(int sessionID) {
         return store.getLastMessage(sessionID);
+    }
+    public List<MessagesRecord> getLastOf(int sessionId, int number){
+        return store.getLast(sessionId, number);
+    }
+
+    public List<MessagesRecord> getRange(int sessionId, int from, int to){
+        return store.getLast(sessionId, from, to);
     }
 
     @Override

@@ -1,15 +1,43 @@
 package chechelpo.frplm.domain.world.edge;
 
+import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.domain.EntityTypes;
 import chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
+import chechelpo.frplm.domain.world.location.LocationController;
+import chechelpo.frplm.jooq.generated.tables.Locations;
+import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static chechelpo.frplm.domain.EntityTypes.API_BASE;
+import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+
 @RestController
+@Component
 @RequestMapping(EntityTypes.EDGES_URL)
-final class EdgeController extends EntityController<LocationNeighborsRecord, EdgeService> {
-    protected EdgeController(EdgeService service) {
+final class EdgeController extends EntityController<LocationEdgesRecord, EdgeService> {
+    private final LocationController locationController;
+
+    EdgeController(EdgeService service, LocationController locationController) {
         super(service);
+        this.locationController = locationController;
+    }
+
+    @GetMapping("/{worldId}/{locationId}/neighbours")
+    public ResponseEntity<EntityDTO[]> getNeighbours(@PathVariable int locationId, @PathVariable int worldId) {
+        return ResponseEntity.ok(
+                locationController.wrapEntities(
+                        service.neighboursOf(EntityKey.<LocationsRecord>builder()
+                                .set(LOCATIONS.WORLD_ID, worldId)
+                                .set(LOCATIONS.ID, locationId)
+                                .build()
+                        )
+                )
+        );
     }
 }

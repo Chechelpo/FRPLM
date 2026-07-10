@@ -1,11 +1,10 @@
 package chechelpo.frplm.utils.integrations;
 
 import chechelpo.frplm.domain.connection.llm.LLMBackend;
-import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
-import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;

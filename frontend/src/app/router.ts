@@ -12,6 +12,7 @@ import PromptTemplatePicker from "@/components/prompts/PromptTemplatePicker.vue"
 import SessionList from "@/components/session/SessionList.vue";
 
 import { EntityTypes } from "@/domain/EntityTypes";
+import Settings from "@/components/settings/Settings.vue";
 
 export function route_to(type: EntityTypes): string {
     return `/${type}`;
@@ -22,6 +23,11 @@ const routes: RouteRecordRaw[] = [
         path: "/",
         component: SessionList,
         name: "sessions",
+    },
+    {
+        path: "/config",
+        component: Settings,
+        name:"settings"
     },
     {
         path: "/lorebook",

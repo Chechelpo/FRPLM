@@ -2,7 +2,6 @@ package chechelpo.frplm.core.entities.pseudo_services;
 
 import ch.qos.logback.classic.Logger;
 import chechelpo.frplm.domain.EntityTypes;
-import chechelpo.frplm.core.entities.data.QueryObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.*;
@@ -67,15 +66,6 @@ public abstract class EntityStore<R extends TableRecord<R>>
         return ctx.selectFrom(main_table)
                 .where(id.getEqualityConditions())
                 .fetch();
-    }
-
-    public List<R> query(@NotNull QueryObject<R> query){
-        List<R> records = ctx.selectFrom(main_table)
-                .where(query.getConditions())
-                .fetch();
-        log.trace("Query {} \n result: {}", query, records.size());
-
-        return records;
     }
 
     public boolean update(@NotNull EntityKey<R> id, @NotNull EntityDataPayload<R> object) {

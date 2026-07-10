@@ -1,12 +1,15 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
-import chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
-import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
-import chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSnapshot {
     public WorldImpl(WorldsRecord record, ExtensionContext context) {
@@ -18,7 +21,7 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
     }
 
     @Override
-    public Reference reference() {
+    public Reference asReference() {
         return new WorldSnapshot.Reference(this.record.getId());
     }
 
@@ -44,10 +47,17 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
     @Override
     public LocationSnapshot @NotNull [] getNeighboursOf(@NotNull LocationSnapshot location){
         LocationImpl loc = requireImpl(location);
-        return context.edges().getNeighboursOf(loc.getRecord())
+        return context.edges().neighboursOf(loc.getRecord())
                 .stream()
                 .map(record -> new LocationImpl(record, context))
                 .toArray(LocationImpl[]::new);
+    }
+
+    @Override
+    public List<RegionSnapshot> getRootRegions() {
+        return context.regions().getRoots(this.record.getId()).stream()
+                .map(record -> (RegionSnapshot) new RegionImpl(record, context))
+                .toList();
     }
 
     @Override

@@ -21,7 +21,7 @@ final class SecretController extends EntityController<ApiKeysRecord, SecretServi
 
     private record NewApiKeyRequest(String key) {}
     @PostMapping(  "/new/{host_id}")
-    ResponseEntity<EntityDTO> createNewKey(@PathVariable("host_id") Integer host_id, @RequestBody(required = true) NewApiKeyRequest key){
+    ResponseEntity<EntityDTO> createNewKey(@PathVariable int host_id, @RequestBody NewApiKeyRequest key){
         return ResponseEntity.ok(
                 wrapEntity(
                         this.service.registerNewKey(host_id, key.key)

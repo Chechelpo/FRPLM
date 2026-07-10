@@ -1,10 +1,9 @@
 package chechelpo.frplm.extensions;
 
-import chechelpo.frplm.extensions.api.EngineRepository;
-import chechelpo.frplm.extensions.api.standalone.*;
-import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
 import chechelpo.frplm.extensions.implementations.standalone.*;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.extensions.api.EngineRepository;
+import io.github.chechelpo.frplm.extensions.api.standalone.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -65,7 +64,8 @@ final class ExtensionRepository implements EngineRepository {
     @Override
     public @NotNull List<ConnectionSnapshot> getConnections() {
         return context.connections().getAll().stream()
-                .map(record -> new ConnectionImpl(record, context)).collect(Collectors.toUnmodifiableList());
+                .map(record -> (ConnectionSnapshot) new ConnectionImpl(record, context))
+                .toList();
     }
 
     @Override
@@ -76,7 +76,7 @@ final class ExtensionRepository implements EngineRepository {
     @Override
     public Optional<ConnectionSnapshot> getConnection(ConnectionSnapshot.Reference reference) {
         return context.connections().find(EntityKey.of(LLM_CONNECTION.ID, reference.id()))
-                .map(record -> new ConnectionImpl(record, context));
+                .map(record -> (ConnectionSnapshot) new ConnectionImpl(record, context));
     }
 
     @Override
@@ -114,7 +114,7 @@ final class ExtensionRepository implements EngineRepository {
     @Override
     public @Unmodifiable @NotNull List<PromptSnapshot> getPrompts() {
         return context.templates().getAll().stream()
-                .map(record -> new PromptImpl(record, context))
+                .map(record -> (PromptSnapshot) new PromptImpl(record, context))
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -128,6 +128,6 @@ final class ExtensionRepository implements EngineRepository {
     public Optional<PromptSnapshot> getPrompt(PromptSnapshot.@NotNull Reference reference) {
         return context.templates().find(
                 EntityKey.of(PROMPT_TEMPLATE.ID, Integer.valueOf(reference.id()).shortValue())
-        ).map(record -> new PromptImpl(record, context));
+        ).map(record -> (PromptSnapshot) new PromptImpl(record, context));
     }
 }

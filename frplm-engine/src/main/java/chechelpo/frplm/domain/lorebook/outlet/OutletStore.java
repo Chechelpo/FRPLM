@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
+import org.jooq.Record2;
+import org.jooq.Result;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
@@ -25,6 +27,13 @@ final class OutletStore extends EntityStore<OutletRecord> {
                 .fetchOne(OUTLET.ID);
     }
 
+    public Result<Record2<Integer, String>> getWithIds(IntSet ids){
+        return ctx.select(OUTLET.ID, OUTLET.OUTLET_)
+                .from(main_table)
+                .where(OUTLET.ID.in(ids))
+                .fetch();
+    }
+
     public boolean existsName(@NotNull String name) {
         return ctx.fetchExists(
                 ctx.selectOne()
@@ -39,16 +48,14 @@ final class OutletStore extends EntityStore<OutletRecord> {
                 .fetchOne(OUTLET.OUTLET_);
     }
 
-    public IntObjectPair<String> @NotNull [] getOutletsOfLorebooks(IntSet lorebookIDs){
-        return ctx.selectDistinct(OUTLET.OUTLET_, OUTLET.ID)
+    public Result<Record2<Integer, String>> getOutletsOfLorebooks(IntSet lorebookIDs){
+        return ctx.selectDistinct(OUTLET.ID, OUTLET.OUTLET_)
                 .from(OUTLET)
                 .join(ENTRY)
                 .on(
                         ENTRY.OUTLET.eq(OUTLET.ID)
                                 .and(ENTRY.LOREBOOK_ID.in(lorebookIDs))
                 )
-                .stream()
-                .map(result -> IntObjectPair.of(result.getValue(OUTLET.ID), result.getValue(OUTLET.OUTLET_)))
-                .toArray(IntObjectPair[]::new);
+                .fetch();
     }
 }

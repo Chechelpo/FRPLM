@@ -1,4 +1,12 @@
-import {ABSEntity, createEntity, deleteEntity, fetchApi, fetchMatching, fetchOne} from "@/frameworks/ABSEntity";
+import {
+    ABSEntity,
+    createEntity,
+    deleteEntity,
+    fetchApi,
+    fetchFromReference,
+    fetchMatching,
+    fetchOne
+} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {Location, LocationData, LocationKey, World, WorldData, WorldKey} from "@/domain/World";
 import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
@@ -6,6 +14,7 @@ import {DTO, PromptDTO} from "@/types/DTOs";
 import {PromptTemplate, PromptTemplateData, PromptTemplateKey} from "@/domain/Prompts";
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
 import {API_BASE} from "@/config";
+import {parseNumberKey} from "@/utils/ReferenceCodec";
 
 export type SessionKey = {id:number};
 export type SessionData = {
@@ -16,8 +25,20 @@ export type SessionData = {
     user_id:number
 };
 export class Session extends ABSEntity<SessionKey,SessionData>{
+    private static readonly REFERENCE_KEY_ORDER: readonly (keyof SessionKey & string)[] = ['id'] as const;
+
     getEntityType(): EntityTypes {
         return EntityTypes.SESSIONS;
+    }
+
+    protected getReferenceKeyOrder(): readonly (keyof SessionKey & string)[] {
+        return Session.REFERENCE_KEY_ORDER;
+    }
+
+    public static async getFromReference(reference:string) : Promise<Session> {
+        return await fetchFromReference<SessionKey, SessionData, Session>(
+            reference, EntityTypes.SESSIONS, this.REFERENCE_KEY_ORDER, {id:parseNumberKey}, Session
+        )
     }
 
     public async getWorld() : Promise<World> {
@@ -88,7 +109,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         console.debug(`Asking for a new prompt for session ${this}`)
 
         return await fetchApi(
-            `${API_BASE}/engine/prompt/${this.get('id')}`,
+            `${API_BASE}/prompts/new/${this.get('id')}`,
             {
                 method:'GET'
             }
@@ -144,8 +165,14 @@ export type MessageData = {
     active_response:number,
 }
 export class Message extends ABSEntity<MessagesKey, MessageData>{
+    private static readonly REFERENCE_KEY_ORDER: readonly (keyof MessagesKey & string)[] = ['session_id', 'tick_num'] as const;
+
     override getEntityType(): EntityTypes {
         return EntityTypes.MESSAGES;
+    }
+
+    protected getReferenceKeyOrder(): readonly (keyof MessagesKey & string)[] {
+        return Message.REFERENCE_KEY_ORDER;
     }
 
     async update<F extends keyof MessageData>(field: F, value: MessageData[F]): Promise<boolean> {

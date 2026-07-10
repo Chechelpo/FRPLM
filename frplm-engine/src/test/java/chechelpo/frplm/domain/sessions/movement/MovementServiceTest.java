@@ -10,7 +10,7 @@ import chechelpo.frplm.domain.sessions.messages.MessageTestContext;
 import chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.jooq.generated.tables.records.*;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

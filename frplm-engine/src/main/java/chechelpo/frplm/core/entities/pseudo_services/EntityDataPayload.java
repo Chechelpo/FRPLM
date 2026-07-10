@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -134,5 +135,34 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         public @NotNull EntityDataPayload<Rec> build() {
             return new EntityDataPayload<>(assignments);
         }
+    }
+
+
+    public String prettyPrint() {
+        if (assignments.isEmpty()) {
+            return "EntityDataPayload {}";
+        }
+
+        StringBuilder out = new StringBuilder("EntityDataPayload {\n");
+
+        assignments.forEach((key, value) -> out
+                .append("  ")
+                .append(key.getUnqualifiedName())
+                .append(" = ")
+                .append(formatValue(value))
+                .append('\n'));
+
+        return out.append('}').toString();
+    }
+
+
+    private static String formatValue(Object value) {
+        return switch (value) {
+            case null -> "null";
+            case CharSequence charSequence -> "\"" + value + "\"";
+            case Character c -> "'" + value + "'";
+            default -> String.valueOf(value);
+        };
+
     }
 }

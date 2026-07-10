@@ -7,7 +7,7 @@ import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.interfaces.DBReload;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;

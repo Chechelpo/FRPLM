@@ -1,7 +1,8 @@
-import {ABSEntity, createEntity, fetch_all, fetchApi, fetchMatching} from "@/frameworks/ABSEntity";
+import {ABSEntity, createEntity, fetch_all, fetchApi, fetchFromReference, fetchMatching} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {ChatCompletionRole} from "@/types/ChatCompletions";
 import {API_BASE} from "@/config";
+import {parseNumberKey} from "@/utils/ReferenceCodec";
 
 
 export type REASONING_EFFORT_VALUE = {id:number, name:string}
@@ -39,10 +40,22 @@ export type PromptTemplateData = {
 
 export class PromptTemplate extends ABSEntity<PromptTemplateKey, PromptTemplateData>{
     private sections: PromptSection[] | null = null;
+    private static readonly REFERENCE_KEY_ORDER : readonly (keyof PromptTemplateKey & string)[] = ['id'];
 
     getEntityType(): EntityTypes {
         return EntityTypes.TEMPLATES;
     }
+
+    protected getReferenceKeyOrder(): readonly (keyof PromptTemplateKey & string)[] {
+        return PromptTemplate.REFERENCE_KEY_ORDER;
+    }
+
+    public static async getFromReference(reference:string) : Promise<PromptTemplate> {
+        return await fetchFromReference<PromptTemplateKey, PromptTemplateData, PromptTemplate>(
+            reference, EntityTypes.TEMPLATES, this.REFERENCE_KEY_ORDER, {id:parseNumberKey}, PromptTemplate
+        );
+    }
+
     public async getSections(): Promise<PromptSection[]> {
         return await fetchMatching<PromptSectionKey, PromptSectionData, PromptSection>(
             {
@@ -77,8 +90,21 @@ export class PromptTemplate extends ABSEntity<PromptTemplateKey, PromptTemplateD
 export type PromptSectionKey = {prompt_id:number, section_id:number};
 export type PromptSectionData = {name:string, active:boolean, position:number, role:ChatCompletionRole, content:string};
 export class PromptSection extends ABSEntity<PromptSectionKey, PromptSectionData>{
+    private static readonly REFERENCE_KEY_ORDER: readonly (keyof PromptSectionKey & string)[] = ['prompt_id', 'section_id'] as const;
+
     getEntityType(): EntityTypes {
         return EntityTypes.SECTIONS;
+    }
+
+    protected getReferenceKeyOrder(): readonly (keyof PromptSectionKey & string)[] {
+        return PromptSection.REFERENCE_KEY_ORDER;
+    }
+
+    public static async fetchFromReference(reference:string) : Promise<PromptSection> {
+        return await fetchFromReference<PromptSectionKey, PromptSectionData, PromptSection>(
+            reference, EntityTypes.SECTIONS, PromptSection.REFERENCE_KEY_ORDER, {prompt_id:parseNumberKey, section_id:parseNumberKey},
+            PromptSection
+        )
     }
 
     public static async exchange(parent:PromptTemplate, one:PromptSection, two:PromptSection): Promise<boolean> {

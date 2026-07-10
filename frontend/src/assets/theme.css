@@ -1,15 +1,214 @@
+/*
+ * Global design tokens.
+ *
+ * Colors use RGB triplets so they remain compatible with:
+ *
+ *   rgb(var(--c-accent))
+ *   rgb(var(--c-accent) / 0.25)
+ *
+ * and Tailwind opacity utilities.
+ */
 :root {
-    /* Use RGB triplets so Tailwind can apply opacity */
-    --c-surface: 28 25 23;        /* stone-900-ish */
-    --c-surface-2: 41 37 36;      /* stone-800-ish */
-    --c-border: 41 37 36;
-    --c-fg: 231 229 228;          /* stone-200-ish */
-    --c-muted: 168 162 158;       /* stone-400-ish */
+    --z-popover: 20000;
 
-    --c-accent: 245 158 11;       /* amber-500-ish */
-    --c-accent-2: 180 83 9;       /* amber-700-ish */
+    --z-modal: 30000;
+    --z-modal-popover: 30100;
 
-    /* Interaction tokens */
-    --c-surface-hover: 49 46 43;  /* hover surface */
-    --c-border-hover: 251 191 36; /* amber-400-ish */
+    --z-nested-modal: 31000;
+    --z-nested-modal-popover: 31100;
+    --z-critical-modal: 50000;
+
+    --z-notification: 40000;
+}
+:root,
+[data-theme="warm"] {
+    color-scheme: light;
+
+    /* ------------------------------------------------------------------------
+     * Base surfaces
+     * --------------------------------------------------------------------- */
+
+    --c-page: 223 174 124;
+    --c-page-secondary: 184 143 90;
+
+    --c-surface: 249 239 226;
+    --c-surface-2: 244 222 194;
+    --c-surface-3: 235 204 166;
+    --c-surface-raised: 255 250 244;
+    --c-surface-hover: 255 246 230;
+    --c-surface-active: 247 226 190;
+
+    /* ------------------------------------------------------------------------
+     * Text
+     * --------------------------------------------------------------------- */
+
+    --c-fg: 57 43 30;
+    --c-fg-strong: 48 34 23;
+    --c-muted: 107 81 56;
+    --c-muted-soft: rgb(137 106 76);
+    --c-on-accent: 70 49 8;
+    --c-on-danger: 255 255 255;
+
+    /* ------------------------------------------------------------------------
+     * Borders
+     * --------------------------------------------------------------------- */
+
+    --c-border: 177 133 85;
+    --c-border-subtle: 107 81 56;
+    --c-border-strong: 132 94 48;
+    --c-border-hover: 175 130 24;
+
+    /* ------------------------------------------------------------------------
+     * Brand and interaction colors
+     * --------------------------------------------------------------------- */
+
+    --c-primary: 175 130 24;
+    --c-primary-strong: 128 91 14;
+
+    --c-accent: 255 198 0;
+    --c-accent-2: 184 143 0;
+    --c-accent-soft: 255 225 128;
+
+    --c-danger: 220 38 38;
+    --c-danger-strong: 153 27 27;
+    --c-danger-soft: 254 226 226;
+
+    --c-success: 22 163 74;
+    --c-success-strong: 21 128 61;
+    --c-success-soft: 220 252 231;
+
+    --c-warning: 217 119 6;
+    --c-warning-strong: 146 64 14;
+    --c-warning-soft: 254 243 199;
+
+    --c-info: 37 99 235;
+    --c-info-strong: 30 64 175;
+    --c-info-soft: 219 234 254;
+
+    /* ------------------------------------------------------------------------
+     * Shadows
+     * --------------------------------------------------------------------- */
+
+    --c-shadow: 67 39 16;
+    --c-shadow-strong: 48 27 12;
+
+    /* ------------------------------------------------------------------------
+     * Typography
+     * --------------------------------------------------------------------- */
+
+    --font-primary:
+            "Manrope",
+            "Avenir Next",
+            Avenir,
+            Arial,
+            sans-serif;
+
+    --font-monospace:
+            "JetBrains Mono",
+            "Cascadia Code",
+            Consolas,
+            monospace;
+
+    /* ------------------------------------------------------------------------
+     * Geometry
+     * --------------------------------------------------------------------- */
+
+    --radius-xs: 0.3rem;
+    --radius-sm: 0.5rem;
+    --radius-md: 0.75rem;
+    --radius-lg: 1rem;
+    --radius-xl: 1.25rem;
+    --radius-round: 999px;
+
+    /* ------------------------------------------------------------------------
+     * Spacing
+     * --------------------------------------------------------------------- */
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+
+    /* ------------------------------------------------------------------------
+     * Motion
+     * --------------------------------------------------------------------- */
+
+    --duration-fast: 120ms;
+    --duration-normal: 180ms;
+    --duration-slow: 260ms;
+
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized: cubic-bezier(0.2, 0, 0, 1.2);
+
+    /* ------------------------------------------------------------------------
+     * Focus
+     * --------------------------------------------------------------------- */
+
+    --focus-ring-width: 3px;
+    --focus-ring-color: 255 198 0;
+}
+
+/*
+ * Optional dark theme.
+ *
+ * Activate it with:
+ *
+ *   <html data-theme="dark">
+ */
+
+[data-theme="dark"] {
+    color-scheme: dark;
+
+    --c-page: 28 25 23;
+    --c-page-secondary: 41 37 36;
+
+    --c-surface: 41 37 36;
+    --c-surface-2: 49 46 43;
+    --c-surface-3: 68 64 60;
+    --c-surface-raised: 55 50 47;
+    --c-surface-hover: 68 64 60;
+    --c-surface-active: 79 70 61;
+
+    --c-fg: 231 229 228;
+    --c-fg-strong: 250 250 249;
+    --c-muted: 168 162 158;
+    --c-muted-soft: 120 113 108;
+    --c-on-accent: 45 31 3;
+    --c-on-danger: 255 255 255;
+
+    --c-border: 87 83 78;
+    --c-border-subtle: 120 113 108;
+    --c-border-strong: 168 162 158;
+    --c-border-hover: 251 191 36;
+
+    --c-primary: 245 158 11;
+    --c-primary-strong: 217 119 6;
+
+    --c-accent: 251 191 36;
+    --c-accent-2: 180 83 9;
+    --c-accent-soft: 120 78 12;
+
+    --c-danger: 239 68 68;
+    --c-danger-strong: 220 38 38;
+    --c-danger-soft: 69 10 10;
+
+    --c-success: 74 222 128;
+    --c-success-strong: 34 197 94;
+    --c-success-soft: 5 46 22;
+
+    --c-warning: 251 191 36;
+    --c-warning-strong: 245 158 11;
+    --c-warning-soft: 69 26 3;
+
+    --c-info: 96 165 250;
+    --c-info-strong: 59 130 246;
+    --c-info-soft: 23 37 84;
+
+    --c-shadow: 0 0 0;
+    --c-shadow-strong: 0 0 0;
+
+    --focus-ring-color: 251 191 36;
 }

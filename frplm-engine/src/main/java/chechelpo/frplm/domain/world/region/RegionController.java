@@ -6,10 +6,7 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static chechelpo.frplm.domain.EntityTypes.REGIONS_URL;
 import static chechelpo.frplm.jooq.generated.Tables.REGION;
@@ -33,6 +30,15 @@ final class RegionController extends EntityController<RegionRecord, RegionServic
         return ResponseEntity.ok(
                 wrapEntities(
                         service.getDepthOneChildrenOf(parent)
+                )
+        );
+    }
+
+    @GetMapping("/{worldId}/roots")
+    public ResponseEntity<EntityDTO[]> getRootRegions(@PathVariable int worldId) {
+        return ResponseEntity.ok(
+                wrapEntities(
+                        service.getRoots(worldId)
                 )
         );
     }

@@ -1,7 +1,6 @@
 package chechelpo.frplm.domain.world.region;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
@@ -42,10 +41,11 @@ class RegionServiceTest {
 
         List<RegionRecord> createdRegions = new ArrayList<>(regionNum);
         for (int i = 0; i < regionNum; i++) {
-            createdRegions.add(testContext.service.createAndGet(
-                    EntityDataPayload.<RegionRecord>builder()
+            createdRegions.add(
+                    testContext.service.createAndGet( //This throws cause of smthn on full test runs. not quite sure why.
+                    EntityDataPayload.<RegionRecord>builder()    // When you test it in isolation, it's fine
                             .set(REGION.WORLD_ID, worldId)
-                            .set(REGION.NAME, "region " + i)
+                            .set(REGION.NAME, "Region number " + i)
                             .build()
             ));
         }

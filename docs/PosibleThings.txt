@@ -1,0 +1,633 @@
+d(A,B)=depth(A)+depth(B)−2depth(LCA(A,B))
+
+Correct. The relevant boundary is not **player-visible versus hidden UI data**; it is:
+
+> **Information available to the LLM versus information absent from the LLM context.**
+
+Since the LLM can potentially narrate anything it knows, all context supplied to it must be treated as potentially player-visible.
+
+That changes the design materially.
+
+## 1. The real operation is context projection
+
+The system has a complete world database, but for every turn it produces a restricted projection:
+
+[
+C = P(W, L_{\text{current}}, \text{context policy})
+]
+
+Where:
+
+* (W) is the complete world state.
+* (L_{\text{current}}) is the character’s current location.
+* (P) is the context-projection function.
+* (C) is the only world information supplied to the LLM.
+
+The LLM should not query arbitrary world state. It should receive only the result of (P).
+
+So your fields such as:
+
+```sql
+share_location_names
+share_descriptions
+```
+
+are conceptually reasonable. They control what crosses the database-to-model boundary.
+
+---
+
+## 2. Anything shared with the LLM is potentially revealable
+
+Even when instructed not to reveal something, an LLM may:
+
+* mention it accidentally;
+* use it indirectly;
+* foreshadow it;
+* make an NPC behave according to it;
+* reveal it under prompt pressure;
+* incorporate it into narration.
+
+Therefore:
+
+> Do not place genuinely secret information in the context and rely on instructions to suppress it.
+
+This means that sharing the full `LOCATIONS.description` of neighboring locations is generally unsafe unless that description contains only information the model may freely reveal.
+
+I would separate descriptions by epistemic purpose:
+
+```sql
+ALTER TABLE LOCATIONS
+    ADD COLUMN nearby_description TEXT NOT NULL DEFAULT '',
+    ADD COLUMN internal_description TEXT NOT NULL DEFAULT '';
+```
+
+For example:
+
+```text
+description
+    Information used when the location is current.
+
+nearby_description
+    Information the LLM may know while narrating from an adjacent location.
+
+internal_description
+    Author/engine information never supplied directly to the narrator.
+```
+
+You may not need `internal_description` if lorebook entries already provide that layer.
+
+---
+
+# 3. Region policy can govern LLM context expansion
+
+Your tree-depth idea becomes more appropriate under this interpretation.
+
+A region can specify how much information the LLM receives about:
+
+1. The region itself.
+2. Descendant regions.
+3. Locations belonging to those regions.
+
+For example:
+
+```sql
+CREATE TYPE context_detail AS ENUM
+(
+    'NONE',
+    'EXISTS',
+    'NAME',
+    'SUMMARY',
+    'FULL'
+);
+```
+
+Conceptually, a region could contain:
+
+```sql
+share_region_detail       context_detail NOT NULL DEFAULT 'NAME',
+share_location_detail     context_detail NOT NULL DEFAULT 'NAME',
+share_descendant_depth    INT,
+```
+
+The semantics could be:
+
+```text
+share_region_detail
+    How much of this region is available when it is included.
+
+share_location_detail
+    How much information about locations directly in this region is included.
+
+share_descendant_depth
+    How many region levels below this region may be expanded.
+```
+
+However, I would not use a single `share_descriptions` boolean. At minimum, use a detail level:
+
+```text
+0 = omitted entirely
+1 = anonymous existence
+2 = name
+3 = name plus nearby summary
+4 = full current-location description
+```
+
+---
+
+# 4. Define the context relative to the current region
+
+Suppose the region tree is:
+
+```text
+World
+└── Empire
+    ├── Western Province
+    │   ├── Red Valley
+    │   └── Iron Coast
+    └── Eastern Province
+        └── Silver Plains
+```
+
+The character is in a location inside `Red Valley`.
+
+You could expose:
+
+```text
+Red Valley
+    Full region description.
+
+Western Province
+    Name and summary because it is an ancestor.
+
+Iron Coast
+    Name only because it is a sibling region.
+
+Eastern Province
+    Name only or omitted because it is outside the current branch.
+
+Silver Plains
+    Omitted because it is below an unrelated branch.
+```
+
+This gives the LLM a coherent geographic model without giving it the entire world.
+
+A useful region-distance definition is the tree distance:
+
+[
+d(A,B)
+======
+
+\operatorname{depth}(A)
++
+\operatorname{depth}(B)
+-----------------------
+
+2\operatorname{depth}(\operatorname{LCA}(A,B))
+]
+
+Where `LCA` is the lowest common ancestor.
+
+You can then disclose based on distance:
+
+```text
+distance 0: full region context
+distance 1: summary
+distance 2: names
+distance 3+: omitted
+```
+
+This is more general than only measuring ancestor depth.
+
+---
+
+# 5. Nearby locations should still come primarily from edges
+
+Even though the restriction applies to the LLM rather than directly to the user, location adjacency remains important.
+
+The current location’s outgoing edges determine which destinations are narratively relevant.
+
+For every outgoing edge:
+
+```sql
+SELECT destination
+FROM location_edges
+WHERE world_id = :world_id
+  AND from_location_id = :current_location;
+```
+
+Then project each destination according to an explicit detail policy.
+
+For example:
+
+```yaml
+current_location:
+  name: "The Old Mill"
+  description: "..."
+
+nearby_locations:
+  - name: "Stonebridge"
+    description: >
+      A fortified bridge crosses the river east of the mill.
+
+  - name: null
+    description: >
+      A narrow passage descends into darkness beneath the mill.
+```
+
+The LLM knows that the passage exists, but not where it leads.
+
+That is fundamentally different from giving the model the destination location’s full database record.
+
+---
+
+# 6. Put disclosure on the edge when appropriate
+
+The information available from one location about another often belongs to the connection, not the destination.
+
+Consider a castle.
+
+From the village:
+
+```text
+A black fortress is visible on the mountain.
+```
+
+From the secret tunnel:
+
+```text
+The tunnel appears to emerge beneath a stone structure.
+```
+
+From inside the royal road checkpoint:
+
+```text
+The road continues toward Castle Veyr.
+```
+
+These are three different pieces of information about the same destination.
+
+Therefore, I would add edge-specific LLM context:
+
+```sql
+ALTER TABLE location_neighbors
+    ADD COLUMN destination_name_visibility SMALLINT NOT NULL DEFAULT 2,
+    ADD COLUMN destination_context TEXT NOT NULL DEFAULT '';
+```
+
+Or more explicitly:
+
+```sql
+CREATE TABLE location_connections
+(
+    world_id            INT NOT NULL,
+    from_location_id    INT NOT NULL,
+    to_location_id      INT NOT NULL,
+
+    travel_cost         INT NOT NULL DEFAULT 0,
+
+    -- Information provided to the LLM while at from_location_id.
+    exposed_name        VARCHAR(255),
+    exposed_description TEXT NOT NULL DEFAULT '',
+
+    -- Maximum destination record detail additionally available.
+    destination_detail  SMALLINT NOT NULL DEFAULT 0,
+
+    PRIMARY KEY (world_id, from_location_id, to_location_id),
+
+    CHECK (destination_detail BETWEEN 0 AND 3),
+
+    FOREIGN KEY (world_id, from_location_id)
+        REFERENCES locations (world_id, id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (world_id, to_location_id)
+        REFERENCES locations (world_id, id)
+        ON DELETE CASCADE
+);
+```
+
+The edge might expose:
+
+```text
+exposed_name = NULL
+exposed_description = "A concealed stairway descends beneath the altar."
+destination_detail = 0
+```
+
+The model knows about an exit but does not know the destination.
+
+Alternatively:
+
+```text
+exposed_name = "Blackwood"
+exposed_description = "A dense forest begins beyond the northern gate."
+destination_detail = 1
+```
+
+The model knows the name and an externally safe description.
+
+---
+
+# 7. Distinguish edge context from destination context
+
+This distinction is particularly important.
+
+## Edge context
+
+What the LLM knows while narrating from the current location:
+
+```text
+A road leads north toward Blackwood.
+```
+
+## Destination context
+
+What the LLM knows about Blackwood itself:
+
+```text
+Blackwood contains an abandoned shrine and a dormant dragon.
+```
+
+The first may be safe to provide. The second may not be.
+
+I would therefore prefer:
+
+```sql
+route_description
+destination_public_summary
+destination_detail_level
+```
+
+rather than a generic `share_description`.
+
+The generic field is ambiguous about whether it shares:
+
+* the route description;
+* the region description;
+* the destination’s visible appearance;
+* the destination’s complete internal description.
+
+---
+
+# 8. A useful projection algorithm
+
+Given current location (L):
+
+### Step 1: Include current location
+
+Provide:
+
+* Full location narration data.
+* Relevant current region information.
+* Current dynamic state.
+* Applicable lorebook entries.
+
+### Step 2: Include outgoing connections
+
+For every edge from (L):
+
+* Always provide its exposed route description.
+* Provide its exposed destination name if defined.
+* Optionally project part of the destination according to `destination_detail`.
+
+### Step 3: Include region context
+
+Starting from the current region:
+
+* Include the current region at full allowed detail.
+* Walk upward through ancestors.
+* Include each ancestor according to depth policy.
+* Optionally include siblings or nearby branches at reduced detail.
+
+### Step 4: Stop at a token budget
+
+Rank context elements:
+
+[
+\text{priority}
+===============
+
+w_1 \cdot \text{adjacency relevance}
++
+w_2 \cdot \text{region proximity}
++
+w_3 \cdot \text{narrative relevance}
+------------------------------------
+
+w_4 \cdot \text{token cost}
+]
+
+Then select the highest-priority elements within the context budget.
+
+---
+
+# 9. Possible region disclosure model
+
+I would model the policy more explicitly than the current two booleans:
+
+```sql
+ALTER TABLE REGION
+    ADD COLUMN self_detail SMALLINT NOT NULL DEFAULT 3,
+    ADD COLUMN ancestor_detail SMALLINT NOT NULL DEFAULT 2,
+    ADD COLUMN child_region_detail SMALLINT NOT NULL DEFAULT 2,
+    ADD COLUMN descendant_region_detail SMALLINT NOT NULL DEFAULT 1,
+    ADD COLUMN descendant_location_detail SMALLINT NOT NULL DEFAULT 0,
+    ADD COLUMN descendant_depth INT DEFAULT NULL;
+```
+
+Possible levels:
+
+```text
+0 = no context
+1 = names only
+2 = name plus summary
+3 = full safe description
+```
+
+Interpretation:
+
+```text
+self_detail
+    Detail supplied when the current location belongs directly to this region.
+
+ancestor_detail
+    Detail supplied when this region is an ancestor of the current region.
+
+child_region_detail
+    Detail supplied for immediate child regions.
+
+descendant_region_detail
+    Detail supplied for deeper descendant regions.
+
+descendant_location_detail
+    Detail supplied about locations in those descendant regions.
+
+descendant_depth
+    Maximum number of levels traversed downward.
+```
+
+This is expressive, though possibly too elaborate initially.
+
+A simpler first version is:
+
+```sql
+llm_region_detail SMALLINT NOT NULL DEFAULT 2,
+llm_location_detail SMALLINT NOT NULL DEFAULT 1,
+llm_share_depth INT NOT NULL DEFAULT 0
+```
+
+---
+
+# 10. Source policy versus destination policy
+
+There are two plausible owners for the disclosure rule.
+
+## Source-controlled disclosure
+
+The current region determines how broadly the LLM may see.
+
+Example:
+
+```text
+While inside an open plains region, the LLM sees many surrounding landmarks.
+While inside a maze, it sees only the current cell and immediate exits.
+```
+
+This is useful for environmental visibility.
+
+## Destination-controlled disclosure
+
+The destination region determines how much information about itself can be shared externally.
+
+Example:
+
+```text
+The Secret Vault is hidden regardless of where the character stands.
+```
+
+This is useful for secrecy.
+
+The most robust computation combines them:
+
+[
+D_{\text{effective}}
+====================
+
+\min
+\left(
+D_{\text{source allowance}},
+D_{\text{destination exposure cap}},
+D_{\text{edge override}}
+\right)
+]
+
+For example:
+
+```text
+Open plains source allowance: SUMMARY
+Secret fortress exposure cap: NAME
+Road edge override: SUMMARY
+Effective result: NAME
+```
+
+The strictest restriction wins.
+
+---
+
+# 11. Character-specific knowledge may still be relevant
+
+Even though the player does not directly access the database, the LLM may need different information depending on what the player-character knows.
+
+For example:
+
+* A first-time traveler sees “a distant tower.”
+* A local sees “the Tower of Saint Orlan.”
+* A former guard knows its internal layout.
+
+So there may be two distinct restrictions:
+
+```text
+Narrator restriction:
+    What the model is technically allowed to know.
+
+Character epistemology:
+    What the current viewpoint character knows.
+```
+
+You can avoid character-specific knowledge entirely if the narrator is allowed to know more than the character and is trusted to narrate correctly. However, that is a weaker secrecy guarantee.
+
+The strict architecture is:
+
+> The LLM receives only information that the active viewpoint may safely reveal.
+
+Then character knowledge belongs in the projection function.
+
+---
+
+# 12. Recommended practical design
+
+I would implement three disclosure layers.
+
+## Layer 1: Current location
+
+```text
+Full narratable information.
+```
+
+## Layer 2: Connections
+
+Stored per edge:
+
+```text
+route description
+exposed destination name
+exposed destination summary
+```
+
+This is the primary mechanism for nearby locations.
+
+## Layer 3: Regional orientation
+
+Stored through region policies:
+
+```text
+ancestor region names and summaries
+nearby region names
+limited descendant-region information
+```
+
+This lets the model understand that:
+
+```text
+The mill is in Red Valley.
+Red Valley is part of Western Province.
+Iron Coast lies west of Red Valley.
+```
+
+without receiving every location inside the Iron Coast.
+
+---
+
+## Central conclusion
+
+Your original region-based idea is valid for controlling the LLM’s **ambient geographic awareness**.
+
+However, I would not use it as the sole mechanism for neighboring locations. Use:
+
+```text
+location edge
+    Determines which nearby places are relevant.
+
+edge exposure fields
+    Determine exactly what the LLM knows from the current location.
+
+region disclosure policy
+    Supplies broader hierarchical orientation.
+
+destination exposure cap
+    Prevents sensitive regions or locations from leaking through permissive source policies.
+```
+
+The key rule is:
+
+> The database may contain complete world truth, but every LLM turn receives a deliberately lossy, location-relative projection of that truth.

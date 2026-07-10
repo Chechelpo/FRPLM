@@ -2,16 +2,16 @@ package chechelpo.frplm.extensions.implementations.session;
 
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.extensions.api.session.SessionCharacter;
-import chechelpo.frplm.extensions.api.session.SessionLocation;
-import chechelpo.frplm.extensions.api.session.SessionWorld;
-import chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.extensions.implementations.standalone.WorldImpl;
-import chechelpo.frplm.extensions.api.results.MoveResult;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.extensions.api.results.MoveResult;
+import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
+import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
+import io.github.chechelpo.frplm.extensions.api.session.SessionWorld;
+import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

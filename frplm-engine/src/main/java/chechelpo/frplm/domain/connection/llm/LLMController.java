@@ -1,6 +1,5 @@
 package chechelpo.frplm.domain.connection.llm;
 
-import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.connection.api_hosts.HostService;
 import chechelpo.frplm.domain.connection.api_keys.SecretService;
 import chechelpo.frplm.exceptions.Severity;
@@ -8,13 +7,12 @@ import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.NotInitialized;
 import chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
-import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.utils.integrations.ModelResponses;
 import chechelpo.frplm.utils.integrations.T2TClient;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;

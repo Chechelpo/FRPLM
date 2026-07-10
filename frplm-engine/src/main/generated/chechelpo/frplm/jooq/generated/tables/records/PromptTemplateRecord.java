@@ -61,157 +61,185 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     }
 
     /**
-     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
-     */
-    public void setMaxTokens(Integer value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
-     */
-    public Integer getMaxTokens() {
-        return (Integer) get(3);
-    }
-
-    /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
      */
     public void setStreaming(Boolean value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.STREAMING</code>.
      */
     public Boolean getStreaming() {
-        return (Boolean) get(4);
+        return (Boolean) get(3);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
      */
     public void setTemperature(Float value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TEMPERATURE</code>.
      */
     public Float getTemperature() {
-        return (Float) get(5);
+        return (Float) get(4);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
      */
     public void setTopP(Float value) {
-        set(6, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_P</code>.
      */
     public Float getTopP() {
-        return (Float) get(6);
+        return (Float) get(5);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
      */
     public void setFrequencyPenalty(Float value) {
-        set(7, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.FREQUENCY_PENALTY</code>.
      */
     public Float getFrequencyPenalty() {
-        return (Float) get(7);
+        return (Float) get(6);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
      */
     public void setPresencePenalty(Float value) {
-        set(8, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.PRESENCE_PENALTY</code>.
      */
     public Float getPresencePenalty() {
-        return (Float) get(8);
+        return (Float) get(7);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.REPETITION_PENALTY</code>.
      */
     public void setRepetitionPenalty(Float value) {
-        set(9, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.REPETITION_PENALTY</code>.
      */
     public Float getRepetitionPenalty() {
-        return (Float) get(9);
+        return (Float) get(8);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
     public void setTopK(Integer value) {
-        set(10, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.TOP_K</code>.
      */
     public Integer getTopK() {
-        return (Integer) get(10);
+        return (Integer) get(9);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.EXCLUDE_REASONING</code>.
      */
     public void setExcludeReasoning(Boolean value) {
-        set(11, value);
+        set(10, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.EXCLUDE_REASONING</code>.
      */
     public Boolean getExcludeReasoning() {
-        return (Boolean) get(11);
+        return (Boolean) get(10);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
      */
     public void setReasoningEffort(Short value) {
-        set(12, value);
+        set(11, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.REASONING_EFFORT</code>.
      */
     public Short getReasoningEffort() {
-        return (Short) get(12);
+        return (Short) get(11);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
+     */
+    public void setMaxTokens(Integer value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.MAX_TOKENS</code>.
+     */
+    public Integer getMaxTokens() {
+        return (Integer) get(12);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.LOREBOOKS_BUDGET</code>.
+     */
+    public void setLorebooksBudget(Float value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.LOREBOOKS_BUDGET</code>.
+     */
+    public Float getLorebooksBudget() {
+        return (Float) get(13);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET</code>.
+     */
+    public void setChatHistoryBudget(Float value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET</code>.
+     */
+    public Float getChatHistoryBudget() {
+        return (Float) get(14);
     }
 
     /**
      * Setter for <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
      */
     public void setNextSectionId(Short value) {
-        set(13, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>PUBLIC.PROMPT_TEMPLATE.NEXT_SECTION_ID</code>.
      */
     public Short getNextSectionId() {
-        return (Short) get(13);
+        return (Short) get(15);
     }
 
     // -------------------------------------------------------------------------
@@ -237,13 +265,12 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
     /**
      * Create a detached, initialised PromptTemplateRecord
      */
-    public PromptTemplateRecord(Short id, Integer connectionId, String name, Integer maxTokens, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Integer topK, Boolean excludeReasoning, Short reasoningEffort, Short nextSectionId) {
+    public PromptTemplateRecord(Short id, Integer connectionId, String name, Boolean streaming, Float temperature, Float topP, Float frequencyPenalty, Float presencePenalty, Float repetitionPenalty, Integer topK, Boolean excludeReasoning, Short reasoningEffort, Integer maxTokens, Float lorebooksBudget, Float chatHistoryBudget, Short nextSectionId) {
         super(PromptTemplate.PROMPT_TEMPLATE);
 
         setId(id);
         setConnectionId(connectionId);
         setName(name);
-        setMaxTokens(maxTokens);
         setStreaming(streaming);
         setTemperature(temperature);
         setTopP(topP);
@@ -253,6 +280,9 @@ public class PromptTemplateRecord extends UpdatableRecordImpl<PromptTemplateReco
         setTopK(topK);
         setExcludeReasoning(excludeReasoning);
         setReasoningEffort(reasoningEffort);
+        setMaxTokens(maxTokens);
+        setLorebooksBudget(lorebooksBudget);
+        setChatHistoryBudget(chatHistoryBudget);
         setNextSectionId(nextSectionId);
         resetChangedOnNotNull();
     }

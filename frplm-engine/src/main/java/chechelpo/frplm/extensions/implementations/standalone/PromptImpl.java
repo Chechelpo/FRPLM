@@ -1,11 +1,14 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
-import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
-import chechelpo.frplm.extensions.api.standalone.PromptSectionSnapshot;
-import chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.extensions.implementations.session.PromptSessionImpl;
 import chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
+import io.github.chechelpo.frplm.extensions.api.utils.PromptBudget;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.GenerationConfig;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.GenerationParameters;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ReasoningEffort;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,15 +30,42 @@ public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implement
     }
 
     @Override
-    public Reference reference() {
+    public GenerationConfig getGenerationConfig() {
+        return new GenerationConfig(
+                record.getStreaming(),
+                record.getExcludeReasoning(),
+                record.getMaxTokens(),
+                ReasoningEffort.fromId(record.getReasoningEffort())
+        );
+    }
+
+    @Override
+    public GenerationParameters getParameters() {
+        return GenerationParameters.builder()
+                .temperature(record.getTemperature())
+                .repetitionPenalty(record.getRepetitionPenalty())
+                .topK(record.getTopK())
+                .topP(record.getTopP())
+                .presencePenalty(record.getPresencePenalty())
+                .frequencyPenalty(record.getFrequencyPenalty())
+                .build();
+    }
+
+    @Override
+    public PromptBudget getBudgetConfig() {
+        return new PromptBudget(record.getLorebooksBudget(), record.getChatHistoryBudget());
+    }
+
+    @Override
+    public Reference asReference() {
         return new PromptSnapshot.Reference(this.record.getId());
     }
 
     @Override
-    public List<PromptSectionSnapshot> getSections() {
+    public List<PromptSectionEntitySnapshot> getSections() {
         return context.sections().getOrderedSectionsOfTemplate(this.getRecord()).stream()
-                .map(section -> new PromptSectionImpl(section, this.context))
-                .map(PromptSectionSnapshot.class::cast)
+                .map(section -> new PromptSectionEntityImpl(section, this.context))
+                .map(PromptSectionEntitySnapshot.class::cast)
                 .toList();
     }
 }

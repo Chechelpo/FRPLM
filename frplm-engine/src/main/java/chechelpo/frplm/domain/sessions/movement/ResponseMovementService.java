@@ -58,6 +58,7 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
                 .set(RESPONSE_LOCATION_CHANGES.RESPONSE_NUM, response.getResponseNum())
                 .set(RESPONSE_LOCATION_CHANGES.CHARACTER_ID, characterId)
                 .build();
+
         if (this.exists(key)) {
             this.update(key, EntityDataPayload.of(RESPONSE_LOCATION_CHANGES.LOCATION_ID, toLocationId));
             return this.find(key).orElseThrow(() -> new UnexpectedException("Couldn't find after update", Severity.SYSTEM));
@@ -69,7 +70,7 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
 
                         .set(RESPONSE_LOCATION_CHANGES.CHARACTER_ID, characterId)
 
-                        .set(RESPONSE_LOCATION_CHANGES.WORLD_ID, messagesRecord.getSessionId())
+                        .set(RESPONSE_LOCATION_CHANGES.WORLD_ID, messagesRecord.getWorldId())
                         .set(RESPONSE_LOCATION_CHANGES.LOCATION_ID, toLocationId)
                         .build()
         );

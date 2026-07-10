@@ -5,11 +5,10 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -23,12 +22,14 @@ public final class EntryStore extends EntityStore<EntryRecord> {
         super(ctx, Entry.ENTRY, EntityTypes.Types.ENTRIES);
     }
 
-    @NotNull List<EntryRecord> getOfLorebook(Integer LorebookID){
-        return this.ctx.selectFrom(Entry.ENTRY)
-                .where(Entry.ENTRY.LOREBOOK_ID.eq(LorebookID))
+    public Result<EntryRecord> getActiveOfLorebooks(IntSet lorebookIds){
+        return ctx.selectFrom(main_table)
+                .where(
+                        ENTRY.LOREBOOK_ID.in(lorebookIds)
+                        .and(ENTRY.ENABLED.eq(true))
+                )
                 .fetch();
     }
-
 
     /**
      * Always returns constant entries.

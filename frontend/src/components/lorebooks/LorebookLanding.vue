@@ -9,7 +9,7 @@ import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
-import {createEntity, deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {createEntity, deleteEntity, fetch_all} from "@/core/ABSEntity";
 
 const lorebooks = ref<Lorebook[]>([])
 

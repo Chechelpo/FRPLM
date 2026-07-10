@@ -21,7 +21,7 @@ final class OutletController extends EntityController<OutletRecord, OutletServic
     }
 
     @Override
-    protected ResponseEntity<EntityDTO> create(Map<String, Object> params, Map<String, Object> body) throws URISyntaxException {
+    protected ResponseEntity<EntityDTO> create(Map<String, Object> params, Map<String, Object> body) {
         throw new UnsupportedAction("Outlets can't be created via entity framework", Severity.USER);
     }
 }

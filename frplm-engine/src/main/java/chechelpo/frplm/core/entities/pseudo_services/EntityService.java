@@ -33,7 +33,7 @@ public abstract class EntityService<
     private final Set<TableField<R, ?>> keys = new HashSet<>();
     private final HashMap<TableField<R, ?>, Object> defaultsOnCreate = new HashMap<>();
 
-    protected final Store store;
+    protected final Store store;    
     protected final Logger log;
     private final EntityTypes.Types entityType;
 
@@ -167,8 +167,6 @@ public abstract class EntityService<
      * @apiNote super() call is advised at the end of your override. This function also contains the event emit as well as validation logic
      */
     protected void beforeCreate(EntityDataPayload<R> data, long operationID) {
-
-
         for (Map.Entry<TableField<R, ?>, Object> defaultAssignment : defaultsOnCreate.entrySet()) {
             TableField<R, ?> field = defaultAssignment.getKey();
             if (!data.assignsField(field))
@@ -184,11 +182,13 @@ public abstract class EntityService<
         Objects.requireNonNull(data, "data");
         long operationID = eventBus.nextOperationID();
         beforeCreate(data, operationID);
-
-        R result = store.createAndGet(data);
-        if (result == null) {
-            log.error("Could not create new entity");
-            throw new UnexpectedException("New entity creation failed with data: " + data, Severity.SYSTEM);
+        R result = null;
+        try{
+            result = store.createAndGet(data);
+        }catch (Exception e){
+            log.error("Error creating entity with data {} \n {} \n Trace: \n", data.prettyPrint(), e.getMessage());
+            e.printStackTrace();
+            throw new UnexpectedException("New entity creation failed with data:  " + data, Severity.SYSTEM);
         }
 
         afterSuccessfulCreate(result, operationID);

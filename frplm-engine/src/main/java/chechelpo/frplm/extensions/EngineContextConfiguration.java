@@ -18,6 +18,7 @@ import chechelpo.frplm.domain.sessions.movement.Movements;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
+import chechelpo.frplm.domain.world.region.RegionService;
 import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import org.springframework.context.annotation.Bean;
@@ -34,9 +35,12 @@ public class EngineContextConfiguration {
 
             CharacterService characters,
             StartingLocationsService startingLocations,
+
             WorldService worlds,
+            RegionService regions,
             LocationsService locations,
             EdgeService edges,
+
             LorebookService lorebooks,
             EntryService entries,
             KeywordService keywords,
@@ -55,6 +59,7 @@ public class EngineContextConfiguration {
                 startingLocations,
 
                 worlds,
+                regions,
                 locations,
                 edges,
 

@@ -1,11 +1,11 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
-import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionMessage;
-import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
-import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.utils.integrations.T2TClient;
+import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
 
 import java.util.Optional;
 
@@ -15,7 +15,7 @@ public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implem
     }
 
     @Override
-    public ConnectionSnapshot.Reference reference(){
+    public ConnectionSnapshot.Reference asReference(){
         return new ConnectionSnapshot.Reference(record.getId());
     }
     @Override

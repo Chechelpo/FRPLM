@@ -5,20 +5,16 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.Outlet;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
-import chechelpo.frplm.utils.collections.IntSetFactory;
-import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Record2;
+import org.jooq.Result;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 @Service
 public class OutletService extends EntityService<OutletRecord, OutletStore> {
@@ -38,19 +34,15 @@ public class OutletService extends EntityService<OutletRecord, OutletStore> {
         return Optional.ofNullable(store.getName(id));
     }
 
-    @CheckReturnValue
-    public IntObjectPair<String>[] getOutlets(LorebooksRecord[] records) {
-        return getOutlets(IntSetFactory.ofValues(
-                Arrays.stream(records)
-                        .flatMapToInt(record -> IntStream.of(record.getId()))
-                        .toArray())
-        );
-    }
-    public IntObjectPair<String>[] getOutlets(IntSet lorebookIDs) {
+    /** @return outletId, value of all entries with these lorebook ids */
+    public Result<Record2<Integer, String>> getOutletsFromLorebook(IntSet lorebookIDs) {
         Objects.requireNonNull(lorebookIDs, "lorebookIDs must not be null");
-        if (lorebookIDs.isEmpty()) return new IntObjectPair[0];
-
         return store.getOutletsOfLorebooks(lorebookIDs);
+    }
+
+    public Result<Record2<Integer, String>> getOutletsFromIds(IntSet outletIds){
+        Objects.requireNonNull(outletIds, "Outlet ids are null");
+        return store.getWithIds(outletIds);
     }
 
     @Transactional

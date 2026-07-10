@@ -1,6 +1,6 @@
 <script setup lang="ts" generic = "Key extends KeyRecord, Data extends DataRecord, T extends ABSEntity<Key,Data>">
 import {computed, onMounted, onUnmounted, ref, watch} from "vue";
-import {DataRecord, ABSEntity, KeyRecord} from "@/frameworks/ABSEntity";
+import {DataRecord, ABSEntity, KeyRecord} from "@/core/ABSEntity";
 import {CommonFields} from "@/utils/CommonFields";
 
 /* ----------------------------- Props & Emits ----------------------------- */

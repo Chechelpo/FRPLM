@@ -18,8 +18,7 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
     CHARACTER_INFO(1, "character_info"),
     LOCATION_INFO(2, "location_info"),
     WORLD_INFO(3, "world_info"),
-    LOREBOOK(4, "lorebook"),
-    CHAT_HISTORY(5, "chat_history")
+    LOREBOOK(4, "lorebook")
     ;
     public static final Pattern UNRESOLVED_MACRO_LINE = Pattern.compile(
             "(?m)^[ \\t]*\\{\\{\\s*[^{}\\r\\n]+\\s*}}[ \\t]*(?:\\R|$)"
@@ -46,7 +45,7 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
 
     @Contract(pure = true)
     public static @NotNull String asMacro(String outlet){
-        return "{{"+outlet+"}}";
+        return "{{outlet:"+outlet+"}}";
     }
     @Contract(pure = true)
     public static @NotNull Pattern asPattern(String outlet){

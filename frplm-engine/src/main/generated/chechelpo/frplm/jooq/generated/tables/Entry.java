@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -35,6 +36,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -88,17 +90,12 @@ public class Entry extends TableImpl<EntryRecord> {
     /**
      * The column <code>PUBLIC.ENTRY.PROBABILITY</code>.
      */
-    public final TableField<EntryRecord, Short> PROBABILITY = createField(DSL.name("PROBABILITY"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
-
-    /**
-     * The column <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
-     */
-    public final TableField<EntryRecord, Boolean> IS_CUSTOM_OUTLET = createField(DSL.name("IS_CUSTOM_OUTLET"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+    public final TableField<EntryRecord, Short> PROBABILITY = createField(DSL.name("PROBABILITY"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.OUTLET</code>.
      */
-    public final TableField<EntryRecord, Integer> OUTLET = createField(DSL.name("OUTLET"), SQLDataType.INTEGER, this, "");
+    public final TableField<EntryRecord, Integer> OUTLET = createField(DSL.name("OUTLET"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.DELAY</code>.
@@ -116,14 +113,19 @@ public class Entry extends TableImpl<EntryRecord> {
     public final TableField<EntryRecord, Integer> STICK_THROUGH = createField(DSL.name("STICK_THROUGH"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     /**
-     * The column <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     * The column <code>PUBLIC.ENTRY.POSITION</code>.
      */
-    public final TableField<EntryRecord, Short> INJECTION_ORDER = createField(DSL.name("INJECTION_ORDER"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
+    public final TableField<EntryRecord, Short> POSITION = createField(DSL.name("POSITION"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("100"), SQLDataType.SMALLINT)), this, "");
+
+    /**
+     * The column <code>PUBLIC.ENTRY.GROUP_ID</code>.
+     */
+    public final TableField<EntryRecord, Short> GROUP_ID = createField(DSL.name("GROUP_ID"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("NULL"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.STRATEGY</code>.
      */
-    public final TableField<EntryRecord, Short> STRATEGY = createField(DSL.name("STRATEGY"), SQLDataType.SMALLINT.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
+    public final TableField<EntryRecord, Short> STRATEGY = createField(DSL.name("STRATEGY"), SQLDataType.SMALLINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.SMALLINT)), this, "");
 
     /**
      * The column <code>PUBLIC.ENTRY.EMBED_TEXT</code>.
@@ -219,7 +221,12 @@ public class Entry extends TableImpl<EntryRecord> {
 
     @Override
     public UniqueKey<EntryRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_3F;
+        return Keys.CHK;
+    }
+
+    @Override
+    public List<UniqueKey<EntryRecord>> getUniqueKeys() {
+        return Arrays.asList(Keys.CONSTRAINT_3F);
     }
 
     @Override
@@ -283,6 +290,13 @@ public class Entry extends TableImpl<EntryRecord> {
      */
     public KeywordPath keyword() {
         return entryKeywords().keyword();
+    }
+
+    @Override
+    public List<Check<EntryRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("CHK_VALID_POSITION"), "\"POSITION\" >= 0", true)
+        );
     }
 
     @Override

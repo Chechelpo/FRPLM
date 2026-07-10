@@ -8,9 +8,6 @@ import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.NotInitialized;
 import chechelpo.frplm.extensions.ExtensionService;
-import chechelpo.frplm.extensions.api.session.SessionPrompt;
-import chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
-import chechelpo.frplm.extensions.api.utils.MessagePrompt;
 import chechelpo.frplm.extensions.implementations.session.SessionContext;
 import chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import chechelpo.frplm.extensions.implementations.standalone.ConnectionImpl;
@@ -18,11 +15,10 @@ import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionRequest;
-import chechelpo.frplm.openai_compatible.ChatCompletionResponse;
 import chechelpo.frplm.utils.integrations.T2TClient;
-import chechelpo.frplm.utils.prompts.Prompt;
-import org.jetbrains.annotations.Contract;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.LoggerFactory;
@@ -40,7 +36,6 @@ final class EngineHolder {
     private final ExtensionService extensionService;
     private final SessionContext sessionContext;
     private final T2TClient textToTextClient;
-
 
     EngineHolder(
             ExtensionContext context,
@@ -63,24 +58,6 @@ final class EngineHolder {
                 });
     }
 
-    @Contract("_ -> new")
-    public @NotNull MessagePrompt getNewPrompt(int sessionID) {
-        SessionsRecord sessionsRecord = sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
-                .orElseThrow(() -> new EntityNotFound("Could not find session with id " + sessionID, Severity.USER));
-        SessionImpl session = new SessionImpl(sessionsRecord, standaloneContext, sessionContext);
-
-        SessionPrompt promptTemplate = session.getPrompt()
-                .orElseThrow(() -> new EntityNotFound("This session has no prompt", Severity.USER));
-        Prompt.Builder promptBuilder = (Prompt.Builder) promptTemplate.getNewMessagePrompt();
-
-        ConnectionSnapshot con = promptTemplate.getAssignedConnection()
-                .orElseThrow(() -> new EntityNotFound("This prompt has no connection", Severity.USER));
-
-        extensionService.runPrePromptGeneration(sessionsRecord, promptBuilder);
-        MessagePrompt rendered = promptBuilder.render(standaloneContext).build(standaloneContext, con.getModelID());
-        log.info("Prompt: {}", rendered.renderedRequest());
-        return rendered;
-    }
 
     public @NotNull MessagesRecord generateNewMessage(
             int sessionID,
@@ -95,6 +72,7 @@ final class EngineHolder {
                 .orElseThrow();
         MessagesRecord generated = sessionContext.messages().createAndGet(
                 EntityDataPayload.<MessagesRecord>builder()
+                        .set(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())
                         .set(MESSAGES.SESSION_ID, session.getRecord().getId())
                         .set(MESSAGES.CONTENT, response.choices().getFirst().message().content())
                         .set(MESSAGES.REQUEST_JSON, OBJECT_MAPPER.writeValueAsString(prompt))

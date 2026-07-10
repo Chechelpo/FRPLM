@@ -1,4 +1,13 @@
-import {ABSEntity, createEntity, deleteEntity, EntityField, fetchApi, fetchOne} from "@/frameworks/ABSEntity";
+import {
+    ABSEntity,
+    createEntity,
+    deleteEntity,
+    EntityField,
+    fetch_all,
+    fetchApi,
+    fetchFromReference,
+    fetchOne
+} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/Tag";
@@ -6,6 +15,7 @@ import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {Location, World} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
 import {API_BASE} from "@/config";
+import {parseNumberKey} from "@/utils/ReferenceCodec";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {
@@ -15,17 +25,57 @@ export type CharacterData = {
     firstMessage: string,
     lorebook_id?: number
 };
+export type CharacterCreationData = Pick<CharacterData, 'name'>
 
 export class Character extends ABSEntity<CharacterKey, CharacterData> {
     private tags: Tag[] | null = null;
     private lorebook: Lorebook | null = null;
     private starting_locations: Location[] | null = null
+    private static readonly REFERENCE_KEY_ORDER = ["id"] as const;
 
     getEntityType(): EntityTypes {
         return EntityTypes.CHARACTERS;
     }
-    getIterationArr(): EntityField<CharacterKey,CharacterData>[] {
-        return [CommonFields.NAME];
+    protected getReferenceKeyOrder(): readonly "id"[] {
+        return Character.REFERENCE_KEY_ORDER;
+    }
+
+    public static async getAll() : Promise<Character[]> {
+        return await fetch_all<CharacterKey, CharacterData, Character>(
+            EntityTypes.CHARACTERS, Character
+        );
+    }
+    public static async getWithID(id: number): Promise<Character> {
+        return await fetchOne<CharacterKey, CharacterData, Character>({id:id}, EntityTypes.CHARACTERS, this)
+    }
+    public static async createNew(initialData:CharacterCreationData): Promise<Character> {
+        if (initialData.name === undefined || initialData.name === null)
+            throw new Error("Name is required for character instantiation");
+        return await createEntity(null, initialData, EntityTypes.CHARACTERS, this)
+    }
+    public static async getStartingAt(world:World):Promise<Character[]>{
+        const response = await fetchApi(
+            `${API_BASE}/${EntityTypes.CHARACTERS}/${world.get('id')}`,
+            {
+                method:'GET'
+            }
+        )
+        return (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS))
+    }
+    public static async fromReference(reference:string): Promise<Character> {
+        return await fetchFromReference<CharacterKey, CharacterData, Character>(
+            reference,
+            EntityTypes.CHARACTERS,
+            Character.REFERENCE_KEY_ORDER,
+            {
+                id:parseNumberKey
+            },
+            Character
+        )
+    }
+
+    public asReference() : string {
+        return `connection: ${this.get('id')}`
     }
 
     public async getLorebook(): Promise<Lorebook> {
@@ -77,16 +127,6 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             this.tags.push(tag)
     }
 
-    public static async getWithID(id: CharacterKey): Promise<Character> {
-        return await fetchOne<CharacterKey, CharacterData, Character>(id, EntityTypes.CHARACTERS, this)
-    }
-
-    public static async createNew(initialData:Partial<CharacterData>): Promise<Character> {
-        if (initialData.name === undefined || initialData.name === null)
-            throw new Error("Name is required for character instantiation");
-        return await createEntity(null, initialData, EntityTypes.CHARACTERS, this)
-    }
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STARTING LOCATIONS:
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,15 +168,6 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             StartingLocation
         )
     }
-    public static async getStartingAt(world:World):Promise<Character[]>{
-        const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.CHARACTERS}/${world.get('id')}`,
-            {
-                method:'GET'
-            }
-        )
-        return (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS))
-    }
 }
 
 type CharacterTagsKey = {char_id: number, tag_id: number};
@@ -147,11 +178,11 @@ class CharacterTags extends ABSEntity<CharacterTagsKey, CharacterTagsData>{
         return EntityTypes.CHARACTER_TAGS;
     }
 
-    getIterationArr(): EntityField<CharacterTagsKey, CharacterTagsData>[] {
-        return [];
+    protected getReferenceKeyOrder(): readonly (keyof CharacterTagsKey & string)[] {
+        return ['char_id', 'tag_id'];
     }
 
-    static async registerTag(key:CharacterTagsKey): Promise<boolean> {
+    public static async registerTag(key:CharacterTagsKey): Promise<boolean> {
         await createEntity<CharacterTagsKey,CharacterTagsData,CharacterTags>(
             key,
             null,
@@ -160,7 +191,7 @@ class CharacterTags extends ABSEntity<CharacterTagsKey, CharacterTagsData>{
         )
         return true;
     }
-    static async unregisterTag(key:CharacterTagsKey): Promise<boolean> {
+    public static async unregisterTag(key:CharacterTagsKey): Promise<boolean> {
         return await deleteEntity<CharacterTagsKey>(key, EntityTypes.CHARACTER_TAGS);
     }
 }
@@ -191,6 +222,10 @@ export type StartingLocationData = {
 export class StartingLocation extends ABSEntity<StartingLocationKeys, StartingLocationData> {
     getEntityType(): EntityTypes {
         return EntityTypes.STARTING_LOCATIONS;
+    }
+
+    protected getReferenceKeyOrder(): (keyof StartingLocationKeys & string)[] {
+        return ["worldID", "locationID", "characterID"];
     }
 
 }

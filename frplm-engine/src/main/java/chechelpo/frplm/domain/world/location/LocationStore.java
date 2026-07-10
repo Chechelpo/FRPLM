@@ -7,6 +7,7 @@ import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +51,7 @@ final class LocationStore extends EntityStore<LocationsRecord> {
                 .fetch();
     }
 
-    public List<LocationsRecord> getLocationsOfRegion(int worldId, int regionId){
+    public List<LocationsRecord> getLocationsOfRegion(int worldId, @Nullable Integer regionId){
         return ctx.selectFrom(main_table)
                 .where(
                         LOCATIONS.REGION_ID.eq(regionId)

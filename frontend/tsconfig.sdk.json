@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "rootDir": "./src",
+    "outDir": "./sdk/dist-sdk",
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "sdk/src/sdk-index.ts"
+  ]
+} 

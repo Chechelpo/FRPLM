@@ -2,24 +2,29 @@ package chechelpo.frplm.extensions;
 
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.extensions.api.types.ConfigurableExtension;
-import jakarta.servlet.http.HttpServletRequest;
+import io.github.chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.PromptSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
+import io.github.chechelpo.frplm.extensions.api.types.ConfigurableExtension;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.JSON;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tools.jackson.databind.JsonNode;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
 @RestController
-@RequestMapping("/api/extensions")
+@RequestMapping(API_BASE + "/extensions")
 final class ExtensionController {
     private final ExtensionService service;
 
@@ -27,13 +32,13 @@ final class ExtensionController {
         this.service = service;
     }
 
-
     private record ConfigurableExtensionDTO(
             String id,
             String displayName,
             String description,
             Map<String, FieldDTO> configMap
     ){ }
+
     private record FieldDTO(
             String name,
             String description,
@@ -41,28 +46,86 @@ final class ExtensionController {
             Object value,
             Object[] possible_values
     ){
-        private static @NotNull Map<String, FieldDTO> fromFields(@NotNull Map<String, ConfigurableExtension.FieldConfig> input, ExtensionRepository repo) {
+        private static @NotNull Map<String, FieldDTO> fromFields(
+                @NotNull Map<String, ConfigurableExtension.FieldConfig> input,
+                ExtensionRepository repo
+        ) {
             Map<String, FieldDTO> result = new HashMap<>(input.size());
             for (Map.Entry<String, ConfigurableExtension.FieldConfig> entry : input.entrySet()) {
                 result.put(entry.getKey(), fromFieldConfig(entry.getValue(), repo));
             }
-
             return result;
         }
-        private static FieldDTO fromFieldConfig(ConfigurableExtension.FieldConfig input, ExtensionRepository repository){
-            return null;
+
+        private static FieldDTO fromFieldConfig(
+                ConfigurableExtension.FieldConfig input,
+                ExtensionRepository repository
+        ) {
+            ConfigurableExtension.Field field = input.field();
+            FieldType kind = switch (field) {
+                case ConfigurableExtension.Field.PrimitiveField.IntegerConfig ic -> FieldType.Number;
+                case ConfigurableExtension.Field.PrimitiveField.DoubleConfig dc -> FieldType.Double;
+                case ConfigurableExtension.Field.PrimitiveField.StringConfig sc -> FieldType.String;
+                case ConfigurableExtension.Field.PrimitiveField.BooleanConfig bc -> FieldType.Boolean;
+                case ConfigurableExtension.Field.SnapshotSelection<?> ss -> FieldType.String;
+            };
+
+            Object[] possibleValues = switch (field) {
+                case ConfigurableExtension.Field.SnapshotSelection<?> ss ->
+                        fetchPossibleValues(ss, repository);
+                default -> new Object[0];
+            };
+
+            return new FieldDTO(
+                    input.label(),
+                    input.description(),
+                    kind,
+                    null, // Current value is fetched dynamically via /config endpoint
+                    possibleValues
+            );
+        }
+
+        private static Object[] fetchPossibleValues(
+                ConfigurableExtension.Field.SnapshotSelection<?> ss,
+                ExtensionRepository repository
+        ) {
+            Class<?> type = ss.type();
+            if (type == ConnectionSnapshot.class) {
+                return repository.getConnections().stream()
+                        .map(s -> s.asReference().toString())
+                        .toArray();
+            }
+            if (type == CharacterSnapshot.class) {
+                return repository.getCharacters().stream()
+                        .map(s -> s.asReference().toString())
+                        .toArray();
+            }
+            if (type == WorldSnapshot.class) {
+                return repository.getWorlds().stream()
+                        .map(s -> s.asReference().toString())
+                        .toArray();
+            }
+            if (type == PromptSnapshot.class) {
+                return repository.getPrompts().stream()
+                        .map(s -> s.asReference().toString())
+                        .toArray();
+            }
+            return new Object[0];
         }
     }
+
     private enum FieldType{String, Number, Double, Boolean}
+
     @GetMapping
     ResponseEntity<List<ConfigurableExtensionDTO>> getConfigurableExtensions(){
+        ExtensionRepository repo = service.getExtensionRepository();
         return ResponseEntity.ok(
                 service.getConfigurableExtensions().stream()
                         .map(ext -> new ConfigurableExtensionDTO(
                                 ext.extensionId(),
                                 ext.displayName(),
                                 ext.description(),
-                                null
+                                FieldDTO.fromFields(ext.getFields(), repo)
                         )).toList()
         );
     }
@@ -72,39 +135,20 @@ final class ExtensionController {
     ResponseEntity<JsonNode> getConfig(@PathVariable String extensionId) {
         return ResponseEntity.ok(service.getConfig(extensionId));
     }
-    @GetMapping(
-            value = "/{extensionId}/config-panel",
-            produces = MediaType.TEXT_HTML_VALUE
-    )
-    ResponseEntity<String> getConfigPanel(@PathVariable String extensionId) {
-        Optional<String> panel = service.getConfigPanel(extensionId);
-        return panel.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
 
-    @GetMapping("/{extensionId}/config-panel/**")
-    ResponseEntity<ByteArrayResource> getConfigPanelAsset(
-            @PathVariable String extensionId,
-            HttpServletRequest request
-    ) {
-        String prefix = "/extensions/" + extensionId + "/config-panel/";
-        String requestPath = request.getRequestURI();
+    @GetMapping(value = "/{extensionId}/{assetName}", produces = "application/javascript")
+    ResponseEntity<ByteArrayResource> getAsset(@PathVariable String extensionId, @PathVariable String assetName) {
+        System.out.println("Serving " + assetName + " extension: " + extensionId);
 
-        if (!requestPath.startsWith(prefix)) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        String assetName = requestPath.substring(prefix.length());
-
-        return service.getConfigPanelAsset(extensionId, assetName)
-                .map(asset -> ResponseEntity
-                        .ok()
-                        .contentType(MediaType.parseMediaType(asset.contentType()))
-                        .contentLength(asset.bytes().length)
+        return service.getExtensionAsset(extensionId, "panel.js")
+                .map(asset -> ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType("application/javascript"))
+                        .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)).cachePublic())
                         .body(new ByteArrayResource(asset.bytes())))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{extensionId}/config")
+    @PutMapping(value = "/{extensionId}/config", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Boolean> updateConfig(@PathVariable String extensionId, @RequestBody JsonNode config) {
         service.getConfigurableExtensions().stream()
                 .filter(ext -> ext.extensionId().equals(extensionId))

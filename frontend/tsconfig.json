@@ -15,5 +15,6 @@
     "jsx": "react",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules","dist-sdk", "dist"]
 }

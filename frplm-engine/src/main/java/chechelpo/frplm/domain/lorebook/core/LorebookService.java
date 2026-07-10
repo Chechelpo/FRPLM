@@ -45,6 +45,13 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
     }
     @Transactional(readOnly = true)
     @CheckReturnValue
+    public @NotNull LorebooksRecord getLorebookOf(@NotNull RegionRecord record) throws EntityNotFound {
+        Objects.requireNonNull(record);
+        return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
+                .orElseThrow(() -> new UnexpectedException("Character " + record.getName() + " without a lorebook", Severity.SYSTEM));
+    }
+    @Transactional(readOnly = true)
+    @CheckReturnValue
     public @NotNull List<LorebooksRecord> getLorebookOf(@NotNull Set<CharactersRecord> records){
         Objects.requireNonNull(records);
         List<LorebooksRecord> results = store.getLorebooks(

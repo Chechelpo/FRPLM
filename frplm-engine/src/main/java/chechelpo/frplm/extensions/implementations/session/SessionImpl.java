@@ -1,15 +1,13 @@
 package chechelpo.frplm.extensions.implementations.session;
 
-import chechelpo.frplm.extensions.api.session.ChatMessage;
-import chechelpo.frplm.extensions.api.session.Session;
-import chechelpo.frplm.extensions.api.session.SessionPrompt;
-import chechelpo.frplm.extensions.api.utils.PromptBuilder;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import chechelpo.frplm.extensions.implementations.standalone.PromptImpl;
 import chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
-import chechelpo.frplm.utils.prompts.Prompt;
+import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
+import io.github.chechelpo.frplm.extensions.api.session.Session;
+import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
@@ -57,7 +55,7 @@ public final class SessionImpl implements Session {
 
     @Contract(" -> new")
     @Override
-    public @NotNull Reference reference() {
+    public @NotNull Reference asReference() {
         return new Session.Reference(record.getId());
     }
 
@@ -65,9 +63,6 @@ public final class SessionImpl implements Session {
     public Optional<SessionPrompt> getPrompt() {
         return context.templates().getOf(this.record)
                 .map(template -> new PromptSessionImpl(template, context, this));
-    }
-    public Optional<Prompt.Builder> getNewPrompt(){
-        return getPrompt().map(promptImpl -> (Prompt.Builder) promptImpl.getNewMessagePrompt());
     }
 
     @Contract(" -> new")
@@ -86,10 +81,12 @@ public final class SessionImpl implements Session {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    @Override
     public SessionCharacterImpl getUserCharacter() {
         return userCharacter;
     }
 
+    @Override
     public SessionWorldImpl getWorld() {
         return world;
     }
@@ -101,15 +98,23 @@ public final class SessionImpl implements Session {
 
     @Override
     @Contract("_ -> new")
-    public @NotNull List<ChatMessage> getLastMessages(int number) {
-        return getLast(number, getChatHistory());
+    public @NotNull @Unmodifiable List<ChatMessage> getLastMessages(int number) {
+        return sessionContext.messages().getLastOf(record.getId(), 0).stream()
+                .map(record -> (ChatMessage) new ChatMessageImpl(record, context, world))
+                .toList();
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<ChatMessage> getMessageRange(int from, int to){
+        return sessionContext.messages().getRange(record.getId(), from, to).stream()
+                .map(record -> (ChatMessage) new ChatMessageImpl(record, context, world))
+                .toList();
     }
 
     private static <T> @NotNull List<T> getLast(int number, @NotNull List<T> of) {
         if (number <= 0 || of.isEmpty()) {
             return List.of();
         }
-
 
         int from = Math.max(0, of.size() - number);
         return List.copyOf(of.subList(from, of.size()));

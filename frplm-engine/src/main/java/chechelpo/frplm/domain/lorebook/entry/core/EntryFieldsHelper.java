@@ -147,7 +147,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
         // Injection Options
         register_field(
                 "injection_order",
-                Entry.ENTRY.INJECTION_ORDER,
+                Entry.ENTRY.POSITION,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
                                 .nullable()

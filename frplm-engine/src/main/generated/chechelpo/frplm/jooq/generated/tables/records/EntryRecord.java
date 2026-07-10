@@ -103,86 +103,86 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
-     */
-    public void setIsCustomOutlet(Boolean value) {
-        set(6, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.ENTRY.IS_CUSTOM_OUTLET</code>.
-     */
-    public Boolean getIsCustomOutlet() {
-        return (Boolean) get(6);
-    }
-
-    /**
      * Setter for <code>PUBLIC.ENTRY.OUTLET</code>.
      */
     public void setOutlet(Integer value) {
-        set(7, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.OUTLET</code>.
      */
     public Integer getOutlet() {
-        return (Integer) get(7);
+        return (Integer) get(6);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.DELAY</code>.
      */
     public void setDelay(Integer value) {
-        set(8, value);
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.DELAY</code>.
      */
     public Integer getDelay() {
-        return (Integer) get(8);
+        return (Integer) get(7);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.COOLDOWN</code>.
      */
     public void setCooldown(Integer value) {
-        set(9, value);
+        set(8, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.COOLDOWN</code>.
      */
     public Integer getCooldown() {
-        return (Integer) get(9);
+        return (Integer) get(8);
     }
 
     /**
      * Setter for <code>PUBLIC.ENTRY.STICK_THROUGH</code>.
      */
     public void setStickThrough(Integer value) {
-        set(10, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>PUBLIC.ENTRY.STICK_THROUGH</code>.
      */
     public Integer getStickThrough() {
-        return (Integer) get(10);
+        return (Integer) get(9);
     }
 
     /**
-     * Setter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     * Setter for <code>PUBLIC.ENTRY.POSITION</code>.
      */
-    public void setInjectionOrder(Short value) {
+    public void setPosition(Short value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.ENTRY.POSITION</code>.
+     */
+    public Short getPosition() {
+        return (Short) get(10);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.ENTRY.GROUP_ID</code>.
+     */
+    public void setGroupId(Short value) {
         set(11, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.ENTRY.INJECTION_ORDER</code>.
+     * Getter for <code>PUBLIC.ENTRY.GROUP_ID</code>.
      */
-    public Short getInjectionOrder() {
+    public Short getGroupId() {
         return (Short) get(11);
     }
 
@@ -293,7 +293,7 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
     /**
      * Create a detached, initialised EntryRecord
      */
-    public EntryRecord(Integer lorebookId, Integer entryId, String name, Boolean enabled, String content, Short probability, Boolean isCustomOutlet, Integer outlet, Integer delay, Integer cooldown, Integer stickThrough, Short injectionOrder, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
+    public EntryRecord(Integer lorebookId, Integer entryId, String name, Boolean enabled, String content, Short probability, Integer outlet, Integer delay, Integer cooldown, Integer stickThrough, Short position, Short groupId, Short strategy, String embedText, Boolean preventFurtherRecursion, Boolean nonRecursable, Boolean delayUntilRecursion, Short scanDepth) {
         super(Entry.ENTRY);
 
         setLorebookId(lorebookId);
@@ -302,12 +302,12 @@ public class EntryRecord extends UpdatableRecordImpl<EntryRecord> {
         setEnabled(enabled);
         setContent(content);
         setProbability(probability);
-        setIsCustomOutlet(isCustomOutlet);
         setOutlet(outlet);
         setDelay(delay);
         setCooldown(cooldown);
         setStickThrough(stickThrough);
-        setInjectionOrder(injectionOrder);
+        setPosition(position);
+        setGroupId(groupId);
         setStrategy(strategy);
         setEmbedText(embedText);
         setPreventFurtherRecursion(preventFurtherRecursion);

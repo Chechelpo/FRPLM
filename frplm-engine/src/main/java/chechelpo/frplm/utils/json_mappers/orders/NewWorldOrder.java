@@ -10,5 +10,6 @@ public record NewWorldOrder (
     EntityDataPayload<WorldsRecord> dataPayload,
     NewLorebookOrder lorebook,
     List<NewLocationOrder> locations,
+    List<NewRegionOrder> regions,
     List<NewEdgeOrder> locationEdges
-    ){}
+){}

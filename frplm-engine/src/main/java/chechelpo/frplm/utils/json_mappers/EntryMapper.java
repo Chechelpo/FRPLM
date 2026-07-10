@@ -58,7 +58,7 @@ public class EntryMapper {
                 entry.getDelay(),
                 entry.getCooldown(),
                 entry.getStickThrough(),
-                entry.getInjectionOrder(),
+                entry.getPosition(),
                 entry.getStrategy(),
                 entry.getPreventFurtherRecursion(),
                 entry.getNonRecursable(),
@@ -71,11 +71,12 @@ public class EntryMapper {
         return entryKeywordService.keywordsOfEntry(entry.getLorebookId(), entry.getEntryId());
     }
     String fetchOutlet(@NonNull EntryRecord entry){
+        if (entry.getOutlet() == null) return null;
         return outletService.getOutletName(entry.getOutlet())
-                .orElseThrow(() -> new EntityNotFound("No outlet name with id: " + entry.getOutlet(), Severity.SYSTEM));
+                .orElse(null);
     }
 
-    NewEntryOrder orderFrom(JsonNode node){
+    public NewEntryOrder orderFrom(JsonNode node){
         EntryJSON json = MAPPER.treeToValue(node, EntryJSON.class);
         int outletId = outletService.getOrCreateOutlet(json.outlet);
 
@@ -91,7 +92,7 @@ public class EntryMapper {
                         .set(ENTRY.DELAY, json.delay)
                         .set(ENTRY.COOLDOWN, json.cooldown)
                         .set(ENTRY.STICK_THROUGH, json.stick_through)
-                        .set(ENTRY.INJECTION_ORDER, (short) json.injection_order)
+                        .set(ENTRY.POSITION, (short) json.injection_order)
                         .set(ENTRY.STRATEGY, (short) json.strategy)
                         .set(ENTRY.PREVENT_FURTHER_RECURSION, json.prevent_further_recursion)
                         .set(ENTRY.NON_RECURSABLE, json.non_recursable)

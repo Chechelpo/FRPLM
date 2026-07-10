@@ -10,23 +10,24 @@ import chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import chechelpo.frplm.domain.world.core.WorldService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.domain.world.location.LocationsService;
+import chechelpo.frplm.domain.world.region.RegionService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.jooq.generated.tables.records.*;
 import chechelpo.frplm.utils.json_mappers.LorebookMapper;
 import chechelpo.frplm.utils.json_mappers.WorldMapper;
 import chechelpo.frplm.utils.json_mappers.orders.*;
+import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
-class ImporterService {
+final class ImporterService {
 
     private final LorebookMapper lorebookMapper;
     private final LorebookService lorebookService;
@@ -38,8 +39,9 @@ class ImporterService {
     private final EdgeService edgeService;
     private final CharacterService characterService;
     private final StartingLocationsService startingLocationsService;
+    private final RegionService regionService;
 
-    ImporterService(LorebookMapper lorebookMapper, LorebookService lorebookService, EntryService entryService, EntryKeywordService entryKeywordService, WorldMapper worldMapper, WorldService worldService, LocationsService locationsService, EdgeService edgeService, CharacterService characterService, StartingLocationsService startingLocationsService) {
+    ImporterService(LorebookMapper lorebookMapper, LorebookService lorebookService, EntryService entryService, EntryKeywordService entryKeywordService, WorldMapper worldMapper, WorldService worldService, LocationsService locationsService, EdgeService edgeService, CharacterService characterService, StartingLocationsService startingLocationsService, RegionService regionService) {
         this.lorebookMapper = lorebookMapper;
         this.lorebookService = lorebookService;
         this.entryService = entryService;
@@ -50,76 +52,145 @@ class ImporterService {
         this.edgeService = edgeService;
         this.characterService = characterService;
         this.startingLocationsService = startingLocationsService;
+        this.regionService = regionService;
     }
 
-    public boolean importLorebook(JsonNode node){
+    public boolean importLorebook(JsonNode node) {
         NewLorebookOrder order = lorebookMapper.orderFrom(node);
-        execute(order);
+        executeLorebook(order);
         return true;
     }
-    private @NonNull LorebooksRecord execute(@NonNull NewLorebookOrder order){
+
+    public WorldsRecord importWorld(JsonNode file) {
+        NewWorldOrder worldOrder = worldMapper.orderFrom(file);
+        LorebooksRecord worldLorebook = executeLorebook(worldOrder.lorebook());
+        worldOrder.dataPayload().set(WORLDS.LOREBOOK_ID, worldLorebook.getId());
+
+        WorldsRecord world = worldService.createAndGet(worldOrder.dataPayload());
+        int worldId = world.getId();
+
+        Map<String, RegionRecord> regionsByName = executeRegions(worldOrder.regions(), worldId);
+        Map<String, Integer> locationIdByName = executeLocationsAndCharacters(worldOrder.locations(), regionsByName, worldId);
+        executeEdges(worldOrder.locationEdges(), locationIdByName, worldId);
+
+        return world;
+    }
+
+    @NonNull LorebooksRecord executeLorebook(@NonNull NewLorebookOrder order) {
         LorebooksRecord record = lorebookService.createAndGet(order.entityPayload());
         int lorebookId = record.getId();
 
-        for (NewEntryOrder entryOrder : order.entries()){
-            entryOrder.entryInfo().set(ENTRY.LOREBOOK_ID, lorebookId);
-            EntryRecord entryRecord = entryService.createAndGet(entryOrder.entryInfo());
-            for (String keyword : entryOrder.keywords())
-                entryKeywordService.associate(lorebookId, entryRecord.getEntryId(), keyword);
+        for (NewEntryOrder entryOrder : order.entries()) {
+            executeEntry(entryOrder, lorebookId);
         }
 
         return record;
     }
 
-    public WorldsRecord importWorld(JsonNode file){
-        NewWorldOrder worldOrder = worldMapper.orderFrom(file);
-        LorebooksRecord worldLorebook = execute(worldOrder.lorebook());
-        worldOrder.dataPayload().set(WORLDS.LOREBOOK_ID, worldLorebook.getId());
+    void executeEntry(NewEntryOrder entryOrder, int lorebookId) {
+        entryOrder.entryInfo().set(ENTRY.LOREBOOK_ID, lorebookId);
+        EntryRecord entryRecord = entryService.createAndGet(entryOrder.entryInfo());
+        for (String keyword : entryOrder.keywords())
+            entryKeywordService.associate(lorebookId, entryRecord.getEntryId(), keyword);
+    }
 
-        WorldsRecord world = worldService.createAndGet(worldOrder.dataPayload());
+    @Contract(mutates = "param1")
+    @NonNull Map<String, RegionRecord> executeRegions(@NonNull List<NewRegionOrder> regionOrders, int worldId) {
+        Map<String, RegionRecord> regionsByName = new HashMap<>(regionOrders.size());
 
-        int worldId = world.getId();
-        Map<String, Integer> lorebookIdByName = new HashMap<>(worldOrder.locations().size());
-        for (NewLocationOrder locationOrder : worldOrder.locations()){
-            LorebooksRecord locationLorebook = execute(locationOrder.lorebookOrder());
+        List<RegionRecord> regionsWithParents = new ArrayList<>(regionOrders.size());
+        for (NewRegionOrder regionOrder : regionOrders) {
+            LorebooksRecord regionLorebook = executeLorebook(regionOrder.lorebookOrder());
+
+            regionOrder.payload().set(REGION.WORLD_ID, worldId);
+            regionOrder.payload().set(REGION.LOREBOOK_ID, regionLorebook.getId());
+            RegionRecord record = regionService.createAndGet(regionOrder.payload());
+
+            regionsByName.put(record.getName(), record);
+            if (regionOrder.parentRegionName() != null) regionsWithParents.add(record);
+        }
+
+        int i = 0;
+        int j = 0;
+        for (NewRegionOrder order : regionOrders){
+            if (order.parentRegionName() == null) {
+                i++;
+                continue;
+            }
+
+            RegionRecord parentRegion = regionsByName.get(order.parentRegionName());
+            if (parentRegion == null) throw new IllegalArgumentException("Null parent region");
+            RegionRecord child = regionsWithParents.get(j);
+
+            if (!Objects.equals(child.getName(), order.payload().requireValue(REGION.NAME)))
+                throw new IllegalStateException("The names don't match, the assertion failed");
+
+            regionService.update(
+                    regionService.keyOf(child),
+                    EntityDataPayload.of(REGION.PARENT_REGION_ID, parentRegion.getId())
+            );
+
+            i++;
+            j++;
+        }
+
+        return regionsByName;
+    }
+
+    @NonNull Map<String, Integer> executeLocationsAndCharacters(
+            @NonNull List<NewLocationOrder> locationOrders,
+            Map<String, RegionRecord> regions,
+            int worldId
+    ){
+        Map<String, Integer> locationIdByName = new HashMap<>(locationOrders.size());
+
+        for (NewLocationOrder locationOrder : locationOrders) {
+            LorebooksRecord locationLorebook = executeLorebook(locationOrder.lorebookOrder());
 
             locationOrder.payload().set(LOCATIONS.WORLD_ID, worldId);
             locationOrder.payload().set(LOCATIONS.LOREBOOK_ID, locationLorebook.getId());
+            if (locationOrder.parentRegionName() != null){
+                locationOrder.payload().set(LOCATIONS.REGION_ID, regions.get(locationOrder.parentRegionName()).getId());
+            }
 
             LocationsRecord newLocation = locationsService.createAndGet(locationOrder.payload());
-            lorebookIdByName.put(newLocation.getName(), newLocation.getId());
+            locationIdByName.put(newLocation.getName(), newLocation.getId());
 
-            for (NewCharacterOrder newCharacterOrder : locationOrder.charactersStartingHere()){
-                LorebooksRecord characterLorebook = execute(newCharacterOrder.lorebook());
-                newCharacterOrder.info().set(CHARACTERS.LOREBOOK_ID, characterLorebook.getId());
-                CharactersRecord characterRecord = characterService.createAndGet(newCharacterOrder.info());
+            if (locationOrder.charactersStartingHere() == null) continue;
+            for (NewCharacterOrder newCharacterOrder : locationOrder.charactersStartingHere()) {
+                CharactersRecord characterRecord = executeCharacter(newCharacterOrder);
                 startingLocationsService.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
-                                .set(STARTING_LOCATIONS.WORLD_ID, worldId)
-                                .set(STARTING_LOCATIONS.LOCATION_ID, newLocation.getId())
-                                .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
-                                .build()
+                        .set(STARTING_LOCATIONS.WORLD_ID, worldId)
+                        .set(STARTING_LOCATIONS.LOCATION_ID, newLocation.getId())
+                        .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
+                        .build()
                 );
             }
         }
 
-        for (NewEdgeOrder edgeOrder : worldOrder.locationEdges()){
-            int fromId = lorebookIdByName.get(edgeOrder.fromName());
-            int toId = lorebookIdByName.get(edgeOrder.toName());
-            edgeService.createAndGet(
-                    EntityDataPayload.<LocationNeighborsRecord>builder()
-                            .set(LOCATION_NEIGHBORS.WORLD_ID, worldId)
-                            .set(LOCATION_NEIGHBORS.LOCATION1_ID, fromId)
-                            .set(LOCATION_NEIGHBORS.LOCATION2_ID, toId)
-                            .set(LOCATION_NEIGHBORS.EDGEDESCRIPTION, edgeOrder.description() == null ? "" : edgeOrder.description())
-                            .set(LOCATION_NEIGHBORS.TRAVELCOST, edgeOrder.travel_cost())
-                            .build()
-            );
-        }
-
-        return world;
+        return locationIdByName;
     }
 
-    public JsonNode exportWorld(int worldId){
+    @NonNull CharactersRecord executeCharacter(NewCharacterOrder newCharacterOrder) {
+        LorebooksRecord characterLorebook = executeLorebook(newCharacterOrder.lorebook());
+        newCharacterOrder.info().set(CHARACTERS.LOREBOOK_ID, characterLorebook.getId());
+        return characterService.createAndGet(newCharacterOrder.info());
+    }
+
+    void executeEdges(@NonNull List<NewEdgeOrder> locationEdges, Map<String, Integer> locationIdByName, int worldId) {
+        for (NewEdgeOrder edgeOrder : locationEdges) {
+            int fromId = locationIdByName.get(edgeOrder.fromName());
+            int toId = locationIdByName.get(edgeOrder.toName());
+
+            edgeOrder.payload().set(LOCATION_EDGES.WORLD_ID, worldId);
+            edgeOrder.payload().set(LOCATION_EDGES.FROM_LOCATION_ID, fromId);
+            edgeOrder.payload().set(LOCATION_EDGES.TO_LOCATION_ID, toId);
+
+            edgeService.createAndGet(edgeOrder.payload());
+        }
+    }
+
+    public JsonNode exportWorld(int worldId) {
         return worldMapper.jsonFrom(
                 worldService.find(EntityKey.of(WORLDS.ID, worldId))
                         .orElseThrow(() -> new EntityNotFound("No world with id " + worldId, Severity.USER))

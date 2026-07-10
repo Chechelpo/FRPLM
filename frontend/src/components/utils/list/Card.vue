@@ -7,31 +7,73 @@
   "
 >
 import { computed } from "vue";
-import { ABSEntity } from "@/frameworks/ABSEntity";
-import { DataRecord } from "@/types/DTOs";
+
+import { ABSEntity } from "@/core/ABSEntity";
+import type { DataRecord } from "@/types/DTOs";
 import { CommonFields } from "@/utils/CommonFields";
 
-const props = defineProps<{
-  character: EntityType;
-  hasDescription: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+      /**
+       * Retained as `character` for compatibility with existing
+       * consumers. This component supports any ABSEntity.
+       */
+      character: EntityType;
+      hasDescription?: boolean;
+    }>(),
+    {
+      hasDescription: false,
+    },
+);
 
 const emit = defineEmits<{
-  edit: [element: EntityType];
-  remove: [element: EntityType];
+  (event: "open", element: EntityType): void;
+  (event: "edit", element: EntityType): void;
+  (event: "remove", element: EntityType): void;
 }>();
 
-const characterName = computed<string>(() => {
-  if (!props.character.hasAttribute(CommonFields.NAME)) {
-    throw new Error(
-        `Character of ${props.character.getEntityType} must specify a name to be shown in a card`,
-    );
+const entityName = computed<string>(() => {
+  if (
+      !props.character.hasAttribute(
+          CommonFields.NAME,
+      )
+  ) {
+    return "Unnamed item";
   }
 
-  return String(
-      props.character.getCommon(CommonFields.NAME),
+  const value = props.character.getCommon(
+      CommonFields.NAME,
   );
+
+  const normalized = String(value ?? "").trim();
+
+  return normalized || "Unnamed item";
 });
+
+const entityDescription = computed<
+    string | null
+>(() => {
+  if (
+      !props.hasDescription ||
+      !props.character.hasAttribute(
+          CommonFields.DESCRIPTION,
+      )
+  ) {
+    return null;
+  }
+
+  const value = props.character.getCommon(
+      CommonFields.DESCRIPTION,
+  );
+
+  const normalized = String(value ?? "").trim();
+
+  return normalized || null;
+});
+
+function onOpen(): void {
+  emit("open", props.character);
+}
 
 function onEdit(): void {
   emit("edit", props.character);
@@ -43,181 +85,350 @@ function onRemove(): void {
 </script>
 
 <template>
-  <div class="card">
-    <div
-        class="cardName"
-        :title="characterName"
+  <article
+      class="entity-card"
+      :class="{
+      'entity-card--with-description':
+        entityDescription,
+    }"
+  >
+    <button
+        type="button"
+        class="entity-card__main"
+        :title="entityName"
+        @click="onOpen"
     >
-      {{ characterName }}
-    </div>
+      <span class="entity-card__content">
+        <span class="entity-card__name">
+          {{ entityName }}
+        </span>
 
-    <div class="cardActions">
+        <span
+            v-if="entityDescription"
+            class="entity-card__description"
+        >
+          {{ entityDescription }}
+        </span>
+      </span>
+    </button>
+
+    <div class="entity-card__actions">
       <button
           type="button"
-          class="cardIcon cardIcon--edit"
-          title="Edit character"
-          aria-label="Edit character"
+          class="
+          entity-card__action
+          entity-card__action--edit
+        "
+          :title="`Edit ${entityName}`"
+          :aria-label="`Edit ${entityName}`"
           @click.stop="onEdit"
       >
-        <img
-            src="/icons/edit.png"
-            alt=""
-        />
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+          <path
+              d="M12 20h9"
+          />
+
+          <path
+              d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"
+          />
+        </svg>
       </button>
 
       <button
           type="button"
-          class="cardIcon cardIcon--remove"
-          title="Remove character"
-          aria-label="Remove character"
+          class="
+          entity-card__action
+          entity-card__action--remove
+        "
+          :title="`Remove ${entityName}`"
+          :aria-label="`Remove ${entityName}`"
           @click.stop="onRemove"
       >
-        <img
-            src="/characterCard/Trash.png"
-            alt=""
-        />
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+          <path d="M3 6h18" />
+          <path d="M8 6V4h8v2" />
+          <path d="m19 6-1 14H6L5 6" />
+          <path d="M10 11v5" />
+          <path d="M14 11v5" />
+        </svg>
       </button>
     </div>
-  </div>
+  </article>
 </template>
 
 <style scoped>
-.card {
+.entity-card {
   width: 100%;
-  height: 50px;
+  min-width: 0;
+  min-height: 3rem;
   box-sizing: border-box;
 
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: stretch;
 
-  padding: 4px 6px 4px 14px;
+  color: rgb(var(--c-fg));
 
-  color: var(--primary-text-color, #2f2418);
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-surface-raised) / 0.58),
+          rgb(var(--c-surface-2) / 0.36)
+      );
 
-  background-color: rgba(184, 143, 90, 0.55);
-  background-color: color-mix(
-      in srgb,
-      var(--secondary-background) 55%,
-      transparent
-  );
+  border:
+      1px solid
+      rgb(var(--c-border) / 0.28);
+  border-radius: var(--radius-sm);
 
-  border: 1px solid rgba(175, 130, 24, 0.7);
-  border-radius: 8px;
-
-  transition:
-      background-color 150ms ease,
-      border-color 150ms ease,
-      box-shadow 150ms ease;
-}
-
-.card:hover {
-  background-color: rgba(184, 143, 90, 0.72);
-  background-color: color-mix(
-      in srgb,
-      var(--secondary-background) 72%,
-      transparent
-  );
-
-  border-color: var(--primary-accent);
-  box-shadow: 0 3px 10px rgba(47, 36, 24, 0.18);
-}
-
-.cardName {
-  flex: 1;
-  min-width: 0;
+  box-shadow:
+      inset 0 1px 0
+      rgb(255 255 255 / 0.28),
+      0 2px 7px
+      rgb(var(--c-shadow) / 0.035);
 
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 
-  font-family: var(
-      --primary-text,
-      "Manrope",
-      "Avenir Next",
-      Avenir,
-      system-ui,
-      sans-serif
-  );
-  font-size: 0.95rem;
-  font-weight: 600;
-  line-height: 1.2;
+  transition:
+      background-color
+      var(--duration-fast)
+      var(--ease-standard),
+      border-color
+      var(--duration-fast)
+      var(--ease-standard),
+      box-shadow
+      var(--duration-fast)
+      var(--ease-standard),
+      transform
+      var(--duration-fast)
+      var(--ease-standard);
 }
 
-.cardActions {
+.entity-card:hover {
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-surface-hover) / 0.78),
+          rgb(var(--c-surface-2) / 0.48)
+      );
+
+  border-color:
+      rgb(var(--c-primary) / 0.48);
+
+  box-shadow:
+      inset 0 1px 0
+      rgb(255 255 255 / 0.34),
+      0 4px 12px
+      rgb(var(--c-shadow) / 0.065);
+
+  transform: translateY(-1px);
+}
+
+.entity-card:focus-within {
+  border-color:
+      rgb(var(--c-accent) / 0.66);
+
+  box-shadow:
+      0 0 0
+      var(--focus-ring-width)
+      rgb(var(--focus-ring-color) / 0.13),
+      inset 0 1px 0
+      rgb(255 255 255 / 0.32),
+      0 4px 12px
+      rgb(var(--c-shadow) / 0.06);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Main content                                                               */
+/* -------------------------------------------------------------------------- */
+
+.entity-card__main {
+  flex: 1 1 auto;
+
+  display: flex;
+  align-items: center;
+
+  min-width: 0;
+
+  padding:
+      var(--space-2)
+      var(--space-3);
+
+  color: inherit;
+
+  background: transparent;
+  border: 0;
+  outline: 0;
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.entity-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+
+  min-width: 0;
+}
+
+.entity-card__name {
+  overflow: hidden;
+
+  color: rgb(var(--c-fg-strong));
+
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entity-card__description {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: rgb(var(--c-muted));
+
+  font-size: 0.72rem;
+  font-weight: 450;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.entity-card--with-description {
+  min-height: 3.75rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Actions                                                                    */
+/* -------------------------------------------------------------------------- */
+
+.entity-card__actions {
   flex: 0 0 auto;
 
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: var(--space-1);
+
+  padding:
+      var(--space-1)
+      var(--space-1)
+      var(--space-1)
+      0;
 }
 
-.cardIcon {
+.entity-card__action {
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
   flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
 
   padding: 0;
 
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  color: rgb(var(--c-muted));
 
-  background-color: transparent;
+  background: transparent;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
+  outline: 0;
 
   cursor: pointer;
 
   transition:
-      background-color 120ms ease,
-      border-color 120ms ease,
-      transform 120ms ease,
-      box-shadow 120ms ease;
+      color
+      var(--duration-fast)
+      var(--ease-standard),
+      background-color
+      var(--duration-fast)
+      var(--ease-standard),
+      border-color
+      var(--duration-fast)
+      var(--ease-standard),
+      transform
+      var(--duration-fast)
+      var(--ease-standard);
 }
 
-.cardIcon--edit {
-  width: 40px;
-  height: 40px;
+.entity-card__action svg {
+  width: 1rem;
+  height: 1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.cardIcon--edit img {
-  width: 28px;
-  height: 28px;
+.entity-card__action--edit:hover {
+  color: rgb(var(--c-primary-strong));
+
+  background:
+      rgb(var(--c-accent) / 0.15);
+  border-color:
+      rgb(var(--c-accent) / 0.35);
 }
 
-.cardIcon--remove {
-  width: 34px;
-  height: 34px;
+.entity-card__action--remove:hover {
+  color: rgb(var(--c-on-danger));
+
+  background:
+      rgb(var(--c-danger) / 0.86);
+  border-color:
+      rgb(var(--c-danger));
 }
 
-.cardIcon--remove img {
-  width: 20px;
-  height: 20px;
+.entity-card__action:active {
+  transform: scale(0.93);
 }
 
-.cardIcon:hover {
-  background-color: rgba(255, 198, 0, 0.2);
-  border-color: rgba(255, 198, 0, 0.55);
+.entity-card__action:focus-visible {
+  border-color:
+      rgb(var(--c-accent) / 0.65);
+
+  box-shadow:
+      0 0 0
+      2px
+      rgb(var(--focus-ring-color) / 0.22);
 }
 
-.cardIcon--remove:hover {
-  background-color: rgba(130, 38, 24, 0.16);
-  border-color: rgba(130, 38, 24, 0.4);
+@media (max-width: 420px) {
+  .entity-card__main {
+    padding:
+        var(--space-2)
+        var(--space-2);
+  }
+
+  .entity-card__actions {
+    gap: 0;
+  }
 }
 
-.cardIcon:active {
-  transform: scale(0.94);
-}
+@media (prefers-reduced-motion: reduce) {
+  .entity-card,
+  .entity-card__action {
+    transition: none;
+  }
 
-.cardIcon:focus-visible {
-  outline: none;
-  border-color: var(--primary-accent);
-  box-shadow: 0 0 0 2px rgba(255, 198, 0, 0.25);
-}
-
-.cardIcon img {
-  display: block;
-  object-fit: contain;
-  pointer-events: none;
+  .entity-card:hover {
+    transform: none;
+  }
 }
 </style>

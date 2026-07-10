@@ -9,7 +9,10 @@ import chechelpo.frplm.domain.world.edge.EdgeTestContext;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
+import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,7 @@ import org.springframework.test.context.jdbc.Sql;
 import javax.xml.stream.events.Characters;
 
 import static chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -66,7 +70,7 @@ public class FullMovementsTest {
     void move_throwsOnNotNeighbours() {
         MessageTestContext.Context context = messages.createSessionWithMessages(10, 3);
         assertThrows(
-                InvalidValue.class,
+                EntityNotFound.class,
                 () -> movements.move(
                         context.sessionContext().session().getId(),
                         context.sessionContext().session().getUserPersonaId(),
@@ -85,6 +89,34 @@ public class FullMovementsTest {
                         context.sessionContext().session().getId(),
                         randomCharacter.getId(),
                         context.sessionContext().sessionLocations().get(2).getId())
+        );
+    }
+    @Test
+    void move_rejectsMovingOnNonTraversableEdge(){
+        MessageTestContext.Context context = messages.createSessionWithMessages(10, 3);
+        int characterId = context.sessionContext().userCharacter().getId();
+        LocationsRecord fromLocation = currentLocationTestContext.service.getLocationOf(
+                context.sessionContext().userCharacter(),
+                context.sessionContext().session()
+        );
+        LocationsRecord toLocation = context.sessionContext().sessionLocations().get(1);
+
+        edgeTestContext.service.createAndGet(
+                EntityDataPayload.<LocationEdgesRecord>builder()
+                        .set(LOCATION_EDGES.WORLD_ID, fromLocation.getWorldId())
+                        .set(LOCATION_EDGES.FROM_LOCATION_ID, fromLocation.getId())
+                        .set(LOCATION_EDGES.TO_LOCATION_ID, toLocation.getId())
+                        .set(LOCATION_EDGES.TRAVERSABLE, false)
+                        .build()
+        );
+
+        assertThrows(
+                UnsupportedAction.class,
+                () -> movements.move(
+                        context.sessionContext().session().getId(),
+                        characterId,
+                        toLocation.getId()
+                )
         );
     }
     @Test

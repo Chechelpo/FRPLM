@@ -24,6 +24,7 @@ public class CharacterMapper {
 
     private record CharacterJSON(
             String name,
+            String description,
             boolean can_be_user,
             String welcome_message,
             JsonNode lorebook
@@ -32,6 +33,7 @@ public class CharacterMapper {
     public JsonNode jsonFrom(@NonNull CharactersRecord record){
         return MAPPER.valueToTree(new CharacterJSON(
                 record.getName(),
+                record.getDescription(),
                 record.getCanBeUser(),
                 record.getWelcomeMessage(),
                 lorebookMapper.jsonFrom(lorebookService.getLorebookOf(record))
@@ -44,6 +46,7 @@ public class CharacterMapper {
         return new NewCharacterOrder(
                 EntityDataPayload.<CharactersRecord>builder()
                         .set(CHARACTERS.NAME, json.name)
+                        .set(CHARACTERS.DESCRIPTION, json.description)
                         .set(CHARACTERS.CAN_BE_USER, json.can_be_user)
                         .set(CHARACTERS.WELCOME_MESSAGE, json.welcome_message)
                         .build()

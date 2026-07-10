@@ -7,6 +7,7 @@ import java.util.List;
 
 public record NewLocationOrder (
     EntityDataPayload<LocationsRecord> payload,
+    String parentRegionName,
     NewLorebookOrder lorebookOrder,
     List<NewCharacterOrder> charactersStartingHere
 ) {}

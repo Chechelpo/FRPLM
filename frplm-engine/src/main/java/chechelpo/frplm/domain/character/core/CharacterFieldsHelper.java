@@ -46,6 +46,13 @@ final class CharacterFieldsHelper extends ABSControllerAwareHelper<
         );
 
         register_field(
+                "description",
+                CHARACTERS.DESCRIPTION,
+                FieldInfo.stringField()
+                        .build()
+        );
+
+        register_field(
                 "is_archetype",
                 CHARACTERS.IS_ARCHETYPE,
                 FieldInfo.booleanField()

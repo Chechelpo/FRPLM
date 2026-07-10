@@ -3,14 +3,14 @@ package chechelpo.frplm.domain.world.edge;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import chechelpo.frplm.domain.world.location.LocationTestContext;
 import chechelpo.frplm.interfaces.DBReload;
-import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 
 import java.util.List;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_NEIGHBORS;
+import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @TestComponent
 public class EdgeTestContext implements DBReload {
@@ -23,10 +23,10 @@ public class EdgeTestContext implements DBReload {
 
 
     public void link(int worldID, int locationId, int otherLocationID){
-        service.createAndGet(EntityDataPayload.<LocationNeighborsRecord>builder()
-                        .set(LOCATION_NEIGHBORS.WORLD_ID, worldID)
-                        .set(LOCATION_NEIGHBORS.LOCATION1_ID, locationId)
-                        .set(LOCATION_NEIGHBORS.LOCATION2_ID, otherLocationID)
+        service.createAndGet(EntityDataPayload.<LocationEdgesRecord>builder()
+                        .set(LOCATION_EDGES.WORLD_ID, worldID)
+                        .set(LOCATION_EDGES.FROM_LOCATION_ID, locationId)
+                        .set(LOCATION_EDGES.TO_LOCATION_ID, otherLocationID)
                         .build()
         );
     }
@@ -34,13 +34,8 @@ public class EdgeTestContext implements DBReload {
     public void linkLinear(List<LocationsRecord> locationsToLink){
         if (locationsToLink == null || locationsToLink.isEmpty()) throw new IllegalArgumentException("Locations list is empty or null");
         int worldID = locationsToLink.getFirst().getWorldId();
-        for (int i = 0; i < locationsToLink.size() - 1; i++) {
+        for (int i = 0; i < locationsToLink.size() - 1; i++)
             link(worldID, locationsToLink.get(i).getId(), locationsToLink.get(i+1).getId());
-            assert service.isNeighbour(
-                    locations.service.keyOf(locationsToLink.get(i)),
-                    locations.service.keyOf(locationsToLink.get(i+1))
-            ) : "Error when linking locations";
-        }
     }
     @Override
     public void reload() {

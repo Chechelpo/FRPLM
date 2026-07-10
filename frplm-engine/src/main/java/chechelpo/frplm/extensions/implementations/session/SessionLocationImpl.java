@@ -1,6 +1,6 @@
 package chechelpo.frplm.extensions.implementations.session;
 
-import chechelpo.frplm.extensions.api.session.SessionLocation;
+import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import chechelpo.frplm.extensions.implementations.standalone.LocationImpl;
 import chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;

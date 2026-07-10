@@ -25,10 +25,10 @@ public final class EntryController extends EntityController<EntryRecord, EntrySe
     }
 
     @PatchMapping(ENTITY_PATH + "/{lorebook_id}/{entryID}")
-    ResponseEntity<Boolean> updateOutlet(
+    ResponseEntity<Integer> updateOutlet(
             @PathVariable("lorebook_id") int lorebookId,
             @PathVariable("entryID") int entryId,
-            @RequestBody String outlet
+            @RequestParam String outlet
     ) {
         return ResponseEntity.ok(
                 service.updateOutlet(

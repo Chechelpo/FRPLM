@@ -6,6 +6,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityStore;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
@@ -37,5 +38,21 @@ final class MessageStore extends EntityStore<MessagesRecord> {
                 .orderBy(MESSAGES.TICK_NUM.desc())
                 .limit(1)
                 .fetchOneInto(MessagesRecord.class);
+    }
+
+    List<MessagesRecord> getLast(int sessionId, int number){
+        return ctx.selectFrom(MESSAGES)
+                .where(MESSAGES.SESSION_ID.eq(sessionId))
+                .orderBy(MESSAGES.TICK_NUM.desc())
+                .limit(number)
+                .fetch();
+    }
+
+    @NonNull List<MessagesRecord> getLast(int sessionId, int from, int to){
+        return ctx.selectFrom(MESSAGES)
+                .where(MESSAGES.SESSION_ID.eq(sessionId))
+                .and(MESSAGES.TICK_NUM.between(from, to))
+                .orderBy(MESSAGES.TICK_NUM.desc())
+                .fetch();
     }
 }

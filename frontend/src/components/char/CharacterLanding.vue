@@ -6,7 +6,7 @@ import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
 import {EntityTypes} from "@/domain/EntityTypes";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
-import {deleteEntity, fetch_all} from "@/frameworks/ABSEntity";
+import {deleteEntity, fetch_all} from "@/core/ABSEntity";
 
 /* data */
 const characters = ref<Character[]>([]);

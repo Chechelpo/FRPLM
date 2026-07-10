@@ -7,7 +7,7 @@ package chechelpo.frplm.jooq.generated.tables;
 import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
-import chechelpo.frplm.jooq.generated.tables.LocationNeighbors.LocationNeighborsPath;
+import chechelpo.frplm.jooq.generated.tables.LocationEdges.LocationEdgesPath;
 import chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
@@ -171,7 +171,7 @@ public class Locations extends TableImpl<LocationsRecord> {
 
     @Override
     public List<UniqueKey<LocationsRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.UNIQUE_LOCATION_NAME_PER_WORLD);
+        return Arrays.asList(Keys.CONSTRAINT_5EBC6, Keys.UNIQUE_LOCATION_NAME_PER_WORLD);
     }
 
     @Override
@@ -215,45 +215,6 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _region;
     }
 
-    private transient MessagesPath _messages;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
-     * table
-     */
-    public MessagesPath messages() {
-        if (_messages == null)
-            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_131AF.getInverseKey());
-
-        return _messages;
-    }
-
-    private transient ResponsesPath _responses;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
-     * table
-     */
-    public ResponsesPath responses() {
-        if (_responses == null)
-            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_31438.getInverseKey());
-
-        return _responses;
-    }
-
-    private transient ResponseLocationChangesPath _responseLocationChanges;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
-     */
-    public ResponseLocationChangesPath responseLocationChanges() {
-        if (_responseLocationChanges == null)
-            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_379EE.getInverseKey());
-
-        return _responseLocationChanges;
-    }
-
     private transient LocationTagsPath _locationTags;
 
     /**
@@ -265,47 +226,6 @@ public class Locations extends TableImpl<LocationsRecord> {
             _locationTags = new LocationTagsPath(this, null, Keys.CONSTRAINT_506A.getInverseKey());
 
         return _locationTags;
-    }
-
-    private transient LocationNeighborsPath _constraint_5df;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.LOCATION_NEIGHBORS</code> table, via the
-     * <code>CONSTRAINT_5DF</code> key
-     */
-    public LocationNeighborsPath constraint_5df() {
-        if (_constraint_5df == null)
-            _constraint_5df = new LocationNeighborsPath(this, null, Keys.CONSTRAINT_5DF.getInverseKey());
-
-        return _constraint_5df;
-    }
-
-    private transient LocationNeighborsPath _constraint_5df1;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.LOCATION_NEIGHBORS</code> table, via the
-     * <code>CONSTRAINT_5DF1</code> key
-     */
-    public LocationNeighborsPath constraint_5df1() {
-        if (_constraint_5df1 == null)
-            _constraint_5df1 = new LocationNeighborsPath(this, null, Keys.CONSTRAINT_5DF1.getInverseKey());
-
-        return _constraint_5df1;
-    }
-
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5AF8.getInverseKey());
-
-        return _currentLocations;
     }
 
     private transient StartingLocationsPath _startingLocations;
@@ -321,6 +241,60 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _startingLocations;
     }
 
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_LOCATION.getInverseKey());
+
+        return _currentLocations;
+    }
+
+    private transient LocationEdgesPath _fkLocationEdgesFromlocationid;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.LOCATION_EDGES</code> table, via the
+     * <code>FK_LOCATION_EDGES_FROMLOCATIONID</code> key
+     */
+    public LocationEdgesPath fkLocationEdgesFromlocationid() {
+        if (_fkLocationEdgesFromlocationid == null)
+            _fkLocationEdgesFromlocationid = new LocationEdgesPath(this, null, Keys.FK_LOCATION_EDGES_FROMLOCATIONID.getInverseKey());
+
+        return _fkLocationEdgesFromlocationid;
+    }
+
+    private transient LocationEdgesPath _fkLocationEdgesTolocationid;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.LOCATION_EDGES</code> table, via the
+     * <code>FK_LOCATION_EDGES_TOLOCATIONID</code> key
+     */
+    public LocationEdgesPath fkLocationEdgesTolocationid() {
+        if (_fkLocationEdgesTolocationid == null)
+            _fkLocationEdgesTolocationid = new LocationEdgesPath(this, null, Keys.FK_LOCATION_EDGES_TOLOCATIONID.getInverseKey());
+
+        return _fkLocationEdgesTolocationid;
+    }
+
+    private transient MessagesPath _messages;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
+     * table
+     */
+    public MessagesPath messages() {
+        if (_messages == null)
+            _messages = new MessagesPath(this, null, Keys.FK_MESSAGE_LOCATION.getInverseKey());
+
+        return _messages;
+    }
+
     private transient MovementsPath _movements;
 
     /**
@@ -329,9 +303,35 @@ public class Locations extends TableImpl<LocationsRecord> {
      */
     public MovementsPath movements() {
         if (_movements == null)
-            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68625.getInverseKey());
+            _movements = new MovementsPath(this, null, Keys.FK_MOVEMENTS_LOCATIONS.getInverseKey());
 
         return _movements;
+    }
+
+    private transient ResponseLocationChangesPath _responseLocationChanges;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     */
+    public ResponseLocationChangesPath responseLocationChanges() {
+        if (_responseLocationChanges == null)
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.FK_RESPONSE_LOCATION_CHANGES_LOCATION.getInverseKey());
+
+        return _responseLocationChanges;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_LOCATIONS.getInverseKey());
+
+        return _responses;
     }
 
     /**

@@ -1,9 +1,15 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.extensions.api.standalone.EntrySnapshot;
-import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.EntrySnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
+import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import org.jooq.Record2;
+import org.jooq.Result;
+
+import java.util.List;
 
 import static chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
@@ -13,7 +19,7 @@ public class LorebookImpl extends StandaloneEntity<LorebooksRecord> implements L
     }
 
     @Override
-    public Reference reference() {
+    public Reference asReference() {
         return new LorebookSnapshot.Reference(getRecord().getId());
     }
 
@@ -27,5 +33,10 @@ public class LorebookImpl extends StandaloneEntity<LorebooksRecord> implements L
         return context.entries().getMatching(EntityKey.of(ENTRY.LOREBOOK_ID, record.getId())).stream()
                 .map(record -> new EntryImpl(record, this.context))
                 .toArray(EntrySnapshot[]::new);
+    }
+
+
+    public List<EntryRecord> getElegible(IntSet keywordIds){
+        return context.entries().getEntriesWith(IntSet.of(record.getId()), keywordIds);
     }
 }

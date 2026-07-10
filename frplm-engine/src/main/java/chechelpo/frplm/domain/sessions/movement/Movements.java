@@ -9,15 +9,12 @@ import chechelpo.frplm.domain.sessions.messages.MessageService;
 import chechelpo.frplm.domain.world.edge.EdgeService;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.exceptions.runtime.InvalidValue;
+import chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import chechelpo.frplm.jooq.generated.tables.records.*;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 import static chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -66,8 +63,23 @@ public class Movements {
         );
         MessagesRecord lastMessage = messageService.getLastOf(sessionId);
         if (messageService.isFirstMessage(lastMessage)) return false; //Can't move in first message
-        if (!edgeService.isNeighbour(previousLocation.getWorldId(), previousLocation.getId(), toLocationId))
-            throw new InvalidValue("Locations are not neighbours");
+
+        LocationEdgesRecord locationEdgesRecord = edgeService.find(
+                EntityKey.<LocationEdgesRecord>builder()
+                        .set(LOCATION_EDGES.WORLD_ID, previousLocation.getWorldId())
+                        .set(LOCATION_EDGES.FROM_LOCATION_ID, previousLocation.getId())
+                        .set(LOCATION_EDGES.TO_LOCATION_ID, toLocationId)
+                        .build()
+        ).orElseThrow(() -> new EntityNotFound(
+                "Edge from location \n%s\n to location id %s does not exist".formatted(previousLocation, toLocationId),
+                Severity.USER
+        ));
+
+        if (!locationEdgesRecord.getTraversable())
+            throw new UnsupportedAction(
+                    "Edge from \n%s\n to \n%s\n is NOT traversable".formatted(previousLocation.getName(), locationEdgesRecord),
+                    Severity.EXPECTED
+            );
 
         ResponseLocationChangesRecord changesRecord = responseMovementService.moveInCurrentResponse(sessionId, characterId, toLocationId);
         currentLocationService.update(EntityKey.<CurrentLocationsRecord>builder()

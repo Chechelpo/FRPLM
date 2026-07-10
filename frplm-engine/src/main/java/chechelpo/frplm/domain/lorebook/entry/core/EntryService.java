@@ -6,7 +6,6 @@ import chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import chechelpo.frplm.events.EventBus;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import chechelpo.frplm.exceptions.runtime.InvalidKey;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
 import chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -16,13 +15,13 @@ import chechelpo.frplm.jooq.generated.tables.Entry;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import chechelpo.frplm.utils.CRUDActionResult;
 import chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +44,9 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         this.outlets = outlets;
         this.entryKeywordService = entryKeywordService;
     }
-
+    public Result<EntryRecord> getAllActiveEntriesOf(IntSet lorebookIds){
+        return store.getActiveOfLorebooks(lorebookIds);
+    }
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<EntryRecord> data, long operationID) {
@@ -74,14 +75,16 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
         super.beforeUpdate(target, data, operationID);
     }
 
-    public boolean updateOutlet(EntityKey<EntryRecord> id, String newOutletName) {
-        return store.update(
+    public int updateOutlet(EntityKey<EntryRecord> id, String newOutletName) {
+        int outletId = outlets.getOrCreateOutlet(newOutletName);
+        store.update(
                 id,
                 EntityDataPayload.of(
                         ENTRY.OUTLET,
-                        outlets.getOrCreateOutlet(newOutletName)
+                        outletId
                 )
         );
+        return outletId;
     }
     @Transactional
     public EntryRecord exchangeEntry(EntityKey<EntryRecord> entryKey, int toLorebookId){
@@ -121,8 +124,8 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
                 .set(ENTRY.DELAY, entry.getDelay())
                 .set(ENTRY.COOLDOWN, entry.getCooldown())
                 .set(ENTRY.STICK_THROUGH, entry.getStickThrough())
-                .set(ENTRY.INJECTION_ORDER, (short) entry.getInjectionOrder())
-                .set(ENTRY.STRATEGY, (short) entry.getStrategy())
+                .set(ENTRY.POSITION, entry.getPosition())
+                .set(ENTRY.STRATEGY, entry.getStrategy())
                 .set(ENTRY.PREVENT_FURTHER_RECURSION, entry.getPreventFurtherRecursion())
                 .set(ENTRY.NON_RECURSABLE, entry.getNonRecursable())
                 .set(ENTRY.SCAN_DEPTH, entry.getScanDepth())

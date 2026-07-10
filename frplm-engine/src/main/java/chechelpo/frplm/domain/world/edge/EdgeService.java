@@ -8,7 +8,7 @@ import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import chechelpo.frplm.exceptions.Severity;
 import chechelpo.frplm.exceptions.runtime.Duplicate;
 import chechelpo.frplm.exceptions.runtime.InvalidValue;
-import chechelpo.frplm.jooq.generated.tables.records.LocationNeighborsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -18,10 +18,10 @@ import java.util.List;
 import java.util.Objects;
 
 import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOCATION_NEIGHBORS;
+import static chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @Service
-public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStore> {
+public class EdgeService extends EntityService<LocationEdgesRecord, EdgeStore> {
     private final LocationsService locations;
 
     EdgeService(LocationsService locations, EdgeStore store, EventBus eventBus) {
@@ -29,94 +29,48 @@ public class EdgeService extends EntityService<LocationNeighborsRecord, EdgeStor
         this.locations = locations;
     }
 
-    public @NotNull List<LocationsRecord> getNeighboursOf(LocationsRecord location) {
-        return this.getNeighbours(locations.keyOf(location));
+    /** @return all locations associated with this location ( thisLocation -> otherLocation ) || ( thisLocation <- otherLocation )*/
+    public @NotNull List<LocationsRecord> neighboursOf(LocationsRecord location) {
+        return this.neighboursOf(locations.keyOf(location));
     }
 
-    public @NotNull List<LocationsRecord> getNeighbours(EntityKey<LocationsRecord> key) {
+    /** @return all locations associated with this location ( thisLocation -> otherLocation ) || ( thisLocation <- otherLocation ) */
+    public @NotNull List<LocationsRecord> neighboursOf(EntityKey<LocationsRecord> key) {
         return this.store.getNeighboursOf(key);
     }
 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     @Override
-    protected void beforeCreate(EntityDataPayload<LocationNeighborsRecord> data, long operationID) {
-        int worldId = data.requireValue(LOCATION_NEIGHBORS.WORLD_ID);
-        int location1 = data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID);
-        int location2 = data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID);
-
-        if (Objects.equals(data.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID), data.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID)))
-            throw new IllegalArgumentException("Locations neighbours must have the same ID");
-
-        if (exists(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, worldId)
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location2)
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location1)
-                .build())
-        ) throw new Duplicate("Edge from id %s to id %s already exists".formatted(location1, location2), Severity.EXPECTED);
+    protected void beforeCreate(EntityDataPayload<LocationEdgesRecord> data, long operationID) {
+        if (Objects.equals(data.requireValue(LOCATION_EDGES.FROM_LOCATION_ID), data.requireValue(LOCATION_EDGES.TO_LOCATION_ID)))
+            throw new InvalidValue("Locations neighbours must have the same ID");
 
         super.beforeCreate(data, operationID);
     }
 
-    @Override
-    public @NotNull LocationNeighborsRecord createAndGet(EntityDataPayload<LocationNeighborsRecord> data) {
-        return super.createAndGet(data);
-    }
-
-    /**
-     * @implNote Tries the inverse if failed.
-     */
-    @Override
-    public boolean delete(EntityKey<LocationNeighborsRecord> id) {
-        return super.delete(id) || super.delete(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, id.requireValue(LOCATION_NEIGHBORS.WORLD_ID))
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, id.requireValue(LOCATION_NEIGHBORS.LOCATION2_ID))
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, id.requireValue(LOCATION_NEIGHBORS.LOCATION1_ID))
-                .build()
-        );
-    }
-
-    /**
-     * @return edge exists (thisLocation -> otherLocation || otherLocation -> thisLocation)
-     */
+    /** @return edge exists ( thisLocation -> otherLocation ) || ( thisLocation <- otherLocation ) */
     @Transactional(readOnly = true)
-    public boolean isNeighbour(@NotNull EntityKey<LocationsRecord> thisKey, @NotNull EntityKey<LocationsRecord> otherKey) {
-        locations.throwIfInvalidKey(thisKey, true);
-        locations.throwIfInvalidKey(otherKey, true);
+    public boolean isNeighbour(@NotNull EntityKey<LocationsRecord> fromKey, @NotNull EntityKey<LocationsRecord> toKey) {
+        locations.throwIfInvalidKey(fromKey, true);
+        locations.throwIfInvalidKey(toKey, true);
 
-        int thisWorldID = thisKey.getValue(LOCATIONS.WORLD_ID);
-        int otherWorldID = otherKey.getValue(LOCATIONS.WORLD_ID);
-
+        int thisWorldID = fromKey.getValue(LOCATIONS.WORLD_ID);
+        int otherWorldID = toKey.getValue(LOCATIONS.WORLD_ID);
         if (thisWorldID != otherWorldID) return false;
 
-        boolean fromThisToOther = this.exists(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, thisWorldID)
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, thisKey.getValue(LOCATIONS.ID))
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, otherKey.getValue(LOCATIONS.ID))
-                .build()
-        );
-        boolean fromOtherToThis = this.exists(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, thisWorldID)
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, otherKey.getValue(LOCATIONS.ID))
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, thisKey.getValue(LOCATIONS.ID))
-                .build()
-        );
-
-        return fromThisToOther || fromOtherToThis;
+        return this.isNeighbour(thisWorldID, fromKey.requireValue(LOCATIONS.ID), toKey.requireValue(LOCATIONS.ID));
     }
     public boolean isNeighbour(int worldID, int location1ID, int location2ID) {
-        boolean fromThisToOther = this.exists(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, worldID)
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location1ID)
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location2ID)
+        return super.exists(EntityKey.<LocationEdgesRecord>builder()
+                .set(LOCATION_EDGES.WORLD_ID, worldID)
+                .set(LOCATION_EDGES.FROM_LOCATION_ID, location1ID)
+                .set(LOCATION_EDGES.TO_LOCATION_ID, location2ID)
+                .build()
+        ) || super.exists(EntityKey.<LocationEdgesRecord>builder()
+                .set(LOCATION_EDGES.WORLD_ID, worldID)
+                .set(LOCATION_EDGES.FROM_LOCATION_ID, location2ID)
+                .set(LOCATION_EDGES.TO_LOCATION_ID, location1ID)
                 .build()
         );
-        boolean fromOtherToThis = this.exists(EntityKey.<LocationNeighborsRecord>builder()
-                .set(LOCATION_NEIGHBORS.WORLD_ID, worldID)
-                .set(LOCATION_NEIGHBORS.LOCATION1_ID, location1ID)
-                .set(LOCATION_NEIGHBORS.LOCATION2_ID, location2ID)
-                .build()
-        );
-
-        return fromThisToOther || fromOtherToThis;
     }
 }

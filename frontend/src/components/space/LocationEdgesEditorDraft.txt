@@ -1,0 +1,155 @@
+<script setup lang="ts">
+import {
+  computed,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
+
+import {
+  EdgeData, EdgeKey,
+  Location,
+  LocationEdge,
+} from "@/domain/World";
+
+import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
+import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import List from "@/components/utils/list/List.vue";
+import {fetchOne} from "@/core/ABSEntity";
+import ConnectLocationPrompt, {ConnectionDirection} from "@/components/space/ConnectLocationPrompt.vue";
+import BooleanTickBox from "@/components/utils/primitiveEditors/BooleanTickBox.vue";
+import {v} from "vue-router/dist/router-CWoNjPRp";
+
+const model = defineModel<{
+  parentLocation: Location;
+  all_locations: Location[];
+}>({
+  required: true,
+});
+
+/** Either from parent location or to location */
+const neighbouringLocations = ref<Location[]>([]);
+
+const editingNeighbour = ref<Location | undefined>(undefined);
+const outEdge = ref<LocationEdge | undefined>(undefined);
+const inEdge = ref<LocationEdge | undefined>(undefined);
+
+async function editNeighbour(neighbour: Location) {
+  if (editingNeighbour.value?.equals(neighbour)) {
+    editingNeighbour.value = undefined;
+    return;
+  }
+  outEdge.value = await model.value.parentLocation.getEdgeInfo(neighbour);
+  inEdge.value = await neighbour.getEdgeInfo(model.value.parentLocation);
+  editingNeighbour.value = neighbour;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Create / delete edge
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const creatingNeighbour = ref<boolean>(false);
+
+async function createNeighbour(other: Location, direction: ConnectionDirection) {
+  editingNeighbour.value = other;
+  if (direction == "both") {
+    await createOutEdge();
+    await createInEdge();
+    return;
+  }
+  if (direction == "outgoing") await createOutEdge();
+  if (direction == "incoming") await createInEdge();
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Create / delete edge
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+async function createInEdge() {
+  if (!editingNeighbour.value) return;
+  const success = await editingNeighbour.value!.connect(model.value.parentLocation, {})
+  if (success) inEdge.value = await editingNeighbour.value.getEdgeInfo(model.value.parentLocation);
+}
+
+async function createOutEdge() {
+  if (!editingNeighbour.value) return;
+  const success = await model.value.parentLocation.connect(editingNeighbour.value! as Location, {})
+  if (success) outEdge.value = await model.value.parentLocation.getEdgeInfo(editingNeighbour.value! as Location);
+}
+
+async function deleteInEdge() {
+  if (!inEdge.value) return;
+  const success = await editingNeighbour.value!.disconnect(model.value.parentLocation);
+  if (success) inEdge.value = undefined;
+}
+
+async function deleteOutEdge() {
+  if (!outEdge) return;
+  const success = await model.value.parentLocation.disconnect(editingNeighbour.value! as Location);
+  if (success) outEdge.value = undefined;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Load info
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+onMounted(() => load())
+const isLoading = ref<boolean>(false);
+
+async function load() {
+  isLoading.value = true;
+  try {
+    neighbouringLocations.value = await model.value.parentLocation.getNeighbours();
+  } finally {
+    isLoading.value = false;
+  }
+}
+</script>
+
+<template>
+  <ConnectLocationPrompt
+      v-if="creatingNeighbour"
+      :parent-location="model.parentLocation"
+      :connectable-locations="model.all_locations"
+      @select="(value, direction) => createNeighbour(value, direction)"
+  />
+  <!-- Create new neighbour + small introduction to the editor (Neighbours of, what it means to be a neighbour) -->
+  <div>
+
+  </div>
+
+  <!-- -->
+  <SplitPanel storage-key="edge editor">
+    <template #left>
+      <!-- Special component listing neighbours with a select-->
+    </template>
+    <!-- Edge Editor. Neighbour name -->
+    <template #right>
+      <!-- Must have alternate view if no neighbour selected -->
+      <div v-if="editingNeighbour">
+        <div v-if="inEdge">
+          <FieldEditorWrapper field-name="edge_description">
+            <LongTextBox
+                :model-value="inEdge.get('edge_description')"
+                @edit="value => inEdge!.update('edge_description', value)"
+                />
+          </FieldEditorWrapper>
+          <!-- Separate action style box for making changes to the other things-->
+          <div>
+            <FieldEditorWrapper field-name="is_traversable">
+              <BooleanTickBox
+                  :model-value="inEdge.get('is_traversable')"
+                  @edit="value => inEdge!.update('is_traversable', value)"
+              />
+            </FieldEditorWrapper>
+          </div>
+        </div>
+        <!-- Same editor for out edge. A button saying create out edge if its not there -->
+        <div v-if="outEdge"></div>
+      </div>
+    </template>
+  </SplitPanel>
+</template>
+
+<style scoped>
+
+</style>
+

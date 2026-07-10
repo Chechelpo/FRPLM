@@ -13,7 +13,7 @@ public final class EntityTypes {
     // Chars
     private static final String CHARACTERS_str         = "characters";
     private static final String STARTING_LOCATIONS_str = "startingLocations";
-    public static final String CHARACTER_TAGS_str      = "characterTags";
+    public static final  String CHARACTER_TAGS_str      = "characterTags";
 
     // Connection
     private static final String API_HOSTS_str          = "apiHosts";

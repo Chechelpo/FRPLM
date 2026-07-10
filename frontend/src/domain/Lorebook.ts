@@ -5,27 +5,39 @@ import {
     EntityField,
     fetch_all,
     fetchApi,
+    fetchFromReference,
     fetchMatching,
     fetchOne,
     getEntityController
-} from "@/frameworks/ABSEntity";
+} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import {CommonFields} from "@/utils/CommonFields";
 import {API_BASE} from "@/config";
 import {DTO, Primitives} from "@/types/DTOs";
+import {parseNumberKey} from "@/utils/ReferenceCodec";
 
 export type LorebookKey = { id: number }
 export type LorebookData = { name: string }
 
 export class Lorebook extends ABSEntity<LorebookKey, LorebookData> {
     private entries: Entry[] | null = null;
+    private static readonly REFERENCE_KEY_ORDER: readonly (keyof LorebookKey & string)[] = ['id'] as const
 
     getEntityType(): EntityTypes {
         return EntityTypes.LOREBOOKS;
     }
 
-    getIterationArr(): EntityField<LorebookKey, LorebookData>[] {
-        return [CommonFields.NAME];
+    protected getReferenceKeyOrder(): readonly (keyof LorebookKey & string)[] {
+        return Lorebook.REFERENCE_KEY_ORDER;
+    }
+
+    public static async getFromReference(reference:string) : Promise<Lorebook> {
+        return await fetchFromReference<LorebookKey, LorebookData, Lorebook>(
+            reference, EntityTypes.LOREBOOKS, this.REFERENCE_KEY_ORDER, {id:parseNumberKey}, Lorebook
+        )
+    }
+
+    public static async getAll() : Promise<Lorebook[]> {
+        return await fetch_all<LorebookKey, LorebookData, Lorebook>(EntityTypes.LOREBOOKS, Lorebook);
     }
 
     public async getEntries(): Promise<Entry[]> {
@@ -36,7 +48,7 @@ export class Lorebook extends ABSEntity<LorebookKey, LorebookData> {
         return this.entries;
     }
 
-    public async newEntry(): Promise<Entry> {
+    public async newEntry(name:string): Promise<Entry> {
         if (this.entries != null)
             await this.getEntries();
 
@@ -44,7 +56,7 @@ export class Lorebook extends ABSEntity<LorebookKey, LorebookData> {
             {
                 lorebook_id: this.get('id')
             },
-            null,
+            {name:name},
             EntityTypes.ENTRY,
             Entry
         )
@@ -108,14 +120,21 @@ export type EntryData = {
 };
 
 export class Entry extends ABSEntity<EntryKey, EntryData> {
+    private static readonly REFERENCE_KEY_ORDER: readonly (keyof EntryKey & string)[] = ['lorebook_id', 'entry_id'] as const;
     getEntityType(): EntityTypes {
         return EntityTypes.ENTRY;
     }
 
-    getIterationArr(): EntityField<EntryKey, EntryData>[] { //This isn't as important, the entry editor must be special
-        return [CommonFields.NAME];
+    protected getReferenceKeyOrder(): readonly (keyof EntryKey & string)[] {
+        return Entry.REFERENCE_KEY_ORDER;
     }
 
+    public static async fromReference(reference:string) : Promise<Entry>{
+        return await fetchFromReference<EntryKey, EntryData, Entry>(
+            reference, EntityTypes.ENTRY, Entry.REFERENCE_KEY_ORDER, {lorebook_id:parseNumberKey, entry_id:parseNumberKey},
+            Entry
+        )
+    }
     async update<F extends keyof EntryData>(field: F, value: EntryData[F]): Promise<boolean> {
         if (field == "outlet_id")
             throw new Error("Trying to update outlet via normal update API")
@@ -178,6 +197,7 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
     }
 
     public async getOutletName(): Promise<string | null> {
+        if (this.dataMap['outlet_id'] == null) return null;
         return await fetchOne<OutletKey, OutletData, Outlet>(
                 {
                     id: super.get('outlet_id')!
@@ -192,10 +212,9 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
     public async updateOutlet(outlet: string): Promise<void> {
         console.debug(`Updating outlet for ${this.get('name')} with new value ${outlet}`)
         const result = await fetchApi(
-            `${getEntityController(EntityTypes.ENTRY)}/${this.get('lorebook_id')}/${super.get('entry_id')}`,
+            `${getEntityController(EntityTypes.ENTRY)}/entity/${this.get('lorebook_id')}/${super.get('entry_id')}?outlet=${outlet}`,
             {
-                method: "PATCH",
-                body: outlet,
+                method: "PATCH"
             })
     }
     public async clearOutlet(): Promise<void> {
@@ -231,6 +250,10 @@ export async function getAllKeywords() : Promise<string[]>{
 export type OutletKey = { id: number };
 export type OutletData = { name: string };
 export class Outlet extends ABSEntity<OutletKey, OutletData> {
+    protected getReferenceKeyOrder(): (keyof OutletKey & string)[] {
+        throw new Error("Tried to get reference key order for outlet");
+    }
+
     getEntityType(): EntityTypes {
         return EntityTypes.OUTLETS
     }

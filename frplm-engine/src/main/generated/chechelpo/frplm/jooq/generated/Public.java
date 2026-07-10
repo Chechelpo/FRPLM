@@ -16,7 +16,7 @@ import chechelpo.frplm.jooq.generated.tables.Extension;
 import chechelpo.frplm.jooq.generated.tables.Extras;
 import chechelpo.frplm.jooq.generated.tables.Keyword;
 import chechelpo.frplm.jooq.generated.tables.LlmConnection;
-import chechelpo.frplm.jooq.generated.tables.LocationNeighbors;
+import chechelpo.frplm.jooq.generated.tables.LocationEdges;
 import chechelpo.frplm.jooq.generated.tables.LocationTags;
 import chechelpo.frplm.jooq.generated.tables.Locations;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks;
@@ -32,6 +32,7 @@ import chechelpo.frplm.jooq.generated.tables.Sessions;
 import chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import chechelpo.frplm.jooq.generated.tables.Tags;
 import chechelpo.frplm.jooq.generated.tables.TestTable;
+import chechelpo.frplm.jooq.generated.tables.TokenizerCache;
 import chechelpo.frplm.jooq.generated.tables.Worlds;
 
 import java.util.Arrays;
@@ -116,9 +117,9 @@ public class Public extends SchemaImpl {
     public final LlmConnection LLM_CONNECTION = LlmConnection.LLM_CONNECTION;
 
     /**
-     * The table <code>PUBLIC.LOCATION_NEIGHBORS</code>.
+     * The table <code>PUBLIC.LOCATION_EDGES</code>.
      */
-    public final LocationNeighbors LOCATION_NEIGHBORS = LocationNeighbors.LOCATION_NEIGHBORS;
+    public final LocationEdges LOCATION_EDGES = LocationEdges.LOCATION_EDGES;
 
     /**
      * The table <code>PUBLIC.LOCATION_TAGS</code>.
@@ -196,6 +197,11 @@ public class Public extends SchemaImpl {
     public final TestTable TEST_TABLE = TestTable.TEST_TABLE;
 
     /**
+     * The table <code>PUBLIC.TOKENIZER_CACHE</code>.
+     */
+    public final TokenizerCache TOKENIZER_CACHE = TokenizerCache.TOKENIZER_CACHE;
+
+    /**
      * The table <code>PUBLIC.WORLDS</code>.
      */
     public final Worlds WORLDS = Worlds.WORLDS;
@@ -228,7 +234,7 @@ public class Public extends SchemaImpl {
             Extras.EXTRAS,
             Keyword.KEYWORD,
             LlmConnection.LLM_CONNECTION,
-            LocationNeighbors.LOCATION_NEIGHBORS,
+            LocationEdges.LOCATION_EDGES,
             LocationTags.LOCATION_TAGS,
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
@@ -244,6 +250,7 @@ public class Public extends SchemaImpl {
             StartingLocations.STARTING_LOCATIONS,
             Tags.TAGS,
             TestTable.TEST_TABLE,
+            TokenizerCache.TOKENIZER_CACHE,
             Worlds.WORLDS
         );
     }

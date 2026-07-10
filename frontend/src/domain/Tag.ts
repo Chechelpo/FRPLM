@@ -1,4 +1,4 @@
-import {ABSEntity, fetchApi} from "@/frameworks/ABSEntity";
+import {ABSEntity, fetchApi} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO, EntityField} from "@/types/DTOs";
 import {CharacterKey} from "@/domain/Characters";
@@ -11,6 +11,11 @@ export class Tag extends ABSEntity<TagKey,TagData>{
     getEntityType(): EntityTypes {
         return EntityTypes.TAGS;
     }
+
+    protected getReferenceKeyOrder(): readonly (keyof TagKey & string)[] {
+        return ['id'] as const;
+    }
+
 
     getIterationArr(): EntityField<TagKey, TagData>[] {
         return [];

@@ -6,7 +6,7 @@ import chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
 import chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import chechelpo.frplm.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 

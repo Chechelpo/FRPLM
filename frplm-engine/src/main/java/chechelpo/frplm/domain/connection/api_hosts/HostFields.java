@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 
 import static chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
-import static chechelpo.frplm.jooq.generated.Tables.OUTLET;
 import static org.jooq.impl.DSL.max;
 
 @Component

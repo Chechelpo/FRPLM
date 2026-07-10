@@ -8,6 +8,7 @@ import chechelpo.frplm.jooq.generated.Keys;
 import chechelpo.frplm.jooq.generated.Public;
 import chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import chechelpo.frplm.jooq.generated.tables.LocationEdges.LocationEdgesPath;
 import chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
@@ -297,6 +298,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686.getInverseKey());
 
         return _movements;
+    }
+
+    private transient LocationEdgesPath _locationEdges;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.LOCATION_EDGES</code> table
+     */
+    public LocationEdgesPath locationEdges() {
+        if (_locationEdges == null)
+            _locationEdges = new LocationEdgesPath(this, null, Keys.FK_LOCATION_EDGES_WORLDID.getInverseKey());
+
+        return _locationEdges;
     }
 
     /**

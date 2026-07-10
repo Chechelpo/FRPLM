@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 /frplm-engine/src/main/resources/static/dist/
+/scripts/

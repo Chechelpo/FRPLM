@@ -1,9 +1,9 @@
 package chechelpo.frplm.extensions.implementations.standalone;
 
-import chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
 import chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
+import io.github.chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 
 public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements CharacterSnapshot {
     public CharacterImpl(CharactersRecord record, ExtensionContext context) {
@@ -11,7 +11,7 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
     }
 
     @Override
-    public Reference reference() {
+    public Reference asReference() {
         return new CharacterSnapshot.Reference(this.record.getId());
     }
 

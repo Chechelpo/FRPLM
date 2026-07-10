@@ -55,7 +55,9 @@ public final class LorebookMapper {
 
     @NonNull
     public NewLorebookOrder orderFrom(JsonNode node){
+        if (node == null) throw new IllegalArgumentException("Node is null");
         LorebookJSON lorebookJSON = MAPPER.treeToValue(node, LorebookJSON.class);
+
         int outletId = outlets.getOrCreateOutlet(lorebookJSON.default_outlet_id);
         return new NewLorebookOrder(
                 EntityDataPayload.<LorebooksRecord>builder()

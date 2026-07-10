@@ -18,6 +18,7 @@ import chechelpo.frplm.domain.lorebook.core.LorebookService;
 import chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,7 +103,7 @@ public class LocationsService extends EntityService<
     }
 
     @Transactional(readOnly = true)
-    public List<LocationsRecord> getLocationsOfRegion(RegionRecord region){
-        return store.getLocationsOfRegion(region);
+    public List<LocationsRecord> getLocationsOfRegion(int worldId, @Nullable Integer regionId){
+        return store.getLocationsOfRegion(worldId, regionId);
     }
 }

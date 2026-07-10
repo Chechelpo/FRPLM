@@ -13,15 +13,16 @@ import java.util.function.Supplier;
 
 /** Inspired on silly tavern's tokenizer.js */
 @Component
-public final class TokenizerRegistry {
-
+final class TokenizerRegistry {
     private static final String RESOURCE_ROOT = "tokenizers/";
+    private static final String TOKENIZER_BUNDLE_REVISION =
+            "tokenizers-v1";
 
     private final Map<String, Supplier<Tokenizer>> factories;
     private final ConcurrentMap<String, Tokenizer> loadedTokenizers =
             new ConcurrentHashMap<>();
 
-    public TokenizerRegistry() {
+    TokenizerRegistry() {
         this.factories = Map.ofEntries(
                 // SentencePiece models
                 Map.entry(
@@ -244,7 +245,7 @@ public final class TokenizerRegistry {
         )) {
             return "r50k_base";
         }
-        
+
         /*
          * Distilled R1 models use their underlying Qwen or Llama tokenizer.
          * Check these before the generic "deepseek" branch.
@@ -311,6 +312,26 @@ public final class TokenizerRegistry {
         }
 
         return false;
+    }
+    public record ResolvedTokenizer(
+            String id,
+            String revision,
+            Tokenizer tokenizer
+    ) {}
+
+    public ResolvedTokenizer resolveForModel(String modelId) {
+        String tokenizerId = resolveTokenizerId(modelId);
+
+        Tokenizer tokenizer = loadedTokenizers.computeIfAbsent(
+                tokenizerId,
+                ignored -> createTokenizer(tokenizerId)
+        );
+
+        return new ResolvedTokenizer(
+                tokenizerId,
+                TOKENIZER_BUNDLE_REVISION,
+                tokenizer
+        );
     }
 
     @PreDestroy
