@@ -49,6 +49,21 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
     }
     @Transactional(readOnly = true)
     @CheckReturnValue
+    public @NotNull LorebooksRecord getLorebookOf(@NotNull WorldsRecord record) throws EntityNotFound {
+        Objects.requireNonNull(record);
+        return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
+                .orElseThrow(() -> new UnexpectedException("World " + record.getName() + " without a lorebook", Severity.SYSTEM));
+    }
+    @Transactional(readOnly = true)
+    @CheckReturnValue
+    public @NotNull LorebooksRecord getLorebookOf(@NotNull LocationsRecord record) throws EntityNotFound {
+        Objects.requireNonNull(record);
+        return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
+                .orElseThrow(() -> new UnexpectedException("Location " + record.getName() + " without a lorebook", Severity.SYSTEM));
+    }
+
+    @Transactional(readOnly = true)
+    @CheckReturnValue
     public @NotNull List<LorebooksRecord> getLorebookOf(@NotNull Set<CharactersRecord> records){
         Objects.requireNonNull(records);
         List<LorebooksRecord> results = store.getLorebooks(
@@ -66,18 +81,5 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
 
         return results;
     }
-    @Transactional(readOnly = true)
-    @CheckReturnValue
-    public @NotNull LorebooksRecord getLorebookOf(@NotNull WorldsRecord record) throws EntityNotFound {
-        Objects.requireNonNull(record);
-        return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
-                .orElseThrow(() -> new UnexpectedException("World " + record.getName() + " without a lorebook", Severity.SYSTEM));
-    }
-    @Transactional(readOnly = true)
-    @CheckReturnValue
-    public @NotNull LorebooksRecord getLorebookOf(@NotNull LocationsRecord record) throws EntityNotFound {
-        Objects.requireNonNull(record);
-        return this.find(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()))
-                .orElseThrow(() -> new UnexpectedException("Location " + record.getName() + " without a lorebook", Severity.SYSTEM));
-    }
+
 }

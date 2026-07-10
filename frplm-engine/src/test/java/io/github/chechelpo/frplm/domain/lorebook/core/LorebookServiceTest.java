@@ -1,12 +1,12 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
-import chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
+import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,8 @@ import org.springframework.test.context.jdbc.Sql;
 import java.util.List;
 import java.util.Set;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static chechelpo.frplm.jooq.generated.Tables.*;
+import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.Types.REGIONS;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.*;
         scripts = "classpath:db/schema.sql",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@Import({LorebookTestContext.class, CharacterCoreTestContext.class, LocationTestContext.class})
+@Import({LorebookTestContext.class, CharacterCoreTestContext.class, LocationTestContext.class, WorldTestContext.class, RegionTestContext.class})
 class LorebookServiceTest {
     @Autowired
     LorebookTestContext testContext;
@@ -35,6 +35,10 @@ class LorebookServiceTest {
     CharacterCoreTestContext characters;
     @Autowired
     private LocationTestContext locationTestContext;
+    @Autowired
+    private RegionTestContext regionTestContext;
+    @Autowired
+    private WorldTestContext worldTestContext;
 
     @BeforeEach
     void setUp() {
@@ -90,5 +94,115 @@ class LorebookServiceTest {
         System.out.println(lorebook2);
 
         assertNotEquals(lorebook1.getId(), lorebook2.getId());
+    }
+
+    @Test
+    void updatingParentNameUpdatesLorebookName_Location(){
+        LocationsRecord locationToUpdate = locationTestContext
+                .createAndGetTestLocationsOfSameWorld(1).getFirst();
+        assertEquals(
+                locationToUpdate.getName(),
+                testContext.service.getLorebookOf(locationToUpdate).getName(),
+                "Starting name doesn't start as equals"
+        );
+
+        String newName = "LocationNewName";
+        assertTrue(
+                locationTestContext.service.update(
+                    locationTestContext.service.keyOf(locationToUpdate),
+                    EntityDataPayload.of(LOCATIONS.NAME, newName)
+            )
+        );
+        assertEquals(
+                newName,
+                testContext.service.getLorebookOf(locationToUpdate).getName(),
+                "Name not updated"
+        );
+    }
+    @Test
+    void updatingParentNameUpdatesLorebookName_World() {
+        WorldsRecord worldToUpdate = worldTestContext
+                .createWorlds(1)
+                .createdRecords().getFirst();
+
+        assertEquals(
+                worldToUpdate.getName(),
+                testContext.service.getLorebookOf(worldToUpdate).getName(),
+                "World and lorebook names are not initially equal"
+        );
+
+        String newName = "WorldNewName";
+
+        assertTrue(
+                worldTestContext.service.update(
+                        worldTestContext.service.keyOf(worldToUpdate),
+                        EntityDataPayload.of(WORLDS.NAME, newName)
+                ),
+                "World update failed"
+        );
+
+        assertEquals(
+                newName,
+                testContext.service.getLorebookOf(worldToUpdate).getName(),
+                "Lorebook name was not updated after changing the world name"
+        );
+    }
+
+    @Test
+    void updatingParentNameUpdatesLorebookName_Region() {
+        RegionRecord regionToUpdate = regionTestContext
+                .createRegions(1, 0)
+                .getFirst();
+
+        assertEquals(
+                regionToUpdate.getName(),
+                testContext.service.getLorebookOf(regionToUpdate).getName(),
+                "Region and lorebook names are not initially equal"
+        );
+
+        String newName = "RegionNewName";
+
+        assertTrue(
+                regionTestContext.service.update(
+                        regionTestContext.service.keyOf(regionToUpdate),
+                        EntityDataPayload.of(REGION.NAME, newName)
+                ),
+                "Region update failed"
+        );
+
+        assertEquals(
+                newName,
+                testContext.service.getLorebookOf(regionToUpdate).getName(),
+                "Lorebook name was not updated after changing the region name"
+        );
+    }
+
+    @Test
+    void updatingParentNameUpdatesLorebookName_Character() {
+        CharactersRecord characterToUpdate = characters
+                .createAndGetRecords(1)
+                .getFirst();
+
+        assertEquals(
+                characterToUpdate.getName(),
+                testContext.service.getLorebookOf(characterToUpdate).getName(),
+                "Character and lorebook names are not initially equal"
+        );
+
+        String newName = "CharacterNewName";
+
+        assertTrue(
+                characters.service.update(
+                        characters.service.keyOf(characterToUpdate),
+                        EntityDataPayload.of(CHARACTERS.NAME, newName)
+                ),
+                "Character update failed"
+        );
+
+        assertEquals(
+                newName,
+                testContext.service.getLorebookOf(characterToUpdate).getName(),
+                "Lorebook name was not updated after changing the character name"
+        );
     }
 }

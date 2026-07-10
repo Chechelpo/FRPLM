@@ -7,7 +7,13 @@ import chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
+import io.github.chechelpo.frplm.domain.world.core.WorldService;
+import io.github.chechelpo.frplm.domain.world.location.LocationsService;
+import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
+import io.github.chechelpo.frplm.exceptions.Severity;
+import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -15,7 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.EnumSet;
 import java.util.Objects;
 
-import static chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
+import static chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class LorebookEvents {
@@ -26,10 +32,16 @@ final class LorebookEvents {
             EntityConfigs.Types.CHARACTER, EntityConfigs.Types.LOCATIONS,
             EntityConfigs.Types.WORLDS, EntityConfigs.Types.REGIONS
     );
+    private final WorldService worldService;
+    private final RegionService regionService;
+    private final LocationsService locationsService;
 
-    LorebookEvents(LorebookService lorebookService, CharacterService characterService) {
+    LorebookEvents(LorebookService lorebookService, CharacterService characterService, WorldService worldService, RegionService regionService, LocationsService locationsService) {
         this.lorebookService = lorebookService;
         this.characterService = characterService;
+        this.worldService = worldService;
+        this.regionService = regionService;
+        this.locationsService = locationsService;
     }
 
     private boolean updateLorebookName(int lorebookId, String newName){
@@ -42,6 +54,7 @@ final class LorebookEvents {
     @SuppressWarnings("unchecked")
     @EventListener
     public void onLocationNameUpdateUpdateLorebook(CRUDCommittedEvent.UpdatedEntity<?> rawEvent){
+        Objects.requireNonNull(rawEvent, "Event is null");
         if (!changeNamesConfigs.contains(rawEvent.type())) return;
 
         switch (rawEvent.type()){
@@ -60,9 +73,68 @@ final class LorebookEvents {
         }
     }
 
-    private void handleWorldNameChange(CRUDCommittedEvent.UpdatedEntity<WorldsRecord> worldEvent){}
-    private void handleLocationNameChange(CRUDCommittedEvent.UpdatedEntity<LocationsRecord> locationEvent){}
-    private void handleRegionNameChange(CRUDCommittedEvent.UpdatedEntity<RegionRecord> regionEvent){}
-    private void handleCharacterNameChange(CRUDCommittedEvent.UpdatedEntity<CharactersRecord> characterEvent){}
+    private void handleWorldNameChange(CRUDCommittedEvent.UpdatedEntity<WorldsRecord> worldEvent) {
+        if (!worldEvent.updatedData().assignsField(WORLDS.NAME)) return;
+        WorldsRecord world = worldService.find(worldEvent.target())
+                .orElseThrow(() -> new EntityNotFound("Couldn't find parent world when updating lorebook name", Severity.SYSTEM));
 
+        if (!updateLorebookName(world.getLorebookId(), world.getName()))
+            throw new UnexpectedException("Could not update lorebook name", Severity.SYSTEM);
+    }
+    private void handleLocationNameChange(
+            CRUDCommittedEvent.UpdatedEntity<LocationsRecord> locationEvent
+    ) {
+        if (!locationEvent.updatedData().assignsField(LOCATIONS.NAME)) return;
+
+        LocationsRecord location = locationsService.find(locationEvent.target())
+                .orElseThrow(() -> new EntityNotFound(
+                        "Couldn't find parent location when updating lorebook name",
+                        Severity.SYSTEM
+                ));
+
+        if (!updateLorebookName(location.getLorebookId(), location.getName())) {
+            throw new UnexpectedException(
+                    "Could not update location lorebook name",
+                    Severity.SYSTEM
+            );
+        }
+    }
+
+    private void handleRegionNameChange(
+            CRUDCommittedEvent.UpdatedEntity<RegionRecord> regionEvent
+    ) {
+        if (!regionEvent.updatedData().assignsField(REGION.NAME)) return;
+
+        RegionRecord region = regionService.find(regionEvent.target())
+                .orElseThrow(() -> new EntityNotFound(
+                        "Couldn't find parent region when updating lorebook name",
+                        Severity.SYSTEM
+                ));
+
+        if (!updateLorebookName(region.getLorebookId(), region.getName())) {
+            throw new UnexpectedException(
+                    "Could not update region lorebook name",
+                    Severity.SYSTEM
+            );
+        }
+    }
+
+    private void handleCharacterNameChange(
+            CRUDCommittedEvent.UpdatedEntity<CharactersRecord> characterEvent
+    ) {
+        if (!characterEvent.updatedData().assignsField(CHARACTERS.NAME)) return;
+
+        CharactersRecord character = characterService.find(characterEvent.target())
+                .orElseThrow(() -> new EntityNotFound(
+                        "Couldn't find parent character when updating lorebook name",
+                        Severity.SYSTEM
+                ));
+
+        if (!updateLorebookName(character.getLorebookId(), character.getName())) {
+            throw new UnexpectedException(
+                    "Could not update character lorebook name",
+                    Severity.SYSTEM
+            );
+        }
+    }
 }

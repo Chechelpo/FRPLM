@@ -15,6 +15,4 @@ public final class LorebookController extends EntityController<LorebooksRecord, 
     LorebookController(LorebookService service) {
         super(service);
     }
-
-
 }
