@@ -132,7 +132,33 @@ const maxTokens = computed<number>({
     model.value.update("max_tokens", value);
   },
 });
+const lorebookBudget = computed<number>({
+  get() {
+    return model.value.get("lorebooks_budget");
+  },
+  set(value: number) {
+    const clamped = Math.min(
+        value,
+        1 - chatHistoryBudget.value,
+    );
 
+    model.value.update("lorebooks_budget", clamped);
+  },
+});
+
+const chatHistoryBudget = computed<number>({
+  get() {
+    return model.value.get("chat_history_budget");
+  },
+  set(value: number) {
+    const clamped = Math.min(
+        value,
+        1 - lorebookBudget.value,
+    );
+
+    model.value.update("chat_history_budget", clamped);
+  },
+});
 // -----------------------------------------------------------------------------
 // Sections
 // -----------------------------------------------------------------------------
@@ -303,6 +329,52 @@ function sectionKey(section: PromptSection): string {
 
             <span>Loading available connections...</span>
           </div>
+        </div>
+      </section>
+
+      <!-- Budgeting configuration -->
+      <section class="edit-box__section">
+        <header class="edit-box__section-header">
+          <div class="edit-box__section-heading">
+            <h2 class="edit-box__section-title">
+              Context budgeting
+            </h2>
+
+            <p class="edit-box__section-description">
+              Allocate the available context budget between chat history and
+              lorebook content.
+            </p>
+          </div>
+        </header>
+
+        <div class="prompt-editor__parameter-grid">
+          <FieldEditorWrapper
+              field-name="Chat history budget"
+              info="Maximum proportion of the context budget allocated to chat history."
+          >
+            <NumberSlider
+                :max="1 - lorebookBudget"
+                :step="0.01"
+                :model-value="chatHistoryBudget"
+                @edit="
+                  value => chatHistoryBudget = value
+                "
+            />
+          </FieldEditorWrapper>
+
+          <FieldEditorWrapper
+              field-name="Lorebooks budget"
+              info="Maximum proportion of the context budget allocated to lorebook content."
+          >
+            <NumberSlider
+                :max="1 - chatHistoryBudget"
+                :step="0.01"
+                :model-value="lorebookBudget"
+                @edit="
+                  value => lorebookBudget = value
+                "
+            />
+          </FieldEditorWrapper>
         </div>
       </section>
 

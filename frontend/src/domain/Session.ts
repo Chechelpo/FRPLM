@@ -2,9 +2,9 @@ import {
     ABSEntity,
     createEntity,
     deleteEntity,
-    fetchApi,
     fetchFromReference,
     fetchMatching,
+    getEntityController,
     fetchOne
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
@@ -15,6 +15,7 @@ import {PromptTemplate, PromptTemplateData, PromptTemplateKey} from "@/domain/Pr
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
 import {API_BASE} from "@/config";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
 
 export type SessionKey = {id:number};
 export type SessionData = {
@@ -223,7 +224,7 @@ export class Message extends ABSEntity<MessagesKey, MessageData>{
 
     public async getCharacters() : Promise<Character[]> {
         return await fetchApi(
-            `${API_BASE}/${EntityTypes.CURRENT_LOCATION}/${this.get('session_id')}/${this.get('location_id')}`,
+            `${getEntityController(EntityTypes.CURRENT_LOCATION)}/${this.get('session_id')}/${this.get('location_id')}`,
             {
                 method:'GET'
             }

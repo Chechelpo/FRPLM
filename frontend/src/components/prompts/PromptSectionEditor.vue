@@ -483,6 +483,8 @@ onBeforeUnmount(() => {
                 >
                   <LongTextBox
                       :model-value="content"
+                      tokenize
+                      :tokenization-started="edit"
                       @edit="value => content = value"
                   />
                 </FieldEditorWrapper>

@@ -1,13 +1,12 @@
-import { FieldInfo } from "@/core/FieldMetadata";
+import {FieldInfo} from "@/core/FieldMetadata";
 import {CommonFields} from "@/utils/CommonFields";
-import {Equatable, ValueComparable} from "@/types/Equatable";
+import {ValueComparable} from "@/types/Equatable";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
-import {QueryAction} from "@/core/queries";
 import {API_BASE} from "@/config";
-import {setGlobalError} from "@/core/GlobalError";
-import {ApiRequestError} from "@/core/ApiRequestError";
 import {ReferenceCodec, ReferenceParsers} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
+import {reactive} from "vue";
 
 /** JSON-safe primitives typically received from backend SQL row payloads */
 export type Primitives = string | number | boolean | null;
@@ -41,9 +40,9 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
             console.error("Key with no entries")
             throw new Error(`Entity with no keys: ${dto.key}`);
         }
-
+        this.throw_if_collision(dto.key as Key, dto.payload as Data)
         this.key = dto.key as Key;
-        this.dataMap = dto.payload as Data;
+        this.dataMap = reactive(dto.payload as Data) as unknown as Data;
     }
 
     /** Method used for avoiding duplication of entity type string */
@@ -89,18 +88,20 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
      */
     public async update<F extends keyof Data>(field: F, value: Data[F]): Promise<boolean> {
         console.debug(`Updating ${String(field)} of [${this.getEntityType()}], key:`, JSON.stringify(this.key), `new value:`, value);
-        const updated: boolean = await UpdateEntityField(
-            this.key,
-            field,
-            value,
-            this.getEntityType()
-        );
+        try{
+            const updated: boolean = await UpdateEntityField(
+                this.key,
+                field,
+                value,
+                this.getEntityType()
+            );
+            if (updated) this.dataMap[field] = value;
 
-        if (updated) {
-            this.dataMap[field] = value;
+            return updated;
+        } catch (e){
+            console.error(`Error when updating field ${String(field)} with new value ${value}`)
+            return false;
         }
-
-        return updated;
     }
 
     protected throw_if_collision(keys: Key, data: Data): void {
@@ -171,21 +172,40 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
     }
 }
 
-const ENTITY_SUFFIX:string = "entity";
-const QUERY_SUFFIX:string = "query";
+const ENTITY_SUFFIX = "entity";
+const QUERY_SUFFIX = "query";
 
-export function getEntityController(object_type:EntityTypes): URL{
-    return new URL(`${API_BASE}/${object_type}`, API_BASE);
-}
-function getQueryPath(object_type:EntityTypes): URL {
-    return new URL(`${API_BASE}/${object_type}/${QUERY_SUFFIX}`, API_BASE)
+export function getEntityController(
+    objectType: EntityTypes,
+): URL {
+    return new URL(
+        `${objectType}`,
+        API_BASE,
+    );
 }
 
-function getPathWithIDParams<Key extends KeyRecord>(object_type:EntityTypes, key:Partial<Key> | null): URL {
-    const url = new URL(`${API_BASE}/${object_type}/${ENTITY_SUFFIX}`, API_BASE);
-    if (key == null) return url;
-    // identityParams come from query string
-    appendIDParams(url, key)
+function getQueryPath(
+    objectType: EntityTypes,
+): URL {
+    return new URL(
+        `${objectType}/${QUERY_SUFFIX}`,
+        API_BASE,
+    );
+}
+
+function getPathWithIDParams<Key extends KeyRecord>(
+    objectType: EntityTypes,
+    key: Partial<Key> | null,
+): URL {
+    const url = new URL(
+        `${objectType}/${ENTITY_SUFFIX}`,
+        API_BASE,
+    );
+
+    if (key !== null) {
+        appendIDParams(url, key);
+    }
+
     return url;
 }
 
@@ -351,188 +371,4 @@ export async function UpdateEntityField<
     return response.status === 200;
 }
 
-type ErrorResponse = {
-    status:number,
-    type:string,
-    message:string,
-    path:string,
-}
 
-
-export interface FetchApiInit extends RequestInit {
-    /**
-     * Set to false when the caller handles the failure itself and no global
-     * notification should be displayed.
-     */
-    showGlobalError?: boolean;
-}
-
-function getRequestPath(input: RequestInfo | URL): string {
-    if (typeof input === "string") {
-        return input;
-    }
-
-    if (input instanceof URL) {
-        return input.toString();
-    }
-
-    return input.url;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null;
-}
-
-function readString(
-    source: Record<string, unknown>,
-    key: string,
-): string | undefined {
-    const value = source[key];
-
-    return typeof value === "string"
-        ? value
-        : undefined;
-}
-
-function readNumber(
-    source: Record<string, unknown>,
-    key: string,
-): number | undefined {
-    const value = source[key];
-
-    return typeof value === "number"
-        ? value
-        : undefined;
-}
-
-async function parseErrorResponse(
-    response: Response,
-    fallbackPath: string,
-): Promise<ErrorResponse> {
-    /*
-     * Parse a clone so that the original Response body remains available to
-     * local error handlers through ApiRequestError.response.
-     */
-    const clonedResponse = response.clone();
-    const contentType =
-        clonedResponse.headers.get("content-type")?.toLowerCase() ?? "";
-
-    let body: unknown;
-
-    try {
-        if (contentType.includes("application/json")) {
-            body = await clonedResponse.json();
-        } else {
-            const text = await clonedResponse.text();
-
-            if (text.trim()) {
-                body = {
-                    message: text,
-                };
-            }
-        }
-    } catch (error) {
-        console.warn("Failed to parse backend error response:", error);
-    }
-
-    const record = isRecord(body)
-        ? body
-        : {};
-
-    return {
-        status:
-            readNumber(record, "status") ??
-            response.status,
-
-        type:
-            readString(record, "type") ??
-            readString(record, "error") ??
-            response.statusText ??
-            "HttpError",
-
-        message:
-            readString(record, "message") ??
-            response.statusText ??
-            `Request failed with HTTP status ${response.status}`,
-
-        path:
-            readString(record, "path") ??
-            fallbackPath,
-    };
-}
-
-export async function fetchApi(
-    input: RequestInfo | URL,
-    init: FetchApiInit = {},
-): Promise<Response> {
-    const {
-        showGlobalError = true,
-        ...requestInit
-    } = init;
-
-    const path = getRequestPath(input);
-
-    let response: Response;
-
-    try {
-        response = await fetch(input, requestInit);
-    } catch (cause) {
-        /*
-         * fetch() only rejects for network-level failures, aborted requests,
-         * CORS failures, malformed URLs, and similar transport errors.
-         */
-        const errorResponse: ErrorResponse = {
-            status: 0,
-            type:
-                cause instanceof DOMException && cause.name === "AbortError"
-                    ? "AbortError"
-                    : "NetworkError",
-            message:
-                cause instanceof Error
-                    ? cause.message
-                    : "The backend could not be reached.",
-            path,
-        };
-
-        /*
-         * Aborted requests are commonly intentional and normally should not
-         * produce a global error notification.
-         */
-        const isAbort =
-            cause instanceof DOMException &&
-            cause.name === "AbortError";
-
-        if (showGlobalError && !isAbort) {
-            setGlobalError(errorResponse);
-        }
-
-        throw new ApiRequestError(
-            errorResponse,
-            undefined,
-            { cause },
-        );
-    }
-
-    if (response.ok) {
-        return response;
-    }
-
-    const errorResponse = await parseErrorResponse(
-        response,
-        path,
-    );
-
-    console.error(
-        "Backend request failed:",
-        errorResponse,
-    );
-
-    if (showGlobalError) {
-        setGlobalError(errorResponse);
-    }
-
-    throw new ApiRequestError(
-        errorResponse,
-        response,
-    );
-}

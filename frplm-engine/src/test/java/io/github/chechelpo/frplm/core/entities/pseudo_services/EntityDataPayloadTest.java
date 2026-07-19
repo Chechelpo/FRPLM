@@ -32,7 +32,6 @@ class EntityDataPayloadTest {
 
         assertTrue(payload.isEmpty());
         assertTrue(payload.assignments().isEmpty());
-        assertTrue(payload.values().isEmpty());
     }
 
     @Test
@@ -285,8 +284,8 @@ class EntityDataPayloadTest {
         EntityDataPayload<Rec> payload = new EntityDataPayload<>();
         payload.assignments().put(name, "Alice");
 
-        assertSame(payload.assignments(), payload.values());
-        assertEquals("Alice", payload.values().get(name));
+        assertSame(payload.assignments(), payload.assignments());
+        assertEquals("Alice", payload.assignments().get(name));
     }
 
     @Test

@@ -2,19 +2,21 @@ import {
     ABSEntity,
     createEntity,
     deleteEntity,
-    fetchApi,
     fetchMatching,
     fetchOne,
     getEntityController
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import {API_BASE} from "@/config";
 import {DTO} from "@/types/DTOs";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
+import {fetchApi} from "@/services/apiClient";
+import {Character} from "@/domain/Characters";
+import {API_BASE} from "@/config";
 
 export type WorldKey = { id: number }
 export type WorldData = {
     name: string,
+    description: string,
     lorebook_id: number,
 }
 
@@ -118,7 +120,7 @@ export class World extends ABSEntity<WorldKey, WorldData> {
 }
 
 export type RegionKey = {world_id: number, id:number}
-export type RegionData = {parent_region_id:number, lorebook_id:number, name:string}
+export type RegionData = {parent_region_id:number, lorebook_id:number, name:string, description: string}
 export class Region extends ABSEntity<RegionKey, RegionData>{
     private static readonly REFERENCE_KEY_ORDER: readonly (keyof RegionKey & string)[] = ['world_id' , 'id'] as const;
 
@@ -167,6 +169,7 @@ export type LocationKey = { worldID: number, id: number }
 export type LocationData = {
     name: string,
     lorebook_id: number,
+    description: string,
     region_id: number | null
 }
 
@@ -182,6 +185,16 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
         return Location.REFERENCE_KEY_ORDER;
     }
 
+    public async getStartingHere(): Promise<Character[]>{
+        return await fetchApi(
+            `api/${EntityTypes.CHARACTERS}/startingAt` +
+            `?worldId=${this.get("worldID")}` +
+            `&locationId=${this.get("id")}`,
+            {
+                method: "GET",
+            },
+        ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto)))
+    }
 
     public async getLorebook(): Promise<Lorebook> {
         if (this.lorebook == null)
@@ -202,7 +215,7 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
     /** @return neighbors ( from this location to other or the inverse) */
     public async getNeighbours(): Promise<Location[]>{
         return await fetchApi(
-            `${API_BASE}/${EntityTypes.EDGES}/${this.get('worldID')}/${this.get('id')}/neighbours`,
+            `api/${EntityTypes.EDGES}/${this.get('worldID')}/${this.get('id')}/neighbours`,
             {
                 method:'GET',
                 headers: new Headers({accept:'application/json'})

@@ -2,10 +2,6 @@ package io.github.chechelpo.frplm.core.entities.fields;
 
 import io.github.chechelpo.frplm.core.entities.fields.coercers.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.*;
-import io.github.chechelpo.frplm.core.entities.fields.coercers.*;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.*;
-import io.github.chechelpo.frplm.core.entities.fields.coercers.*;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.*;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldKind;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import org.jetbrains.annotations.Contract;
@@ -22,7 +18,7 @@ public final class FieldInfo<T extends FieldKind>{
     @Contract(pure = true)
     private FieldInfo(@NotNull FieldInfoBuilder<T> builder) {
         this.type = builder.type;
-        this.format = builder.format;
+        this.format = builder.coercer;
         this.require = builder.require;
         this.constraints = builder.constraints;
     }
@@ -53,18 +49,18 @@ public final class FieldInfo<T extends FieldKind>{
 
     public static class FieldInfoBuilder<T extends FieldKind> {
         private final FieldType type;
-        private Coercer<T> format;
+        private Coercer<T> coercer;
         private Constraint<T, ?> constraints;
         private boolean require;
 
         private FieldInfoBuilder(FieldType type) {
             this.type = type;
             this.constraints = (Constraint<T, ?>) getDefaultConstraint(type);
-            this.format = getDefaultCoercer(type);
+            this.coercer = getDefaultCoercer(type);
         }
 
-        public FieldInfoBuilder<T> setFormat(Coercer format) {
-            this.format = format;
+        public FieldInfoBuilder<T> setCoercer(Coercer coercer) {
+            this.coercer = coercer;
             return this;
         }
         public <C extends Constraint<T, ?>> FieldInfoBuilder<T> setConstraints(
@@ -76,7 +72,7 @@ public final class FieldInfo<T extends FieldKind>{
             this.constraints = constraints;
             return this;
         }
-        public FieldInfoBuilder<T> require() {
+        public FieldInfoBuilder<T> requireOnCreate() {
             this.require = true;
             return this;
         }
@@ -86,6 +82,7 @@ public final class FieldInfo<T extends FieldKind>{
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static <T extends FieldKind> @NotNull Constraint<T, ?> getDefaultConstraint(
             @NotNull FieldType type
     ) {
@@ -107,7 +104,8 @@ public final class FieldInfo<T extends FieldKind>{
         return switch (type) {
             case STRING -> StringCoercer.create();
             case BYTE, INTEGER, LONG, SHORT -> NumberCoercer.create(type);
-            case FLOAT, DOUBLE -> FloatCoercer.create(type);
+            case FLOAT -> FloatCoercer.create();
+            case DOUBLE -> DoubleCoercer.create();
             case BOOLEAN -> BoolCoercer.create();
         };
     }

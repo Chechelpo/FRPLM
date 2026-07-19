@@ -138,8 +138,6 @@ final class ExtensionController {
 
     @GetMapping(value = "/{extensionId}/{assetName}", produces = "application/javascript")
     ResponseEntity<ByteArrayResource> getAsset(@PathVariable String extensionId, @PathVariable String assetName) {
-        System.out.println("Serving " + assetName + " extension: " + extensionId);
-
         return service.getExtensionAsset(extensionId, "panel.js")
                 .map(asset -> ResponseEntity.ok()
                         .contentType(MediaType.parseMediaType("application/javascript"))
@@ -150,11 +148,17 @@ final class ExtensionController {
 
     @PutMapping(value = "/{extensionId}/config", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<Boolean> updateConfig(@PathVariable String extensionId, @RequestBody JsonNode config) {
-        service.getConfigurableExtensions().stream()
-                .filter(ext -> ext.extensionId().equals(extensionId))
-                .findFirst()
+        service.getExtensionOfType(extensionId, ConfigurableExtension.class)
                 .orElseThrow(() -> new EntityNotFound("No such extension with id " + extensionId, Severity.USER))
-                .updateConfig(config);
+                .replaceConfig(config);
+
+        return ResponseEntity.ok(true);
+    }
+    @PatchMapping(value = "/{extensionId}/config", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<Boolean> patchConfig(@PathVariable String extensionId, @RequestBody JsonNode config){
+        service.getExtensionOfType(extensionId, ConfigurableExtension.class)
+                .orElseThrow(() -> new EntityNotFound("No such extension with id " + extensionId, Severity.USER))
+                .patchConfig(config);
 
         return ResponseEntity.ok(true);
     }

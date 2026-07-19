@@ -15,8 +15,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.OUTLE
 
 @RestController
 @RequestMapping(OUTLET_URL)
-final class OutletController extends EntityController<OutletRecord, OutletService> {
-    OutletController(OutletService service) {
+final class OutletController extends EntityController<OutletRecord, OutletServiceImpl> {
+    OutletController(OutletServiceImpl service) {
         super(service);
     }
 

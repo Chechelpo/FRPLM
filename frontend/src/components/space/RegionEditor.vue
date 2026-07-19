@@ -21,6 +21,8 @@ import LocationEditor from "@/components/space/LocationEditor.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 
 const props = defineProps<{
   region: Region;
@@ -214,14 +216,8 @@ async function createNewRegion(): Promise<void> {
         :title="region.get('name')"
         @status-change="expand"
     >
-      <div
-          v-if="isLoading"
-          class="edit-box__body"
-      >
-        <div
-            class="edit-box__state"
-            aria-live="polite"
-        >
+      <div v-if="isLoading" class="edit-box__body">
+        <div class="edit-box__state" aria-live="polite">
           <span class="edit-box__spinner" />
 
           <div class="edit-box__state-content">
@@ -238,19 +234,56 @@ async function createNewRegion(): Promise<void> {
 
       <div
           v-else
-          class="
-          edit-box__body
-          edit-box__stack
-          region-node__content
-        "
+          class="edit-box__body edit-box__stack region-node__content"
       >
+        <!-- Basic information -->
+        <section class="edit-box__section region-section region-section--identity">
+          <header class="edit-box__section-header">
+            <div class="edit-box__section-heading">
+              <h3 class="edit-box__section-title">
+                Basic information
+              </h3>
+
+              <p class="edit-box__section-description">
+                Define the region name and contextual description used in
+                generated prompts.
+              </p>
+            </div>
+          </header>
+
+          <div class="region-section__body region-identity">
+            <div class="region-identity__field">
+              <FieldEditorWrapper
+                  field-name="Name"
+                  info="The region's display name."
+                  :vertical="true"
+              >
+                <ShortTextBox
+                    :model-value="region.get('name')"
+                    @edit="payload => region.update('name', payload)"
+                />
+              </FieldEditorWrapper>
+            </div>
+
+            <div class="region-identity__field region-identity__field--description">
+              <FieldEditorWrapper
+                  field-name="Description"
+                  info="Context applied while characters are inside this region."
+                  :vertical="true"
+              >
+                <LongTextBox
+                    :model-value="region.get('description')"
+                    @edit="payload => region.update('description', payload)"
+                    tokenize
+                    :tokenization-started="true"
+                />
+              </FieldEditorWrapper>
+            </div>
+          </div>
+        </section>
+
         <!-- Lorebook -->
-        <section
-            class="
-            edit-box__section
-            region-section
-          "
-        >
+        <section class="edit-box__section region-section">
           <Expandable title="Lorebook" variant="compact">
             <div class="region-section__body">
               <LorebookEditor
@@ -260,17 +293,10 @@ async function createNewRegion(): Promise<void> {
 
               <div
                   v-else-if="hasExpanded"
-                  class="
-                  edit-box__state
-                  edit-box__state--vertical
-                  region-section__empty
-                "
+                  class="edit-box__state edit-box__state--vertical region-section__empty"
               >
                 <div class="edit-box__state-icon">
-                  <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                  >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z" />
                     <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z" />
                   </svg>
@@ -291,17 +317,9 @@ async function createNewRegion(): Promise<void> {
         </section>
 
         <!-- Locations -->
-        <section
-            class="
-            edit-box__section
-            region-section
-          "
-        >
+        <section class="edit-box__section region-section">
           <Expandable title="Locations" variant="compact">
-            <div
-                v-if="hasExpanded"
-                class="locations-layout"
-            >
+            <div v-if="hasExpanded" class="locations-layout">
               <div class="edit-box__toolbar">
                 <div class="edit-box__toolbar-main">
                   <SearchBar
@@ -327,14 +345,8 @@ async function createNewRegion(): Promise<void> {
                     <List
                         :elements="filteredLocations"
                         @create="onCreateLocation"
-                        @edit="
-                        element =>
-                          onEditLocation(element as Location)
-                      "
-                        @remove="
-                        element =>
-                          deleteLocation(element as Location)
-                      "
+                        @edit="element => onEditLocation(element as Location)"
+                        @remove="element => deleteLocation(element as Location)"
                     />
                   </div>
                 </template>
@@ -351,23 +363,12 @@ async function createNewRegion(): Promise<void> {
 
                     <div
                         v-else
-                        class="
-                        edit-box__state
-                        edit-box__state--vertical
-                        locations-layout__placeholder
-                      "
+                        class="edit-box__state edit-box__state--vertical locations-layout__placeholder"
                     >
                       <div class="edit-box__state-icon">
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                        >
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
-                          <circle
-                              cx="12"
-                              cy="10"
-                              r="2.5"
-                          />
+                          <circle cx="12" cy="10" r="2.5" />
                         </svg>
                       </div>
 
@@ -377,8 +378,7 @@ async function createNewRegion(): Promise<void> {
                         </strong>
 
                         <p class="edit-box__state-description">
-                          Choose a location from the list to edit its
-                          details.
+                          Choose a location from the list to edit its details.
                         </p>
                       </div>
                     </div>
@@ -427,10 +427,7 @@ async function createNewRegion(): Promise<void> {
                       variant="accent"
                       @click="createNewRegion"
                   >
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                    >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M12 5v14" />
                       <path d="M5 12h14" />
                     </svg>
@@ -450,10 +447,7 @@ async function createNewRegion(): Promise<void> {
                     class="region-tree__item"
                     role="treeitem"
                 >
-                  <div
-                      class="region-tree__connector"
-                      aria-hidden="true"
-                  />
+                  <div class="region-tree__connector" aria-hidden="true" />
 
                   <div class="region-tree__child">
                     <RegionEditor :region="childRegion" />
@@ -463,23 +457,11 @@ async function createNewRegion(): Promise<void> {
 
               <div
                   v-else-if="regionFilteringTerm.trim()"
-                  class="
-                  edit-box__state
-                  edit-box__state--vertical
-                  region-filter-empty
-                "
+                  class="edit-box__state edit-box__state--vertical region-filter-empty"
               >
                 <div class="edit-box__state-icon">
-                  <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                  >
-                    <circle
-                        cx="11"
-                        cy="11"
-                        r="7"
-                    />
-
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
                     <path d="m20 20-4-4" />
                   </svg>
                 </div>
@@ -499,10 +481,7 @@ async function createNewRegion(): Promise<void> {
                 </div>
 
                 <button
-                    class="
-                    edit-box__action
-                    edit-box__action--accent
-                  "
+                    class="edit-box__action edit-box__action--accent"
                     type="button"
                     @click="regionFilteringTerm = ''"
                 >
@@ -512,16 +491,10 @@ async function createNewRegion(): Promise<void> {
 
               <div
                   v-else
-                  class="
-                  edit-box__state
-                  edit-box__state--vertical
-                "
+                  class="edit-box__state edit-box__state--vertical"
               >
                 <div class="edit-box__state-icon">
-                  <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                  >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M12 3v6" />
                     <path d="M6 21v-6" />
                     <path d="M18 21v-6" />
@@ -543,10 +516,7 @@ async function createNewRegion(): Promise<void> {
                 </div>
 
                 <button
-                    class="
-                    edit-box__action
-                    edit-box__action--accent
-                  "
+                    class="edit-box__action edit-box__action--accent"
                     type="button"
                     @click="createNewRegion"
                 >
@@ -564,11 +534,9 @@ async function createNewRegion(): Promise<void> {
 <style scoped>
 .region-node {
   position: relative;
-
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-
   color: rgb(var(--c-fg));
   font-family: var(--font-primary);
 }
@@ -597,6 +565,75 @@ async function createNewRegion(): Promise<void> {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Basic information                                                          */
+/* -------------------------------------------------------------------------- */
+
+.region-identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.region-identity__field {
+  min-width: 0;
+  padding: var(--space-3);
+
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.48),
+      rgb(var(--c-surface-2) / 0.24)
+  );
+
+  border: 1px solid rgb(var(--c-border) / 0.19);
+  border-radius: var(--radius-md);
+
+  box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 3px 9px rgb(var(--c-shadow) / 0.035);
+
+  transition:
+      background-color var(--duration-normal) var(--ease-standard),
+      border-color var(--duration-normal) var(--ease-standard),
+      box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.region-identity__field:hover {
+  border-color: rgb(var(--c-primary) / 0.27);
+}
+
+.region-identity__field:focus-within {
+  background: rgb(var(--c-surface-raised) / 0.62);
+  border-color: rgb(var(--c-primary) / 0.42);
+
+  box-shadow:
+      0 0 0 3px rgb(var(--c-primary) / 0.09),
+      inset 0 1px 0 rgb(255 255 255 / 0.32);
+}
+
+.region-identity__field--description {
+  border-color: rgb(var(--c-primary) / 0.2);
+
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-primary) / 0.055),
+      rgb(var(--c-surface-raised) / 0.5)
+  );
+}
+
+.region-identity__field :deep(input),
+.region-identity__field :deep(textarea) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.region-identity__field :deep(textarea) {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Locations                                                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -604,7 +641,6 @@ async function createNewRegion(): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-
   min-width: 0;
   padding: var(--space-3);
 }
@@ -612,12 +648,11 @@ async function createNewRegion(): Promise<void> {
 .locations-layout__split-panel {
   min-height: 20rem;
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.4),
-          rgb(var(--c-surface-2) / 0.24)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.4),
+      rgb(var(--c-surface-2) / 0.24)
+  );
 
   border: 1px solid rgb(var(--c-border) / 0.22);
   border-radius: var(--radius-md);
@@ -639,19 +674,17 @@ async function createNewRegion(): Promise<void> {
 
 .locations-layout__list {
   padding: var(--space-2);
-
   background: rgb(var(--c-surface) / 0.18);
 }
 
 .locations-layout__editor {
   padding: var(--space-3);
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.32),
-          rgb(var(--c-surface-2) / 0.2)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.32),
+      rgb(var(--c-surface-2) / 0.2)
+  );
 }
 
 .locations-layout__placeholder {
@@ -673,12 +706,11 @@ async function createNewRegion(): Promise<void> {
 }
 
 .children-regions__heading {
-  flex: 1 1 22rem;
-  min-width: 0;
-
   display: flex;
+  flex: 1 1 22rem;
   flex-direction: column;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .children-regions__summary {
@@ -701,35 +733,28 @@ async function createNewRegion(): Promise<void> {
 
 .region-tree {
   position: relative;
-
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-
   min-width: 0;
-
   margin: 0;
   padding: 0 0 0 1.6rem;
-
   list-style: none;
 }
 
 .region-tree::before {
   content: "";
-
   position: absolute;
   top: 0;
   bottom: 1.25rem;
   left: 0.5rem;
-
   width: 2px;
 
-  background:
-      linear-gradient(
-          to bottom,
-          rgb(var(--c-primary) / 0.66),
-          rgb(var(--c-primary) / 0.1)
-      );
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--c-primary) / 0.66),
+      rgb(var(--c-primary) / 0.1)
+  );
 
   border-radius: var(--radius-round);
 }
@@ -743,45 +768,35 @@ async function createNewRegion(): Promise<void> {
   position: absolute;
   top: 1.4rem;
   left: -1.1rem;
-
   width: 1.1rem;
   height: 2px;
-
   background: rgb(var(--c-primary) / 0.56);
 }
 
 .region-tree__connector::before {
   content: "";
-
   position: absolute;
   top: 50%;
   right: -0.28rem;
-
   width: 0.55rem;
   height: 0.55rem;
   box-sizing: border-box;
-
   background: rgb(var(--c-accent));
   border: 2px solid rgb(var(--c-primary));
   border-radius: 50%;
-
-  box-shadow:
-      0 0 0 3px rgb(var(--c-accent) / 0.12);
-
+  box-shadow: 0 0 0 3px rgb(var(--c-accent) / 0.12);
   transform: translateY(-50%);
 }
 
 .region-tree__child {
   min-width: 0;
-
   padding: var(--space-1);
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.28),
-          rgb(var(--c-surface-2) / 0.16)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.28),
+      rgb(var(--c-surface-2) / 0.16)
+  );
 
   border: 1px solid rgb(var(--c-primary) / 0.17);
   border-radius: var(--radius-md);
@@ -794,18 +809,14 @@ async function createNewRegion(): Promise<void> {
 }
 
 .region-tree__child:hover {
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.46),
-          rgb(var(--c-surface-hover) / 0.28)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.46),
+      rgb(var(--c-surface-hover) / 0.28)
+  );
 
   border-color: rgb(var(--c-primary) / 0.34);
-
-  box-shadow:
-      0 6px 18px rgb(var(--c-shadow) / 0.075);
-
+  box-shadow: 0 6px 18px rgb(var(--c-shadow) / 0.075);
   transform: translateY(-1px);
 }
 
@@ -834,6 +845,10 @@ async function createNewRegion(): Promise<void> {
   .locations-layout,
   .children-regions,
   .region-section__body {
+    padding: var(--space-2);
+  }
+
+  .region-identity__field {
     padding: var(--space-2);
   }
 
@@ -889,6 +904,7 @@ async function createNewRegion(): Promise<void> {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .region-identity__field,
   .region-tree__child {
     transition: none;
   }

@@ -146,7 +146,7 @@ class LorebookServiceTest {
     @Test
     void updatingParentNameUpdatesLorebookName_Region() {
         RegionRecord regionToUpdate = regionTestContext
-                .createRegions(1, 0)
+                .createRegions(1)
                 .getFirst();
 
         assertEquals(

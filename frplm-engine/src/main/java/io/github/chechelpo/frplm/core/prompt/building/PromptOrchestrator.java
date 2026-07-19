@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptBuilder;
+import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.session.Session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +46,7 @@ public class PromptOrchestrator implements PromptBuilder {
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
         this.session = session;
-        this.promptBuilder = new PromptRenderer(messages, sections);
+        this.promptBuilder = new PromptRenderer(messages, sections.stream().map(SectionManager::new).toList());
         this.tokensManager = tokensManager;
         this.lorebookManager = new LorebooksManager(lorebookContext, tokensManager);
     }
@@ -60,7 +62,8 @@ public class PromptOrchestrator implements PromptBuilder {
                     .appendAll(messages)
                     .configurationParameters(prompt.getGenerationConfig())
                     .generationParameters(prompt.getParameters())
-                    .modelID(prompt.getAssignedConnection().orElseThrow().getModelID())
+                    .modelID(prompt.getAssignedConnection()
+                            .orElseThrow().getModelID())
                     .build(),
                 lorebookManager
         );
@@ -85,31 +88,25 @@ public class PromptOrchestrator implements PromptBuilder {
 
     @Override
     public PromptBuilder addLorebooks(LorebookSnapshot... lorebookSnapshots) {
+        Arrays.stream(lorebookSnapshots).forEach(this::addLorebook);
         return null;
     }
 
     @Override
     public PromptBuilder appendAsSection(ChatCompletionMessage section) {
-        return null;
-    }
-
-    @Override
-    public PromptBuilder append(@NotNull ChatMessage message) {
-        return null;
-    }
-
-    @Override
-    public PromptBuilder appendAll(@NotNull List<ChatMessage> chatHistory) {
-        return null;
+        promptBuilder.addSection(section, new PromptSection.InjectAtPosition.AtDepth(0));
+        return this;
     }
 
     @Override
     public PromptBuilder insertAt(int depth, ChatCompletionMessage message) {
-        return null;
+        System.out.println("Inserted " + message + " at position " + depth);
+        promptBuilder.addSection(message, new PromptSection.InjectAtPosition.AtDepth(depth));
+        return this;
     }
 
-    @Override
-    public PromptBuilder injectAtOutlet(int id, String content) {
-        return null;
-    }
+    /*
+    public PromptBuilder injectAtOutlet(String outlet, String content) {
+        throw new UnsupportedOperationException("Macros not yet implemented");
+    }*/
 }

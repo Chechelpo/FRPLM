@@ -63,14 +63,11 @@ async function loadCharacter(character: Character): Promise<void> {
     characterTags.value = tags;
     embedLorebook.value = lorebook;
 
-    console.debug(
-        "Loaded character editor data:",
-        {
-          character,
-          tags,
-          lorebook,
-        },
-    );
+    console.debug("Loaded character editor data:", {
+      character,
+      tags,
+      lorebook,
+    });
   } finally {
     if (model.value.equals(character)) {
       isLoadingCharacter.value = false;
@@ -103,6 +100,16 @@ const name = computed<string>({
   },
 });
 
+const description = computed<string>({
+  get() {
+    return model.value.get("description");
+  },
+
+  set(value: string) {
+    model.value.update("description", value);
+  },
+});
+
 const canBeUser = computed<boolean>({
   get() {
     return model.value.get("can_be_user");
@@ -118,14 +125,12 @@ const canBeUser = computed<boolean>({
 // -----------------------------------------------------------------------------
 
 async function handleNewTag(tag: Tag): Promise<void> {
-  console.debug(
-      `Adding tag ${tag} to character ${model.value}`,
-  );
+  console.debug(`Adding tag ${tag} to character ${model.value}`);
 
   await model.value.addTag(tag);
 
-  const exists = characterTags.value.some(
-      existingTag => existingTag.equals(tag),
+  const exists = characterTags.value.some(existingTag =>
+      existingTag.equals(tag),
   );
 
   if (!exists) {
@@ -136,9 +141,7 @@ async function handleNewTag(tag: Tag): Promise<void> {
 async function handleRemoveTag(tag: Tag): Promise<void> {
   const character = model.value;
 
-  console.debug(
-      `Removing tag ${tag} from character ${character}`,
-  );
+  console.debug(`Removing tag ${tag} from character ${character}`);
 
   await character.removeTag(tag);
 
@@ -187,8 +190,8 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
         </div>
 
         <p class="edit-box__description">
-          Configure the character identity, player availability, opening
-          message, embedded lore, and possible starting locations.
+          Configure the character identity, description, player availability,
+          opening message, embedded lore, and possible starting locations.
         </p>
       </div>
     </header>
@@ -216,7 +219,7 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
             >
               <ShortTextBox
                   v-model="name"
-                  @edit="value => name = value"
+                  @edit="value => (name = value)"
               />
             </FieldEditorWrapper>
           </div>
@@ -228,7 +231,28 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
             >
               <BooleanToggle
                   :model-value="canBeUser"
-                  @edit="value => canBeUser = value"
+                  @edit="value => (canBeUser = value)"
+              />
+            </FieldEditorWrapper>
+          </div>
+
+          <div
+              class="
+              character-editor__field
+              character-editor__field--full
+              character-editor__description-field
+            "
+          >
+            <FieldEditorWrapper
+                field-name="Description"
+                info="Describes the character's identity, appearance, personality, and behavior"
+                :vertical="true"
+            >
+              <LongTextBox
+                  :model-value="description"
+                  @edit="value => (description = value)"
+                  tokenize
+                  :tokenization-started="true"
               />
             </FieldEditorWrapper>
           </div>
@@ -258,22 +282,6 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
           </Transition>
         </div>
       </section>
-
-      <!--
-        Tag editor can be restored here later using the same section style:
-
-        <section class="edit-box__section">
-          <header class="edit-box__section-header">
-            ...
-          </header>
-
-          <TagAutocomplete
-            v-model="characterTags"
-            @new-tag="handleNewTag"
-            @remove-tag="handleRemoveTag"
-          />
-        </section>
-      -->
 
       <!-- Character lorebook -->
       <section class="edit-box__section character-editor__expandable-section">
@@ -432,6 +440,15 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
   grid-column: 1 / -1;
 }
 
+.character-editor__description-field {
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-primary) / 0.04),
+          rgb(var(--c-surface-raised) / 0.48)
+      );
+}
+
 .character-editor__first-message {
   border-color: rgb(var(--c-accent) / 0.2);
 
@@ -474,10 +491,6 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
   min-width: 0;
 }
 
-/*
- * These selectors remain intentionally conservative because Expandable's
- * internal structure may differ between implementations.
- */
 .character-editor__expandable-section :deep(button) {
   font-family: var(--font-primary);
 }

@@ -1,6 +1,6 @@
 //src/extensions/extensions.ts!
-import {fetchApi} from "@/core/ABSEntity";
 import {API_BASE} from "@/config";
+import {fetchApi} from "@/services/apiClient";
 
 export type ExtensionDTO = {
     id: string;
@@ -11,7 +11,7 @@ export type ExtensionDTO = {
 
 export async function fetchExtensions() : Promise<ExtensionDTO[]> {
     return await fetchApi(
-        `${API_BASE}/extensions`,
+        `api/extensions`,
         {
             method:'GET'
         }

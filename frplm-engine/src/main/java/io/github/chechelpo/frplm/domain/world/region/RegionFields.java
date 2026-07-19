@@ -61,7 +61,7 @@ final class RegionFields extends ABSControllerAwareHelper<RegionRecord, RegionSe
                 "name",
                 REGION.NAME,
                 FieldInfo.stringField()
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(

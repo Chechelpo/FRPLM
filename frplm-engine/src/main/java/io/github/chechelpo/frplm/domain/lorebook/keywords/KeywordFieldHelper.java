@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 
 @Component
-final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, KeywordService, KeywordController> {
-    public KeywordFieldHelper(KeywordService service, KeywordController controller) {
+final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, KeywordServiceImpl, KeywordController> {
+    public KeywordFieldHelper(KeywordServiceImpl service, KeywordController controller) {
         super(service, controller);
         register_field(
                 "id",
@@ -36,7 +36,7 @@ final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, K
                                         .readOnly()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
     }

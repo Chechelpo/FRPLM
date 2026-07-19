@@ -53,6 +53,7 @@ public final class LorebooksManager implements LorebookManager {
     public boolean outletExists(String outletName){
         return lorebookContext.outlets.getOutletID(outletName).isPresent();
     }
+
     @Override
     public OverrideResult overrideLorebookOutlet(@NonNull LorebookSnapshot targetLorebook, String targetOutlet, String newOutlet) {
         Optional<LorebookSnapshot> found = lorebooks.stream().filter(other -> other.equals(targetLorebook))
@@ -75,7 +76,8 @@ public final class LorebooksManager implements LorebookManager {
 
     @Override
     public OverrideResult overrideAllLorebookOutlets(LorebookSnapshot targetLorebook, String newOutletName) {
-        Optional<LorebookSnapshot> found = lorebooks.stream().filter(other -> other.equals(targetLorebook))
+        Optional<LorebookSnapshot> found = lorebooks.stream()
+                .filter(other -> other.equals(targetLorebook))
                 .findFirst();
         if (found.isEmpty()) {
             log.info("Target lorebook {} is not active when overriding outlet {}", targetLorebook.getName(), newOutletName);

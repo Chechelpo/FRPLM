@@ -26,7 +26,7 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -56,7 +56,7 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
                         .setConstraints(StringConstraint.builder()
                                 .setPossibleValues(ChatCompletionRole.wireValues())
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -71,14 +71,14 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
                 "world_id",
                 MESSAGES.WORLD_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
                 "location_id",
                 MESSAGES.LOCATION_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -89,7 +89,7 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
                         .setConstraints(StringConstraint.builder()
                                 .nullable()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

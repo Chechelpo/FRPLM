@@ -32,7 +32,7 @@ public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
 
         );
@@ -46,7 +46,7 @@ public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -60,7 +60,7 @@ public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(

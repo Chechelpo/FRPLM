@@ -1,6 +1,6 @@
 // src/main.js
-import './assets/main.css'
-import './assets/styles/EntityEditors.css'
+import '../sdk/assets/main.css'
+import '../sdk/assets/styles/EntityEditors.css'
 
 import { createApp } from "vue";
 import App from "./App.vue";

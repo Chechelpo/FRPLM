@@ -7,6 +7,8 @@ import org.jooq.JSON;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Optional;
+
 import static io.github.chechelpo.frplm.jooq.generated.Tables.EXTENSION;
 
 @Store
@@ -34,13 +36,14 @@ final class ExtensionStore {
                 .where(EXTENSION.ID.eq(extensionID))
                 .execute();
     }
-    public JsonNode getConfig(String extensionID){
+    public Optional<JsonNode> getConfig(String extensionID){
         JSON json = ctx.selectFrom(EXTENSION)
                 .where(EXTENSION.ID.eq(extensionID))
                 .fetchOne(EXTENSION.CONFIG);
-        assert json != null;
+        if (json == null)
+            return Optional.empty();
 
-        return mapper.readTree(json.data());
+        return Optional.of(mapper.readTree(json.data()));
     }
 
     public boolean exists(String extensionID){

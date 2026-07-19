@@ -64,8 +64,6 @@ public class EntryKeywordService extends EntityService<EntryKeywordsRecord, Entr
 
     @Override
     protected void beforeCreate(EntityDataPayload<EntryKeywordsRecord> data, long operationID) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported.");
     }
-
-
 }

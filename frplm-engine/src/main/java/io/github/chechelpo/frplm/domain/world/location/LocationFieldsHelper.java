@@ -30,7 +30,7 @@ final class LocationFieldsHelper extends ABSControllerAwareHelper<
                                 .key()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -65,9 +65,13 @@ final class LocationFieldsHelper extends ABSControllerAwareHelper<
                                         .setMaxLength(255)
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
+
+        registerControllerField(Locations.LOCATIONS.DESCRIPTION)
+                .setDtoName("description")
+                .setInfo(FieldInfo.stringField().build());
 
         register_field(
                 "lorebook_id",

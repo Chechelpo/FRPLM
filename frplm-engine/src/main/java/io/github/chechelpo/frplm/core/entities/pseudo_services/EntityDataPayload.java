@@ -1,10 +1,13 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Condition;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
+import org.jooq.impl.DSL;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,10 +63,6 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         return assignments.containsKey(field);
     }
 
-    public Map<TableField<R, ?>, Object> values() {
-        return assignments;
-    }
-
     public <T> T requireValue(TableField<R, T> field) {
         if (assignments.containsKey(field))
             return (T) assignments.get(field);
@@ -71,10 +70,10 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         throw new IllegalArgumentException("Unknown field or unassigned field:  " + field.getName());
     }
 
+    @SuppressWarnings("unchecked")
     public <T> @NotNull Optional<T> getValue(TableField<R, T> field) {
         return Optional.ofNullable((T) assignments.get(field));
     }
-
 
     public boolean isEmpty() {
         return assignments.isEmpty();
@@ -82,6 +81,46 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
 
     public Map<TableField<R, ?>, Object> assignments() {
         return assignments;
+    }
+
+    /**
+     * Converts every assignment into an equality condition.
+     *
+     * Example:
+     *   ID = 10
+     *   NAME = "Marco"
+     */
+    public List<Condition> asEqualityConditions() {
+        return assignments.entrySet()
+                .stream()
+                .map(entry -> equalityCondition(
+                        entry.getKey(),
+                        entry.getValue()
+                ))
+                .toList();
+    }
+
+    /**
+     * Combines every equality condition using AND.
+     *
+     * Example:
+     *   ID = 10 AND NAME = "Marco"
+     */
+    public Condition asEqualityCondition() {
+        return DSL.and(asEqualityConditions());
+    }
+
+    private static <Rec extends TableRecord<Rec>, T> Condition equalityCondition(
+            TableField<Rec, T> field,
+            Object value
+    ) {
+        if (value == null) {
+            return field.isNull();
+        }
+
+        T convertedValue = field.getDataType().convert(value);
+
+        return field.eq(convertedValue);
     }
 
     @Override

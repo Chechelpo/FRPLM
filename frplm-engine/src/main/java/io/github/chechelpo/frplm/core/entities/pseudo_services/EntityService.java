@@ -15,6 +15,8 @@ import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Field;
+import org.jooq.Result;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,7 @@ import java.util.*;
 public abstract class EntityService<
         R extends TableRecord<R>,
         Store extends EntityStore<R>
-        > {
+        > implements EntityReader<R> {
     private final static EnumSet<EntityConfigs.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final EventBus eventBus;
     // Fields
@@ -114,6 +116,10 @@ public abstract class EntityService<
         log.trace("Registering field {} with constraints {} ", field, constraint);
 
         if (required) required_instantiation_fields.add(field);
+    }
+
+    public Set<TableField<R, ?>> getKeyFields(){
+        return keys;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -244,21 +250,41 @@ public abstract class EntityService<
     }
 
     @Transactional(readOnly = true)
-    public List<R> getAll() {
-        List<R> records = store.getAll();
+    public Result<R> getAll() {
+        Result<R> records = store.getAll();
         afterRetrieve(records, 0);
         return records;
     }
 
     @Transactional(readOnly = true)
-    public List<R> getMatching(EntityKey<R> key) {
+    public Result<R> getMatching(EntityKey<R> key) {
         Objects.requireNonNull(key);
         throwIfInvalidKey(key, false);
 
-        List<R> records = store.getAllMatching(key);
+        Result<R> records = store.getAllMatching(key);
         afterRetrieve(records, 0);
 
         return records;
+    }
+
+    @Override
+    public Result<R> getMatching(EntityDataPayload<R> target) {
+        Objects.requireNonNull(target, "Target data is null");
+        Result<R> records;
+
+        try {
+            records = store.getMatching(target);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        afterRetrieve(records, 0);
+        return records;
+    }
+
+    @Override
+    public <T> Result<R> getMatching(TableField<R, T> field, T value) {
+        return store.getMatching(field, value);
     }
 
     @Transactional(readOnly = true)
@@ -317,59 +343,217 @@ public abstract class EntityService<
 
         return success;
     }
+
     @Transactional
-    public <T extends Number> Optional<T> incrementAndGet(TableField<R,T> field, EntityKey<R> entityKey) {
-        Objects.requireNonNull(field);
-        Objects.requireNonNull(entityKey);
-        if (!exists(entityKey)) {
-            log.error("{} with key {} not found", this.getType().getEntityType(), entityKey.toString());
-            return Optional.empty();
-        }
-        long operationID = eventBus.nextOperationID();
-        T newValue = store.get(field, entityKey);
-        T expectedValue = increment(field, newValue);
-
-        beforeUpdate(entityKey, EntityDataPayload.of(field, expectedValue), operationID);
-        T number = store.incrementAndGet(field, entityKey);
-        log.trace("Incremented field {} . Prev: {} , New: {}", field.getUnqualifiedName(), number, expectedValue);
-        afterSuccessfulUpdate(entityKey, EntityDataPayload.of(field, number), operationID);
-
-        return Optional.of(number);
+    public <T extends Number> Optional<T> incrementAndGet(
+            TableField<R, T> field,
+            EntityKey<R> entityKey
+    ) {
+        return adjustAndGet(field, entityKey, 1);
     }
 
-    private <T extends Number> T increment(@NotNull TableField<R, T> field, T value) {
+    @Transactional
+    public <T extends Number> Optional<T> decrementAndGet(
+            TableField<R, T> field,
+            EntityKey<R> entityKey
+    ) {
+        return adjustAndGet(field, entityKey, -1);
+    }
+
+    private <T extends Number> Optional<T> adjustAndGet(
+            TableField<R, T> field,
+            EntityKey<R> entityKey,
+            int delta
+    ) {
+        Objects.requireNonNull(field, "field");
+        Objects.requireNonNull(entityKey, "entityKey");
+
+        if (delta != 1 && delta != -1) {
+            throw new IllegalArgumentException(
+                    "Entity adjustment must be either +1 or -1"
+            );
+        }
+
+        long operationID = eventBus.nextOperationID();
+
+        /*
+         * SELECT ... FOR UPDATE.
+         *
+         * This avoids the race in:
+         *
+         *     exists()
+         *     get()
+         *     update()
+         *
+         * Another transaction cannot modify or delete this row until the
+         * current transaction completes.
+         */
+        Optional<T> currentValueResult =
+                store.getNumericValueForUpdate(field, entityKey);
+
+        if (currentValueResult.isEmpty()) {
+            log.debug(
+                    "{} with key {} was not found",
+                    getType().getEntityType(),
+                    entityKey
+            );
+
+            return Optional.empty();
+        }
+
+        T currentValue = currentValueResult.get();
+        T expectedValue = adjustValue(field, currentValue, delta);
+
+        EntityDataPayload<R> draftUpdate =
+                EntityDataPayload.of(field, expectedValue);
+
+        /*
+         * Runs field validation and publishes the draft update event.
+         */
+        beforeUpdate(
+                entityKey,
+                draftUpdate,
+                operationID
+        );
+
+        /*
+         * An event subscriber can mutate EntityDataPayload. Increment and
+         * decrement have fixed semantics, so subscribers must not replace
+         * the calculated value.
+         */
+        T approvedValue = draftUpdate.requireValue(field);
+
+        if (!Objects.equals(approvedValue, expectedValue)) {
+            throw new IllegalStateException(
+                    "An update listener changed the result of a numeric " +
+                            "adjustment for field " + field.getName() +
+                            ": expected " + expectedValue +
+                            ", received " + approvedValue
+            );
+        }
+
+        T actualValue = store.adjustAndGet(
+                field,
+                entityKey,
+                delta
+        );
+
+        log.trace(
+                "{} field {}. Previous: {}, new: {}",
+                delta > 0 ? "Incremented" : "Decremented",
+                field.getUnqualifiedName(),
+                currentValue,
+                actualValue
+        );
+
+        afterSuccessfulUpdate(
+                entityKey,
+                EntityDataPayload.of(field, actualValue),
+                operationID
+        );
+
+        return Optional.of(actualValue);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <R extends TableRecord<R> ,T extends Number> T adjustValue(
+            @NotNull TableField<R, T> field,
+            @NotNull T value,
+            int delta
+    ) {
         Class<?> type = field.getType();
 
         if (type == Integer.class) {
-            return (T) Integer.valueOf(value.intValue() + 1);
+            return (T) Integer.valueOf(
+                    Math.addExact(value.intValue(), delta)
+            );
         }
 
         if (type == Long.class) {
-            return (T) Long.valueOf(value.longValue() + 1L);
+            return (T) Long.valueOf(
+                    Math.addExact(value.longValue(), delta)
+            );
         }
 
         if (type == Short.class) {
-            return (T) Short.valueOf((short) (value.shortValue() + 1));
+            int adjusted = Math.addExact(
+                    value.shortValue(),
+                    delta
+            );
+
+            if (adjusted < Short.MIN_VALUE ||
+                    adjusted > Short.MAX_VALUE) {
+                throw new ArithmeticException(
+                        "Short overflow while adjusting field " +
+                                field.getName()
+                );
+            }
+
+            return (T) Short.valueOf((short) adjusted);
         }
 
         if (type == Byte.class) {
-            return (T) Byte.valueOf((byte) (value.byteValue() + 1));
+            int adjusted = Math.addExact(
+                    value.byteValue(),
+                    delta
+            );
+
+            if (adjusted < Byte.MIN_VALUE ||
+                    adjusted > Byte.MAX_VALUE) {
+                throw new ArithmeticException(
+                        "Byte overflow while adjusting field " +
+                                field.getName()
+                );
+            }
+
+            return (T) Byte.valueOf((byte) adjusted);
         }
 
         if (type == java.math.BigInteger.class) {
-            return (T) ((java.math.BigInteger) value).add(java.math.BigInteger.ONE);
+            return (T) ((java.math.BigInteger) value).add(
+                    java.math.BigInteger.valueOf(delta)
+            );
         }
 
         if (type == java.math.BigDecimal.class) {
-            return (T) ((java.math.BigDecimal) value).add(java.math.BigDecimal.ONE);
+            return (T) ((java.math.BigDecimal) value).add(
+                    java.math.BigDecimal.valueOf(delta)
+            );
+        }
+
+        if (type == Double.class) {
+            double adjusted = value.doubleValue() + delta;
+
+            if (!Double.isFinite(adjusted)) {
+                throw new ArithmeticException(
+                        "Non-finite double produced while adjusting field " +
+                                field.getName()
+                );
+            }
+
+            return (T) Double.valueOf(adjusted);
+        }
+
+        if (type == Float.class) {
+            float adjusted = value.floatValue() + delta;
+
+            if (!Float.isFinite(adjusted)) {
+                throw new ArithmeticException(
+                        "Non-finite float produced while adjusting field " +
+                                field.getName()
+                );
+            }
+
+            return (T) Float.valueOf(adjusted);
         }
 
         throw new IllegalArgumentException(
-                "Cannot increment numeric field " + field.getName() +
-                        " of type " + type.getName()
+                "Cannot numerically adjust field " +
+                        field.getName() +
+                        " of type " +
+                        type.getName()
         );
     }
-
     protected void afterSuccessfulUpdate(EntityKey<R> key, EntityDataPayload<R> updated, long operationID) {
         eventBus.publish(new CRUDCommittedEvent.UpdatedEntity<R>(this.entityType, operationID, key, updated));
     }

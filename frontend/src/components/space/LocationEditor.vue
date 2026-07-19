@@ -1,30 +1,14 @@
 <script setup lang="ts">
-import {
-  computed,
-  onMounted,
-  ref,
-  shallowRef,
-  watch,
-} from "vue";
+import {computed, onMounted, ref, shallowRef, watch,} from "vue";
 
-import {
-  Location,
-} from "@/domain/World";
-import {
-  Character,
-  type CharacterData,
-  type CharacterKey,
-} from "@/domain/Characters";
-import { Lorebook } from "@/domain/Lorebook";
-import { EntityTypes } from "@/domain/EntityTypes";
-import type { DTO } from "@/types/DTOs";
+import {Location} from "@/domain/World";
+import {Character, type CharacterData, type CharacterKey} from "@/domain/Characters";
+import {Lorebook} from "@/domain/Lorebook";
+import {EntityTypes} from "@/domain/EntityTypes";
+import type {DTO} from "@/types/DTOs";
 
-import {
-  createEntity,
-  deleteEntity,
-  fetchApi,
-} from "@/core/ABSEntity";
-import { API_BASE } from "@/config";
+import {createEntity, deleteEntity, } from "@/core/ABSEntity";
+import {API_BASE} from "@/config";
 
 import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
@@ -34,6 +18,8 @@ import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
+import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<{
   location: Location;
@@ -91,33 +77,15 @@ async function loadLocationData(): Promise<void> {
       characterResponse,
     ] = await Promise.all([
       currentLocation.getLorebook(),
-      fetchApi(
-          `${API_BASE}/${EntityTypes.CHARACTERS}/startingAt` +
-          `?worldId=${currentLocation.get("worldID")}` +
-          `&locationId=${currentLocation.get("id")}`,
-          {
-            method: "GET",
-          },
-      ),
+      currentLocation.getStartingHere()
     ]);
 
-    const characterDtos =
-        (await characterResponse.json()) as DTO[];
 
     if (requestId !== loadRequestId) {
       return;
     }
-
     lorebook.value = loadedLorebook;
-
-    charactersHere.value =
-        characterDtos.map(
-            (dto) =>
-                new Character(
-                    dto,
-                    EntityTypes.CHARACTERS,
-                ),
-        );
+    charactersHere.value = characterResponse;
   } catch (error) {
     if (requestId !== loadRequestId) {
       return;
@@ -172,7 +140,7 @@ async function createCharacterInLocation(): Promise<void> {
       newCharacter,
     ];
 
-    editingCharacter.value = newCharacter;
+    selectCharacter(newCharacter)
   } finally {
     creatingCharacter.value = false;
   }
@@ -256,33 +224,14 @@ watch(
 
 <template>
   <article
-      class="
-      location-editor
-      edit-box
-      edit-box--primary
-    "
+      class="location-editor edit-box edit-box--primary"
       :aria-busy="isLoading"
   >
-    <header
-        class="
-        edit-box__header
-        location-editor__header
-      "
-    >
-      <div
-          class="edit-box__header-icon"
-          aria-hidden="true"
-      >
+    <header class="edit-box__header location-editor__header">
+      <div class="edit-box__header-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24">
-          <path
-              d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"
-          />
-
-          <circle
-              cx="12"
-              cy="10"
-              r="2.5"
-          />
+          <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
         </svg>
       </div>
 
@@ -298,32 +247,20 @@ watch(
 
           <span class="edit-box__count">
             {{ characterCount }}
-            {{
-              characterCount === 1
-                  ? "character"
-                  : "characters"
-            }}
+            {{ characterCount === 1 ? "character" : "characters" }}
           </span>
         </div>
 
         <p class="edit-box__description">
-          Configure the location description,
-          lorebook, connections, and starting
-          characters.
+          Configure the location description, lorebook, connections, and
+          starting characters.
         </p>
       </div>
     </header>
 
-    <div
-        v-if="loadError"
-        class="edit-box__body"
-    >
+    <div v-if="loadError" class="edit-box__body">
       <div
-          class="
-          edit-box__state
-          edit-box__state--error
-          edit-box__state--vertical
-        "
+          class="edit-box__state edit-box__state--error edit-box__state--vertical"
           role="alert"
       >
         <div class="edit-box__state-content">
@@ -338,10 +275,7 @@ watch(
 
         <button
             type="button"
-            class="
-            edit-box__action
-            edit-box__action--accent
-          "
+            class="edit-box__action edit-box__action--accent"
             @click="loadLocationData"
         >
           Retry
@@ -351,85 +285,57 @@ watch(
 
     <div
         v-else
-        class="
-        edit-box__body
-        edit-box__stack
-        location-editor__body
-      "
+        class="edit-box__body edit-box__stack location-editor__body"
     >
       <!-- Basic information -->
-      <section
-          class="
-          edit-box__section
-          location-editor__section
-        "
-      >
+      <section class="edit-box__section location-editor__section">
         <header class="edit-box__section-header">
           <div class="edit-box__section-heading">
             <h3 class="edit-box__section-title">
               Basic information
             </h3>
 
-            <p
-                class="
-                edit-box__section-description
-              "
-            >
-              Define how this location is named
-              and described in generated prompts.
+            <p class="edit-box__section-description">
+              Define how this location is named and described in generated
+              prompts.
             </p>
           </div>
         </header>
 
-        <div class="edit-box__stack">
-          <FieldEditorWrapper
-              field-name="Name"
-              info="The location's display name."
-              :vertical="true"
-          >
-            <ShortTextBox
-                :model-value="
-                model.location.get('name')
-              "
-                @edit="
-                payload =>
-                  model.location.update(
-                    'name',
-                    payload,
-                  )
-              "
-            />
-          </FieldEditorWrapper>
-          <!--
-          <FieldEditorWrapper
-              field-name="Description"
-              info="Injected into the prompt while this is the current location."
-              :vertical="true"
-          >
-            <LongTextBox
-                :model-value="
-                model.location.get('description')
-              "
-                @edit="
-                payload =>
-                  model.location.update(
-                    'description',
-                    payload,
-                  )
-              "
-            />
-          </FieldEditorWrapper>
-          -->
+        <div class="location-editor__field-row">
+          <div class="location-editor__field location-editor__field--name">
+            <FieldEditorWrapper
+                field-name="Name"
+                info="The location's display name."
+                :vertical="true"
+            >
+              <ShortTextBox
+                  :model-value="model.location.get('name')"
+                  @edit="payload => model.location.update('name', payload)"
+              />
+            </FieldEditorWrapper>
+          </div>
+
+          <div class="location-editor__field location-editor__field--description">
+            <FieldEditorWrapper
+                field-name="Description"
+                info="Injected into the prompt while this is the current location."
+                :vertical="true"
+            >
+              <LongTextBox
+                  :model-value="model.location.get('description')"
+                  @edit="payload => model.location.update('description', payload)"
+                  tokenize
+                  :tokenization-started="true"
+              />
+            </FieldEditorWrapper>
+          </div>
         </div>
       </section>
 
       <!-- Lorebook -->
       <section
-          class="
-          edit-box__section
-          location-editor__section
-          location-editor__section--expandable
-        "
+          class="edit-box__section location-editor__section location-editor__section--expandable"
       >
         <Expandable
             title="Location lorebook"
@@ -443,27 +349,15 @@ watch(
                 role="status"
                 aria-live="polite"
             >
-              <span
-                  class="edit-box__spinner"
-                  aria-hidden="true"
-              />
+              <span class="edit-box__spinner" aria-hidden="true" />
 
-              <div
-                  class="edit-box__state-content"
-              >
-                <strong
-                    class="edit-box__state-title"
-                >
+              <div class="edit-box__state-content">
+                <strong class="edit-box__state-title">
                   Loading lorebook
                 </strong>
 
-                <p
-                    class="
-                    edit-box__state-description
-                  "
-                >
-                  Retrieving location-specific
-                  lore entries.
+                <p class="edit-box__state-description">
+                  Retrieving location-specific lore entries.
                 </p>
               </div>
             </div>
@@ -475,42 +369,26 @@ watch(
 
             <div
                 v-else
-                class="
-                edit-box__state
-                edit-box__state--vertical
-              "
+                class="edit-box__state edit-box__state--vertical"
             >
               <div class="edit-box__state-icon">
-                <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
                       d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v17H6.5A2.5 2.5 0 0 0 4 22V5.5Z"
                   />
-
                   <path
                       d="M20 5.5A2.5 2.5 0 0 0 17.5 3H13v17h4.5A2.5 2.5 0 0 1 20 22V5.5Z"
                   />
                 </svg>
               </div>
 
-              <div
-                  class="edit-box__state-content"
-              >
-                <strong
-                    class="edit-box__state-title"
-                >
+              <div class="edit-box__state-content">
+                <strong class="edit-box__state-title">
                   No lorebook
                 </strong>
 
-                <p
-                    class="
-                    edit-box__state-description
-                  "
-                >
-                  This location does not currently
-                  have a lorebook.
+                <p class="edit-box__state-description">
+                  This location does not currently have a lorebook.
                 </p>
               </div>
             </div>
@@ -520,11 +398,7 @@ watch(
 
       <!-- Connections -->
       <section
-          class="
-          edit-box__section
-          location-editor__section
-          location-editor__section--expandable
-        "
+          class="edit-box__section location-editor__section location-editor__section--expandable"
       >
         <Expandable
             title="Connected locations"
@@ -534,8 +408,7 @@ watch(
             <LocationEdgesEditor
                 :model-value="{
                 parentLocation: model.location,
-                all_locations:
-                  model.all_locations,
+                all_locations: model.all_locations,
               }"
             />
           </div>
@@ -555,52 +428,28 @@ watch(
             title="Characters starting here"
             info="Static starting locations, not current session positions."
         >
-          <div
-              class="
-              location-characters
-              location-editor__section-body
-            "
-          >
-            <header
-                class="
-                edit-box__toolbar
-                location-characters__toolbar
-              "
-            >
+          <div class="location-characters location-editor__section-body">
+            <header class="edit-box__toolbar location-characters__toolbar">
               <div class="edit-box__toolbar-main">
                 <span class="edit-box__eyebrow">
                   Starting characters
                 </span>
 
-                <p
-                    class="
-                    location-characters__description
-                  "
-                >
-                  Select a character to edit its
-                  configuration.
+                <p class="location-characters__description">
+                  Select a character to edit its configuration.
                 </p>
               </div>
 
-              <div
-                  class="
-                  edit-box__toolbar-actions
-                "
-              >
+              <div class="edit-box__toolbar-actions">
                 <span class="edit-box__count">
                   {{ characterCount }}
                 </span>
 
                 <button
                     type="button"
-                    class="
-                    edit-box__action
-                    edit-box__action--accent
-                  "
+                    class="edit-box__action edit-box__action--accent"
                     :disabled="creatingCharacter"
-                    @click="
-                    createCharacterInLocation
-                  "
+                    @click="createCharacterInLocation"
                 >
                   <span
                       v-if="creatingCharacter"
@@ -608,11 +457,7 @@ watch(
                       aria-hidden="true"
                   />
 
-                  {{
-                    creatingCharacter
-                        ? "Creating..."
-                        : "New character"
-                  }}
+                  {{ creatingCharacter ? "Creating..." : "New character" }}
                 </button>
               </div>
             </header>
@@ -623,114 +468,51 @@ watch(
                 role="status"
                 aria-live="polite"
             >
-              <span
-                  class="edit-box__spinner"
-                  aria-hidden="true"
-              />
+              <span class="edit-box__spinner" aria-hidden="true" />
 
-              <div
-                  class="edit-box__state-content"
-              >
-                <strong
-                    class="edit-box__state-title"
-                >
+              <div class="edit-box__state-content">
+                <strong class="edit-box__state-title">
                   Loading characters
                 </strong>
 
-                <p
-                    class="
-                    edit-box__state-description
-                  "
-                >
-                  Retrieving characters that begin
-                  at this location.
+                <p class="edit-box__state-description">
+                  Retrieving characters that begin at this location.
                 </p>
               </div>
             </div>
 
             <SplitPanel
                 v-else
-                class="
-                location-characters__split-panel
-              "
+                class="location-characters__split-panel"
                 storage-key="location-characters-editor"
             >
               <template #left>
-                <div
-                    class="
-                    location-characters__list
-                  "
-                >
+                <div class="location-characters__list">
                   <List
                       :elements="charactersHere as Character[]"
-                      @edit="
-                      value =>
-                        selectCharacter(
-                          value as Character,
-                        )
-                    "
-                      @create="
-                      createCharacterInLocation
-                    "
-                      @remove="
-                      value =>
-                        onDeleteCharacter(
-                          value as Character,
-                        )
-                    "
+                      @edit="value => selectCharacter(value as Character)"
+                      @create="createCharacterInLocation"
+                      @remove="value => onDeleteCharacter(value as Character)"
                   />
 
                   <div
-                      v-if="
-                      charactersHere.length === 0
-                    "
-                      class="
-                      edit-box__state
-                      edit-box__state--vertical
-                      location-characters__empty
-                    "
+                      v-if="charactersHere.length === 0"
+                      class="edit-box__state edit-box__state--vertical location-characters__empty"
                   >
-                    <div
-                        class="
-                        edit-box__state-icon
-                      "
-                    >
-                      <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                      >
-                        <circle
-                            cx="12"
-                            cy="8"
-                            r="4"
-                        />
-
-                        <path
-                            d="M4 21a8 8 0 0 1 16 0"
-                        />
+                    <div class="edit-box__state-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 21a8 8 0 0 1 16 0" />
                       </svg>
                     </div>
 
-                    <div
-                        class="
-                        edit-box__state-content
-                      "
-                    >
-                      <strong
-                          class="
-                          edit-box__state-title
-                        "
-                      >
+                    <div class="edit-box__state-content">
+                      <strong class="edit-box__state-title">
                         No starting characters
                       </strong>
 
-                      <p
-                          class="
-                          edit-box__state-description
-                        "
-                      >
-                        Create a character whose
-                        initial location is
+                      <p class="edit-box__state-description">
+                        Create a character whose initial location is
                         {{ locationName }}.
                       </p>
                     </div>
@@ -739,81 +521,34 @@ watch(
               </template>
 
               <template #right>
-                <div
-                    class="
-                    location-characters__editor
-                  "
-                >
+                <div class="location-characters__editor">
                   <CharacterEditor
                       v-if="editingCharacter"
-                      :key="
-                      editingCharacter.get('id')
-                    "
-                      :model-value="
-                      editingCharacter
-                    "
-                      :edit-starting-locations="
-                      false
-                    "
+                      :key="editingCharacter.get('id')"
+                      :model-value="editingCharacter"
+                      :edit-starting-locations="false"
                   />
 
                   <div
                       v-else
-                      class="
-                      edit-box__state
-                      edit-box__state--vertical
-                      location-characters__placeholder
-                    "
+                      class="edit-box__state edit-box__state--vertical location-characters__placeholder"
                   >
-                    <div
-                        class="
-                        edit-box__state-icon
-                      "
-                    >
-                      <svg
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                      >
-                        <circle
-                            cx="12"
-                            cy="8"
-                            r="4"
-                        />
-
-                        <path
-                            d="M4 21a8 8 0 0 1 16 0"
-                        />
-
-                        <path
-                            d="M18 3v4"
-                        />
-
-                        <path
-                            d="M16 5h4"
-                        />
+                    <div class="edit-box__state-icon">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 21a8 8 0 0 1 16 0" />
+                        <path d="M18 3v4" />
+                        <path d="M16 5h4" />
                       </svg>
                     </div>
 
-                    <div
-                        class="
-                        edit-box__state-content
-                      "
-                    >
-                      <strong
-                          class="
-                          edit-box__state-title
-                        "
-                      >
+                    <div class="edit-box__state-content">
+                      <strong class="edit-box__state-title">
                         Select a character
                       </strong>
 
-                      <p
-                          class="
-                          edit-box__state-description
-                        "
-                      >
-                        Choose a character from the
-                        list to edit its details.
+                      <p class="edit-box__state-description">
+                        Choose a character from the list to edit its details.
                       </p>
                     </div>
                   </div>
@@ -823,9 +558,7 @@ watch(
 
             <p
                 v-if="deletingCharacterId !== null"
-                class="
-                location-characters__operation
-              "
+                class="location-characters__operation"
                 role="status"
                 aria-live="polite"
             >
@@ -842,7 +575,6 @@ watch(
 .location-editor {
   width: 100%;
   min-width: 0;
-
   color: rgb(var(--c-fg));
   font-family: var(--font-primary);
 }
@@ -870,6 +602,75 @@ watch(
 }
 
 /* -------------------------------------------------------------------------- */
+/* Basic information                                                          */
+/* -------------------------------------------------------------------------- */
+
+.location-editor__field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.location-editor__field {
+  min-width: 0;
+  padding: var(--space-3);
+
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.48),
+      rgb(var(--c-surface-2) / 0.24)
+  );
+
+  border: 1px solid rgb(var(--c-border) / 0.19);
+  border-radius: var(--radius-md);
+
+  box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 3px 9px rgb(var(--c-shadow) / 0.035);
+
+  transition:
+      background-color var(--duration-normal) var(--ease-standard),
+      border-color var(--duration-normal) var(--ease-standard),
+      box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.location-editor__field:hover {
+  border-color: rgb(var(--c-primary) / 0.27);
+}
+
+.location-editor__field:focus-within {
+  background: rgb(var(--c-surface-raised) / 0.62);
+  border-color: rgb(var(--c-primary) / 0.42);
+
+  box-shadow:
+      0 0 0 3px rgb(var(--c-primary) / 0.09),
+      inset 0 1px 0 rgb(255 255 255 / 0.32);
+}
+
+.location-editor__field--description {
+  border-color: rgb(var(--c-primary) / 0.2);
+
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-primary) / 0.055),
+      rgb(var(--c-surface-raised) / 0.5)
+  );
+}
+
+.location-editor__field :deep(input),
+.location-editor__field :deep(textarea) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.location-editor__field :deep(textarea) {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Starting characters                                                        */
 /* -------------------------------------------------------------------------- */
 
@@ -877,7 +678,6 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-
   min-width: 0;
 }
 
@@ -886,19 +686,13 @@ watch(
   margin-bottom: 0;
 }
 
-.location-characters__toolbar
-.edit-box__eyebrow {
+.location-characters__toolbar .edit-box__eyebrow {
   margin: 0;
 }
 
 .location-characters__description {
-  margin:
-      var(--space-1)
-      0
-      0;
-
+  margin: var(--space-1) 0 0;
   color: rgb(var(--c-muted));
-
   font-size: 0.76rem;
   line-height: 1.45;
 }
@@ -908,23 +702,18 @@ watch(
   min-width: 0;
   height: clamp(24rem, 58dvh, 44rem);
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.4),
-          rgb(var(--c-surface-2) / 0.24)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.4),
+      rgb(var(--c-surface-2) / 0.24)
+  );
 
-  border:
-      1px solid
-      rgb(var(--c-border) / 0.22);
+  border: 1px solid rgb(var(--c-border) / 0.22);
   border-radius: var(--radius-md);
 
   box-shadow:
-      inset 0 1px 0
-      rgb(255 255 255 / 0.26),
-      0 4px 14px
-      rgb(var(--c-shadow) / 0.045);
+      inset 0 1px 0 rgb(255 255 255 / 0.26),
+      0 4px 14px rgb(var(--c-shadow) / 0.045);
 
   overflow: hidden;
 }
@@ -940,31 +729,23 @@ watch(
 .location-characters__list {
   padding: var(--space-2);
   overflow: auto;
-
-  background:
-      rgb(var(--c-surface) / 0.18);
-
+  background: rgb(var(--c-surface) / 0.18);
   scrollbar-width: thin;
-  scrollbar-color:
-      rgb(var(--c-primary) / 0.44)
-      transparent;
+  scrollbar-color: rgb(var(--c-primary) / 0.44) transparent;
 }
 
 .location-characters__editor {
   padding: var(--space-3);
   overflow: auto;
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface-raised) / 0.32),
-          rgb(var(--c-surface-2) / 0.2)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface-raised) / 0.32),
+      rgb(var(--c-surface-2) / 0.2)
+  );
 
   scrollbar-width: thin;
-  scrollbar-color:
-      rgb(var(--c-primary) / 0.44)
-      transparent;
+  scrollbar-color: rgb(var(--c-primary) / 0.44) transparent;
 }
 
 .location-characters__list::-webkit-scrollbar,
@@ -980,9 +761,7 @@ watch(
 
 .location-characters__list::-webkit-scrollbar-thumb,
 .location-characters__editor::-webkit-scrollbar-thumb {
-  background:
-      rgb(var(--c-primary) / 0.38);
-
+  background: rgb(var(--c-primary) / 0.38);
   border: 2px solid transparent;
   border-radius: var(--radius-round);
   background-clip: padding-box;
@@ -999,9 +778,7 @@ watch(
 
 .location-characters__operation {
   margin: 0;
-
   color: rgb(var(--c-muted));
-
   font-size: 0.75rem;
   line-height: 1.4;
   text-align: right;
@@ -1011,12 +788,13 @@ watch(
 /* Responsive                                                                 */
 /* -------------------------------------------------------------------------- */
 
-@media (max-width: 720px) {
-  .location-editor__body {
+@media (max-width: 760px) {
+  .location-editor__body,
+  .location-editor__section-body {
     padding: var(--space-2);
   }
 
-  .location-editor__section-body {
+  .location-editor__field {
     padding: var(--space-2);
   }
 
@@ -1025,8 +803,7 @@ watch(
     flex-direction: column;
   }
 
-  .location-characters__toolbar
-  .edit-box__toolbar-actions {
+  .location-characters__toolbar .edit-box__toolbar-actions {
     width: 100%;
     justify-content: space-between;
   }
@@ -1046,21 +823,21 @@ watch(
     height: 32rem;
   }
 
-  .location-characters__toolbar
-  .edit-box__toolbar-actions {
+  .location-characters__toolbar .edit-box__toolbar-actions {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .location-characters__toolbar
-  .edit-box__action {
+  .location-characters__toolbar .edit-box__action {
     width: 100%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .location-editor__field,
   .location-characters__list,
   .location-characters__editor {
+    transition: none;
     scroll-behavior: auto;
   }
 }

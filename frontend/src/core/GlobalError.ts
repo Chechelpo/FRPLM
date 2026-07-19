@@ -1,11 +1,5 @@
 import { computed, shallowRef } from "vue";
-
-export type ErrorResponse = {
-    status: number;
-    type: string;
-    message: string;
-    path: string;
-};
+import {ErrorResponse} from "@/services/apiClient";
 
 export type GlobalErrorEntry = ErrorResponse & {
     id: string;
@@ -36,6 +30,7 @@ export function setGlobalError(error: ErrorResponse): void {
     /*
      * Assignment is used instead of push because errorQueue is a shallowRef.
      */
+    if (errorQueue.value.length > 5) return;
     errorQueue.value = [...errorQueue.value, entry];
 }
 

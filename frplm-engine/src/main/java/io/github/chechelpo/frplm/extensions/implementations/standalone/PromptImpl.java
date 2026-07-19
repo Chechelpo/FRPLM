@@ -53,7 +53,7 @@ public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implement
 
     @Override
     public PromptBudget getBudgetConfig() {
-        return new PromptBudget(record.getLorebooksBudget(), record.getChatHistoryBudget());
+        return new PromptBudget(record.getMaxTokens(), record.getLorebooksBudget(), record.getChatHistoryBudget());
     }
 
     @Override

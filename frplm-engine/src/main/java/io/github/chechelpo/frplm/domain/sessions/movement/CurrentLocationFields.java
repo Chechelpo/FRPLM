@@ -20,7 +20,7 @@ final class CurrentLocationFields extends ABSHelper<CurrentLocationsRecord, Curr
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -31,7 +31,7 @@ final class CurrentLocationFields extends ABSHelper<CurrentLocationsRecord, Curr
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -39,7 +39,7 @@ final class CurrentLocationFields extends ABSHelper<CurrentLocationsRecord, Curr
                 CURRENT_LOCATIONS.TICK_NUM,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

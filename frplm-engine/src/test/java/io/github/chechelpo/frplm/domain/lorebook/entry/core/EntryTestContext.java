@@ -8,9 +8,11 @@ import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -20,6 +22,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 @TestComponent
 @Import({LorebookTestContext.class, KeywordTestContext.class, EntryKeywordsTestContext.class})
 public class EntryTestContext implements DBReload {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     @Autowired
     public LorebookTestContext lorebooks;
     @Autowired
@@ -129,6 +132,25 @@ public class EntryTestContext implements DBReload {
         }
 
         return entries;
+    }
+
+    public enum KNOWN_ST_LOREBOOKS {
+        Eldoria("eldoria.json"),
+        Mansion("Mansion_1.json")
+        ;
+        public final String path;
+        KNOWN_ST_LOREBOOKS(String path){
+            this.path = path;
+        }
+    }
+
+    public LorebooksRecord importTestLorebookFile(KNOWN_ST_LOREBOOKS lorebookFile){
+        LorebooksRecord lorebook = lorebooks.createLorebooks(0L, 1).getFirst();
+        entryService.importEntriesFromJSON(
+                lorebook.getId(),
+                OBJECT_MAPPER.readTree(STLorebookImporter.class.getResourceAsStream("imports/st_lorebooks/" + lorebookFile.path))
+        );
+        return lorebook;
     }
 
     private static short randomShort(

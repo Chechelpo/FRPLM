@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 
 @Component
-final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, SecretService, SecretController> {
-    SecretFieldsHelper(SecretService service, SecretController controller) {
+final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, SecretServiceImpl, SecretController> {
+    SecretFieldsHelper(SecretServiceImpl service, SecretController controller) {
         super(service, controller);
 
         register_field(
@@ -35,7 +35,7 @@ final class SecretFieldsHelper extends ABSControllerAwareHelper<ApiKeysRecord, S
                                 .setMaxLength(255)
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

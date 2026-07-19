@@ -23,7 +23,7 @@ final class CharacterTagsControllerAwareHelper
                                 .key()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -35,7 +35,7 @@ final class CharacterTagsControllerAwareHelper
                                 .key()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
     }

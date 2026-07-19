@@ -24,7 +24,7 @@ class KeywordServiceTest {
     @Autowired
     EntryTestContext entryTestContext;
     @Autowired
-    KeywordService keywordService;
+    KeywordServiceImpl keywordService;
     @Autowired
     KeywordFieldHelper fields;
 
@@ -41,7 +41,7 @@ class KeywordServiceTest {
 
         assertTrue(id > 0);
         assertTrue(keywordService.existsWith(keyword));
-        assertEquals(id, keywordService.getIDOfKeywordWith(keyword));
+        assertEquals(id, keywordService.getIDOfKeywordWith(keyword).orElse(id + 1));
     }
 
     @Test

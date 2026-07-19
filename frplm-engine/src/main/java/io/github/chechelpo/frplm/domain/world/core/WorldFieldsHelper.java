@@ -33,7 +33,7 @@ public final class WorldFieldsHelper extends ABSControllerAwareHelper<
                                         .readOnly()
                                         .build()
                         )
-                        .setFormat(NumberCoercer.create(FieldType.INTEGER))
+                        .setCoercer(NumberCoercer.create(FieldType.INTEGER))
                         .build()
         );
 
@@ -48,6 +48,10 @@ public final class WorldFieldsHelper extends ABSControllerAwareHelper<
                         )
                         .build()
         );
+
+        registerControllerField(WORLDS.DESCRIPTION)
+                .setDtoName("description")
+                .setInfo(FieldInfo.stringField().build());
 
         register_field(
                 "lorebook_id",

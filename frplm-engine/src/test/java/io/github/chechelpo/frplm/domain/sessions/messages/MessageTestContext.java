@@ -4,18 +4,28 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
+import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
+import io.github.chechelpo.frplm.test_utils.Asserts;
+import org.jooq.Field;
+import org.jooq.TableField;
+import org.jooq.TableRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @TestComponent
 @Import({SessionTestContext.class, LocationTestContext.class})
@@ -64,11 +74,23 @@ public class MessageTestContext implements DBReload {
 
             createdMessagesKeys.add(service.keyOf(service.createAndGet(newMessage)));
         }
+        SessionTestContext.SessionContext updated = new SessionTestContext.SessionContext(
+                sessionContext.userCharacter(),
+                sessions.service.find(sessions.service.keyOf(sessionContext.session())).orElseThrow(),
+                sessionContext.sessionLocations()
+        );
 
-        return new Context(sessionContext,
+        return new Context(updated,
                 createdMessagesKeys.stream()
                         .map(key -> service.find(key).orElseThrow(() -> new IllegalStateException("Couldn't find message")))
                         .toList()
                 );
     }
+
+    public void assertMessageEquals(MessagesRecord expected, MessagesRecord actual, boolean includeKeys){
+        Set<TableField<MessagesRecord, ?>> keyFields = includeKeys ? service.getKeyFields() : Set.of();
+        Asserts.assertEqualsMinusFields(expected, actual, keyFields);
+    }
+
+
 }

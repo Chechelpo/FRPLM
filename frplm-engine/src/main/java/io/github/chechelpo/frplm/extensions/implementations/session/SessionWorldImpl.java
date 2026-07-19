@@ -15,6 +15,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 
@@ -108,11 +109,11 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
         }
     }
 
-    public SessionCharacterImpl @NotNull [] getAtLocation(@NotNull SessionLocationImpl location) {
+    public List<SessionCharacter> getAtLocation(@NotNull SessionLocationImpl location) {
         return Arrays
                 .stream(session.context().movements().getAtLocation(location.getRecord(), session.getRecord()))
-                .map(record -> new SessionCharacterImpl(record, this.context, session, this))
-                .toArray(SessionCharacterImpl[]::new);
+                .map(record -> (SessionCharacter) new SessionCharacterImpl(record, this.context, session, this))
+                .toList();
     }
 
     @Override

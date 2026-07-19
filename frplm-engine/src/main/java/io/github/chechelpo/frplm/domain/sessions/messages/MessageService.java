@@ -57,9 +57,9 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     public List<MessagesRecord> getLastOf(int sessionId, int number){
         return store.getLast(sessionId, number);
     }
-
+    /** @return messages in range from <= tick_num <= to (both inclusive) and descending order (last messages first) */
     public List<MessagesRecord> getRange(int sessionId, int from, int to){
-        return store.getLast(sessionId, from, to);
+        return store.getRange(sessionId, from, to);
     }
 
     @Override

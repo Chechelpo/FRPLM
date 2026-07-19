@@ -1,8 +1,9 @@
-import {ABSEntity, createEntity, fetch_all, fetchApi, fetchFromReference, fetchMatching} from "@/core/ABSEntity";
+import {ABSEntity, createEntity, fetch_all, fetchFromReference, fetchMatching} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {ChatCompletionRole} from "@/types/ChatCompletions";
 import {API_BASE} from "@/config";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
 
 
 export type REASONING_EFFORT_VALUE = {id:number, name:string}
@@ -27,6 +28,9 @@ export type PromptTemplateData = {
     max_tokens: number,
     streaming: boolean,
 
+    chat_history_budget: number,
+    lorebooks_budget: number,
+    
     temperature: number,
     top_p: number,
     frequency_penalty: number,

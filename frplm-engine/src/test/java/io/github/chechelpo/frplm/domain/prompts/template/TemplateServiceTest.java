@@ -89,4 +89,39 @@ class TemplateServiceTest {
         assertTrue(newRecord.isPresent());
         assertEquals(maxTokens - 2, newRecord.get().getMaxTokens());
     }
+
+    @Test
+    void onUpdate_throwsIfInvalidBudget(){
+        PromptTemplateRecord promptTemplate = promptTestContext.service.createAndGet(
+                EntityDataPayload.of(PROMPT_TEMPLATE.NAME, "test")
+        );
+        EntityKey<PromptTemplateRecord> key = promptTestContext.service.keyOf(promptTemplate);
+        float incorrectChatHistoryBudget = 0.5f;
+        float incorrectLorebookBudget = 0.7f;
+
+        assertThrows(
+                InvalidValue.class,
+                () -> promptTestContext.service.update(
+                        key,
+                        EntityDataPayload.<PromptTemplateRecord>builder()
+                                .set(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, incorrectChatHistoryBudget)
+                                .set(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, incorrectLorebookBudget)
+                                .build()
+                )
+        );
+    }
+
+    @Test
+    void onCreate_throwsIfInvalidBudget(){
+        assertThrows(
+                InvalidValue.class,
+                () -> promptTestContext.service.createAndGet(
+                        EntityDataPayload.<PromptTemplateRecord>builder()
+                                .set(PROMPT_TEMPLATE.NAME, "Test")
+                                .set(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, 0.5f)
+                                .set(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, 0.6f)
+                                .build()
+                )
+        );
+    }
 }

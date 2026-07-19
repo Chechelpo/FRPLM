@@ -49,6 +49,11 @@ public final class SessionImpl implements Session {
         return this.sessionContext;
     }
 
+    @Override
+    public int getCurrentTick() {
+        return record.getCurrentTick();
+    }
+
     public SessionsRecord getRecord() {
         return record;
     }
@@ -105,7 +110,7 @@ public final class SessionImpl implements Session {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<ChatMessage> getMessageRange(int from, int to){
+    public @NotNull @Unmodifiable List<ChatMessage> getLastMessagesRange(int from, int to){
         return sessionContext.messages().getRange(record.getId(), from, to).stream()
                 .map(record -> (ChatMessage) new ChatMessageImpl(record, context, world))
                 .toList();

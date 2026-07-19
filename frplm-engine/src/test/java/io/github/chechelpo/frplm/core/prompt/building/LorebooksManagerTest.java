@@ -1,804 +1,724 @@
 package io.github.chechelpo.frplm.core.prompt.building;
 
-import io.github.chechelpo.frplm.core.prompt.building.LorebooksManager;
+import io.github.chechelpo.frplm.core.prompt.TextType;
+import io.github.chechelpo.frplm.domain.lorebook.LorebookContext;
+import io.github.chechelpo.frplm.domain.lorebook.LorebookContextTestFactory;
+import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
+import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
+import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
+import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
+import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordService;
+import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordServiceTestFactory;
+import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
+import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletServiceTestFactory;
+import io.github.chechelpo.frplm.extensions.api.prompts.LorebookManager;
+import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import org.jooq.DSLContext;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class LorebooksManagerTest {
 
-    @Test
-    void constructorRejectsNullContext() {
-        NullPointerException exception = assertThrows(
-                NullPointerException.class,
-                () -> new LorebooksManager(null, null)
+    private static final DSLContext JOOQ =
+            DSL.using(SQLDialect.DEFAULT);
+
+    @Mock
+    private EntryService entryService;
+
+    @Mock
+    private LorebookService lorebookService;
+
+    @Mock
+    private EntryKeywordService entryKeywordService;
+
+    private KeywordService keywordService;
+
+    private OutletService outletService;
+
+    @Mock
+    private PromptBudgetManager budgetManager;
+
+    @Mock
+    private PromptRenderer renderer;
+
+    private LorebooksManager manager;
+
+    @BeforeEach
+    void setUp() {
+        keywordService = KeywordServiceTestFactory.mockService();
+        outletService = OutletServiceTestFactory.mockService();
+
+        LorebookContext context =
+                LorebookContextTestFactory.create(
+                        entryService,
+                        lorebookService,
+                        entryKeywordService,
+                        keywordService,
+                        outletService
+                );
+
+        manager = new LorebooksManager(
+                context,
+                budgetManager
         );
-
-        assertEquals("Lorebook context is null", exception.getMessage());
-    }
-/*
-    @Test
-    void newlyConstructedManagerHasNoLorebooksAndNoActiveEntries() {
-        LorebooksManager manager = new LorebooksManager(contextReturningEntries(List.of()).context());
-
-        assertTrue(manager.getLorebooks().isEmpty());
-        assertTrue(manager.getOf(1).isEmpty());
-        assertFalse(manager.isActive(1, 1));
     }
 
     @Test
-    void addLorebookAppendsSnapshot() {
-        LorebooksManager manager = new LorebooksManager(contextReturningEntries(List.of()).context());
-
-        LorebookSnapshot first = lorebook(10);
-        LorebookSnapshot second = lorebook(20);
-
-        manager.addLorebook(first);
-        manager.addLorebook(second);
-
-        assertEquals(List.of(first, second), manager.getLorebooks());
-    }
-
-    @Test
-    void addLorebooksAppendsSnapshotsInOrder() {
-        LorebooksManager manager = new LorebooksManager(contextReturningEntries(List.of()).context());
-
-        LorebookSnapshot first = lorebook(10);
-        LorebookSnapshot second = lorebook(20);
-        LorebookSnapshot third = lorebook(30);
+    void addsLorebooks() {
+        LorebookSnapshot first = lorebook(1);
+        LorebookSnapshot second = lorebook(2);
+        LorebookSnapshot third = lorebook(3);
 
         manager.addLorebook(first);
         manager.addLorebooks(List.of(second, third));
 
-        assertEquals(List.of(first, second, third), manager.getLorebooks());
+        assertEquals(
+                List.of(first, second, third),
+                manager.getLorebooks()
+        );
+
+        assertEquals(
+                List.of(first, second, third),
+                manager.usedLorebooks()
+        );
     }
 
     @Test
-    void getLorebooksReturnsLiveBackingList() {
-        LorebooksManager manager = new LorebooksManager(contextReturningEntries(List.of()).context());
+    void outletExistsDelegatesToOutletService() {
+        when(outletService.getOutletID("known"))
+                .thenReturn(Optional.of(9));
 
-        LorebookSnapshot snapshot = lorebook(10);
-        List<LorebookSnapshot> returned = manager.getLorebooks();
+        when(outletService.getOutletID("unknown"))
+                .thenReturn(Optional.empty());
 
-        returned.add(snapshot);
-
-        assertEquals(List.of(snapshot), manager.getLorebooks());
+        assertTrue(manager.outletExists("known"));
+        assertFalse(manager.outletExists("unknown"));
     }
 
     @Test
-    void activateEntriesPassesConfiguredLorebookIdsToContextRepository() {
-        EntryRecord entry = entry(
-                10,
-                100,
-                7,
-                "Entry content",
-                false,
-                false
+    void rejectsOverrideForInactiveLorebook() {
+        LorebookSnapshot inactive = lorebook(17);
+
+        LorebookManager.OverrideResult result =
+                manager.overrideLorebookOutlet(
+                        inactive,
+                        "old_outlet",
+                        "new_outlet"
+                );
+
+        assertEquals(
+                LorebookManager.OverrideResult
+                        .TARGET_LOREBOOK_DOES_NOT_EXIST,
+                result
         );
 
-        ContextFixture fixture = contextReturningEntries(List.of(entry));
-
-        LorebooksManager manager = new LorebooksManager(fixture.context());
-        manager.addLorebooks(List.of(lorebook(10), lorebook(20)));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(keyword(1, "dragon"))
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(entry), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(rendererWithMessages(message("dragon")));
-        }
-
-        IntSet passedLorebookIds = fixture.lastRequestedLorebookIds().get();
-
-        assertNotNull(passedLorebookIds);
-        assertEquals(new IntOpenHashSet(new int[]{10, 20}), passedLorebookIds);
+        verifyNoInteractions(outletService);
     }
 
     @Test
-    void activateEntriesMarksFirstPassEntryActiveWhenAllKeywordsAreDetected() {
-        EntryRecord entry = entry(
-                10,
-                100,
-                7,
-                "Lorebook content",
-                false,
-                false
+    void rejectsOverrideWhenTargetOutletDoesNotExist() {
+        LorebookSnapshot lorebook = lorebook(17);
+        manager.addLorebook(lorebook);
+
+        when(outletService.getOutletID("missing"))
+                .thenReturn(Optional.empty());
+
+        LorebookManager.OverrideResult result =
+                manager.overrideLorebookOutlet(
+                        lorebook,
+                        "missing",
+                        "replacement"
+                );
+
+        assertEquals(
+                LorebookManager.OverrideResult
+                        .TARGET_OUTLET_DOES_NOT_EXIST,
+                result
         );
 
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(entry)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(keyword(1, "dragon"))
-        );
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(entry), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("A dragon appears.")),
-                    keywordService
-            );
-        }
-
-        assertTrue(manager.isActive(10, 100));
-
-        Optional<List<EntryRecord>> outletEntries = manager.getOf(7);
-        assertTrue(outletEntries.isPresent());
-        assertEquals(List.of(entry), outletEntries.get());
+        verify(outletService, never())
+                .getOrCreateOutlet(anyString());
     }
 
     @Test
-    void activateEntriesDoesNotMarkEntryActiveWhenStaticEvaluatorReturnsFalse() {
-        EntryRecord entry = entry(
-                10,
-                100,
-                7,
-                "Lorebook content",
-                false,
-                false
+    void rejectsSecondLorebookWideOverride() {
+        LorebookSnapshot lorebook = lorebook(4);
+        manager.addLorebook(lorebook);
+
+        when(outletService.getOrCreateOutlet("first"))
+                .thenReturn(100);
+
+        assertEquals(
+                LorebookManager.OverrideResult.SUCCESS,
+                manager.overrideAllLorebookOutlets(
+                        lorebook,
+                        "first"
+                )
         );
 
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(entry)).context()
+        assertEquals(
+                LorebookManager.OverrideResult.ALREADY_OVERRIDDEN,
+                manager.overrideAllLorebookOutlets(
+                        lorebook,
+                        "second"
+                )
         );
-        manager.addLorebook(lorebook(10));
 
-        EntryKeywordService keywordService = keywordService(
-                List.of(keyword(1, "dragon"))
-        );
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(entry), eq(0), eq(0)))
-                    .thenReturn(false);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("A dragon appears.")),
-                    keywordService
-            );
-        }
-
-        assertFalse(manager.isActive(10, 100));
-        assertTrue(manager.getOf(7).isEmpty());
+        verify(outletService, never())
+                .getOrCreateOutlet("second");
     }
 
     @Test
-    void activateEntriesGroupsActiveEntriesByOutlet() {
-        EntryRecord first = entry(
-                10,
-                100,
-                7,
-                "First content",
-                false,
-                false
+    void appliesOutletOverridesInSpecificityOrder() {
+        LorebookSnapshot firstLorebook = lorebook(1);
+        LorebookSnapshot secondLorebook = lorebook(2);
+
+        manager.addLorebooks(
+                List.of(firstLorebook, secondLorebook)
         );
 
-        EntryRecord second = entry(
-                10,
-                101,
-                7,
-                "Second content",
-                false,
-                false
+        /*
+         * Global:
+         * outlet 10 -> outlet 300
+         */
+        when(outletService.getOutletID("source-ten"))
+                .thenReturn(Optional.of(10));
+
+        when(outletService.getOrCreateOutlet("global"))
+                .thenReturn(300);
+
+        assertEquals(
+                LorebookManager.OverrideResult.SUCCESS,
+                manager.overrideOutlet(
+                        "source-ten",
+                        "global"
+                )
         );
 
-        EntryRecord third = entry(
+        /*
+         * Lorebook-wide:
+         * all entries in lorebook 1 -> outlet 200
+         */
+        when(outletService.getOrCreateOutlet("lorebook-wide"))
+                .thenReturn(200);
+
+        assertEquals(
+                LorebookManager.OverrideResult.SUCCESS,
+                manager.overrideAllLorebookOutlets(
+                        firstLorebook,
+                        "lorebook-wide"
+                )
+        );
+
+        /*
+         * Most specific:
+         * lorebook 1, outlet 10 -> outlet 100
+         */
+        when(outletService.getOrCreateOutlet("specific"))
+                .thenReturn(100);
+
+        assertEquals(
+                LorebookManager.OverrideResult.SUCCESS,
+                manager.overrideLorebookOutlet(
+                        firstLorebook,
+                        "source-ten",
+                        "specific"
+                )
+        );
+
+        EntryRecord specific = constantEntry(
+                1,
+                1,
                 10,
-                102,
+                0,
+                "Specific override"
+        );
+
+        EntryRecord lorebookWide = constantEntry(
+                1,
+                2,
+                11,
+                0,
+                "Lorebook-wide override"
+        );
+
+        EntryRecord global = constantEntry(
+                2,
+                1,
+                10,
+                0,
+                "Global override"
+        );
+
+        EntryRecord unchanged = constantEntry(
+                2,
+                2,
+                12,
+                0,
+                "Original outlet"
+        );
+
+        prepareConstantActivation(
+                entries(
+                        specific,
+                        lorebookWide,
+                        global,
+                        unchanged
+                )
+        );
+
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
+
+        assertEquals(
+                List.of(specific),
+                manager.getOf(100).orElseThrow()
+        );
+
+        assertEquals(
+                List.of(lorebookWide),
+                manager.getOf(200).orElseThrow()
+        );
+
+        assertEquals(
+                List.of(global),
+                manager.getOf(300).orElseThrow()
+        );
+
+        assertEquals(
+                List.of(unchanged),
+                manager.getOf(12).orElseThrow()
+        );
+    }
+
+    @Test
+    void activatesAndSortsConstantEntriesWithinOutlet() {
+        manager.addLorebooks(List.of(
+                lorebook(1),
+                lorebook(2)
+        ));
+
+        EntryRecord third = constantEntry(
+                2,
+                8,
+                4,
+                20,
+                "Third"
+        );
+
+        EntryRecord second = constantEntry(
+                1,
                 9,
-                "Third content",
-                false,
-                false
+                4,
+                20,
+                "Second"
         );
 
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(first, second, third)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "castle"),
-                        keyword(3, "wizard")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-        when(keywordService.keywordIDsOfEntry(10, 102)).thenReturn(Set.of(3));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(any(EntryRecord.class), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon castle wizard")),
-                    keywordService
-            );
-        }
-
-        assertEquals(List.of(first, second), manager.getOf(7).orElseThrow());
-        assertEquals(List.of(third), manager.getOf(9).orElseThrow());
-
-        assertTrue(manager.isActive(10, 100));
-        assertTrue(manager.isActive(10, 101));
-        assertTrue(manager.isActive(10, 102));
-    }
-
-    @Test
-    void activateEntriesDoesNotDuplicateSameEntryWhenRepositoryReturnsDuplicateRecords() {
-        EntryRecord entry = entry(
-                10,
-                100,
-                7,
-                "Duplicate content",
-                false,
-                false
-        );
-
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(entry, entry)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(keyword(1, "dragon"))
-        );
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(entry), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon")),
-                    keywordService
-            );
-        }
-
-        assertEquals(List.of(entry), manager.getOf(7).orElseThrow());
-        assertTrue(manager.isActive(10, 100));
-    }
-
-    @Test
-    void activateEntriesUsesDeepestDetectedKeywordDepthForFirstPassActivation() {
-        EntryRecord entry = entry(
-                10,
-                100,
-                7,
-                "Lorebook content",
-                false,
-                false
-        );
-
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(entry)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "castle")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1, 2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(entry), eq(0), eq(2)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(
-                            message("dragon"),
-                            message("irrelevant"),
-                            message("castle")
-                    ),
-                    keywordService
-            );
-
-            evaluator.verify(() -> EntryEvaluator.activates(same(entry), eq(0), eq(2)));
-        }
-
-        assertTrue(manager.isActive(10, 100));
-    }
-
-    @Test
-    void activateEntriesQueuesRecursableEntryAndActivatesItAfterFirstPassContentAddsKeyword() {
-        EntryRecord seed = entry(
-                10,
-                100,
-                7,
-                "The ancient key is hidden here.",
-                false,
-                false
-        );
-
-        EntryRecord recursive = entry(
-                10,
-                101,
-                8,
-                "Recursive entry content",
-                false,
-                false
-        );
-
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(seed, recursive)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "ancient key")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(seed), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            evaluator.when(() -> EntryEvaluator.activates(same(recursive), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon")),
-                    keywordService
-            );
-        }
-
-        assertTrue(manager.isActive(10, 100));
-        assertTrue(manager.isActive(10, 101));
-
-        assertEquals(List.of(seed), manager.getOf(7).orElseThrow());
-        assertEquals(List.of(recursive), manager.getOf(8).orElseThrow());
-    }
-
-    @Test
-    void activateEntriesDoesNotUseFirstPassEntryContentForRecursionWhenPreventFurtherRecursionIsTrue() {
-        EntryRecord seed = entry(
-                10,
-                100,
-                7,
-                "The ancient key is hidden here.",
-                true,
-                false
-        );
-
-        EntryRecord recursive = entry(
-                10,
-                101,
-                8,
-                "Recursive entry content",
-                false,
-                false
-        );
-
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(seed, recursive)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "ancient key")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(seed), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon")),
-                    keywordService
-            );
-
-            evaluator.verify(
-                    () -> EntryEvaluator.activates(same(recursive), anyInt(), anyInt()),
-                    never()
-            );
-        }
-
-        assertTrue(manager.isActive(10, 100));
-        assertFalse(manager.isActive(10, 101));
-
-        assertEquals(List.of(seed), manager.getOf(7).orElseThrow());
-        assertTrue(manager.getOf(8).isEmpty());
-    }
-
-    @Test
-    void activateEntriesDoesNotQueueEntryForRecursionWhenEntryIsNonRecursable() {
-        EntryRecord seed = entry(
-                10,
-                100,
-                7,
-                "The ancient key is hidden here.",
-                false,
-                false
-        );
-
-        EntryRecord nonRecursable = entry(
-                10,
-                101,
-                8,
-                "Non-recursable content",
-                false,
-                true
-        );
-
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(seed, nonRecursable)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "ancient key")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(seed), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon")),
-                    keywordService
-            );
-
-            evaluator.verify(
-                    () -> EntryEvaluator.activates(same(nonRecursable), anyInt(), anyInt()),
-                    never()
-            );
-        }
-
-        assertTrue(manager.isActive(10, 100));
-        assertFalse(manager.isActive(10, 101));
-    }
-
-    @Test
-    void activateEntriesCanActivateMultipleRecursiveWaves() {
-        EntryRecord first = entry(
-                10,
-                100,
+        EntryRecord first = constantEntry(
                 1,
-                "This reveals beta.",
-                false,
-                false
-        );
-
-        EntryRecord second = entry(
-                10,
-                101,
-                2,
-                "This reveals gamma.",
-                false,
-                false
-        );
-
-        EntryRecord third = entry(
-                10,
-                102,
                 3,
-                "Final recursive content.",
-                false,
-                false
+                4,
+                10,
+                "First"
         );
 
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(first, second, third)).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "alpha"),
-                        keyword(2, "beta"),
-                        keyword(3, "gamma")
-                )
+        prepareConstantActivation(
+                entries(third, second, first)
         );
 
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-        when(keywordService.keywordIDsOfEntry(10, 102)).thenReturn(Set.of(3));
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
 
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(any(EntryRecord.class), eq(0), eq(0)))
-                    .thenReturn(true);
+        List<EntryRecord> active =
+                manager.getOf(4).orElseThrow();
 
-            manager.activateEntries(
-                    rendererWithMessages(message("alpha")),
-                    keywordService
-            );
-        }
+        assertEquals(
+                List.of(first, second, third),
+                active
+        );
 
-        assertTrue(manager.isActive(10, 100));
-        assertTrue(manager.isActive(10, 101));
-        assertTrue(manager.isActive(10, 102));
+        assertTrue(manager.isActive(1, 3));
+        assertTrue(manager.isActive(1, 9));
+        assertTrue(manager.isActive(2, 8));
 
-        assertEquals(List.of(first), manager.getOf(1).orElseThrow());
-        assertEquals(List.of(second), manager.getOf(2).orElseThrow());
-        assertEquals(List.of(third), manager.getOf(3).orElseThrow());
+        assertEquals(
+                List.of(first, second, third),
+                manager.activatedEntries()
+        );
     }
 
     @Test
-    void activateEntriesStopsRecursionWhenNoNewKeywordsWereDetected() {
-        EntryRecord first = entry(
-                10,
-                100,
+    void recursivelyActivatesEntryFromPreviouslyActivatedContent() {
+        manager.addLorebook(lorebook(1));
+
+        EntryRecord seed = constantEntry(
                 1,
-                "This content does not reveal the missing keyword.",
-                false,
-                false
+                1,
+                4,
+                0,
+                "A dragon sleeps below the mountain."
         );
 
-        EntryRecord blocked = entry(
-                10,
-                101,
+        EntryRecord recursive = entry(
+                1,
                 2,
-                "Blocked content.",
-                false,
-                false
+                4,
+                1,
+                "The dragon-related recursive entry.",
+                ActivationStrategy.COMMON
         );
 
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of(first, blocked)).context()
-        );
-        manager.addLorebook(lorebook(10));
+        Result<EntryRecord> entries =
+                entries(seed, recursive);
 
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "alpha"),
-                        keyword(2, "beta")
+        when(entryService.getAllActiveEntriesOf(
+                any(IntSet.class)
+        )).thenReturn(entries);
+
+        when(renderer.getChatHistory())
+                .thenReturn(List.of());
+
+        when(entryKeywordService.getKeywords(
+                any(IntSet.class)
+        )).thenReturn(List.of(
+                IntObjectPair.of(50, "dragon")
+        ));
+
+        when(entryKeywordService.keywordIDsOfEntry(1, 1))
+                .thenReturn(Set.of());
+
+        when(entryKeywordService.keywordIDsOfEntry(1, 2))
+                .thenReturn(Set.of(50));
+
+        when(budgetManager.hasSpaceFor(
+                anyString(),
+                eq(TextType.LOREBOOK_ENTRY)
+        )).thenReturn(true);
+
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
+
+        assertTrue(manager.isActive(1, 1));
+        assertTrue(manager.isActive(1, 2));
+
+        assertEquals(
+                List.of(seed, recursive),
+                manager.getOf(4).orElseThrow()
+        );
+    }
+
+    @Test
+    void preventFurtherRecursionStopsContentFromActivatingEntries() {
+        manager.addLorebook(lorebook(1));
+
+        EntryRecord seed = constantEntry(
+                1,
+                1,
+                4,
+                0,
+                "A dragon sleeps below the mountain."
+        );
+
+        seed.setPreventFurtherRecursion(true);
+
+        EntryRecord recursive = entry(
+                1,
+                2,
+                4,
+                1,
+                "Recursive content",
+                ActivationStrategy.COMMON
+        );
+
+        when(entryService.getAllActiveEntriesOf(
+                any(IntSet.class)
+        )).thenReturn(entries(seed, recursive));
+
+        when(renderer.getChatHistory())
+                .thenReturn(List.of());
+
+        when(entryKeywordService.getKeywords(
+                any(IntSet.class)
+        )).thenReturn(List.of(
+                IntObjectPair.of(50, "dragon")
+        ));
+
+        when(entryKeywordService.keywordIDsOfEntry(1, 1))
+                .thenReturn(Set.of());
+
+        when(entryKeywordService.keywordIDsOfEntry(1, 2))
+                .thenReturn(Set.of(50));
+
+        when(budgetManager.hasSpaceFor(
+                anyString(),
+                eq(TextType.LOREBOOK_ENTRY)
+        )).thenReturn(true);
+
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
+
+        assertTrue(manager.isActive(1, 1));
+        assertFalse(manager.isActive(1, 2));
+
+        assertEquals(
+                List.of(seed),
+                manager.getOf(4).orElseThrow()
+        );
+    }
+
+    @Test
+    void getOutletsUsesActivatedOutletIds() {
+        manager.addLorebook(lorebook(1));
+
+        EntryRecord first = constantEntry(
+                1,
+                1,
+                4,
+                0,
+                "First"
+        );
+
+        EntryRecord second = constantEntry(
+                1,
+                2,
+                77,
+                0,
+                "Second"
+        );
+
+        prepareConstantActivation(
+                entries(first, second)
+        );
+
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
+
+        Result<Record2<Integer, String>> expected =
+                JOOQ.newResult(
+                        OUTLET.ID,
+                        OUTLET.OUTLET_
+                );
+
+        when(outletService.getOutletsFromIds(
+                any(IntSet.class)
+        )).thenReturn(expected);
+
+        assertSame(
+                expected,
+                manager.getOutlets()
+        );
+
+        ArgumentCaptor<IntSet> idsCaptor =
+                ArgumentCaptor.forClass(IntSet.class);
+
+        verify(outletService)
+                .getOutletsFromIds(idsCaptor.capture());
+
+        IntSet requestedIds = idsCaptor.getValue();
+
+        assertEquals(2, requestedIds.size());
+        assertTrue(requestedIds.contains(4));
+        assertTrue(requestedIds.contains(77));
+    }
+
+    @Test
+    void activateEntriesCannotBeCalledTwice() {
+        manager.addLorebook(lorebook(1));
+
+        prepareConstantActivation(entries());
+
+        manager.activateEntries(
+                renderer,
+                entryKeywordService
+        );
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> manager.activateEntries(
+                        renderer,
+                        entryKeywordService
                 )
         );
 
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(same(first), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("alpha")),
-                    keywordService
-            );
-
-            evaluator.verify(
-                    () -> EntryEvaluator.activates(same(blocked), anyInt(), anyInt()),
-                    never()
-            );
-        }
-
-        assertTrue(manager.isActive(10, 100));
-        assertFalse(manager.isActive(10, 101));
+        assertEquals(
+                "Activate entries has been called twice",
+                exception.getMessage()
+        );
     }
 
     @Test
-    void activateEntriesWithNoLorebooksDoesNotActivateAnything() {
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of()).context()
+    void budgetRejectedEntryIsActivatedButNotInjected() {
+        manager.addLorebook(lorebook(1));
+
+        EntryRecord entry = constantEntry(
+                1,
+                1,
+                4,
+                0,
+                "Too large"
         );
 
-        EntryKeywordService keywordService = keywordService(List.of());
+        when(entryService.getAllActiveEntriesOf(
+                any(IntSet.class)
+        )).thenReturn(entries(entry));
+
+        when(renderer.getChatHistory())
+                .thenReturn(List.of());
+
+        when(entryKeywordService.getKeywords(
+                any(IntSet.class)
+        )).thenReturn(List.of());
+
+        when(entryKeywordService.keywordIDsOfEntry(1, 1))
+                .thenReturn(Set.of());
+
+        when(budgetManager.hasSpaceFor(
+                "Too large",
+                TextType.LOREBOOK_ENTRY
+        )).thenReturn(false);
 
         manager.activateEntries(
-                rendererWithMessages(message("dragon")),
-                keywordService
+                renderer,
+                entryKeywordService
         );
 
-        assertTrue(manager.getLorebooks().isEmpty());
-        assertTrue(manager.getOf(1).isEmpty());
-        assertFalse(manager.isActive(1, 1));
+        // The entry satisfied its activation strategy.
+        assertTrue(manager.isActive(1, 1));
+
+        // It was rejected by the prompt budget, so it is not injected.
+        assertTrue(manager.activatedEntries().isEmpty());
+        assertTrue(manager.getOf(4).isEmpty());
+    }
+    private void prepareConstantActivation(
+            Result<EntryRecord> entries
+    ) {
+        when(entryService.getAllActiveEntriesOf(
+                any(IntSet.class)
+        )).thenReturn(entries);
+
+        when(renderer.getChatHistory())
+                .thenReturn(List.of());
+
+        when(entryKeywordService.getKeywords(
+                any(IntSet.class)
+        )).thenReturn(List.of());
+
+        lenient().when(entryKeywordService.keywordIDsOfEntry(
+                anyInt(),
+                anyInt()
+        )).thenReturn(Set.of());
+
+        lenient().when(budgetManager.hasSpaceFor(
+                anyString(),
+                eq(TextType.LOREBOOK_ENTRY)
+        )).thenReturn(true);
     }
 
-    @Test
-    void activateEntriesWithNoRepositoryEntriesDoesNotActivateAnything() {
-        LorebooksManager manager = new LorebooksManager(
-                contextReturningEntries(List.of()).context()
-        );
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(keyword(1, "dragon"))
+    private static LorebookSnapshot lorebook(int id) {
+        LorebookSnapshot snapshot = mock(
+                LorebookSnapshot.class,
+                RETURNS_DEEP_STUBS
         );
 
-        manager.activateEntries(
-                rendererWithMessages(message("dragon")),
-                keywordService
-        );
+        lenient().
+                when(snapshot.asReference().id())
+                .thenReturn(id);
 
-        assertTrue(manager.getOf(1).isEmpty());
-        assertFalse(manager.isActive(10, 100));
+        /*
+         * Used only by logging branches. Lenient prevents strict Mockito
+         * from rejecting it in successful paths.
+         */
+        lenient()
+                .when(snapshot.getName())
+                .thenReturn("Lorebook " + id);
+
+        return snapshot;
     }
 
-    @Test
-    void activateEntriesAccumulatesActiveEntriesAcrossMultipleCallsBecauseStateIsNotCleared() {
-        EntryRecord first = entry(
-                10,
-                100,
-                1,
-                "First content",
-                false,
-                false
+    private static EntryRecord constantEntry(
+            int lorebookId,
+            int entryId,
+            int outletId,
+            int position,
+            String content
+    ) {
+        return entry(
+                lorebookId,
+                entryId,
+                outletId,
+                position,
+                content,
+                ActivationStrategy.CONSTANT
         );
-
-        EntryRecord second = entry(
-                10,
-                101,
-                1,
-                "Second content",
-                false,
-                false
-        );
-
-        ContextFixture fixture = contextReturningEntries(List.of(first));
-        LorebooksManager manager = new LorebooksManager(fixture.context());
-        manager.addLorebook(lorebook(10));
-
-        EntryKeywordService keywordService = keywordService(
-                List.of(
-                        keyword(1, "dragon"),
-                        keyword(2, "castle")
-                )
-        );
-
-        when(keywordService.keywordIDsOfEntry(10, 100)).thenReturn(Set.of(1));
-        when(keywordService.keywordIDsOfEntry(10, 101)).thenReturn(Set.of(2));
-
-        try (MockedStatic<EntryEvaluator> evaluator = mockStatic(EntryEvaluator.class)) {
-            evaluator.when(() -> EntryEvaluator.activates(any(EntryRecord.class), eq(0), eq(0)))
-                    .thenReturn(true);
-
-            manager.activateEntries(
-                    rendererWithMessages(message("dragon")),
-                    keywordService
-            );
-
-            fixture.replaceEntries(List.of(second));
-
-            manager.activateEntries(
-                    rendererWithMessages(message("castle")),
-                    keywordService
-            );
-        }
-
-        assertEquals(List.of(first, second), manager.getOf(1).orElseThrow());
-        assertTrue(manager.isActive(10, 100));
-        assertTrue(manager.isActive(10, 101));
     }
 
     private static EntryRecord entry(
             int lorebookId,
             int entryId,
-            int outlet,
+            int outletId,
+            int position,
             String content,
-            boolean preventFurtherRecursion,
-            boolean nonRecursable
+            ActivationStrategy strategy
     ) {
-        EntryRecord record = new EntryRecord();
+        EntryRecord entry =
+                JOOQ.newRecord(ENTRY);
 
-        record.setLorebookId(lorebookId);
-        record.setEntryId(entryId);
-        record.setOutlet(outlet);
-        record.setContent(content);
-        record.setPreventFurtherRecursion(preventFurtherRecursion);
-        record.setNonRecursable(nonRecursable);
+        entry.setLorebookId(lorebookId);
+        entry.setEntryId(entryId);
+        entry.setName("Entry " + entryId);
+        entry.setContent(content);
+        entry.setOutlet(outletId);
+        entry.setPosition((short) position);
+        entry.setStrategy(strategy.stable_id);
+        entry.setProbability((short) 100);
+        entry.setNonRecursable(false);
+        entry.setPreventFurtherRecursion(false);
+        entry.setScanDepth(null);
 
-        return record;
+        return entry;
     }
 
-    private static EntryKeywordService keywordService(
-            List<IntObjectPair<String>> allKeywords
+    private static Result<EntryRecord> entries(
+            EntryRecord... entries
     ) {
-        EntryKeywordService keywordService = mock(EntryKeywordService.class);
-        when(keywordService.getKeywords(any(IntSet.class))).thenReturn(allKeywords);
-        return keywordService;
-    }
+        Result<EntryRecord> result =
+                JOOQ.newResult(ENTRY);
 
-    private static IntObjectPair<String> keyword(int id, String value) {
-        return IntObjectPair.of(id, value);
-    }
-
-    private static PromptRenderer rendererWithMessages(ChatMessage... messages) {
-        PromptRenderer renderer = mock(PromptRenderer.class);
-        when(renderer.getChatHistory()).thenReturn(List.of(messages));
-        return renderer;
-    }
-
-    private static ChatMessage message(String content) {
-        ChatMessage message = mock(ChatMessage.class);
-        when(message.content()).thenReturn(content);
-        return message;
-    }
-
-    private static LorebookSnapshot lorebook(int id) {
-        LorebookSnapshot snapshot = mock(LorebookSnapshot.class, RETURNS_DEEP_STUBS);
-        when(snapshot.reference().id()).thenReturn(id);
-        return snapshot;
-    }
-
-    private static ContextFixture contextReturningEntries(List<EntryRecord> entries) {
-        try {
-            AtomicReference<List<EntryRecord>> mutableEntries =
-                    new AtomicReference<>(new ArrayList<>(entries));
-
-            AtomicReference<IntSet> lastRequestedLorebookIds =
-                    new AtomicReference<>();
-
-            LorebookContext context = mock(LorebookContext.class);
-
-            Field entriesField = LorebookContext.class.getDeclaredField("entries");
-            entriesField.setAccessible(true);
-
-            Object entriesRepository = mock(
-                    entriesField.getType(),
-                    invocation -> {
-                        if (invocation.getMethod().getName().equals("getAllActiveEntriesOf")) {
-                            lastRequestedLorebookIds.set(invocation.getArgument(0));
-                            return resultOf(mutableEntries.get());
-                        }
-
-                        return RETURNS_DEFAULTS.answer(invocation);
-                    }
-            );
-
-            entriesField.set(context, entriesRepository);
-
-            return new ContextFixture(
-                    context,
-                    mutableEntries,
-                    lastRequestedLorebookIds
-            );
-        } catch (ReflectiveOperationException exception) {
-            throw new AssertionError("Could not build LorebookContext test fixture", exception);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Result<EntryRecord> resultOf(List<EntryRecord> entries) {
-        Result<EntryRecord> result = mock(Result.class);
-
-        when(result.size()).thenReturn(entries.size());
-        when(result.iterator()).thenAnswer(invocation -> entries.iterator());
+        Collections.addAll(result, entries);
 
         return result;
     }
-
-    private record ContextFixture(
-            LorebookContext context,
-            AtomicReference<List<EntryRecord>> entries,
-            AtomicReference<IntSet> lastRequestedLorebookIds
-    ) {
-        void replaceEntries(List<EntryRecord> replacement) {
-            entries.set(new ArrayList<>(replacement));
-        }
-    }*/
 }

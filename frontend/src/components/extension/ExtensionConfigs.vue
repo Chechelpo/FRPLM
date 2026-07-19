@@ -2,8 +2,8 @@
 import { onMounted, ref } from "vue";
 import { ExtensionDTO, fetchExtensions } from "@/extensions/extensions";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import {fetchApi} from "@/core/ABSEntity";
 import {API_BASE} from "@/config";
+import {fetchApi} from "@/services/apiClient";
 
 const extensions = ref<ExtensionDTO[]>([]);
 const loadedScripts = ref<Set<string>>(new Set());

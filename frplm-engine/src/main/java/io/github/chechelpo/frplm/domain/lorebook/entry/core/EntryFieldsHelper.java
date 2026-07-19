@@ -37,7 +37,7 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(

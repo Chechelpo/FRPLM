@@ -24,7 +24,7 @@ final class EntryKeywordsFieldHelper extends ABSControllerAwareHelper<
                                 .readOnly()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -36,7 +36,7 @@ final class EntryKeywordsFieldHelper extends ABSControllerAwareHelper<
                                 .readOnly()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -48,7 +48,7 @@ final class EntryKeywordsFieldHelper extends ABSControllerAwareHelper<
                                 .readOnly()
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

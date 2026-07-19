@@ -44,7 +44,7 @@ final class LorebookFieldsHelper extends ABSControllerAwareHelper<
                                         .setMaxLength(255)
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
 
         );

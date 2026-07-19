@@ -30,7 +30,7 @@ public final class EncryptorService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     public EncryptorService() {
-        this(loadKeyFromEnvironment());
+        this(MasterKeyProvider.loadOrCreate());
     }
 
     public EncryptorService(byte @NotNull [] rawKey) {
@@ -148,7 +148,6 @@ public final class EncryptorService {
 
         if (encoded == null || encoded.isBlank()) {
             System.err.println("MISSING ENVIRONMENT VARIABLE: " + ENV_KEY_NAME + " \n NOW ASSUMING THIS IS A TEST ");
-            encoded = generateBase64Key();
             /*throw new IllegalStateException(
                     "Missing environment variable " + ENV_KEY_NAME
             );*/

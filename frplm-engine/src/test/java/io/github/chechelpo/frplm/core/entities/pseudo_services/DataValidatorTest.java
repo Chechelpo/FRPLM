@@ -73,7 +73,7 @@ class DataValidatorTest {
                                 .setMin(min)
                                 .setMax(max)
                 )
-                .require()
+                .requireOnCreate()
                 .build();
 
         return new TestField<>(tableField, info);
@@ -102,7 +102,7 @@ class DataValidatorTest {
                                 .setMinLength(minLength)
                                 .setMaxLength(maxLength)
                 )
-                .require()
+                .requireOnCreate()
                 .build();
 
         return new TestField<>(tableField, info);

@@ -16,10 +16,12 @@ import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
+import io.github.chechelpo.frplm.utils.tokenizers.TokenizerService;
 import org.jetbrains.annotations.NotNull;
 
 public record ExtensionContext(
         @NotNull LLMService connections,
+        @NotNull TokenizerService tokenizers,
         @NotNull HostService hosts,
         @NotNull SecretService secrets,
 

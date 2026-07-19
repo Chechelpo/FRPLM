@@ -6,45 +6,60 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class FloatCoercer extends Coercer<Double> {
-    private FloatCoercer(FieldType type) {
-        super(type);
+public final class FloatCoercer extends Coercer<Float> {
+    private FloatCoercer() {
+        super(FieldType.FLOAT);
     }
 
-    @Contract("_ -> new")
-    public static @NotNull FloatCoercer create(FieldType type) {
-        return new FloatCoercer(type);
+    @Contract("-> new")
+    public static @NotNull FloatCoercer create() {
+        return new FloatCoercer();
     }
 
     @Override
     @Contract(value = "_ -> !null", pure = true)
-    public @NotNull Either<CoerceError, @Nullable Double> coerce(@Nullable Object value) {
+    public @NotNull Either<CoerceError, @Nullable Float> coerce(
+            @Nullable Object value
+    ) {
         return switch (value) {
             case null -> Either.right(null);
 
-            case Float f -> Either.right(f.doubleValue());
+            case Float f -> validateFinite(f, value);
 
-            case Double d -> Either.right(d);
+            case Number number -> {
+                float converted = number.floatValue();
+                yield validateFinite(converted, value);
+            }
 
-            case Number n -> Either.right(n.doubleValue());
-
-            case String s -> {
+            case String string -> {
                 try {
-                    double parsed = this.type == FieldType.FLOAT
-                            ? Float.parseFloat(s)
-                            : Double.parseDouble(s);
-
-                    yield Either.right(parsed);
-                } catch (NumberFormatException ex) {
-                    yield Either.left(new CoerceError(
-                            "Cannot coerce '" + value + "' to " + this.type
-                    ));
+                    float parsed = Float.parseFloat(string);
+                    yield validateFinite(parsed, value);
+                } catch (NumberFormatException exception) {
+                    yield failure(value);
                 }
             }
 
-            default -> Either.left(new CoerceError(
-                    "Cannot coerce '" + value + "' to " + this.type
-            ));
+            default -> failure(value);
         };
+    }
+
+    private @NotNull Either<CoerceError, Float> validateFinite(
+            float value,
+            @Nullable Object originalValue
+    ) {
+        if (!Float.isFinite(value)) {
+            return failure(originalValue);
+        }
+
+        return Either.right(value);
+    }
+
+    private @NotNull Either<CoerceError, Float> failure(
+            @Nullable Object value
+    ) {
+        return Either.left(new CoerceError(
+                "Cannot coerce '" + value + "' to " + this.type
+        ));
     }
 }

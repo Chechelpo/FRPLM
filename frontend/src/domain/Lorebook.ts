@@ -4,7 +4,6 @@ import {
     deleteEntity,
     EntityField,
     fetch_all,
-    fetchApi,
     fetchFromReference,
     fetchMatching,
     fetchOne,
@@ -14,6 +13,7 @@ import {EntityTypes} from "@/domain/EntityTypes";
 import {API_BASE} from "@/config";
 import {DTO, Primitives} from "@/types/DTOs";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
 
 export type LorebookKey = { id: number }
 export type LorebookData = { name: string }

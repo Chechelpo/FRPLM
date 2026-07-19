@@ -21,7 +21,7 @@ final class MovementFieldsHelper extends ABSHelper<MovementsRecord, MovementServ
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -51,14 +51,14 @@ final class MovementFieldsHelper extends ABSHelper<MovementsRecord, MovementServ
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
         register_field(
                 MOVEMENTS.PREVIOUS_LOCATION_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
     }

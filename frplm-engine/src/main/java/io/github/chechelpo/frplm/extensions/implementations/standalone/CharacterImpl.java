@@ -12,12 +12,20 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
 
     @Override
     public Reference asReference() {
-        return new CharacterSnapshot.Reference(this.record.getId());
+        return asReference(this.record);
     }
 
+    public static Reference asReference(CharactersRecord record) {
+        return new CharacterSnapshot.Reference(record.getId());
+    }
     @Override
     public LorebookSnapshot lorebook() {
         return new LorebookImpl(context.lorebooks().getLorebookOf(this.getRecord()), this.context);
+    }
+
+    @Override
+    public String getDescription() {
+        return record.getDescription();
     }
 
     @Override

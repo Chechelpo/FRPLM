@@ -30,7 +30,7 @@ import {
   clearTokenizerConnection,
   setTokenizerConnection,
   tokenizerConnectionId,
-} from "@/utils/tokenizer";
+} from "@/services/tokenizer";
 
 const allConnections = ref<LLMConnection[]>([]);
 const editingConnection = ref<LLMConnection | null>(null);

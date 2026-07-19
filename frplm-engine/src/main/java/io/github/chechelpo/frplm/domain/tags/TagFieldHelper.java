@@ -34,7 +34,7 @@ final class TagFieldHelper extends ABSControllerAwareHelper<TagsRecord, TagServi
                                 .setMinLength(0)
                                 .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(

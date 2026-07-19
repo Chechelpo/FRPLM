@@ -48,7 +48,7 @@ final class MessageStore extends EntityStore<MessagesRecord> {
                 .fetch();
     }
 
-    @NonNull List<MessagesRecord> getLast(int sessionId, int from, int to){
+    @NonNull List<MessagesRecord> getRange(int sessionId, int from, int to){
         return ctx.selectFrom(MESSAGES)
                 .where(MESSAGES.SESSION_ID.eq(sessionId))
                 .and(MESSAGES.TICK_NUM.between(from, to))

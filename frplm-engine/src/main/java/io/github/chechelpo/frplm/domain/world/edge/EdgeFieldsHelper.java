@@ -33,7 +33,7 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -47,7 +47,7 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -61,7 +61,7 @@ final class EdgeFieldsHelper extends ABSControllerAwareHelper<
                                         .key()
                                         .build()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

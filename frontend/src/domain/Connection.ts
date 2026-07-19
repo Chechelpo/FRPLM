@@ -1,8 +1,15 @@
-import {ABSEntity, appendIDParams, fetch_all, fetchApi, fetchFromReference, fetchOne} from "@/core/ABSEntity";
+import {
+    ABSEntity,
+    appendIDParams,
+    fetch_all,
+    fetchFromReference,
+    fetchOne,
+    getEntityController
+} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
-import {API_BASE} from "@/config";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
 
 export type LLMConnectionKeys = {id:number}
 export type LLMConnectionData = {
@@ -47,11 +54,8 @@ export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionDat
     }
 
     public async testConnection(): Promise<boolean> {
-        const url = new URL(`${API_BASE}/${EntityTypes.LLM}/test`);
-
-        appendIDParams(url, this.key);
         const response = await fetchApi(
-            url.toString(),
+            `api/${EntityTypes.LLM}/test?id=${this.get('id')}`,
             {
                 method: "GET"
             }
@@ -62,10 +66,8 @@ export class LLMConnection extends ABSEntity<LLMConnectionKeys, LLMConnectionDat
     }
 
     public async getModels(): Promise<ModelResponse[]> {
-        const url = new URL(`${API_BASE}/${EntityTypes.LLM}/models`);
-        appendIDParams(url, this.key);
         const response = await fetchApi(
-            url.toString(),
+            `api/${EntityTypes.LLM}/models?id=${this.get('id')}`,
             {
                 method: "GET"
             }
@@ -86,7 +88,7 @@ export class ApiKey extends ABSEntity<APIKeys, any>{
 
     static async create(key:string, host_id: number) : Promise<ApiKey> {
         const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.API_KEY}/new/${host_id}`,
+            `api/${EntityTypes.API_KEY}/new/${host_id}`,
             {
                 method: "POST",
                 headers: new Headers({

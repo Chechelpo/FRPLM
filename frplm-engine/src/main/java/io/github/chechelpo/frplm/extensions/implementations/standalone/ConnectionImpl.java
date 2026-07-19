@@ -45,6 +45,11 @@ public class ConnectionImpl extends StandaloneEntity<LlmConnectionRecord> implem
     }
 
     @Override
+    public int tokenCount(String text) {
+        return context.tokenizers().tokenCount(this.getModelID(), text);
+    }
+
+    @Override
     public Optional<ChatCompletionResponse> generate(ChatCompletionRequest request) {
         T2TClient client = new T2TClient(context.secrets(), context.hosts());
         return client.generate(

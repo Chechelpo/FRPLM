@@ -15,7 +15,7 @@ class STLorebookImporterTest {
 
     @Test
     void getEntries() throws IOException {
-        InputStream in = STLorebookImporterTest.class.getResourceAsStream("/imports/eldoria.json");
+        InputStream in = STLorebookImporterTest.class.getResourceAsStream("/imports/st_lorebooks/eldoria.json");
         assert in != null : "Resource not found: /imports/eldoria.json";
         JsonNode testLorebook = MAPPER.readTree(in);
         System.out.println(testLorebook);

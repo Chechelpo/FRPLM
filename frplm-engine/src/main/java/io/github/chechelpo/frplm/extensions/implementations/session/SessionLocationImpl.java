@@ -1,12 +1,21 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.LocationImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Arrays;
+import java.util.List;
+
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 public final class SessionLocationImpl extends LocationImpl implements SessionLocation {
     private final SessionWorldImpl world;
@@ -16,8 +25,38 @@ public final class SessionLocationImpl extends LocationImpl implements SessionLo
         this.world = world;
     }
 
-    public SessionCharacterImpl @NotNull [] getCharactersHere(){
+    @Override
+    public @NonNull @Unmodifiable List<SessionCharacter> getCharactersHere(){
         return world.getAtLocation(this);
+    }
+
+    @Override
+    public List<Edge<SessionLocation>> getSessionOutEdges() {
+        return context.edges().getMatching(
+                        EntityKey.<LocationEdgesRecord>builder()
+                                .set(LOCATION_EDGES.WORLD_ID, record.getWorldId())
+                                .set(LOCATION_EDGES.FROM_LOCATION_ID, record.getId())
+                                .build()
+                ).stream()
+                .map(record ->
+                        new Edge<SessionLocation>(
+                                new SessionLocationImpl(
+                                        context.locations().find(
+                                                EntityKey.<LocationsRecord>builder()
+                                                        .set(LOCATIONS.WORLD_ID, record.getWorldId())
+                                                        .set(LOCATIONS.ID, record.getToLocationId())
+                                                        .build()
+                                        ).orElseThrow(),
+                                        context,
+                                        world
+                                ),
+                                record.getEdgedescription(),
+                                record.getTraversable(),
+                                record.getShowDestinationName(),
+                                record.getShowDestinationDescription()
+                        )
+                )
+                .toList();
     }
 
     @Override

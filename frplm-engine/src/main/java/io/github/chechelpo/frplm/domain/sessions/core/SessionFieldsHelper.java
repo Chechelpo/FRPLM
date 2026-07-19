@@ -45,7 +45,7 @@ final class SessionFieldsHelper extends ABSControllerAwareHelper<SessionsRecord,
                 SESSIONS.USER_PERSONA_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
                         .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
@@ -57,7 +57,7 @@ final class SessionFieldsHelper extends ABSControllerAwareHelper<SessionsRecord,
                                 NumberConstraint.builder(FieldType.INTEGER)
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

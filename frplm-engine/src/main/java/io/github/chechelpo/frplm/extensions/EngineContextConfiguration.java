@@ -21,6 +21,7 @@ import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
+import io.github.chechelpo.frplm.utils.tokenizers.TokenizerService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -48,10 +49,11 @@ public class EngineContextConfiguration {
 
             OutletService outlets,
             TemplateService templates,
-            SectionService sections
-    ) {
+            SectionService sections,
+            TokenizerService tokenizerService) {
         return new ExtensionContext(
                 llmService,
+                tokenizerService,
                 hosts,
                 secretService,
 

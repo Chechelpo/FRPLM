@@ -1,11 +1,14 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
+import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,11 +21,24 @@ public abstract class ABSControllerAwareHelper<
         > extends ABSHelper<R, Service> {
     protected final C controller;
 
+    List<ControllerFieldBuilder<?>> controllerFieldBuilders = new ArrayList<>();
+
     protected ABSControllerAwareHelper(Service service, C controller) {
         super(service);
         Objects.requireNonNull(controller);
         this.controller = controller;
     }
+    @PostConstruct
+    void registerControllerFields(){
+        controllerFieldBuilders.forEach(
+                builder -> {
+                    register_field(builder);
+                    Objects.requireNonNull(builder.dtoName, "Dto name is null for field " + builder.column);
+                    controller.registerPublicField(builder.column, builder.dtoName, builder.info.format);
+                }
+        );
+    }
+
     protected <T> void register_field(
             @Nullable String dto_name,
             @NotNull TableField<R, T> column,
@@ -50,4 +66,21 @@ public abstract class ABSControllerAwareHelper<
         if (dto_name != null) controller.registerPublicField(column, dto_name, info.format);
     }
 
+    protected <T> ControllerFieldBuilder<T> registerControllerField(TableField<R,T> column){
+        ControllerFieldBuilder<T> builder =  new ControllerFieldBuilder<>(column);
+        controllerFieldBuilders.add(builder);
+        return builder;
+    }
+
+    public class ControllerFieldBuilder<T> extends FieldBuilder<T> {
+        String dtoName = null;
+        public ControllerFieldBuilder(TableField<R,T> column){
+            super(column);
+        }
+
+        public ControllerFieldBuilder<T> setDtoName(String name){
+            this.dtoName = name;
+            return this;
+        }
+    }
 }

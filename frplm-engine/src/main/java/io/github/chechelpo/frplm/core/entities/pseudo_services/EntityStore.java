@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public abstract class EntityStore<R extends TableRecord<R>>
 {
@@ -47,8 +49,8 @@ public abstract class EntityStore<R extends TableRecord<R>>
         return this.type;
     }
 
-    public List<R> getAll(){
-        List<R> records = ctx.selectFrom(main_table)
+    public Result<R> getAll(){
+        Result<R> records = ctx.selectFrom(main_table)
                 .fetch();
         log.trace("Retrieved {} records on getAll call", records.size());
 
@@ -63,7 +65,20 @@ public abstract class EntityStore<R extends TableRecord<R>>
 
         return record;
     }
-    public List<R> getAllMatching(@NotNull EntityKey<R> id){
+
+    public <T> Result<R> getMatching(TableField<R,T> field, T value) {
+        return ctx.selectFrom(main_table)
+                .where(field.eq(value))
+                .fetch();
+    }
+
+    public Result<R> getMatching(EntityDataPayload<R> data){
+        return ctx.selectFrom(main_table)
+                .where(data.asEqualityCondition())
+                .fetch();
+    }
+
+    public Result<R> getAllMatching(@NotNull EntityKey<R> id){
         return ctx.selectFrom(main_table)
                 .where(id.getEqualityConditions())
                 .fetch();
@@ -106,7 +121,6 @@ public abstract class EntityStore<R extends TableRecord<R>>
      *
      * @param data the UpdateObject that will be inserted (mutable!). Functions as data carrier, not really as an update
      *             in HTTP sense
-     * @apiNote {@link #incrementAndGet(TableField, EntityKey)} for those sequence numbers that give out IDs to child entities.
      */
     public @Nullable R createAndGet(@NotNull EntityDataPayload<R> data) {
         log.trace("Creating new record with values: {}", data);
@@ -123,16 +137,82 @@ public abstract class EntityStore<R extends TableRecord<R>>
                 .fetchOne(field);
     }
 
-    public <T extends Number> T incrementAndGet(TableField<R,T> field, @NotNull EntityKey<R> key){
-        // Atomic: UPDATE parent SET counter = counter + 1 RETURNING counter + 1
-        T newValue = ctx.update(main_table)
-                .set(field, field.add(1))  // counter = counter + 1
+    public <T extends Number> Optional<T> getNumericValueForUpdate(
+            TableField<R, T> field,
+            @NotNull EntityKey<R> key
+    ) {
+        Objects.requireNonNull(field, "field");
+        Objects.requireNonNull(key, "key");
+
+        Record1<T> row = ctx
+                .select(field)
+                .from(main_table)
+                .where(key.getPkCondition())
+                .forUpdate()
+                .fetchOne();
+
+        if (row == null) {
+            return Optional.empty();
+        }
+
+        T value = row.value1();
+
+        if (value == null) {
+            throw new IllegalStateException(
+                    "Cannot adjust null numeric field " +
+                            field.getName() +
+                            " on entity " +
+                            key
+            );
+        }
+
+        return Optional.of(value);
+    }
+    public <T extends Number> T adjustAndGet(
+            TableField<R, T> field,
+            @NotNull EntityKey<R> key,
+            int delta
+    ) {
+        Objects.requireNonNull(field, "field");
+        Objects.requireNonNull(key, "key");
+
+        if (delta != 1 && delta != -1) {
+            throw new IllegalArgumentException(
+                    "Adjustment must be either +1 or -1"
+            );
+        }
+
+        Field<T> adjustedValue = delta > 0
+                ? field.add(delta)
+                : field.sub(-delta);
+
+        /*
+         * SQL:
+         *
+         * UPDATE table
+         * SET numeric_field = numeric_field +/- 1
+         * WHERE ...
+         * RETURNING numeric_field
+         */
+        T newValue = ctx
+                .update(main_table)
+                .set(field, adjustedValue)
                 .where(key.getPkCondition())
                 .returningResult(field)
                 .fetchOne(field);
 
-        if (newValue == null)
-            throw new IllegalStateException("Something went wrong when updating field " + field);
+        if (newValue == null) {
+            /*
+             * Because the row was locked earlier in the same transaction,
+             * disappearance here indicates an internal consistency problem.
+             */
+            throw new IllegalStateException(
+                    "Numeric adjustment affected no row for entity " +
+                            key +
+                            " and field " +
+                            field.getName()
+            );
+        }
 
         return newValue;
     }

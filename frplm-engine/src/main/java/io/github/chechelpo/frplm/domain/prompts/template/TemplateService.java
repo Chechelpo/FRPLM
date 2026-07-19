@@ -17,6 +17,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -43,10 +44,41 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
         return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getMainPrompt().shortValue()));
     }
 
+
+    @Override
+    protected void beforeCreate(EntityDataPayload<PromptTemplateRecord> data, long operationID) {
+        if (data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) || data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET))
+            validateCreationOfBudget(data);
+        super.beforeCreate(data, operationID);
+    }
+
+    private void validateCreationOfBudget(EntityDataPayload<PromptTemplateRecord> data){
+        boolean assignedField = false;
+        if (data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) && !data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)){
+            assignedField = true;
+            data.set(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, 1F - data.requireValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET));
+        }
+        if (data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET) && !data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)){
+            assignedField = true;
+            data.set(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, 1F - data.requireValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET));
+        }
+
+        validateBudgetAssignation(
+                null,
+                data.requireValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET),
+                data.requireValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
+        );
+    }
+
     @Override
     protected void beforeUpdate(@NotNull EntityKey<PromptTemplateRecord> target, @NotNull EntityDataPayload<PromptTemplateRecord> data, long operationID) {
         if (data.assignsField(PROMPT_TEMPLATE.MAX_TOKENS)) validateMaxTokens(target, data);
         if (data.assignsField(PROMPT_TEMPLATE.CONNECTION_ID)) updateToMaxTokensConnection(data);
+        validateBudgetAssignation(
+                target,
+                data.getValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET).orElse(null),
+                data.getValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET).orElse(null)
+        );
 
         super.beforeUpdate(target, data, operationID);
     }
@@ -55,7 +87,7 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
         data.set(PROMPT_TEMPLATE.MAX_TOKENS,
                 llmService.getValueOf(LLM_CONNECTION.MAX_TOKENS,
                         EntityKey.of(LLM_CONNECTION.ID, data.requireValue(PROMPT_TEMPLATE.CONNECTION_ID))
-                ).orElseThrow(() -> new UnexpectedException("Setting new connection ID with no max_tokens", Severity.USER))
+                ).orElseThrow(() -> new UnexpectedException("Setting new connection ID with no maxTokens", Severity.USER))
         );
     }
 
@@ -66,6 +98,27 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
         if (connection.getMaxTokens() < data.requireValue(PROMPT_TEMPLATE.MAX_TOKENS))
             throw new InvalidValue("Tokens of template larger than LLMs connection max tokens");
+    }
+
+    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
+    private void validateBudgetAssignation(
+            EntityKey<PromptTemplateRecord> ofTemplate,
+            @Nullable Float chatHistoryBudget,
+            @Nullable Float lorebookBudget
+    ){
+        if (chatHistoryBudget == null && lorebookBudget == null) return;
+        if (( chatHistoryBudget == null || lorebookBudget == null ) && ofTemplate == null)
+            throw new IllegalArgumentException("Target key must be non null if chat history budget is null or lorebook budget");
+
+        if (chatHistoryBudget == null)
+            chatHistoryBudget = getValueOf(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, ofTemplate)
+                    .orElseThrow(() -> new EntityNotFound("No template with key: " + ofTemplate, Severity.SYSTEM));
+        if (lorebookBudget == null)
+            lorebookBudget = getValueOf(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, ofTemplate)
+                    .orElseThrow(() -> new EntityNotFound("No template with key: " + ofTemplate, Severity.SYSTEM));
+
+        if (lorebookBudget + chatHistoryBudget > 1D)
+            throw new InvalidValue("Lorebook budget and history budget sum to more than 1", Severity.USER);
     }
 
     @TransactionalEventListener

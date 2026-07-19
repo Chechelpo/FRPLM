@@ -39,6 +39,16 @@ public class RegionImpl extends StandaloneEntity<RegionRecord> implements Region
     }
 
     @Override
+    public String getDescription() {
+        return record.getDescription();
+    }
+
+    @Override
+    public String getName() {
+        return record.getName();
+    }
+
+    @Override
     public LorebookSnapshot lorebook() {
         return new LorebookImpl(context.lorebooks().getLorebookOf(this.record), context);
     }

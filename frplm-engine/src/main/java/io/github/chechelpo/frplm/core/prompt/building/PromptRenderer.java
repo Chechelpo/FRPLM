@@ -19,9 +19,9 @@ final class PromptRenderer {
     private final List<SectionManager> sections = new ArrayList<>();
     private final List<ChatMessage> chatHistory;
 
-    public PromptRenderer(List<ChatMessage> chatHistory, @NonNull List<PromptSectionEntitySnapshot> initialSections){
+    public PromptRenderer(List<ChatMessage> chatHistory, @NonNull List<SectionManager> initialSections){
         this.chatHistory = chatHistory;
-        sections.addAll(initialSections.stream().map(SectionManager::new).toList());
+        sections.addAll(initialSections);
     }
 
     List<ChatMessage> getChatHistory(){
@@ -30,6 +30,10 @@ final class PromptRenderer {
 
     void addSection(@NonNull ChatCompletionMessage message, PromptSection.InjectAtPosition injectionOrder){
         sections.add(new SectionManager(message.content(), message.role(), injectionOrder));
+    }
+
+    void appendSection(SectionManager section){
+        sections.add(section);
     }
 
     List<ChatCompletionMessage> render(LorebooksManager lorebooksManager) {
@@ -70,7 +74,7 @@ final class PromptRenderer {
 
         return orderedMessages;
     }
-    /** Injects at depth sections */
+
     private void appendChatHistoryWithDepthInjections(
             int chatHistoryStartOffset,
             int chatHistoryEndOffset,
@@ -85,12 +89,16 @@ final class PromptRenderer {
         }
     }
 
-    Optional<String> renderEligibleAtOutlet(int outletId, LorebooksManager lorebooksManager) {
-        Optional<List<EntryRecord>> entries = lorebooksManager.getOf(outletId);
-
+    Optional<String> renderEligibleAtOutlet(
+            int outletId,
+            LorebooksManager lorebooksManager
+    ) {
         return Optional.of(renderedContent.computeIfAbsent(outletId, key -> {
-            List<EntryRecord> outletEntries = entries.orElse(List.of());
-            List<String> injections = customInjections.getOrDefault(outletId, List.of());
+            List<EntryRecord> outletEntries =
+                    lorebooksManager.getOf(key).orElse(List.of());
+
+            List<String> injections =
+                    customInjections.getOrDefault(key, List.of());
 
             int stringSize =
                     outletEntries.stream()
@@ -110,13 +118,18 @@ final class PromptRenderer {
 
             for (EntryRecord entry : outletEntries) {
                 String content = entry.getContent();
-                if (content == null || content.isBlank()) continue;
+
+                if (content == null || content.isBlank()) {
+                    continue;
+                }
 
                 appendWithSeparator(builder, content);
             }
 
             for (String injection : injections) {
-                if (injection == null || injection.isBlank()) continue;
+                if (injection == null || injection.isBlank()) {
+                    continue;
+                }
 
                 appendWithSeparator(builder, injection);
             }
@@ -124,7 +137,6 @@ final class PromptRenderer {
             return builder.toString();
         }));
     }
-
     private static void appendWithSeparator(StringBuilder builder, String content) {
         if (!builder.isEmpty()) {
             builder.append('\n');

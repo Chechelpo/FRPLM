@@ -30,8 +30,9 @@ final class SectionManager {
         this.unrenderedContent = section.content();
         this.role = section.role();
         this.position = section.getInjectionOrder();
-        this.isChatHistorySection = section.asReference().promptId() == DefaultSections.CHAT_HISTORY.sectionID;
+        this.isChatHistorySection = section.type() == PromptSectionEntitySnapshot.Type.CHAT_HISTORY;
     }
+
     public SectionManager(String content, ChatCompletionRole role, PromptSection.InjectAtPosition position){
         this.unrenderedContent = content;
         this.role = role;
@@ -73,10 +74,6 @@ final class SectionManager {
         renderedContent = result;
     }
 
-
-    private void renderRelevantEntries(LorebooksManager manager){
-
-    }
 
     public String getUnrenderedContent(){
         return unrenderedContent;

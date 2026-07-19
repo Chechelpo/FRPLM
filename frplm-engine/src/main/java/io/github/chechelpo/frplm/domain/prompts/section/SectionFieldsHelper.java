@@ -24,7 +24,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                                 .readOnly()
                                 .key    ()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -45,7 +45,7 @@ final class SectionFieldsHelper extends ABSControllerAwareHelper<PromptSectionRe
                         .setConstraints(StringConstraint.builder()
                                 .setMaxLength(255)
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

@@ -1,6 +1,9 @@
 package io.github.chechelpo.frplm.extensions;
 
 import ch.qos.logback.classic.Logger;
+import io.github.chechelpo.frplm.exceptions.Severity;
+import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
@@ -13,9 +16,11 @@ import io.github.chechelpo.frplm.extensions.api.utils.ExtensionDBBridge;
 import io.github.chechelpo.frplm.extensions.api.utils.io;
 import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +28,7 @@ import java.util.Optional;
 @Service
 public final class ExtensionService implements ExtensionDBBridge {
     private final Logger logger = (Logger) LoggerFactory.getLogger(ExtensionService.class.getName());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final List<Extension> extensions;
     private final ExtensionStore store;
@@ -40,7 +46,7 @@ public final class ExtensionService implements ExtensionDBBridge {
         extensions.addAll(extensionDiscovery.discoverExtensions());
 
         this.extensions = extensions;
-        logger.info("Extensions found: {}", extensions);
+        logger.info("Extensions found: {}", extensions.stream().map(Extension::displayName).toList());
         this.extensionRepository = extensionRepository;
         this.sessionContext = sessionContext;
     }
@@ -66,6 +72,14 @@ public final class ExtensionService implements ExtensionDBBridge {
 
     private void logExtensionError(Extension e, String errorMessage){
         logger.error("Extension {} error : \n {}", e.extensionId(), errorMessage);
+    }
+
+    <T extends Extension> @NonNull Optional<T> getExtensionOfType(String extensionId, Class<T> type){
+        return extensions.stream()
+                .filter(type::isInstance)
+                .map(type::cast)
+                .filter(ext -> ext.extensionId().equals(extensionId))
+                .findFirst();
     }
 
     public void runPrePromptGeneration(SessionsRecord session, PromptBuilder builder){
@@ -112,8 +126,20 @@ public final class ExtensionService implements ExtensionDBBridge {
 
     @Override
     public JsonNode getConfig(String extensionId) {
-        return store.getConfig(extensionId);
+        return store.getConfig(extensionId)
+                .orElse( //This part is for when users inevitably make default config = null at init (I did it already), let them be forgiven for their sins
+                        getExtensionOfType(extensionId, ConfigurableExtension.class)
+                                .orElseThrow(() -> new EntityNotFound("No extension with id " + extensionId, Severity.SYSTEM))
+                                .defaultConfig()
+                );
     }
+
+    @Override
+    public <T> T getConfig(String extensionId, Class<T> recordType) {
+        return OBJECT_MAPPER.treeToValue(getConfig(extensionId), recordType);
+    }
+
+
 
     @NotNull Optional<io.WebAsset> getExtensionAsset(String extensionID, String path){
         Optional<ConfigurableExtension> configExtension = extensions.stream()

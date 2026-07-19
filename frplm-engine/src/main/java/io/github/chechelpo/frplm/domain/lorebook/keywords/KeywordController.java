@@ -16,10 +16,10 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.KEYWO
 
 @RestController
 @RequestMapping(KEYWORDS_URL)
-final class KeywordController extends EntityController<KeywordRecord, KeywordService> {
+final class KeywordController extends EntityController<KeywordRecord, KeywordServiceImpl> {
     private final EntryKeywordService entryKeywordService;
 
-    KeywordController(KeywordService service, EntryKeywordService entryKeywordsService) {
+    KeywordController(KeywordServiceImpl service, EntryKeywordService entryKeywordsService) {
         super(service);
         this.entryKeywordService = entryKeywordsService;
     }

@@ -35,6 +35,11 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
     }
 
     @Override
+    public String getDescription() {
+        return record.getDescription();
+    }
+
+    @Override
     public LocationImpl @NotNull [] getNeighbours() {
         return context.edges().neighboursOf(this.record).stream()
                 .map(record -> new LocationImpl(record, this.context))
@@ -42,7 +47,7 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
     }
 
     @Override
-    public List<Edge> getOutEdges() {
+    public List<Edge<LocationSnapshot>> getOutEdges() {
         return context.edges().getMatching(
                 EntityKey.<LocationEdgesRecord>builder()
                         .set(LOCATION_EDGES.WORLD_ID, record.getWorldId())
@@ -50,7 +55,7 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
                         .build()
         ).stream()
                 .map(record ->
-                    new Edge(
+                    new Edge<LocationSnapshot>(
                             new LocationImpl(
                                     context.locations().find(
                                             EntityKey.<LocationsRecord>builder()
@@ -60,6 +65,7 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
                                     ).orElseThrow(),
                                     context
                             ),
+                            record.getEdgedescription(),
                             record.getTraversable(),
                             record.getShowDestinationName(),
                             record.getShowDestinationDescription()

@@ -22,7 +22,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestComponent
-@Import({WorldTestContext.class, LocationTestContext.class})
+@Import({WorldTestContext.class})
 public class RegionTestContext implements DBReload {
     @Autowired
     WorldTestContext worlds;
@@ -30,15 +30,12 @@ public class RegionTestContext implements DBReload {
     public RegionService service;
     @Autowired
     RegionFields fields;
-    @Autowired
-    LocationTestContext locationTestContext;
 
-    public List<RegionRecord> createRegions(int number, @Nullable Integer locationsPerRegion) {
-        WorldsRecord world = worlds.service.createAndGet(EntityDataPayload.of(WORLDS.NAME, "Region world"));
+    public List<RegionRecord> createRegions(int number) {
+        WorldsRecord world = worlds.service.createAndGet(EntityDataPayload.of(WORLDS.NAME, "Region world" + worlds.service.getAll().size()));
 
         List<RegionRecord> records = new ArrayList<>(number);
         int worldId = world.getId();
-        final boolean injectLocations = locationsPerRegion != null;
         for (int i = 0; i < number; i++) {
             RegionRecord regionRecord = service.createAndGet(
                     EntityDataPayload.<RegionRecord>builder()
@@ -47,17 +44,6 @@ public class RegionTestContext implements DBReload {
                             .build()
             );
             int regionId = regionRecord.getId();
-            if (injectLocations){
-                for (int j = 0 ; j < locationsPerRegion ; j++){
-                    locationTestContext.service.createAndGet(
-                            EntityDataPayload.<LocationsRecord>builder()
-                                    .set(LOCATIONS.WORLD_ID, worldId)
-                                    .set(LOCATIONS.REGION_ID, regionId)
-                                    .set(LOCATIONS.NAME, "location num %s of worldId : %s, regionId: %s".formatted(j, worldId, regionId))
-                                    .build()
-                    );
-                }
-            }
             records.add(regionRecord);
         }
 

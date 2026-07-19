@@ -45,6 +45,16 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
     }
 
     @Override
+    public String getName() {
+        return record.getName();
+    }
+
+    @Override
+    public String getDescription() {
+        return record.getDescription();
+    }
+
+    @Override
     public LocationSnapshot @NotNull [] getNeighboursOf(@NotNull LocationSnapshot location){
         LocationImpl loc = requireImpl(location);
         return context.edges().neighboursOf(loc.getRecord())

@@ -17,12 +17,13 @@ import {
   createEntity,
   deleteEntity,
   fetch_all,
-  fetchApi,
+
 } from "@/core/ABSEntity";
 import { API_BASE } from "@/config";
 
 import WorldEdit from "@/components/space/WorldEdit.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
+import {fetchApi} from "@/services/apiClient";
 
 interface WorldSummary {
   loading: boolean;

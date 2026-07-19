@@ -13,4 +13,5 @@ final class WorldStore extends EntityStore<WorldsRecord> {
     WorldStore(DSLContext ctx) {
         super(ctx, WORLDS, EntityConfigs.Types.WORLDS);
     }
+
 }

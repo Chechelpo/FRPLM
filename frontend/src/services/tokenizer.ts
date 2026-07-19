@@ -2,8 +2,8 @@
 import { readonly, ref } from "vue";
 
 import { API_BASE } from "@/config";
-import { fetchApi } from "@/core/ABSEntity";
 import { LLMConnection } from "@/domain/Connection";
+import {fetchApi} from "@/services/apiClient";
 
 const STORAGE_KEY = "frplm.tokenizer.connectionId";
 
@@ -108,7 +108,7 @@ export async function tokenize(text: string): Promise<number> {
     }
 
     const url =
-        `${API_BASE}/tokenizer/tokenize` +
+        `api/tokenizer/tokenize` +
         `?connectionId=${encodeURIComponent(String(connectionId))}`;
 
     const response = await fetchApi(

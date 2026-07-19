@@ -48,7 +48,7 @@ class EntityServiceTest {
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         testFields.register_field(
@@ -58,7 +58,7 @@ class EntityServiceTest {
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         testFields.register_field(
@@ -159,6 +159,93 @@ class EntityServiceTest {
         assertTrue(testService.find(unknownKey).isEmpty(),
                 "Created phantom record");
     }
+    @Test
+    public void testDecrementAndGet() {
+        int firstId = 1;
+        int secondId = 2;
+
+        EntityDataPayload<TestTableRecord> data =
+                EntityDataPayload.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, firstId)
+                        .set(TEST_TABLE.SECOND_ID, secondId)
+                        .set(TEST_TABLE.NAME, "test_decrement")
+                        .build();
+
+        assertDoesNotThrow(() -> testService.createAndGet(data));
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, firstId)
+                        .set(TEST_TABLE.SECOND_ID, secondId)
+                        .build();
+
+        int startCounter = 0;
+
+        Optional<Integer> supposedStartCounter =
+                testService.getValueOf(TEST_TABLE.COUNTER, key);
+
+        assertTrue(
+                supposedStartCounter.isPresent(),
+                "Could not retrieve the initial counter value"
+        );
+
+        assertEquals(
+                startCounter,
+                supposedStartCounter.get(),
+                "Mismatch in expected default state of TestTable.counter"
+        );
+
+        Optional<Integer> previousCounter =
+                testService.decrementAndGet(TEST_TABLE.COUNTER, key);
+
+        assertTrue(
+                previousCounter.isPresent(),
+                "Could not decrement counter"
+        );
+
+        assertEquals(
+                startCounter - 1,
+                previousCounter.get(),
+                "Mismatch in expected state of TestTable.counter after decrement"
+        );
+
+        Optional<Integer> persistedCounter =
+                testService.getValueOf(TEST_TABLE.COUNTER, key);
+
+        assertTrue(
+                persistedCounter.isPresent(),
+                "Could not retrieve the persisted counter"
+        );
+
+        assertEquals(
+                startCounter - 1,
+                persistedCounter.get(),
+                "Counter was not persisted after decrement"
+        );
+
+        EntityKey<TestTableRecord> unknownKey =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1020)
+                        .set(TEST_TABLE.SECOND_ID, 12)
+                        .build();
+
+        Optional<Integer> unknownResult =
+                testService.decrementAndGet(
+                        TEST_TABLE.COUNTER,
+                        unknownKey
+                );
+
+        assertTrue(
+                unknownResult.isEmpty(),
+                "Decrement unexpectedly succeeded for an unregistered entity"
+        );
+
+        assertTrue(
+                testService.find(unknownKey).isEmpty(),
+                "Decrement created a phantom record"
+        );
+    }
+
     @Test
     public void emptyOptionalOnUnknownKey(){
         EntityKey<TestTableRecord> unknownKey = EntityKey.<TestTableRecord>builder()

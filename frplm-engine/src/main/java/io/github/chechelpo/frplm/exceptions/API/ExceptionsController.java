@@ -7,15 +7,16 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-final class Controller {
+final class ExceptionsController {
     private static final Logger log = (Logger) LoggerFactory.getLogger("ExceptionController");
 
-    Controller() {}
+    ExceptionsController() {}
 
     record ErrorResponse(
             int status,
@@ -60,6 +61,25 @@ final class Controller {
         );
 
         return ResponseEntity.status(e.status).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    @NotNull
+    ResponseEntity<ErrorResponse> handleUnhandledException(
+            @NotNull Exception e,
+            @NotNull HttpServletRequest request
+    ) {
+        log.error("Unhandled exception on {}", request.getRequestURI(), e);
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                e.getClass().getSimpleName(),
+                e.getMessage() != null ? e.getMessage() : "Unexpected server error",
+                request.getRequestURI(),
+                Severity.SYSTEM
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 
     private void logOnSeverity(@NotNull HttpServletRequest request, @NotNull RuntimeDomainException exc){

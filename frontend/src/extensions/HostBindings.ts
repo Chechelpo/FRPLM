@@ -6,7 +6,7 @@ import { Entry, Lorebook } from "@/domain/Lorebook";
 import { Tag } from "@/domain/Tag";
 import { LLMConnection } from "@/domain/Connection";
 import { PromptSection, PromptTemplate } from "@/domain/Prompts";
-import {fetchOne, fetch_all, createEntity, deleteEntity, fetchApi} from "@/core/ABSEntity";
+import {fetchOne, fetch_all, createEntity, deleteEntity} from "@/core/ABSEntity";
 import { EntityTypes } from "@/domain/EntityTypes";
 import { defineCustomElement } from "vue";
 import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
@@ -15,6 +15,7 @@ import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput
 import type { FrplmHostBindings, FrplmExtensionBindings } from "../../sdk/src/HostSdkBindings";
 import {ExtensionConfig} from "@/extensions/extensions";
 import {API_BASE} from "@/config";
+import {fetchApi} from "@/services/apiClient";
 
 const FrplmEnumInput = defineCustomElement(SingleEnumInput);
 customElements.define('frplm-enum-input', FrplmEnumInput);
@@ -32,7 +33,7 @@ window.FrplmExtension = {
      * Fetches the current configuration JSON for this extension.
      */
     getConfig: async (extensionId: string): Promise<ExtensionConfig> => {
-        const res = await fetchApi(`${API_BASE}/extensions/${extensionId}/config`);
+        const res = await fetchApi(`api/extensions/${extensionId}/config`);
         if (!res.ok) throw new Error(`Failed to fetch config for ${extensionId}`);
         return res.json();
     },
@@ -42,7 +43,7 @@ window.FrplmExtension = {
      * Throws an error if validation fails.
      */
     saveConfig: async (extensionId: string, config: ExtensionConfig): Promise<boolean> => {
-        const res = await fetchApi(`${API_BASE}/extensions/${extensionId}/config`, {
+        const res = await fetchApi(`api/extensions/${extensionId}/config`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config),

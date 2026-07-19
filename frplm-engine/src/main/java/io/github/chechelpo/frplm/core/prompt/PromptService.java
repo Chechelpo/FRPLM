@@ -18,6 +18,7 @@ import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;
 import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -57,28 +58,31 @@ public class PromptService {
                 standaloneContext,
                 sessionContext
         );
-
-        SessionPrompt sessionPrompt = session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("Session has no prompt", Severity.EXPECTED));
-        ConnectionSnapshot connection = sessionPrompt.getAssignedConnection()
-                .orElseThrow(() -> new NotInitialized("Session has no assigned connection", Severity.EXPECTED));
-
-        PromptOrchestrator orchestrator = new PromptOrchestrator(
-                new PromptBudgetManager(connection.getModelID(), sessionPrompt, tokenizerService),
-                lorebookContext,
-                session
-        );
+        PromptOrchestrator orchestrator = getPromptOrchestrator(session);
 
         orchestrator.addLorebook(session.getWorld().lorebook());
         SessionLocation currentLocation = session.getUserCharacter().getCurrentLocation();
         orchestrator.addLorebook(currentLocation.getParentRegion().lorebook());
         orchestrator.addLorebook(currentLocation.lorebook());
-        Arrays.stream(currentLocation.getCharactersHere())
+        currentLocation.getCharactersHere().stream()
                 .map(SessionCharacter::lorebook)
                 .forEach(orchestrator::addLorebook);
 
         extension.runPrePromptGeneration(session.getRecord(), orchestrator);
 
         return orchestrator.render();
+    }
+
+    private @NonNull PromptOrchestrator getPromptOrchestrator(@NonNull SessionImpl session) {
+        SessionPrompt sessionPrompt = session.getPrompt()
+                .orElseThrow(() -> new NotInitialized("Session has no prompt", Severity.EXPECTED));
+        ConnectionSnapshot connection = sessionPrompt.getAssignedConnection()
+                .orElseThrow(() -> new NotInitialized("Session has no assigned connection", Severity.EXPECTED));
+
+        return new PromptOrchestrator(
+                new PromptBudgetManager(connection.getModelID(), sessionPrompt.getBudgetConfig(), tokenizerService),
+                lorebookContext,
+                session
+        );
     }
 }

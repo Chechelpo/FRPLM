@@ -1,8 +1,9 @@
-import {ABSEntity, fetchApi} from "@/core/ABSEntity";
+import {ABSEntity} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO, EntityField} from "@/types/DTOs";
 import {CharacterKey} from "@/domain/Characters";
 import {API_BASE} from "@/config";
+import {fetchApi} from "@/services/apiClient";
 
 export type TagKey = {id:number}
 export type TagData = {name:string, color?:string}
@@ -23,7 +24,7 @@ export class Tag extends ABSEntity<TagKey,TagData>{
 
     public static async ofCharacter(key: CharacterKey): Promise<Tag[]> {
         const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.TAGS}/${EntityTypes.CHARACTER_TAGS}/${key.id}`,
+            `api/${EntityTypes.TAGS}/${EntityTypes.CHARACTER_TAGS}/${key.id}`,
             {
                 method: "GET",
             })

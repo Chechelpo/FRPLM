@@ -14,8 +14,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_K
 
 @RestController
 @RequestMapping(API_KEYS_URL)
-final class SecretController extends EntityController<ApiKeysRecord, SecretService> {
-    SecretController(SecretService service) {
+final class SecretController extends EntityController<ApiKeysRecord, SecretServiceImpl> {
+    SecretController(SecretServiceImpl service) {
         super(service);
     }
 

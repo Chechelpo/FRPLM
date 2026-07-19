@@ -9,6 +9,7 @@ import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
+import it.unimi.dsi.fastutil.ints.IntComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -230,6 +233,87 @@ class MessageServiceTest {
         }
 
         assertTrue(atLeastOneUserMessage, "This test did nothing");
+    }
+
+    @Test
+    void getLastMessageOfSession() {
+        MessageTestContext.Context context =
+                messageTestContext.createSessionWithMessages(2, 30);
+
+        int sessionId = context.sessionContext().session().getId();
+        int currentTick = context.sessionContext().session().getCurrentTick();
+
+        MessagesRecord expected = context.messages().stream()
+                .filter(message -> message.getTickNum() == currentTick)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError(
+                        "No message exists for the session's current tick: " + currentTick
+                ));
+
+        MessagesRecord actual =
+                messageTestContext.service.getLastOf(sessionId);
+
+        assertNotNull(actual, "Expected a message at the session's current tick");
+
+        messageTestContext.assertMessageEquals(expected, actual, true);
+    }
+
+    @Test
+    void getLastMessagesOfSession() {
+        int number = 10;
+
+        MessageTestContext.Context context =
+                messageTestContext.createSessionWithMessages(2, 30);
+
+        int sessionId = context.sessionContext().session().getId();
+
+        List<MessagesRecord> expected = context.messages().stream()
+                .sorted(Comparator.comparingInt(MessagesRecord::getTickNum).reversed())
+                .limit(number)
+                .toList();
+
+        List<MessagesRecord> actual =
+                messageTestContext.service.getLastOf(sessionId, number);
+
+        assertEquals(expected.size(), actual.size(), "Mismatch in messages size");
+
+        for (int i = 0; i < expected.size(); i++) {
+            messageTestContext.assertMessageEquals(
+                    expected.get(i),
+                    actual.get(i),
+                    true
+            );
+        }
+    }
+
+    @Test
+    void getMessageRange() {
+        int fromTick = 3;
+        int toTick = 10;
+
+        MessageTestContext.Context context =
+                messageTestContext.createSessionWithMessages(2, 30);
+
+        List<MessagesRecord> expected = context.messages().stream()
+                .filter(message -> message.getTickNum() >= fromTick)
+                .filter(message -> message.getTickNum() <= toTick)
+                .sorted(Comparator.comparingInt(MessagesRecord::getTickNum).reversed())
+                .toList();
+
+        int sessionId = context.sessionContext().session().getId();
+
+        List<MessagesRecord> actual =
+                messageTestContext.service.getRange(sessionId, fromTick, toTick);
+
+        assertEquals(expected.size(), actual.size(), "Mismatch in messages size");
+
+        for (int i = 0; i < expected.size(); i++) {
+            messageTestContext.assertMessageEquals(
+                    expected.get(i),
+                    actual.get(i),
+                    true
+            );
+        }
     }
 
     @Test

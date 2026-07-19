@@ -1,20 +1,32 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.Constraint;
+import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class ABSHelper<
         R extends TableRecord<R>,
         Service extends EntityService<R,?>
         > {
     protected final Service service;
+    private List<FieldBuilder<?>> builders = new ArrayList<>(10);
 
     public ABSHelper(Service service) {
         this.service = service;
+    }
+
+    @PostConstruct
+    private void registerBuilders(){
+        builders.forEach(this::register_field);
+        builders = null;
     }
 
     /**
@@ -36,28 +48,42 @@ public abstract class ABSHelper<
             @NotNull FieldInfo<?> info,
             T defaultValue
     ){
-        if (info.constraints.validateConstraint(column, defaultValue, false).isPresent())
-            throw new IllegalArgumentException("Default value does not pass constraint");
+        Objects.requireNonNull(info, "Field info is null");
 
         service.registerField(column, info.require, info.constraints, defaultValue);
     }
 
     protected <T> void register_field(FieldBuilder<T> builder){
         Objects.requireNonNull(builder, "Builder is null");
-        this.register_field(builder.column, builder.info, builder.defaultValue);
+
+        if (builder.assignedDefaultValue) this.register_field(builder.column, builder.info, builder.defaultValue);
+        else this.register_field(builder.column, builder.info);
     }
 
     public <T> FieldBuilder<T> register_field(TableField<R, T> column){
-        return new FieldBuilder<>(column);
+        FieldBuilder<T> fieldBuilder = new FieldBuilder<>(column);
+        builders.add(fieldBuilder);
+        return fieldBuilder;
     }
 
     public class FieldBuilder<T> {
-        private final TableField<R,T> column;
-        FieldInfo<?> info = null;
-        T defaultValue = null;
+        protected final TableField<R,T> column;
+        protected FieldInfo<?> info = null;
+        boolean assignedDefaultValue = false;
+        protected T defaultValue = null;
 
-        private FieldBuilder(TableField<R,T> column){
+        protected FieldBuilder(TableField<R,T> column){
             this.column = column;
+        }
+
+        public TableField<R,T> getColumn(){
+            return this.column;
+        }
+        public FieldInfo<?> getInfo(){
+            return info;
+        }
+        public T getDefaultValue() {
+            return defaultValue;
         }
 
         public FieldBuilder<T> setInfo(FieldInfo<?> info){
@@ -67,6 +93,7 @@ public abstract class ABSHelper<
 
         public FieldBuilder<T> withDefaultValue(T defaultValue){
             this.defaultValue = defaultValue;
+            assignedDefaultValue = true;
             return this;
         }
     }

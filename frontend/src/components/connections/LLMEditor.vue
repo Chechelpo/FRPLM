@@ -12,11 +12,11 @@ import {
 import { EntityTypes } from "@/domain/EntityTypes";
 
 import { API_BASE } from "@/config";
-import { fetchApi } from "@/core/ABSEntity";
 
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
 import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<LLMConnection>({
   required: true,
@@ -105,7 +105,7 @@ async function assignCustomBackend(hostUrl: string): Promise<void> {
   const encodedUrl = encodeURIComponent(hostUrl);
 
   const response = await fetchApi(
-      `${API_BASE}/${EntityTypes.LLM}/${model.value.get("id")}/assignHost?url=${encodedUrl}`,
+      `api/${EntityTypes.LLM}/${model.value.get("id")}/assignHost?url=${encodedUrl}`,
       {
         method: "PUT",
       },

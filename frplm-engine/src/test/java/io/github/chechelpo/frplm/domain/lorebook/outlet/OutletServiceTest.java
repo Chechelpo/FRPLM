@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 )
 class OutletServiceTest {
     @Autowired
-    OutletService outletService;
+    OutletServiceImpl outletService;
     @Autowired
     OutletHelper outletHelper;
 

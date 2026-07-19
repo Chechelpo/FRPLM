@@ -16,9 +16,9 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 import static org.jooq.impl.DSL.max;
 
 @Component
-final class OutletHelper extends ABSControllerAwareHelper<OutletRecord, OutletService, OutletController> {
+final class OutletHelper extends ABSControllerAwareHelper<OutletRecord, OutletServiceImpl, OutletController> {
     private final DSLContext ctx;
-    OutletHelper(OutletService service, OutletController controller, DSLContext dslContext) {
+    OutletHelper(OutletServiceImpl service, OutletController controller, DSLContext dslContext) {
         super(service, controller);
         this.ctx = dslContext;
         register_field(
@@ -39,7 +39,7 @@ final class OutletHelper extends ABSControllerAwareHelper<OutletRecord, OutletSe
                         .setConstraints(StringConstraint.builder()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 

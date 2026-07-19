@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // LongTextBox.vue
 import {nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
-import {tokenize as countTokens} from "@/utils/tokenizer";
+import {tokenize as countTokens} from "@/services/tokenizer";
 
 /**
  * Debounce interval for emitting edit events in milliseconds.
@@ -44,7 +44,7 @@ const expandedRef = ref<HTMLTextAreaElement | null>(null);
 let timer: number | null = null;
 
 function canTokenize(): boolean {
-  return options.tokenize && options.tokenizationStarted;
+  return options.tokenize && options.tokenizationStarted && text.value.length > 0;
 }
 function schedule_edit_emit(): void {
   model.value = text.value;

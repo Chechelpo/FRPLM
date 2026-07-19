@@ -4,9 +4,8 @@ import {
     deleteEntity,
     EntityField,
     fetch_all,
-    fetchApi,
     fetchFromReference,
-    fetchOne
+    fetchOne, getEntityController
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {CommonFields} from "@/utils/CommonFields";
@@ -14,8 +13,8 @@ import {Tag} from "@/domain/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {Location, World} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
-import {API_BASE} from "@/config";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
+import {fetchApi} from "@/services/apiClient";
 
 export type CharacterKey = { id: number };
 export type CharacterData = {
@@ -55,7 +54,7 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
     }
     public static async getStartingAt(world:World):Promise<Character[]>{
         const response = await fetchApi(
-            `${API_BASE}/${EntityTypes.CHARACTERS}/${world.get('id')}`,
+            `${getEntityController(EntityTypes.CHARACTERS)}/${world.get('id')}`,
             {
                 method:'GET'
             }
@@ -198,7 +197,7 @@ class CharacterTags extends ABSEntity<CharacterTagsKey, CharacterTagsData>{
 
 async function getStartingLocations(key:CharacterKey): Promise<Location[]> {
     const response = await fetchApi(
-        `${API_BASE}/${EntityTypes.LOCATIONS}/entity/ofCharacter/${key.id}`,
+        `api/${EntityTypes.LOCATIONS}/entity/ofCharacter/${key.id}`,
         {
             method: 'GET'
         }

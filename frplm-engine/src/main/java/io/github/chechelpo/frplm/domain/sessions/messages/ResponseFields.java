@@ -21,7 +21,7 @@ final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -31,7 +31,7 @@ final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
@@ -41,33 +41,33 @@ final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
                                 .key()
                                 .readOnly()
                         )
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
 
         register_field(
                 RESPONSES.CONTENT,
                 FieldInfo.stringField()
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
                 RESPONSES.ADVANCES_TIME_BY,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build(),
                 0
         );
         register_field(
                 RESPONSES.WORLD_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
         register_field(
                 RESPONSES.LOCATION_ID,
                 FieldInfo.numberField(FieldType.INTEGER)
-                        .require()
+                        .requireOnCreate()
                         .build()
         );
     }

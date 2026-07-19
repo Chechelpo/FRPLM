@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public abstract sealed class Coercer<P>
-        permits BoolCoercer, FloatCoercer, NumberCoercer, StringCoercer {
+        permits BoolCoercer, FloatCoercer, DoubleCoercer, NumberCoercer, StringCoercer {
     protected final FieldType type;
 
     protected Coercer(FieldType type) {

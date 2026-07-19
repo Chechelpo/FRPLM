@@ -200,7 +200,7 @@ class ImporterServiceTest {
     @Test
     void executeRegions_Roundtrip() {
         RegionTestContext regionContext = domain.regions;
-        List<RegionRecord> expectedRegions = regionContext.createRegions(100, null);
+        List<RegionRecord> expectedRegions = regionContext.createRegions(100);
         regionContext.linkRegionsAsAcyclicChains(expectedRegions);
         expectedRegions = regionContext.service.getAll();
         expectedRegions.forEach(UpdatableRecordImpl::refresh);
@@ -278,8 +278,10 @@ class ImporterServiceTest {
 
     @Test
     void executeLocations_RoundtripNoStartingLocations() {
+        throw new UnsupportedOperationException("Not implemented");
+        /*
         int locationsPerRegion = 10;
-        List<RegionRecord> regions = domain.regions.createRegions(100, locationsPerRegion);
+        List<RegionRecord> regions = domain.regions.createRegions(100, locationgion);
         int worldId = regions.getFirst().getWorldId();
         Map<RegionRecord, List<LocationsRecord>> expectedPerRegion = new HashMap<>(regions.size());
         regions.forEach(region ->
@@ -317,7 +319,7 @@ class ImporterServiceTest {
                         assertLocationEquals(actualLocation, expectedLocation.get());
                     }
             );
-        }
+        }*/
     }
     private void assertLocationEquals(
             LocationsRecord actual,

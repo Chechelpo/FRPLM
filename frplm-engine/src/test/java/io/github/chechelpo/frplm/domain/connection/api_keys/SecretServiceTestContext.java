@@ -9,12 +9,12 @@ import org.springframework.context.annotation.Import;
 @TestConfiguration
 @Import(HostTestContext.class)
 public class SecretServiceTestContext implements DBReload {
-    public final SecretService secretService;
+    public final SecretServiceImpl secretService;
     @Autowired public HostTestContext hostTestContext;
     @Autowired
     SecretFieldsHelper fields;
 
-    public SecretServiceTestContext(SecretService secretService) {
+    public SecretServiceTestContext(SecretServiceImpl secretService) {
         this.secretService = secretService;
     }
 

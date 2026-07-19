@@ -20,7 +20,7 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
         TemplateController
         > {
 
-     TemplateFieldsHelper(TemplateService service, TemplateController controller) {
+    TemplateFieldsHelper(TemplateService service, TemplateController controller) {
         super(service, controller);
 
         register_field(
@@ -146,6 +146,29 @@ final class TemplateFieldsHelper extends ABSControllerAwareHelper<
                         .build(),
                 (short) ReasoningEffort.Maximum.id
         );
+
+        registerControllerField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)
+                .setDtoName("chat_history_budget")
+                .setInfo(
+                        FieldInfo.floatField(FieldType.FLOAT)
+                                .setConstraints(
+                                        FloatConstraint.builder(FieldType.FLOAT)
+                                        .setMax(1D)
+                                        .setMin(0D)
+                                )
+                                .build()
+                );
+
+        registerControllerField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
+                .setDtoName("lorebooks_budget")
+                .setInfo(
+                        FieldInfo.floatField(FieldType.FLOAT)
+                                .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
+                                        .setMax(1D)
+                                        .setMin(0D)
+                                )
+                                .build()
+                );
 
         register_field(
                 null,
