@@ -288,7 +288,8 @@ public abstract class EntityService<
         Result<R> result = store.getMatching(target);
         if (result.size() > 1)
             throw new IllegalStateException("Found more than one result to query with values: \n" + target);
-        return Optional.ofNullable(result.getFirst());
+
+        return result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
     }
 
     @Override
