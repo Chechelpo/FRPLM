@@ -247,6 +247,19 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
 
+                <configuration>
+                    <mainClass>io.github.chechelpo.frplm.FRPLMEngine</mainClass>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

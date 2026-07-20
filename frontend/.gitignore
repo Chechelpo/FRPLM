@@ -9,7 +9,7 @@ lerna-debug.log*
 
 node_modules
 .DS_Store
-dist
+../frplm-engine/src/main/resources/static/dist
 dist-ssr
 coverage
 *.local

@@ -72,8 +72,8 @@ final class ImporterService {
         int worldId = world.getId();
 
         Map<String, RegionRecord> regionsByName = executeRegions(worldOrder.regions(), worldId);
-        Map<String, Integer> locationIdByName = executeLocationsAndCharacters(worldOrder.locations(), regionsByName, worldId);
-        executeEdges(worldOrder.locationEdges(), locationIdByName, worldId);
+        executeLocationsAndCharacters(worldOrder.locations(), regionsByName, worldId);
+        executeEdges(worldOrder.locationEdges(), worldId);
 
         return world;
     }
@@ -179,18 +179,36 @@ final class ImporterService {
         return characterService.createAndGet(newCharacterOrder.info());
     }
 
-    void executeEdges(@NonNull List<NewEdgeOrder> locationEdges, Map<String, Integer> locationIdByName, int worldId) {
+    void executeEdges(@NonNull List<NewEdgeOrder> locationEdges, int worldId) {
         for (NewEdgeOrder edgeOrder : locationEdges) {
-            int fromId = locationIdByName.get(edgeOrder.fromName());
-            int toId = locationIdByName.get(edgeOrder.toName());
+            LocationsRecord fromLocation = getOneLocationByName(worldId, edgeOrder.fromRegion(),edgeOrder.fromName());
+            LocationsRecord toLocation = getOneLocationByName(worldId, edgeOrder.toRegion(), edgeOrder.toRegion());
 
             edgeOrder.payload().set(LOCATION_EDGES.WORLD_ID, worldId);
-            edgeOrder.payload().set(LOCATION_EDGES.FROM_LOCATION_ID, fromId);
-            edgeOrder.payload().set(LOCATION_EDGES.TO_LOCATION_ID, toId);
+            edgeOrder.payload().set(LOCATION_EDGES.FROM_LOCATION_ID, fromLocation.getId());
+            edgeOrder.payload().set(LOCATION_EDGES.TO_LOCATION_ID, toLocation.getId());
 
             edgeService.createAndGet(edgeOrder.payload());
         }
     }
+    private @NonNull LocationsRecord getOneLocationByName(int worldId, String regionName, String locationName){
+        RegionRecord regionRecord = regionService.getOneMatching(EntityDataPayload.<RegionRecord>builder()
+                        .set(REGION.WORLD_ID, worldId)
+                        .set(REGION.NAME, regionName)
+                .build()
+        ).orElseThrow(() -> new EntityNotFound(
+                "Could not find region with name " + regionName + " when importing " + locationName,
+                Severity.SYSTEM)
+        );
+
+        return locationsService.getOneMatching(EntityDataPayload.<LocationsRecord>builder()
+                        .set(LOCATIONS.WORLD_ID, worldId)
+                        .set(LOCATIONS.REGION_ID, regionRecord.getId())
+                        .set(LOCATIONS.NAME, locationName)
+                        .build()
+        ).orElseThrow();
+    }
+
 
     public JsonNode exportWorld(int worldId) {
         return worldMapper.jsonFrom(
