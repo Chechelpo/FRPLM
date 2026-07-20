@@ -181,8 +181,8 @@ final class ImporterService {
 
     void executeEdges(@NonNull List<NewEdgeOrder> locationEdges, int worldId) {
         for (NewEdgeOrder edgeOrder : locationEdges) {
-            LocationsRecord fromLocation = getOneLocationByName(worldId, edgeOrder.fromRegion(),edgeOrder.fromName());
-            LocationsRecord toLocation = getOneLocationByName(worldId, edgeOrder.toRegion(), edgeOrder.toRegion());
+            LocationsRecord fromLocation = getOneLocationByName(worldId, edgeOrder.fromRegion(), edgeOrder.fromName());
+            LocationsRecord toLocation = getOneLocationByName(worldId, edgeOrder.toRegion(), edgeOrder.toName());
 
             edgeOrder.payload().set(LOCATION_EDGES.WORLD_ID, worldId);
             edgeOrder.payload().set(LOCATION_EDGES.FROM_LOCATION_ID, fromLocation.getId());
