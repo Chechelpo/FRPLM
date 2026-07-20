@@ -378,7 +378,8 @@ export async function fetchApi(
         ...requestInit
     } = init;
 
-    const path = getRequestPath(input);
+    const normalizedInput = normalizeApiInput(input);
+    const path = getRequestPath(normalizedInput);
 
     let response: Response;
 
@@ -453,4 +454,40 @@ export async function fetchApi(
         errorResponse,
         response,
     );
+}
+
+function ensureApiPath(path: string): string {
+    if (path === "/api" || path.startsWith("/api/")) {
+        return path;
+    }
+
+    if (path === "api" || path.startsWith("api/")) {
+        return `/${path}`;
+    }
+
+    return `/api/${path.replace(/^\/+/, "")}`;
+}
+
+function normalizeApiInput(
+    input: RequestInfo | URL,
+): RequestInfo | URL {
+    if (typeof input === "string") {
+        return ensureApiPath(input);
+    }
+
+    if (input instanceof URL) {
+        const normalizedUrl = new URL(input);
+        normalizedUrl.pathname = ensureApiPath(
+            normalizedUrl.pathname,
+        );
+
+        return normalizedUrl;
+    }
+
+    const normalizedUrl = new URL(input.url);
+    normalizedUrl.pathname = ensureApiPath(
+        normalizedUrl.pathname,
+    );
+
+    return new Request(normalizedUrl, input);
 }
