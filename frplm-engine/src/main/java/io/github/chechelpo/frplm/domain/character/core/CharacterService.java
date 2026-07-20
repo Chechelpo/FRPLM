@@ -55,16 +55,13 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
         super.afterSuccessfulDelete(id, operationID, record);
     }
 
-    public Optional<CharactersRecord> getCharacterWith(String name){
-        return Optional.ofNullable(store.getWithName(name));
-    }
-
     public @NotNull List<CharactersRecord> getStartingAt(int worldID){
         return store.getStartingAtWorld(worldID);
     }
     public @NotNull List<CharactersRecord> getStartingAt(int worldID, int locationId){
         return store.getStartingAtLocation(worldID,locationId);
     }
+
     @Transactional(readOnly = true)
     @CheckReturnValue
     public CharactersRecord getUserCharacter(@NotNull SessionsRecord record) throws EntityNotFound {

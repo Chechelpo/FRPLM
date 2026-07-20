@@ -1,9 +1,11 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
@@ -13,8 +15,7 @@ import io.github.chechelpo.frplm.extensions.api.standalone.WorldSnapshot;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
-import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 public class RegionImpl extends StandaloneEntity<RegionRecord> implements RegionSnapshot {
     protected RegionImpl(RegionRecord record, ExtensionContext context) {
@@ -55,7 +56,12 @@ public class RegionImpl extends StandaloneEntity<RegionRecord> implements Region
 
     @Override
     public List<LocationSnapshot> getChildrenLocations() {
-        return context.locations().getLocationsOfRegion(this.record.getWorldId(), this.record.getId()).stream()
+        return context.locations().getMatching(
+                    EntityDataPayload.<LocationsRecord>builder()
+                            .set(LOCATIONS.WORLD_ID, this.record.getWorldId())
+                            .set(LOCATIONS.REGION_ID, this.record.getId())
+                            .build()
+                ).stream()
                 .map(record -> (LocationSnapshot) new LocationImpl(record, context))
                 .toList();
     }

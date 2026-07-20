@@ -11,6 +11,7 @@ import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.Result;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 import org.slf4j.LoggerFactory;
@@ -184,7 +185,14 @@ public abstract class EntityController<
         return dtos;
     }
 
-    public final EntityDTO @NotNull [] wrapEntities(@NotNull List<R> records) {
+    public final <T extends List<R>> EntityDTO @NotNull [] wrapEntities(@NotNull T records) {
+        EntityDTO[] dtos = new EntityDTO[records.size()];
+        for (int i = 0; i < records.size(); i++)
+            dtos[i] = wrapEntity(records.get(i));
+
+        return dtos;
+    }
+    public final <T extends Result<R>> EntityDTO @NotNull [] wrapEntities(@NotNull T records) {
         EntityDTO[] dtos = new EntityDTO[records.size()];
         for (int i = 0; i < records.size(); i++)
             dtos[i] = wrapEntity(records.get(i));

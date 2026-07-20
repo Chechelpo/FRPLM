@@ -17,45 +17,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 
 @Component
 final class LocationStore extends EntityStore<LocationsRecord> {
-    private final DSLContext ctx;
-    private final WorldService worlds;
-
-    public LocationStore(DSLContext ctx, WorldService worlds) {
+    public LocationStore(DSLContext ctx) {
         super(ctx, LOCATIONS, EntityConfigs.Types.LOCATIONS);
-        this.ctx = ctx;
-        this.worlds = worlds;
-    }
-
-
-    @Override
-    public LocationsRecord createAndGet(@NotNull EntityDataPayload<LocationsRecord> data) {
-        /*
-        EntityKey<WorldsRecord> worldKey = EntityKey.builder().setAll(
-                Map.of(WORLDS.ID, data.getValue(LOCATIONS.WORLD_ID))
-        ).build();
-        data.setValue(
-                LOCATIONS.ID,
-                worlds.getAndIncrement(WORLDS.NEXT_LOCATION_ID, worldKey)
-        );*/
-
-        return super.createAndGet(data);
-    }
-
-    public List<LocationsRecord> getLocationsOfRegion(RegionRecord record){
-        return ctx.selectFrom(main_table)
-                .where(
-                        LOCATIONS.REGION_ID.eq(record.getId())
-                        .and(LOCATIONS.WORLD_ID.eq(record.getWorldId()))
-                )
-                .fetch();
-    }
-
-    public List<LocationsRecord> getLocationsOfRegion(int worldId, @Nullable Integer regionId){
-        return ctx.selectFrom(main_table)
-                .where(
-                        LOCATIONS.REGION_ID.eq(regionId)
-                                .and(LOCATIONS.WORLD_ID.eq(worldId))
-                )
-                .fetch();
     }
 }

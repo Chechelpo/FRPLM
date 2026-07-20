@@ -94,16 +94,17 @@ public class LocationsService extends EntityService<
     void checkRegionDeletion(CRUDDraftEvent.DeleteEntityDraft<?> rawEvent){
         if (rawEvent.type() != EntityConfigs.Types.REGIONS) return;
 
+        //noinspection unchecked
         CRUDDraftEvent.DeleteEntityDraft<RegionRecord> event = (CRUDDraftEvent.DeleteEntityDraft<RegionRecord>) rawEvent;
         int worldId = event.key().requireValue(REGION.WORLD_ID);
         int regionId = event.key().requireValue(REGION.ID);
 
-        if (!store.getLocationsOfRegion(worldId,regionId).isEmpty())
-            throw new UnsupportedAction("This region still has associated locations", Severity.USER);
-    }
-
-    @Transactional(readOnly = true)
-    public List<LocationsRecord> getLocationsOfRegion(int worldId, @Nullable Integer regionId){
-        return store.getLocationsOfRegion(worldId, regionId);
+        if (!store.getMatching(
+                EntityDataPayload.<LocationsRecord>builder()
+                        .set(LOCATIONS.WORLD_ID, worldId)
+                        .set(LOCATIONS.REGION_ID, regionId)
+                        .build())
+                .isEmpty()
+        ) throw new UnsupportedAction("This region still has associated locations", Severity.USER);
     }
 }

@@ -32,7 +32,9 @@ final class CharacterEntityTranslator implements PrologEntityTranslator {
     /** Transforms character name -> Character reference (character: ${id}) */
     @Override
     public @NonNull Optional<String> getIdOfRepresentation(String argumentName) {
-        return characterService.getCharacterWith(argumentName)
+        return characterService.getOneMatching(CHARACTERS.NAME, argumentName)
+                .ifMoreThanOneThrow()
+                .asOptional()
                 .map(record -> CharacterImpl.asReference(record).encode());
     }
 

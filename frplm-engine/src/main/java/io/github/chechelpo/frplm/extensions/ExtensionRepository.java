@@ -53,7 +53,10 @@ final class ExtensionRepository implements EngineRepository {
 
     @Override
     public Optional<CharacterSnapshot> getCharacterWithName(String name) {
-        return context.characters().getCharacterWith(name).map(record -> new CharacterImpl(record, context));
+        return context.characters().getOneMatching(CHARACTERS.NAME, name)
+                .ifMoreThanOneThrow()
+                .asOptional()
+                .map(record -> new CharacterImpl(record, context));
     }
 
     @Override

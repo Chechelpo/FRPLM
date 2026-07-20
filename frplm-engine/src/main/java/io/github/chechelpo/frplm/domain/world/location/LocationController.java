@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
@@ -11,6 +12,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,11 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 @Component
 @RequestMapping(EntityConfigs.LOCATIONS_URL)
 public final class LocationController extends EntityController<LocationsRecord, LocationsService> {
-    private final EdgeService edgeService;
     private final StartingLocationsService startLocService;
     private final RegionService regionService;
 
-    LocationController(LocationsService service, EdgeService edgeService, StartingLocationsService startLocService, RegionService regionService) {
+    LocationController(LocationsService service, StartingLocationsService startLocService, RegionService regionService) {
         super(service);
-        this.edgeService = edgeService;
         this.startLocService = startLocService;
         this.regionService = regionService;
     }
@@ -70,7 +70,11 @@ public final class LocationController extends EntityController<LocationsRecord, 
 
         return ResponseEntity.ok(
                 wrapEntities(
-                        service.getLocationsOfRegion(worldId, regionId)
+                        service.getMatching(EntityDataPayload.<LocationsRecord>builder()
+                                        .set(LOCATIONS.WORLD_ID, worldId)
+                                        .set(LOCATIONS.REGION_ID, regionId)
+                                        .build()
+                        )
                 )
         );
     }
