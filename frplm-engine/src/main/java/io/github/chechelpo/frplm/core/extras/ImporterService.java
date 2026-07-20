@@ -206,7 +206,10 @@ final class ImporterService {
                         .set(LOCATIONS.REGION_ID, regionRecord.getId())
                         .set(LOCATIONS.NAME, locationName)
                         .build()
-        ).orElseThrow();
+        ).orElseThrow(() -> new EntityNotFound(
+                "Could not find location %s with region \n%s\n when importing".formatted(locationName, regionRecord),
+                Severity.SYSTEM
+        ));
     }
 
 
