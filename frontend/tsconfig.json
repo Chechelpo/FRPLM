@@ -16,5 +16,8 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules","dist-sdk", "dist"]
+  "exclude": ["node_modules","dist-sdk",
+    "../frplm-engine/src/main/resources/static/dist",
+    "sdk/**/*"
+  ]
 }
