@@ -20,6 +20,7 @@ import org.jooq.Field;
 import org.jooq.Result;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -284,12 +285,24 @@ public abstract class EntityService<
     }
 
     @Override
-    public Optional<R> getOneMatching(EntityDataPayload<R> target){
+    public OneMatchingResult<R> getOneMatching(EntityDataPayload<R> target){
+        return getOneMatchingResult(target);
+    }
+
+    @Override
+    public <T> OneMatchingResult<R> getOneMatching(TableField<R, T> field, T value) {
+        EntityDataPayload<R> target = EntityDataPayload.of(field, value);
+        return getOneMatchingResult(target);
+    }
+
+    private EntityReader.OneMatchingResult<R> getOneMatchingResult(EntityDataPayload<R> target) {
         Result<R> result = store.getMatching(target);
         if (result.size() > 1)
-            throw new IllegalStateException("Found more than one result to query with values: \n" + target);
+            return new OneMatchingResult.MoreThanOne<>(target, result.size());
 
-        return result.isEmpty() ? Optional.empty() : Optional.of(result.getFirst());
+        return result.isEmpty() ?
+                new OneMatchingResult.Empty<>(target) :
+                new OneMatchingResult.Present<>(target, result.getFirst());
     }
 
     @Override

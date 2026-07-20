@@ -40,21 +40,18 @@ public class RegionEntityTranslator implements PrologEntityTranslator {
     @Override
     public Optional<String> getIdOfRepresentation(String argumentName) {
         QualifiedNames.TwoParts parts = QualifiedNames.splitTwo(argumentName);
-        Result<WorldsRecord> worlds = worldService.getMatching(
+        WorldsRecord world = worldService.getOneMatching(
                 EntityDataPayload.of(WORLDS.NAME, parts.first())
-        );
-        if (worlds.size() != 1)
-            throw new UnexpectedException("Got more worlds than expected", Severity.SYSTEM);
-        Result<RegionRecord> regions = regionService.getMatching(
+        ).resolve();
+
+        RegionRecord region = regionService.getOneMatching(
                 EntityDataPayload.<RegionRecord>builder()
-                        .set(REGION.WORLD_ID, worlds.getFirst().getId())
+                        .set(REGION.WORLD_ID, world.getId())
                         .set(REGION.NAME, parts.second())
                         .build()
-        );
-        if (worlds.size() != 1)
-            throw new UnexpectedException("Got more regions than expected", Severity.SYSTEM);
+        ).resolve();
 
-        return Optional.of(new RegionSnapshot.Reference(regions.getFirst().getWorldId(), regions.getFirst().getId()).encode());
+        return Optional.of(new RegionSnapshot.Reference(region.getWorldId(), region.getId()).encode());
     }
 
     @Override

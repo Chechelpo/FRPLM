@@ -36,38 +36,40 @@ final class LocationEntityTranslator implements PrologEntityTranslator {
     @Override
     public @NonNull Optional<String> getIdOfRepresentation(String argumentName) {
         QualifiedNames.ThreeParts parts = QualifiedNames.splitThree(argumentName);
-        Result<WorldsRecord> matchingWorlds = worldService.getMatching(WORLDS.NAME, parts.first());
-        if (matchingWorlds.size() != 1)
-            throw new UnexpectedException("Expected to get one world with name %s. Instead got %s".formatted(parts.first(), matchingWorlds),
-                    Severity.SYSTEM
-            );
 
-        Result<RegionRecord> regions = regionService.getMatching(
-                EntityDataPayload.<RegionRecord>builder()
-                        .set(REGION.WORLD_ID, matchingWorlds.getFirst().getId())
-                        .set(REGION.NAME, parts.second())
-                        .build()
-        );
-        if (regions.size() != 1)
-            throw new UnexpectedException("Expected to get a single region with name %s, instead got %s".formatted(parts.second(), regions),
-                    Severity.SYSTEM
-            );
+        WorldsRecord world = worldService.getOneMatching(WORLDS.NAME, parts.first())
+                .ifEmptyThrow(empty -> new EntityNotFound(
+                        "Couldn't find world with name " + parts.first(),
+                        Severity.SYSTEM
+                ))
+                .resolve();
 
-        Result<LocationsRecord> locations = locationsService.getMatching(
-                EntityKey.<LocationsRecord>builder()
-                        .set(LOCATIONS.ID, matchingWorlds.getFirst().getId())
-                        .set(LOCATIONS.REGION_ID, regions.getFirst().getId())
-                        .set(LOCATIONS.NAME, parts.third())
-                        .build()
-        );
-        if (locations.size() != 1)
-            throw new UnexpectedException(
-                    "Expected to get one location with name %s. Instead got %s".formatted(parts.first(), locations),
-                    Severity.SYSTEM
-            );
+        RegionRecord region = regionService.getOneMatching(
+                        EntityDataPayload.<RegionRecord>builder()
+                                .set(REGION.WORLD_ID, world.getId())
+                                .set(REGION.NAME, parts.second())
+                                .build()
+                )
+                .ifEmptyThrow(emptyResult -> new EntityNotFound(
+                        "Couldn't find parent region with name " + parts.second(),
+                        Severity.SYSTEM
+                ))
+                .ifMoreThanOneThrow(target -> new UnexpectedException(
+                        "Multiple regions match name %s, got %s results for query: \n %s".formatted(parts.second(), target.matchCount(), target.target()),
+                        Severity.SYSTEM)
+                )
+                .resolve();
+
+        LocationsRecord location = locationsService.getOneMatching(
+                        EntityDataPayload.<LocationsRecord>builder()
+                                .set(LOCATIONS.WORLD_ID, world.getId())
+                                .set(LOCATIONS.REGION_ID, region.getId())
+                                .set(LOCATIONS.NAME, parts.third())
+                                .build()
+                ).resolve();
 
         return Optional.of(
-                new LocationSnapshot.Reference(locations.getFirst().getId(), locations.getFirst().getId()).encode()
+                new LocationSnapshot.Reference(location.getWorldId(), location.getId()).encode()
         );
     }
 
@@ -86,12 +88,14 @@ final class LocationEntityTranslator implements PrologEntityTranslator {
                 worldService.find(EntityKey.of(WORLDS.ID, reference.id()))
                         .orElseThrow(() -> new EntityNotFound("Couldn't find world when getting qualified name for " + record, Severity.SYSTEM))
                         .getName(),
+
                 regionService.find(EntityKey.<RegionRecord>builder()
                                 .set(REGION.WORLD_ID, reference.worldId())
                                 .set(REGION.ID, record.getRegionId())
                                 .build()
                         ).orElseThrow(() -> new EntityNotFound("Couldn't find region for " + record, Severity.SYSTEM))
                         .getName(),
+
                 record.getName()
         ));
     }

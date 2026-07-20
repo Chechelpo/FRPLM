@@ -114,7 +114,7 @@ final class ImporterService {
 
         int i = 0;
         int j = 0;
-        for (NewRegionOrder order : regionOrders){
+        for (NewRegionOrder order : regionOrders) {
             if (order.parentRegionName() == null) {
                 i++;
                 continue;
@@ -143,7 +143,7 @@ final class ImporterService {
             @NonNull List<NewLocationOrder> locationOrders,
             Map<String, RegionRecord> regions,
             int worldId
-    ){
+    ) {
         Map<String, Integer> locationIdByName = new HashMap<>(locationOrders.size());
 
         for (NewLocationOrder locationOrder : locationOrders) {
@@ -151,7 +151,7 @@ final class ImporterService {
 
             locationOrder.payload().set(LOCATIONS.WORLD_ID, worldId);
             locationOrder.payload().set(LOCATIONS.LOREBOOK_ID, locationLorebook.getId());
-            if (locationOrder.parentRegionName() != null){
+            if (locationOrder.parentRegionName() != null) {
                 locationOrder.payload().set(LOCATIONS.REGION_ID, regions.get(locationOrder.parentRegionName()).getId());
             }
 
@@ -191,25 +191,29 @@ final class ImporterService {
             edgeService.createAndGet(edgeOrder.payload());
         }
     }
-    private @NonNull LocationsRecord getOneLocationByName(int worldId, String regionName, String locationName){
+
+    private @NonNull LocationsRecord getOneLocationByName(int worldId, String regionName, String locationName) {
         RegionRecord regionRecord = regionService.getOneMatching(EntityDataPayload.<RegionRecord>builder()
                         .set(REGION.WORLD_ID, worldId)
                         .set(REGION.NAME, regionName)
-                .build()
-        ).orElseThrow(() -> new EntityNotFound(
-                "Could not find region with name " + regionName + " when importing " + locationName,
-                Severity.SYSTEM)
-        );
+                        .build()
+                )
+                .ifEmptyThrow(noMatch -> new EntityNotFound(
+                        "Could not find region with name " + regionName + " when importing " + locationName,
+                        Severity.SYSTEM)
+                )
+                .resolve();
 
         return locationsService.getOneMatching(EntityDataPayload.<LocationsRecord>builder()
                         .set(LOCATIONS.WORLD_ID, worldId)
                         .set(LOCATIONS.REGION_ID, regionRecord.getId())
                         .set(LOCATIONS.NAME, locationName)
                         .build()
-        ).orElseThrow(() -> new EntityNotFound(
-                "Could not find location %s with region \n%s\n when importing".formatted(locationName, regionRecord),
-                Severity.SYSTEM
-        ));
+                ).ifEmptyThrow(noMatch -> new EntityNotFound(
+                        "Could not find location with data \n%s\n with region \n%s\n when importing".formatted(noMatch, regionRecord),
+                        Severity.SYSTEM
+                ))
+                .resolve();
     }
 
 
