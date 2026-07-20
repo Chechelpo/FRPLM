@@ -14,10 +14,10 @@ async function loadPanelScript(ext: ExtensionDTO) {
     return;
   }
 
-  const url = `http://localhost:8080/api/extensions/${encodeURIComponent(ext.id)}/panel.js`;
-
   try {
-    const response = await fetch(url, {
+    const response = await fetchApi(
+        `api/extensions/${encodeURIComponent(ext.id)}/panel.js`,
+        {
       method: "GET",
       headers: {
         Accept: "application/javascript, text/javascript"
