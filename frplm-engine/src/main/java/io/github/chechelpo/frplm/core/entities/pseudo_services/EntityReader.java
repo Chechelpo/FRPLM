@@ -16,5 +16,11 @@ public interface EntityReader<R extends TableRecord<R>> {
 
     <T> Result<R> getMatching(TableField<R, T> field, T value);
 
+    /**
+     * @throws IllegalStateException if it finds more than one result to your query
+     * @return query result, may be null or a single record
+     */
+    Optional<R> getOneMatching(EntityDataPayload<R> target);
+
     Result<R> getAll();
 }

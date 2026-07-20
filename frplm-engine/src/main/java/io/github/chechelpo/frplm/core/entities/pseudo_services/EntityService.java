@@ -12,6 +12,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.Constraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -280,6 +281,14 @@ public abstract class EntityService<
 
         afterRetrieve(records, 0);
         return records;
+    }
+
+    @Override
+    public Optional<R> getOneMatching(EntityDataPayload<R> target){
+        Result<R> result = store.getMatching(target);
+        if (result.size() > 1)
+            throw new IllegalStateException("Found more than one result to query with values: \n" + target);
+        return Optional.ofNullable(result.getFirst());
     }
 
     @Override
