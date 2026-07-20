@@ -73,7 +73,7 @@ async function onExportWorld(): Promise<void> {
 
   try {
     const response = await fetchApi(
-        `${API_BASE}/import/world?worldId=${model.value.get("id")}`,
+        `api/import/world?worldId=${model.value.get("id")}`,
         {
           method: "GET",
           headers: {

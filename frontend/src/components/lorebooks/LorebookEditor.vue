@@ -3,9 +3,10 @@ import {ref, onMounted, computed, watch} from 'vue'
 import {Entry, Lorebook, Outlet} from '@/domain/Lorebook'
 import EntryEditor from "@/components/lorebooks/EntryEditor.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
-import {API_BASE} from "@/config";
 import {EntityTypes} from "@/domain/EntityTypes";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
+import {getEntityController} from "@/core/ABSEntity";
+import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<Lorebook>({required: true, type: Lorebook})
 const props = withDefaults(
@@ -137,8 +138,8 @@ async function onImportFileSelected(event: Event): Promise<void> {
 
     const text = await file.text();
 
-    const response = await fetch(
-        `${API_BASE}/${EntityTypes.ENTRY}/${model.value.get('id')}/import`,
+    const response = await fetchApi(
+        `${getEntityController(EntityTypes.ENTRY)}/${model.value.get('id')}/import`,
         {
           method: 'POST',
           headers: {

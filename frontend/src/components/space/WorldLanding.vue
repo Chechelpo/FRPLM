@@ -310,7 +310,7 @@ async function onImportFileSelected(
     JSON.parse(text);
 
     const response = await fetchApi(
-        `${API_BASE}/import/world`,
+        `api/import/world`,
         {
           method: "POST",
           headers: {
