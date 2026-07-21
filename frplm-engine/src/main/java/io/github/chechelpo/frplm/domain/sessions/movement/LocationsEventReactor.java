@@ -127,8 +127,25 @@ class LocationsEventReactor {
             userCharacterLocation = getStartingLocationBySession(userCharacterId, sessionId);
         else userCharacterLocation = movements.getLocationOf(userCharacterId, sessionId);
 
-        event.initialData().set(MESSAGES.WORLD_ID, userCharacterLocation.getWorldId());
-        event.initialData().set(MESSAGES.LOCATION_ID, userCharacterLocation.getId());
+        if (!event.initialData().assignsField(MESSAGES.LOCATION_ID)){
+            log.debug("Assigning by default user character {} location {} (worldId: {} , locationId: {}) to new message of session {}",
+                    characterService.find(EntityKey.of(CHARACTERS.ID, userCharacterId)).orElseThrow().getName(),
+                    userCharacterLocation.getName(),
+                    userCharacterLocation.getWorldId(),
+                    userCharacterLocation.getId(),
+                    sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
+                            .orElseThrow()
+                            .getName()
+            );
+
+            event.initialData().set(MESSAGES.WORLD_ID, userCharacterLocation.getWorldId());
+            event.initialData().set(MESSAGES.LOCATION_ID, userCharacterLocation.getId());
+
+        } else log.trace("Didn't assign default location of user character for new message of session {} (was already assigned)",
+                sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
+                        .orElseThrow()
+                        .getName()
+        );
     }
 
     private LocationsRecord getStartingLocationBySession(int userCharacterId, int sessionId) {
