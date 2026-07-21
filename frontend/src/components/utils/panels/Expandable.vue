@@ -5,7 +5,7 @@ import {
   watch,
 } from "vue";
 
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 
 export type ExpandableVariant =

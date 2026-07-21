@@ -6,6 +6,7 @@ import type { LLMConnection } from "../../src/domain/Connection";
 import type { PromptSection, PromptTemplate } from "../../src/domain/Prompts";
 import type { fetchOne, fetch_all, createEntity, deleteEntity } from "../../src/core/ABSEntity";
 import type { EntityTypes } from "../../src/domain/EntityTypes";
+import {FrplmComponentRegistry} from "./components";
 
 export interface FrplmHostBindings {
     entities: {
@@ -20,9 +21,7 @@ export interface FrplmHostBindings {
         Entry: typeof Entry;
         Tag: typeof Tag;
     };
-    components: {
-        SingleEnumInput: "frplm-enum-input";
-    };
+    components: FrplmComponentRegistry;
     api: {
         fetchOne: typeof fetchOne;
         fetch_all: typeof fetch_all;

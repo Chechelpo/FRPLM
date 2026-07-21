@@ -14,8 +14,8 @@ import { EntityTypes } from "@/domain/EntityTypes";
 import { API_BASE } from "@/config";
 
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<LLMConnection>({

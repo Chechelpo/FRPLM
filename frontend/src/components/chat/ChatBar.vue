@@ -10,7 +10,7 @@ import type {
 } from "@/types/ChatCompletions";
 import type { PromptDTO } from "@/types/DTOs";
 
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import InlinePopover from "@/components/utils/prompts/InlinePopover.vue";
 import PromptDebug from "@/components/chat/PromptDebug.vue";

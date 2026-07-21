@@ -5,9 +5,9 @@ import { Character } from "@/domain/Characters";
 import { Lorebook } from "@/domain/Lorebook";
 import { Tag } from "@/domain/Tag";
 
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";

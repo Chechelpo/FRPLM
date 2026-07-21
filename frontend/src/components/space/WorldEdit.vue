@@ -21,7 +21,7 @@ import {
 
 } from "@/core/ABSEntity";
 
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
@@ -29,7 +29,7 @@ import SearchBar from "@/components/utils/SearchBar.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import RegionEditor from "@/components/space/RegionEditor.vue";
 import WorldLocationGraph from "@/components/space/WorldLocationGraph.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
 import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<World>({

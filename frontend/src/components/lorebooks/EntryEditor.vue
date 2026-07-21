@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import {ActivationStrategy, Entry, Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
 import {computed, onMounted, ref, watch} from "vue";
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
-import AutoCompleteBox from "@/components/utils/autocomplete/AutoCompleteBox.vue";
-import SingleAutoComplete from "@/components/utils/autocomplete/SingleAutoComplete.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
+import AutoCompleteBox from "@/components/primitive-editors/AutoCompleteBox.vue";
+import SingleAutoComplete from "@/components/primitive-editors/SingleAutoComplete.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import NumberInput from "@/components/utils/primitiveEditors/NumberInput.vue";
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import NumberInput from "@/components/primitive-editors/NumberInput.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import {fetch_all} from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
-import BooleanTickBox from "@/components/utils/primitiveEditors/BooleanTickBox.vue";
+import BooleanTickBox from "@/components/primitive-editors/BooleanTickBox.vue";
 
 // ---- model / emit -------------------------------------------------------
 const props = defineProps<{

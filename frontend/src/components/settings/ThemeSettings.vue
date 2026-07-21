@@ -23,7 +23,7 @@ import {
   type ThemePreference,
 } from "@/core/theme";
 
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 
 interface ThemeOption {

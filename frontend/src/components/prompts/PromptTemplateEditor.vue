@@ -17,10 +17,10 @@ import {
 import { EntityTypes } from "@/domain/EntityTypes";
 import { fetch_all } from "@/core/ABSEntity";
 
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
-import NumberSlider from "@/components/utils/primitiveEditors/NumberSlider.vue";
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
+import NumberSlider from "@/components/primitive-editors/NumberSlider.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import PromptSectionEditor from "@/components/prompts/PromptSectionEditor.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";

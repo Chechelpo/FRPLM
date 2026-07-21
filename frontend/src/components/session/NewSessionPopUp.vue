@@ -20,7 +20,7 @@ import {
 
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
 
 const model = defineModel<boolean>({

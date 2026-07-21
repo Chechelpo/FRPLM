@@ -21,8 +21,8 @@ import LocationEditor from "@/components/space/LocationEditor.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
 
 const props = defineProps<{
   region: Region;

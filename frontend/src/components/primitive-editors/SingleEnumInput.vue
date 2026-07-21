@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="T extends string | number | symbol">
+// src/SingleEnumInput.vue
 import {
   computed,
   nextTick,

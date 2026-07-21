@@ -1,8 +1,23 @@
 // src/services/apiClient.ts
 
 import { setGlobalError } from "@/core/GlobalError";
-import { ApiRequestError } from "@/core/ApiRequestError";
 
+export class ApiRequestError extends Error {
+    readonly details: ErrorResponse;
+    readonly response?: Response;
+
+    constructor(
+        details: ErrorResponse,
+        response?: Response,
+        options?: ErrorOptions,
+    ) {
+        super(details.message, options);
+
+        this.name = "ApiRequestError";
+        this.details = details;
+        this.response = response;
+    }
+}
 interface CsrfState {
     headerName: string;
     token: string;

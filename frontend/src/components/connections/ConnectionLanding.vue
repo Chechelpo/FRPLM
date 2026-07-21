@@ -18,7 +18,7 @@ import { EntityTypes } from "@/domain/EntityTypes";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import List from "@/components/utils/list/List.vue";
 import LLMEditor from "@/components/connections/LLMEditor.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 
 import {
   createEntity,

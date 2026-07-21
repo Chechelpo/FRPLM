@@ -18,7 +18,7 @@ import { createEntity } from "@/core/ABSEntity";
 
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import PromptTemplateEditor from "@/components/prompts/PromptTemplateEditor.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import WorldEdit from "@/components/space/WorldEdit.vue";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
 import PromptTemplatePicker from "@/components/prompts/PromptTemplatePicker.vue";

@@ -10,10 +10,10 @@ import {
 import { PromptSection } from "@/domain/Prompts";
 import { ChatCompletionRole } from "@/types/ChatCompletions";
 
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
-import BooleanToggle from "@/components/utils/primitiveEditors/BooleanToggle.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
+import BooleanToggle from "@/components/primitive-editors/BooleanToggle.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 
 const props = defineProps<{

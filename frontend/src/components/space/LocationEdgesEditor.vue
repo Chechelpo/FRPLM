@@ -17,8 +17,8 @@ import {
 
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
-import BooleanTickBox from "@/components/utils/primitiveEditors/BooleanTickBox.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
+import BooleanTickBox from "@/components/primitive-editors/BooleanTickBox.vue";
 
 import ConnectLocationPrompt, {
   type ConnectionDirection,

@@ -1,32 +1,41 @@
 {
   "name": "@frplm/host-sdk",
-  "version": "0.1.4",
+  "version": "0.1.6-alpha.4",
   "private": false,
   "type": "module",
   "description": "FRPLM host SDK types for frontend extension panels.",
   "license": "MIT",
+
   "types": "./dist-sdk/sdk/src/sdk-index.d.ts",
+
   "exports": {
     ".": {
       "types": "./dist-sdk/sdk/src/sdk-index.d.ts",
       "default": "./dist-sdk/sdk/src/sdk-index.d.ts"
-    }
+    },
+    "./assets/*": "./dist-sdk/assets/*"
   },
+
   "scripts": {
-    "build": "rm -rf dist-sdk && tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "build": "rm -rf dist-sdk && tsc -p tsconfig.json && tsc-alias -p tsconfig.json && cp -R src/assets dist-sdk/assets",
     "pack:check": "npm run build && npm pack --dry-run"
   },
+
   "devDependencies": {
     "typescript": "^5.9.3",
     "tsc-alias": "^1.8.16"
   },
+
   "files": [
     "dist-sdk"
   ],
+
   "engines": {
     "node": ">=20.19.0"
   },
+
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "tag": "alpha"
   }
 }

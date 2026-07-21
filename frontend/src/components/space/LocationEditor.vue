@@ -10,7 +10,7 @@ import type {DTO} from "@/types/DTOs";
 import {createEntity, deleteEntity, } from "@/core/ABSEntity";
 import {API_BASE} from "@/config";
 
-import ShortTextBox from "@/components/utils/primitiveEditors/ShortTextBox.vue";
+import ShortTextBox from "@/components/primitive-editors/ShortTextBox.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
@@ -18,7 +18,7 @@ import LocationEdgesEditor from "@/components/space/LocationEdgesEditor.vue";
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import CharacterEditor from "@/components/char/CharacterEditor.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
 import {fetchApi} from "@/services/apiClient";
 
 const model = defineModel<{

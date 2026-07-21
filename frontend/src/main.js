@@ -1,6 +1,6 @@
 // src/main.js
-import '../sdk/assets/main.css'
-import '../sdk/assets/styles/EntityEditors.css'
+import '../sdk/src/assets/main.css'
+import '../sdk/src/assets/styles/EntityEditors.css'
 
 import { createApp } from "vue";
 import App from "./App.vue";
@@ -17,5 +17,3 @@ initializeTheme();
 createApp(App)
     .use(router)
     .mount("#app");
-
-window.FRPLMHostSDK = HostSDK;

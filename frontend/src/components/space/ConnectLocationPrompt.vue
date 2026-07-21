@@ -18,7 +18,7 @@ import {
 } from "@/domain/World";
 
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 
 export type ConnectionDirection =

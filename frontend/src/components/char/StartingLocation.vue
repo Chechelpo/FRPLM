@@ -3,13 +3,13 @@ import {computed, onMounted, ref, watch} from "vue";
 import {Character, StartingLocation, StartingLocationData, StartingLocationKeys} from "@/domain/Characters";
 import { Location, World, WorldData, WorldKey } from "@/domain/World";
 import { EntityTypes } from "@/domain/EntityTypes";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import List from "@/components/utils/list/List.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import EnumPrompt from "@/components/utils/prompts/EnumPrompt.vue";
-import LongTextBox from "@/components/utils/primitiveEditors/LongTextBox.vue";
-import NumberInput from "@/components/utils/primitiveEditors/NumberInput.vue";
+import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
+import NumberInput from "@/components/primitive-editors/NumberInput.vue";
 import {deleteEntity, fetch_all} from "@/core/ABSEntity";
 
 const model = defineModel<Character>({ required: true });

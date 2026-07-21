@@ -16,7 +16,7 @@ import { EntityTypes } from "@/domain/EntityTypes";
 import { createEntity } from "@/core/ABSEntity";
 
 import PromptTemplateEditor from "@/components/prompts/PromptTemplateEditor.vue";
-import SingleEnumInput from "@/components/utils/primitiveEditors/SingleEnumInput.vue";
+import SingleEnumInput from "@/components/primitive-editors/SingleEnumInput.vue";
 import IconButton from "@/components/utils/buttons/IconButton.vue";
 
 const props = defineProps<{

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// src/primitive-editors/BooleanTickBox.vue
 const model = defineModel<boolean>({
   required: true,
 });
