@@ -7,11 +7,9 @@ import io.github.chechelpo.frplm.extensions.implementations.standalone.Connectio
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Component;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
-@Component
 final class ConnectionMapper extends ReferenceMapper<LlmConnectionRecord, ConnectionSnapshot.Reference, ConnectionSnapshot> {
     ConnectionMapper(EntityReader<LlmConnectionRecord> reader) {
         super(
