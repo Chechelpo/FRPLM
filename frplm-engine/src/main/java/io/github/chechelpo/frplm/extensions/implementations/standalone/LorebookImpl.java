@@ -12,7 +12,7 @@ import java.util.List;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 
 public class LorebookImpl extends StandaloneEntity<LorebooksRecord> implements LorebookSnapshot {
-    LorebookImpl(LorebooksRecord record, ExtensionContext context) {
+    public LorebookImpl(LorebooksRecord record, ExtensionContext context) {
         super(record, context);
     }
 

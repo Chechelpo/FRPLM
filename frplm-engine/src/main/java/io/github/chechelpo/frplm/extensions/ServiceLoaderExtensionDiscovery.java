@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.extensions;
 
 import io.github.chechelpo.frplm.extensions.api.types.Extension;
+import jakarta.annotation.PostConstruct;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;

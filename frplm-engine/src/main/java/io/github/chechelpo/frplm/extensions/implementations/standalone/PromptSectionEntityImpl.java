@@ -8,7 +8,7 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatComp
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 
 public class PromptSectionEntityImpl extends StandaloneEntity<PromptSectionRecord> implements PromptSectionEntitySnapshot {
-    protected PromptSectionEntityImpl(PromptSectionRecord record, ExtensionContext context) {
+    public PromptSectionEntityImpl(PromptSectionRecord record, ExtensionContext context) {
         super(record, context);
     }
 

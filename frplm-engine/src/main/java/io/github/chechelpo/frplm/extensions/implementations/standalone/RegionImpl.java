@@ -18,7 +18,7 @@ import java.util.Optional;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 public class RegionImpl extends StandaloneEntity<RegionRecord> implements RegionSnapshot {
-    protected RegionImpl(RegionRecord record, ExtensionContext context) {
+    public RegionImpl(RegionRecord record, ExtensionContext context) {
         super(record, context);
     }
 
