@@ -18,6 +18,19 @@ import java.util.ServiceLoader;
 final class ServiceLoaderExtensionDiscovery {
 
     private static final Path PLUGINS_DIR = resolvePluginsDir();
+
+    @PostConstruct
+    void createDirectoryIfNotExists() {
+        try {
+            Files.createDirectories(PLUGINS_DIR);
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Could not create plugins directory: " + PLUGINS_DIR,
+                    e
+            );
+        }
+    }
+    
     private static Path resolvePluginsDir() {
         Path codeSource = resolveCodeSourcePath();
 
