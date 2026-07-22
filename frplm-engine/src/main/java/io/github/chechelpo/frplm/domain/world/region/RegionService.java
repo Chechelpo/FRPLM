@@ -64,11 +64,11 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     private boolean updateCreatesCycle(int worldId, int fromRegionId, int newParent) {
         RegionRecord currentRegion = this.find(getKey(worldId, newParent))
-                .orElseThrow(() -> new EntityNotFound("No such parent region with id " + newParent, Severity.USER));
+                .orElseThrow(Severity.SYSTEM);
         while (currentRegion.getParentRegionId() != null) {
             if (currentRegion.getParentRegionId() == fromRegionId) return true;
             currentRegion = this.find(getKey(worldId, currentRegion.getParentRegionId()))
-                    .orElseThrow();;
+                    .orElseThrow(Severity.SYSTEM);
         }
 
         return false;
@@ -77,7 +77,7 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     @Override
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeDelete(EntityKey<RegionRecord> id, long operationID) {
-        RegionRecord toDelete = this.find(id).orElseThrow(() -> new EntityNotFound("Not found with id " + id, Severity.USER));
+        RegionRecord toDelete = this.find(id).orElseThrow(Severity.USER);
         if (!getDepthOneChildrenOf(toDelete).isEmpty())
             throw new UnsupportedAction("Cannot delete a region when it has children", Severity.EXPECTED);
 

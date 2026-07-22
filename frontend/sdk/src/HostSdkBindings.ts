@@ -34,6 +34,9 @@ export interface FrplmHostBindings {
 export interface FrplmExtensionBindings {
     getConfig: (id: string) => Promise<any>;
     saveConfig: (id: string, config: any) => Promise<boolean>;
+    logError: (id: string, message:string) => void;
+    logDebug: (id: string, message:string) => void;
+    logInfo: (id:string, message:string) => void;
     notify: (message: string, type?: "success" | "error" | "info") => void;
 }
 

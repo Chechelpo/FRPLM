@@ -258,7 +258,7 @@ class EntityControllerTest {
     void getReturnsWrappedEntityWhenServiceFindsRecord() {
         TestTableRecord found = record(1, 2, "found", 0, "found description text");
 
-        when(service.find(any())).thenReturn(Optional.of(found));
+        when(service.find(any())).thenReturn(EntityReader.FindResult.found(EntityKey.of(TEST_TABLE.FIRST_ID, 1), found));
 
         ResponseEntity<EntityController.EntityDTO> response = controller.get(Map.of(
                 DTOFields.FirstID.toString(), "1",
@@ -280,7 +280,7 @@ class EntityControllerTest {
 
     @Test
     void getThrowsEntityNotFoundWhenServiceReturnsEmpty() {
-        when(service.find(any())).thenReturn(Optional.empty());
+        when(service.find(any())).thenReturn(EntityReader.FindResult.notFound(EntityKey.of(TEST_TABLE.FIRST_ID, 0)));
 
         assertThrows(EntityNotFound.class, () ->
                 controller.get(Map.of(

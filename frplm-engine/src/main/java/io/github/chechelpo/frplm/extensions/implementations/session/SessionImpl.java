@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.session.Session;
@@ -9,10 +10,11 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /// # Session
 /// API interface of a session snapshot
@@ -49,13 +51,18 @@ public final class SessionImpl implements Session {
         return this.sessionContext;
     }
 
+    public SessionsRecord getRecord() {
+        return record;
+    }
+
     @Override
     public int getCurrentTick() {
         return record.getCurrentTick();
     }
 
-    public SessionsRecord getRecord() {
-        return record;
+    @Override
+    public @NonNull String getName(){
+        return record.getName();
     }
 
     @Contract(" -> new")
@@ -70,20 +77,26 @@ public final class SessionImpl implements Session {
                 .map(template -> new PromptSessionImpl(template, context, this));
     }
 
-    @Contract(" -> new")
-    public @NotNull ChatMessage getLastMessage() {
+    @Contract("_ -> new")
+    public @NotNull ChatMessage getLastMessage(boolean filterEnabled) {
+        if (!filterEnabled) new ChatMessageImpl(
+                sessionContext.messages().getLastMessageOf(this.record),
+                context,
+                world
+        );
+
         return new ChatMessageImpl(
-                sessionContext.messages().getLastOf(this.record.getId()),
+                sessionContext.messages().getLastEnabled(this.record.getId()),
                 context,
                 world
         );
     }
 
     @Override
-    public @UnmodifiableView List<ChatMessage> getChatHistory() {
-        return sessionContext.messages().getMessages(this.record).stream()
-                .map(record -> new ChatMessageImpl(record, context, world))
-                .collect(Collectors.toUnmodifiableList());
+    public @UnmodifiableView @NonNull List<ChatMessage> getChatHistory(final boolean filterEnabled) {
+        return fromStream(sessionContext.messages().getMessages(this.record).stream()
+                .filter(record -> !filterEnabled || record.getIsEnabled())
+        );
     }
 
     @Override
@@ -98,31 +111,24 @@ public final class SessionImpl implements Session {
 
     @Contract(" -> new")
     public @NotNull ChatMessageImpl lastMessage() {
-        return new ChatMessageImpl(sessionContext.messages().getLastOf(this.getRecord()), context, world);
+        return new ChatMessageImpl(sessionContext.messages().getLastMessageOf(this.getRecord()), context, world);
     }
 
     @Override
-    @Contract("_ -> new")
-    public @NotNull @Unmodifiable List<ChatMessage> getLastMessages(int number) {
-        return sessionContext.messages().getLastOf(record.getId(), 0).stream()
-                .map(record -> (ChatMessage) new ChatMessageImpl(record, context, world))
-                .toList();
+    public @NotNull @Unmodifiable List<ChatMessage> getLastMessages(int number, final boolean filterEnabled) {
+        if (filterEnabled)
+            return fromStream(sessionContext.messages().getLastEnabledMessages(record.getId(), number).stream());
+
+        return fromStream(sessionContext.messages().getLastMessagesOf(record.getId(), number).stream());
     }
 
     @Override
     public @NotNull @Unmodifiable List<ChatMessage> getLastMessagesRange(int from, int to){
-        return sessionContext.messages().getRange(record.getId(), from, to).stream()
-                .map(record -> (ChatMessage) new ChatMessageImpl(record, context, world))
-                .toList();
+        return fromStream(sessionContext.messages().getRange(record.getId(), from, to).stream());
     }
 
-    private static <T> @NotNull List<T> getLast(int number, @NotNull List<T> of) {
-        if (number <= 0 || of.isEmpty()) {
-            return List.of();
-        }
-
-        int from = Math.max(0, of.size() - number);
-        return List.copyOf(of.subList(from, of.size()));
+    private @NonNull @Unmodifiable List<ChatMessage> fromStream(@NonNull Stream<MessagesRecord> stream){
+        return stream.map(record -> (ChatMessage) new ChatMessageImpl(record, context, world)).toList();
     }
 
     @Override

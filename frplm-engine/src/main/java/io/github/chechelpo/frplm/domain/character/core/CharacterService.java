@@ -66,9 +66,9 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
     @CheckReturnValue
     public CharactersRecord getUserCharacter(@NotNull SessionsRecord record) throws EntityNotFound {
         return this.find(EntityKey.of(CHARACTERS.ID, record.getUserPersonaId()))
-                .orElseThrow(() -> {
-                    log.error("Session has no user character \n {}", record);
-                    return new EntityNotFound("Session has no user character", Severity.SYSTEM);
+                .orElseThrow( notFound -> {
+                    log.error("Couldn't find session user character: {}", notFound.toDebugString());
+                    return new EntityNotFound(notFound, Severity.SYSTEM);
                 });
     }
 

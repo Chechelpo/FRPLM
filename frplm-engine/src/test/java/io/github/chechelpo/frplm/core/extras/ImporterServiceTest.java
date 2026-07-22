@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.core.extras;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.FullDomainContext;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.utils.json_mappers.*;
@@ -248,8 +249,8 @@ class ImporterServiceTest {
                         .set(REGION.WORLD_ID, worldId)
                         .set(REGION.ID, actualRegion.getParentRegionId())
                         .build();
-                Optional<RegionRecord> actualParent = regionContext.service.find(parentKey);
-                assertTrue(actualParent.isPresent(), "Couldn't find parent");
+                EntityReader.FindResult<RegionRecord> actualParent = regionContext.service.find(parentKey);
+                assertTrue(actualParent.isFound(), "Couldn't find parent");
                 assertEquals(
                         expectedParentName.get(expectedRegion),
                         actualParent.get().getName(),

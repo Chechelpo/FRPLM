@@ -68,7 +68,7 @@ class CharacterServiceTest {
             assertTrue(this.characterService.delete(characterService.keyOf(record)), "Error deleting character");
             assertTrue(lorebookTestContext.service.find(
                     lorebookTestContext.service.keyOf(lorebook)
-            ).isEmpty(), "Stale lorebook referencing character");
+            ).isFound(), "Stale lorebook referencing character");
         }
     }
 }

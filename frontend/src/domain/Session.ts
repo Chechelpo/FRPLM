@@ -110,7 +110,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         console.debug(`Asking for a new prompt for session ${this}`)
 
         return await fetchApi(
-            `${API_BASE}/prompts/new/${this.get('id')}`,
+            `api/prompts/new/${this.get('id')}`,
             {
                 method:'GET'
             }
@@ -118,7 +118,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
     }
     public async generateNewMessage(request:ChatCompletionRequest) : Promise<Message> {
         return await fetchApi(
-            `${API_BASE}/engine/generate/${this.get('id')}`,
+            `api/engine/generate/${this.get('id')}`,
             {
                 method:'POST',
                 headers: {
@@ -190,7 +190,7 @@ export class Message extends ABSEntity<MessagesKey, MessageData>{
         if (this.get('role') != ChatCompletionRole.ASSISTANT) return;
         try{
             const newMessage = await fetchApi(
-                `${API_BASE}/engine/regenerate?sessionID=${this.get('session_id')}&tick_num=${this.get("tick_num")}`,
+                `api/engine/regenerate?sessionID=${this.get('session_id')}&tick_num=${this.get("tick_num")}`,
                 {
                     method: "POST",
                 }

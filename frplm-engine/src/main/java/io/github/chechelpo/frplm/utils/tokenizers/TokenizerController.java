@@ -38,16 +38,13 @@ final class TokenizerController {
 
                     LlmConnectionRecord connection = lLMService
                             .find(EntityKey.of(LLM_CONNECTION.ID, connectionId))
-                            .orElseThrow(() -> new EntityNotFound(
-                                    "No tokenizer connection with id " + connectionId,
-                                    Severity.USER
-                            ));
+                            .orElseThrow("Couldn't tokenize %s ".formatted(text) , Severity.USER);
 
                     String modelId = connection.getModel();
 
                     if (modelId == null) {
                         throw new NotInitialized(
-                                "Tokenizer connection has no model id selected",
+                                "Tokenizer connection %s has no model id selected".formatted(connection.getName()),
                                 Severity.USER
                         );
                     }

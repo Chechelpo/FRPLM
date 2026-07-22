@@ -86,14 +86,14 @@ final class LocationEntityTranslator implements PrologEntityTranslator {
                         .build()
         ).map(record -> QualifiedNames.qualify(
                 worldService.find(EntityKey.of(WORLDS.ID, reference.id()))
-                        .orElseThrow(() -> new EntityNotFound("Couldn't find world when getting qualified name for " + record, Severity.SYSTEM))
+                        .orElseThrow("Couldn't find world when getting qualified name for \n " + record, Severity.SYSTEM)
                         .getName(),
 
                 regionService.find(EntityKey.<RegionRecord>builder()
                                 .set(REGION.WORLD_ID, reference.worldId())
                                 .set(REGION.ID, record.getRegionId())
                                 .build()
-                        ).orElseThrow(() -> new EntityNotFound("Couldn't find region for " + record, Severity.SYSTEM))
+                        ).orElseThrow("Couldn't find region for \n " + record, Severity.SYSTEM)
                         .getName(),
 
                 record.getName()

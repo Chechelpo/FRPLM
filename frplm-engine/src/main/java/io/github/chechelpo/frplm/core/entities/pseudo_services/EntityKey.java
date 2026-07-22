@@ -21,11 +21,9 @@ public final class EntityKey<R extends TableRecord<R>>
 {
     //Type checking done at FieldsABS, not here
     private final Map<TableField<R, ?>, Object> values;
-    private final boolean mutable;
 
     EntityKey(Map<TableField<R, ?>, Object> values, boolean mutable){
         this.values = values;
-        this.mutable = mutable;
     }
 
     public @UnmodifiableView Map<TableField<R, ?>, Object> getValues() {

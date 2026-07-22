@@ -39,8 +39,8 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     @Transactional(readOnly = true)
     @CheckReturnValue
-    public Optional<PromptTemplateRecord> getOf(@NotNull SessionsRecord record) throws EntityNotFound {
-        if (record.getMainPrompt() == null) return Optional.empty();
+    public FindResult<PromptTemplateRecord> getOf(@NotNull SessionsRecord record) throws EntityNotFound {
+        if (record.getMainPrompt() == null) return FindResult.notFound(null);
         return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getMainPrompt().shortValue()));
     }
 
@@ -93,8 +93,10 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     private void validateMaxTokens(@NotNull EntityKey<PromptTemplateRecord> target, @NotNull EntityDataPayload<PromptTemplateRecord> data) {
         LlmConnectionRecord connection = llmService.fromTemplate(this.find(target)
-                .orElseThrow(() -> new EntityNotFound("No template with key " + target, Severity.USER))
-        ).orElseThrow(() -> new NotInitialized("Modifying max tokens with no connection assigned", Severity.EXPECTED));
+                .orElseThrow("Couldn't find connection of template " + target, Severity.USER)
+        ).orElseThrow(notFound ->
+                new NotInitialized("Modifying max tokens of template %s no connection assigned".formatted(target), Severity.USER)
+        );
 
         if (connection.getMaxTokens() < data.requireValue(PROMPT_TEMPLATE.MAX_TOKENS))
             throw new InvalidValue("Tokens of template larger than LLMs connection max tokens");

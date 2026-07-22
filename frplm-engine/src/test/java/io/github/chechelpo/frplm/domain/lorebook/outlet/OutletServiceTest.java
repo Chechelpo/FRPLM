@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,8 @@ class OutletServiceTest {
             outletNames[i] = "outlet" + i;
             int outletId = outletService.getOrCreateOutlet(outletNames[i]);
 
-            Optional<OutletRecord> findResult = outletService.find(EntityKey.of(OUTLET.ID, outletId));
-            assertTrue(findResult.isPresent(), "Could not fetch record");
+            EntityReader.FindResult<OutletRecord> findResult = outletService.find(EntityKey.of(OUTLET.ID, outletId));
+            assertTrue(findResult.isFound(), "Could not fetch record");
             OutletRecord outletRecord = findResult.get();
             assertEquals(outletRecord.getId(), outletId);
             assertEquals(outletRecord.getOutlet(), outletNames[i]);

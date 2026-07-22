@@ -62,7 +62,7 @@ public class RegionEntityTranslator implements PrologEntityTranslator {
                 .set(REGION.ID, reference.regionId())
                 .build()
         ).map(record -> QualifiedNames.qualify(
-                        worldService.find(EntityKey.of(WORLDS.ID, record.getWorldId())).orElseThrow().getName(),
+                        worldService.find(EntityKey.of(WORLDS.ID, record.getWorldId())).orElseThrow(Severity.SYSTEM).getName(),
                         record.getName()
                 )
         );

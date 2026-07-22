@@ -175,16 +175,45 @@ public abstract class EntityService<
      * @param operationID of the creation event
      * @apiNote super() call is advised at the end of your override. This function also contains the event emit as well as validation logic
      */
-    protected void beforeCreate(EntityDataPayload<R> data, long operationID) {
-        for (Map.Entry<TableField<R, ?>, Object> defaultAssignment : defaultsOnCreate.entrySet()) {
-            TableField<R, ?> field = defaultAssignment.getKey();
-            if (!data.assignsField(field))
-                data.unsafeSetValue(field, defaultAssignment.getValue());
+        protected void beforeCreate(EntityDataPayload<R> data, long operationID) {
+            for (Map.Entry<TableField<R, ?>, Object> defaultAssignment : defaultsOnCreate.entrySet()) {
+                TableField<R, ?> field = defaultAssignment.getKey();
+                if (!data.assignsField(field))
+                    data.unsafeSetValue(field, defaultAssignment.getValue());
+            }
+
+            Optional<EntityKey<R>> initialKey = buildInitialKey(data);
+
+            eventBus.publish(new CRUDDraftEvent.CreateEntityDraft<R>(this.entityType, operationID, initialKey, data));
+            throwIfInvalidData(data, false);
         }
 
-        eventBus.publish(new CRUDDraftEvent.CreateEntityDraft<R>(this.entityType, operationID, Optional.empty(), data));
-        throwIfInvalidData(data, false);
-    }
+        /**
+         * Builds an {@link EntityKey} from whatever key fields are already
+         * assigned in {@code data} (after defaults have been applied).
+         *
+         * <p>Returns {@link Optional#empty()} when no key field is assigned
+         * yet — e.g. when the primary key is auto-generated and won't be
+         * known until after {@code store.createAndGet}. When only some key
+         * fields are known (composite key with a missing component), the
+         * returned key is a <em>partial</em> key containing just the
+         * assigned fields.</p>
+         */
+        private Optional<EntityKey<R>> buildInitialKey(EntityDataPayload<R> data) {
+            if (keys.isEmpty()) return Optional.empty();
+
+            Map<TableField<R, ?>, Object> assignments = data.assignments();
+            EntityKey.Builder<R> builder = EntityKey.builder();
+            boolean anyAssigned = false;
+            for (TableField<R, ?> keyField : keys) {
+                if (assignments.containsKey(keyField)) {
+                    builder.unsafeSet(keyField, assignments.get(keyField));
+                    anyAssigned = true;
+                }
+            }
+
+            return anyAssigned ? Optional.of(builder.build()) : Optional.empty();
+        }
 
     @Transactional
     public @NotNull R createAndGet(EntityDataPayload<R> data) {
@@ -238,17 +267,19 @@ public abstract class EntityService<
         if (key != null) throwIfInvalidKey(key, isFullKey);
     }
 
+    @Override
     @Transactional(readOnly = true)
-    public Optional<R> find(EntityKey<R> key){
+    public FindResult<R> find(EntityKey<R> key){
         Objects.requireNonNull(key);
         long operationID = eventBus.nextOperationID();
         beforeRetrieve(key, true, operationID);
         log.debug("Finding record with id {}", key);
 
-        Optional<R> record = Optional.ofNullable(store.get(key));
-        record.ifPresent(r -> afterRetrieve(List.of(r), operationID));
+        R record = store.get(key);
+        if (record == null) return new FindResult.NotFound<>(key);
+        afterRetrieve(List.of(record), operationID);
 
-        return record;
+        return new FindResult.Found<>(key, record);
     }
 
     @Transactional(readOnly = true)
@@ -597,7 +628,7 @@ public abstract class EntityService<
 
         long operationID = eventBus.nextOperationID();
         beforeDelete(id, operationID);
-        Optional<R> staleRecord = this.find(id);
+        Optional<R> staleRecord = this.find(id).asOptional();
         if (staleRecord.isEmpty()) {
             log.error("No such entity to delete with ID {}", id);
             return false;

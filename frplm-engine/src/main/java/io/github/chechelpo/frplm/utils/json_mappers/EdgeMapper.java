@@ -63,13 +63,13 @@ public class EdgeMapper {
                         .set(LOCATIONS.WORLD_ID, worldId)
                         .set(LOCATIONS.ID, locationId)
                 .build()
-        ).orElseThrow(() -> new UnexpectedException("Couldn't find base edge when exporting edge", Severity.SYSTEM));
+        ).orElseThrow(notFound -> new EntityNotFound("Couldn't find base edge when exporting edge " + notFound.toDebugString(), Severity.SYSTEM));
 
         return regionService.find(EntityKey.<RegionRecord>builder()
                         .set(REGION.WORLD_ID, worldId)
                         .set(REGION.ID, record.getRegionId())
                 .build()
-        ).orElseThrow(() -> new EntityNotFound("Couldn't find parent region when exporting edge", Severity.SYSTEM))
+        ).orElseThrow(notFound -> new EntityNotFound("Couldn't find parent region when exporting edge " + notFound.toDebugString(), Severity.SYSTEM))
                 .getName();
     }
 
@@ -78,7 +78,7 @@ public class EdgeMapper {
                         .set(LOCATIONS.WORLD_ID, worldId)
                         .set(LOCATIONS.ID, locationId)
                         .build()
-                ).orElseThrow(() -> new EntityNotFound("Location with id " + locationId, Severity.SYSTEM))
+                ).orElseThrow(Severity.SYSTEM)
                 .getName();
     }
 

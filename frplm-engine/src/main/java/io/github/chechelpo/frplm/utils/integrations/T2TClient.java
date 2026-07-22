@@ -4,6 +4,8 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
+import io.github.chechelpo.frplm.exceptions.Severity;
+import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
@@ -37,7 +39,11 @@ public final class T2TClient {
     @Contract("_ -> new")
     private @NonNull OpenAICompatible getOpenAIClient(@NonNull LlmConnectionRecord con){
         return new OpenAICompatible(
-                apiHosts.find(EntityKey.of(ApiHosts.API_HOSTS.ID, con.getHostId().intValue())).orElseThrow().getHostUrl()
+                apiHosts.find(EntityKey.of(ApiHosts.API_HOSTS.ID, con.getHostId().intValue()))
+                        .orElseThrow(notFound ->
+                                new NotInitialized("Connection %s has no assigned api key".formatted(con.getName()), Severity.USER)
+                        )
+                        .getHostUrl()
         );
     }
 

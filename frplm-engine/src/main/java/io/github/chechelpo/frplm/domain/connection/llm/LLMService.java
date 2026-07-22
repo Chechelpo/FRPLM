@@ -28,7 +28,7 @@ public class LLMService extends EntityService<LlmConnectionRecord, LLMStore> {
     }
 
     @Transactional(readOnly = true)
-    public Optional<LlmConnectionRecord> fromTemplate(@NotNull PromptTemplateRecord template) {
+    public FindResult<LlmConnectionRecord> fromTemplate(@NotNull PromptTemplateRecord template) {
         return this.find(EntityKey.of(LLM_CONNECTION.ID, template.getConnectionId()));
     }
 

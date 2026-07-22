@@ -42,7 +42,11 @@ public class WorldService extends EntityService<
     @CheckReturnValue
     public WorldsRecord getWorldOf(@NotNull SessionsRecord record) throws EntityNotFound {
         return this.find(EntityKey.of(WORLDS.ID, record.getWorldId()))
-                .orElseThrow(() -> new UnexpectedException("This session has no world, which should be impossible", Severity.SYSTEM));
+                .orElseThrow(notFound -> new UnexpectedException(
+                        "This session has no world, which should be impossible " + notFound.toDebugString(),
+                        Severity.SYSTEM
+                        )
+                );
     }
 
     @Override

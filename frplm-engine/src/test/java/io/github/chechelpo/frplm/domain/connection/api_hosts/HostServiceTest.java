@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.connection.api_hosts;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,8 +33,8 @@ class HostServiceTest {
     void testLLMBackendsRegistered(){
         for (LLMBackend backend : LLMBackend.values()){
             if (backend.toKey().isPresent()){
-                Optional<ApiHostsRecord> record = hostTestContext.service.find(backend.toKey().get());
-                assertTrue(record.isPresent());
+                EntityReader.FindResult<ApiHostsRecord> record = hostTestContext.service.find(backend.toKey().get());
+                assertTrue(record.isFound());
                 ApiHostsRecord llmBackendRecord = record.get();
 
                 assertEquals(backend.stable_id, llmBackendRecord.getId(), "Mismatch in backend id for: " + backend);

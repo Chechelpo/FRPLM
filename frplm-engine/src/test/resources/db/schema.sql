@@ -470,8 +470,9 @@ CREATE TABLE messages
 
     role            varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
     request_json    TEXT,                                       -- Stored, but it could also just be regen. Should only be there for assistant msgs
-    content         TEXT,                                       -- Always derived
+    content         TEXT,            -- Always derived
 
+    is_enabled      BOOL       NOT NULL DEFAULT TRUE,
     time            INT        NOT NULL,
     world_id        INT        NOT NULL REFERENCES WORLDS (id), -- Derived
     location_id     INT        NOT NULL,                        -- Derived

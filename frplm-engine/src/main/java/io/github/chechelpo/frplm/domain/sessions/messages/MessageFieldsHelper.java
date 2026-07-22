@@ -41,6 +41,10 @@ final class MessageFieldsHelper extends ABSControllerAwareHelper<MessagesRecord,
                         .build()
         );
 
+        registerControllerField(MESSAGES.IS_ENABLED)
+                .setDtoName("is_enabled")
+                .setInfo(FieldInfo.booleanField().build());
+
         register_field(
                 "time",
                 MESSAGES.TIME,

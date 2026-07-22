@@ -63,7 +63,7 @@ public class LocationMapper {
                             .set(REGION.ID, record.getRegionId())
                             .set(REGION.WORLD_ID, record.getWorldId())
                             .build()
-                    ).orElseThrow(() -> new EntityNotFound("No region with id %s when exporting \n %s".formatted(record.getRegionId(), record), Severity.SYSTEM))
+                    ).orElseThrow(notFound -> new EntityNotFound("No region with id %s when exporting \n %s".formatted(notFound.toString(),record.getRegionId(), record), Severity.SYSTEM))
                     .getName();
 
         return new LocationJSON(

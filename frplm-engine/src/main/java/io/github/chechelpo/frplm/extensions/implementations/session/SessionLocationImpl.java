@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.LocationImpl;
@@ -46,7 +47,10 @@ public final class SessionLocationImpl extends LocationImpl implements SessionLo
                                                         .set(LOCATIONS.WORLD_ID, record.getWorldId())
                                                         .set(LOCATIONS.ID, record.getToLocationId())
                                                         .build()
-                                        ).orElseThrow(),
+                                        ).orElseThrow(
+                                                "Somehow couldn't find edge that exists in DB but destination location doesn't. Go ape shit",
+                                                Severity.SYSTEM
+                                        ),
                                         context,
                                         world
                                 ),

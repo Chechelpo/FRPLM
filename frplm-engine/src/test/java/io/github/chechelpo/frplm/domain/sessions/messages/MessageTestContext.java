@@ -82,7 +82,9 @@ public class MessageTestContext implements DBReload {
 
         return new Context(updated,
                 createdMessagesKeys.stream()
-                        .map(key -> service.find(key).orElseThrow(() -> new IllegalStateException("Couldn't find message")))
+                        .map(key -> service.find(key).orElseThrow(notFound ->
+                                new IllegalStateException("Couldn't find message " + notFound.toString()))
+                        )
                         .toList()
                 );
     }

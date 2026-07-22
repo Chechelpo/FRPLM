@@ -89,11 +89,11 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
     @Transactional
     public EntryRecord exchangeEntry(EntityKey<EntryRecord> entryKey, int toLorebookId){
         Objects.requireNonNull(entryKey, "Entry key is null");
-        EntryRecord entry = this.find(entryKey).orElseThrow(() -> {
+        EntryRecord entry = this.find(entryKey).orElseThrow(notFound -> {
             log.error("No such entry with key: {} \n when exchanging lorebooks", entryKey);
             return new EntityNotFound("No such entry with key " + entryKey.toString(), Severity.SYSTEM);
         });
-        LorebooksRecord newLorebook = lorebooks.find(EntityKey.of(LOREBOOKS.ID, toLorebookId)).orElseThrow(() -> {
+        LorebooksRecord newLorebook = lorebooks.find(EntityKey.of(LOREBOOKS.ID, toLorebookId)).orElseThrow(notFound -> {
             log.error("No such destination lorebook with id {} when exchanging entry: {}", toLorebookId, entry.getName());
             return new EntityNotFound("No such lorebook with id " + toLorebookId, Severity.SYSTEM);
         });

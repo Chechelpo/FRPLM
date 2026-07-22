@@ -58,7 +58,7 @@ class WorldServiceTest {
             assertTrue(this.context.service.delete(context.service.keyOf(record)), "Error deleting character");
             assertTrue(lorebookTestContext.service.find(
                     lorebookTestContext.service.keyOf(lorebook)
-            ).isEmpty(), "Stale lorebook referencing world");
+            ).isFound(), "Stale lorebook referencing world");
         }
     }
 }

@@ -220,7 +220,7 @@ final class ImporterService {
     public JsonNode exportWorld(int worldId) {
         return worldMapper.jsonFrom(
                 worldService.find(EntityKey.of(WORLDS.ID, worldId))
-                        .orElseThrow(() -> new EntityNotFound("No world with id " + worldId, Severity.USER))
+                        .orElseThrow(Severity.USER)
         );
     }
 }

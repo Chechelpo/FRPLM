@@ -1,7 +1,5 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
-import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -20,42 +18,41 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 public class MessageService extends EntityService<MessagesRecord, MessageStore> {
     public static final int FIRST_MESSAGE_TICK_NUM = 1;
-    private final CharacterService characters;
-    private final StartingLocationsService startingLocations;
     private final SessionService sessionService;
     private final ResponseService responseService;
 
     MessageService(
-            CharacterService characters,
-            StartingLocationsService startingLocations,
             MessageStore store,
             EventBus eventBus,
             SessionService sessionService,
             ResponseService responseService
     ) {
         super(store, eventBus);
-        this.characters = characters;
-        this.startingLocations = startingLocations;
         this.sessionService = sessionService;
         this.responseService = responseService;
     }
 
-    public MessagesRecord getLastOf(@NotNull SessionsRecord record) {
-        return this.getLastOf(record.getId());
+    public MessagesRecord getLastMessageOf(@NotNull SessionsRecord record) {
+        return this.getLastMessageOf(record.getId());
     }
 
-    public MessagesRecord getLastOf(int sessionID) {
+    public MessagesRecord getLastMessageOf(int sessionID) {
         return store.getLastMessage(sessionID);
     }
-    public List<MessagesRecord> getLastOf(int sessionId, int number){
+    public MessagesRecord getLastEnabled(int sessionId){
+        return store.getLastEnabled(sessionId);
+    }
+    public List<MessagesRecord> getLastMessagesOf(int sessionId, int number){
         return store.getLast(sessionId, number);
+    }
+    public List<MessagesRecord> getLastEnabledMessages(int sessionId, int number){
+        return store.getLastEnabled(sessionId, number);
     }
     /** @return messages in range from <= tick_num <= to (both inclusive) and descending order (last messages first) */
     public List<MessagesRecord> getRange(int sessionId, int from, int to){
@@ -79,21 +76,22 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     void validateActiveResponse(EntityKey<MessagesRecord> target, short active_response) {
         int sessionId = target.requireValue(MESSAGES.SESSION_ID);
         int tick_num = target.requireValue(MESSAGES.TICK_NUM);
-        Optional<MessagesRecord> record = this.find(target);
-        if (record.isEmpty()) {
-            log.error("No message found for session id {} tick num {}", sessionId, tick_num);
-            throw new EntityNotFound("Message not found when setting active response", Severity.EXPECTED);
-        }
-        if (record.get().getRole().equals(ChatCompletionRole.USER.wireValue())) {
+        MessagesRecord record = this.find(target)
+                .orElseThrow(notFound -> {
+                    log.error("No message found for session id {} tick num {}", sessionId, tick_num);
+                    return new EntityNotFound("Message not found when setting active response " + notFound.toString(), Severity.EXPECTED);
+                });
+
+        if (record.getRole().equals(ChatCompletionRole.USER.wireValue())) {
             log.debug("Attempted changing the response number of a user message");
             return;
         }
-        if (record.get().getActiveResponse() == active_response) {
+        if (record.getActiveResponse() == active_response) {
             log.debug("Response {} of message (session: {} , tick: {}) is already active", active_response, sessionId, tick_num);
             return;
         }
 
-        int maxResponseNum = record.get().getResponseNum();
+        int maxResponseNum = record.getResponseNum();
         if (maxResponseNum < active_response) {
             log.error("Max number response is {} yet attempted to change to {}", maxResponseNum, active_response);
             throw new InvalidValue("There's no response with number " + active_response);
@@ -107,10 +105,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                 .set(RESPONSES.TICK_NUM, target.requireValue(MESSAGES.TICK_NUM))
                 .set(RESPONSES.RESPONSE_NUM, data.requireValue(MESSAGES.ACTIVE_RESPONSE))
                 .build()
-        ).orElseThrow(() ->
-                new EntityNotFound("Response with number " + data.requireValue(MESSAGES.ACTIVE_RESPONSE) + " not found."
-                        , Severity.SYSTEM)
-        );
+        ).orElseThrow(notFound -> new EntityNotFound("Not Found when applying active response: " + notFound.toString(), Severity.SYSTEM));
+
         data.set(MESSAGES.CONTENT, newActiveResponse.getContent());
         data.set(MESSAGES.ACTIVE_RESPONSE, newActiveResponse.getResponseNum());
         data.set(MESSAGES.LOCATION_ID, newActiveResponse.getLocationId());
@@ -236,7 +232,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         int sessionId = id.requireValue(MESSAGES.SESSION_ID);
         int requestedTick = id.requireValue(MESSAGES.TICK_NUM);
 
-        MessagesRecord lastMessage = getLastOf(sessionId);
+        MessagesRecord lastMessage = getLastMessageOf(sessionId);
         int lastTick = lastMessage.getTickNum();
 
         if (requestedTick != lastTick) {
@@ -255,7 +251,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     }
 
     private void applyDefaultsOfLastMessage(@NotNull EntityDataPayload<MessagesRecord> data) {
-        MessagesRecord lastMessage = getLastOf(data.requireValue(MESSAGES.SESSION_ID));
+        MessagesRecord lastMessage = getLastMessageOf(data.requireValue(MESSAGES.SESSION_ID));
         if (lastMessage != null) {
             log.trace("Applying last message defaults");
             if (!data.assignsField(MESSAGES.LOCATION_ID))
@@ -283,8 +279,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     }
     @Transactional(readOnly = true)
     public ResponsesRecord getActiveResponseOf(@NotNull EntityKey<MessagesRecord> key) {
-        MessagesRecord record = this.find(key)
-                .orElseThrow(() -> new EntityNotFound("No message with this key " + key, Severity.SYSTEM));
+        MessagesRecord record = this.find(key).orElseThrow(Severity.SYSTEM);
         return getActiveResponseOf(record);
     }
 
@@ -295,7 +290,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                         .set(RESPONSES.TICK_NUM, record.getTickNum())
                         .set(RESPONSES.RESPONSE_NUM, record.getActiveResponse())
                         .build()
-        ).orElseThrow(() -> new EntityNotFound("Response not found", Severity.SYSTEM));
+        ).orElseThrow(Severity.SYSTEM);
     }
 
     public boolean isFirstMessage(@NotNull MessagesRecord record) {

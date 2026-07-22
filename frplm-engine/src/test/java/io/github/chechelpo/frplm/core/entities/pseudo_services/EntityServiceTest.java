@@ -115,8 +115,8 @@ class EntityServiceTest {
                 .set(TEST_TABLE.FIRST_ID, firstId)
                 .set(TEST_TABLE.SECOND_ID, secondId)
                 .build();
-        Optional<TestTableRecord> record = testService.find(key);
-        assertTrue(record.isPresent());
+        EntityReader.FindResult<TestTableRecord> record = testService.find(key);
+        assertTrue(record.isFound());
         assertEquals(key, testService.keyOf(record.get()), "Mismatch in expected constructed key");
     }
     
@@ -156,7 +156,7 @@ class EntityServiceTest {
                 .build();
         assertTrue(testService.getValueOf(TEST_TABLE.COUNTER, unknownKey).isEmpty(),
                 "Could increment value of unregistered entity");
-        assertTrue(testService.find(unknownKey).isEmpty(),
+        assertTrue(testService.find(unknownKey).isNotFound(),
                 "Created phantom record");
     }
     @Test
@@ -236,12 +236,12 @@ class EntityServiceTest {
                 );
 
         assertTrue(
-                unknownResult.isEmpty(),
+                unknownResult.isPresent(),
                 "Decrement unexpectedly succeeded for an unregistered entity"
         );
 
         assertTrue(
-                testService.find(unknownKey).isEmpty(),
+                testService.find(unknownKey).isNotFound(),
                 "Decrement created a phantom record"
         );
     }
@@ -252,7 +252,7 @@ class EntityServiceTest {
                 .set(TEST_TABLE.FIRST_ID, 1020)
                 .set(TEST_TABLE.SECOND_ID, 12)
                 .build();
-        assertTrue(testService.find(unknownKey).isEmpty(), "Created phantom record");
+        assertTrue(testService.find(unknownKey).isNotFound(), "Created phantom record");
     }
     @Test
     public void getMatchingWithPartialKeyReturnsExpectedRecords() {
@@ -324,8 +324,8 @@ class EntityServiceTest {
                 .set(TEST_TABLE.FIRST_ID, firstId)
                 .set(TEST_TABLE.SECOND_ID, secondId)
                 .build();
-        Optional<TestTableRecord> returnValue = testService.find(key);
-        assertTrue(returnValue.isPresent());
+        EntityReader.FindResult<TestTableRecord> returnValue = testService.find(key);
+        assertTrue(returnValue.isFound());
         assertThrows(UneditableField.class, () -> testService.update(key,
                 EntityDataPayload.of(TEST_TABLE.FIRST_ID, 200))
         );
@@ -389,8 +389,8 @@ class EntityServiceTest {
         for (int i = 0 ; i < testAmount ; i++) {
             EntityKey<TestTableRecord> key = keys.get(i);
             assertTrue(testService.exists(key), "Key " + key + " not found after create");
-            Optional<TestTableRecord> findResult = testService.find(key);
-            assertTrue(findResult.isPresent(), "Could not find record of key " + key);
+            EntityReader.FindResult<TestTableRecord> findResult = testService.find(key);
+            assertTrue(findResult.isFound(), "Could not find record of key " + key);
 
             TestTableRecord found = findResult.get();
             EntityDataPayload<TestTableRecord> payload = data.get(i);
@@ -414,7 +414,7 @@ class EntityServiceTest {
             assertTrue(testService.delete(entityKey), "Couldn't delete key " + entityKey);
             assertFalse(testService.delete(entityKey), "Deleted key twice " + entityKey);
             assertFalse(testService.exists(entityKey), "Key still exists " + entityKey);
-            assertTrue(testService.find(entityKey).isEmpty(), "Found deleted record " + entityKey);
+            assertTrue(testService.find(entityKey).isNotFound(), "Found deleted record " + entityKey);
         });
         assertEquals(0, testService.getAll().size(), "Rows remained after deleting all records");
     }

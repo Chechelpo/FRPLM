@@ -9,7 +9,6 @@ import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
-import it.unimi.dsi.fastutil.ints.IntComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
@@ -84,7 +81,7 @@ class MessageServiceTest {
                         .build(),
                 SESSIONS.ID
         );
-        MessagesRecord message = messageService.getLastOf(sessionId);
+        MessagesRecord message = messageService.getLastMessageOf(sessionId);
 
         assertEquals(firstMessage, message.getContent());
     }
@@ -251,7 +248,7 @@ class MessageServiceTest {
                 ));
 
         MessagesRecord actual =
-                messageTestContext.service.getLastOf(sessionId);
+                messageTestContext.service.getLastMessageOf(sessionId);
 
         assertNotNull(actual, "Expected a message at the session's current tick");
 
@@ -270,10 +267,11 @@ class MessageServiceTest {
         List<MessagesRecord> expected = context.messages().stream()
                 .sorted(Comparator.comparingInt(MessagesRecord::getTickNum).reversed())
                 .limit(number)
+                .sorted(Comparator.comparingInt(MessagesRecord::getTickNum))
                 .toList();
 
         List<MessagesRecord> actual =
-                messageTestContext.service.getLastOf(sessionId, number);
+                messageTestContext.service.getLastMessagesOf(sessionId, number);
 
         assertEquals(expected.size(), actual.size(), "Mismatch in messages size");
 
@@ -285,6 +283,81 @@ class MessageServiceTest {
             );
         }
     }
+
+    @Test
+    void getLastEnabled() {
+        MessageTestContext.Context context =
+                messageTestContext.createSessionWithMessages(2, 30);
+
+        int sessionId = context.sessionContext().session().getId();
+
+        // Disable the latest message so the filter is actually exercised
+        MessagesRecord lastMessage = context.messages().stream()
+                .max(Comparator.comparingInt(MessagesRecord::getTickNum))
+                .orElseThrow();
+        messageTestContext.service.update(
+                messageTestContext.service.keyOf(lastMessage),
+                EntityDataPayload.of(MESSAGES.IS_ENABLED, false)
+        );
+
+        // Re-fetch to get the updated IS_ENABLED state
+        List<MessagesRecord> updated =
+                messageTestContext.service.getMessages(context.sessionContext().session());
+
+        MessagesRecord expected = updated.stream()
+                .filter(message -> Boolean.TRUE.equals(message.getIsEnabled()))
+                .max(Comparator.comparingInt(MessagesRecord::getTickNum))
+                .orElseThrow(() -> new AssertionError("No enabled message found"));
+
+        MessagesRecord actual =
+                messageTestContext.service.getLastEnabled(sessionId);
+
+        assertNotNull(actual, "Expected an enabled message");
+        messageTestContext.assertMessageEquals(expected, actual, true);
+    }
+
+    @Test
+    void getLastEnabledMessages() {
+        int number = 20;
+        MessageTestContext.Context context =
+                messageTestContext.createSessionWithMessages(2, 40);
+
+        int sessionId = context.sessionContext().session().getId();
+
+        // Disable every 3rd message so the enabled filter is meaningful
+        for (MessagesRecord message : context.messages()) {
+            if (message.getTickNum() % 3 == 0) {
+                messageTestContext.service.update(
+                        messageTestContext.service.keyOf(message),
+                        EntityDataPayload.of(MESSAGES.IS_ENABLED, false)
+                );
+            }
+        }
+
+        // Re-fetch to get the updated IS_ENABLED state
+        List<MessagesRecord> updated =
+                messageTestContext.service.getMessages(context.sessionContext().session());
+
+        List<MessagesRecord> expected = updated.stream()
+                .filter(message -> Boolean.TRUE.equals(message.getIsEnabled()))
+                .sorted(Comparator.comparingInt(MessagesRecord::getTickNum).reversed())
+                .limit(number)
+                .sorted(Comparator.comparingInt(MessagesRecord::getTickNum))
+                .toList();
+
+        List<MessagesRecord> actual = messageTestContext.service.getLastEnabledMessages(sessionId, number);
+
+        assertEquals(expected.size(), actual.size(), "Mismatch in messages size");
+
+        for (int i = 0; i < expected.size(); i++) {
+            messageTestContext.assertMessageEquals(
+                    expected.get(i),
+                    actual.get(i),
+                    true
+            );
+        }
+    }
+
 
     @Test
     void getMessageRange() {

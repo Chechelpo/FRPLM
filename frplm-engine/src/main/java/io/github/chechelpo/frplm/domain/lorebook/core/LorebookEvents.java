@@ -76,7 +76,7 @@ final class LorebookEvents {
     private void handleWorldNameChange(CRUDCommittedEvent.UpdatedEntity<WorldsRecord> worldEvent) {
         if (!worldEvent.updatedData().assignsField(WORLDS.NAME)) return;
         WorldsRecord world = worldService.find(worldEvent.target())
-                .orElseThrow(() -> new EntityNotFound("Couldn't find parent world when updating lorebook name", Severity.SYSTEM));
+                .orElseThrow("Couldn't find parent world when updating its lorebook name", Severity.SYSTEM);
 
         if (!updateLorebookName(world.getLorebookId(), world.getName()))
             throw new UnexpectedException("Could not update lorebook name", Severity.SYSTEM);
@@ -85,16 +85,13 @@ final class LorebookEvents {
             CRUDCommittedEvent.UpdatedEntity<LocationsRecord> locationEvent
     ) {
         if (!locationEvent.updatedData().assignsField(LOCATIONS.NAME)) return;
-
+        String name = locationEvent.updatedData().requireValue(LOCATIONS.NAME);
         LocationsRecord location = locationsService.find(locationEvent.target())
-                .orElseThrow(() -> new EntityNotFound(
-                        "Couldn't find parent location when updating lorebook name",
-                        Severity.SYSTEM
-                ));
+                .orElseThrow("Couldn't find parent location (with name %s) when updating lorebook name".formatted(name), Severity.SYSTEM);
 
         if (!updateLorebookName(location.getLorebookId(), location.getName())) {
             throw new UnexpectedException(
-                    "Could not update location lorebook name",
+                    "Could not update location's lorebook with new name " + name,
                     Severity.SYSTEM
             );
         }
@@ -104,16 +101,17 @@ final class LorebookEvents {
             CRUDCommittedEvent.UpdatedEntity<RegionRecord> regionEvent
     ) {
         if (!regionEvent.updatedData().assignsField(REGION.NAME)) return;
+        String name = regionEvent.updatedData().requireValue(REGION.NAME);
 
         RegionRecord region = regionService.find(regionEvent.target())
-                .orElseThrow(() -> new EntityNotFound(
-                        "Couldn't find parent region when updating lorebook name",
+                .orElseThrow(
+                        "Couldn't find parent region (with new name %s) when updating lorebook with name ".formatted(name),
                         Severity.SYSTEM
-                ));
+                );
 
         if (!updateLorebookName(region.getLorebookId(), region.getName())) {
             throw new UnexpectedException(
-                    "Could not update region lorebook name",
+                    "Could not update region's lorebook with new name: " + name,
                     Severity.SYSTEM
             );
         }
@@ -125,10 +123,10 @@ final class LorebookEvents {
         if (!characterEvent.updatedData().assignsField(CHARACTERS.NAME)) return;
 
         CharactersRecord character = characterService.find(characterEvent.target())
-                .orElseThrow(() -> new EntityNotFound(
+                .orElseThrow(
                         "Couldn't find parent character when updating lorebook name",
                         Severity.SYSTEM
-                ));
+                );
 
         if (!updateLorebookName(character.getLorebookId(), character.getName())) {
             throw new UnexpectedException(

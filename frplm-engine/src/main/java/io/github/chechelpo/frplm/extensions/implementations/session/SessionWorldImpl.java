@@ -35,23 +35,23 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     MoveResult move(SessionCharacter character, LocationSnapshot location) {
         return move(require(character), (SessionLocationImpl) location);
     }
-    private MoveResult move(SessionCharacterImpl character, SessionLocationImpl location) {
-        if (isAtLocation(character, location)) return MoveResult.alreadyAtLocation(character, location);
+    private MoveResult move(SessionCharacterImpl character, SessionLocationImpl toLocation) {
+        if (isAtLocation(character, toLocation)) return MoveResult.alreadyAtLocation(character, toLocation);
 
         SessionLocationImpl characterLocation = this.locationOf(character);
-        if (!areNeighbours(characterLocation, location))
-            return MoveResult.notNeighbours(character, characterLocation, location);
+        if (!isTraversable(characterLocation, toLocation))
+            return MoveResult.notNeighbours(character, characterLocation, toLocation);
 
         boolean success = session.context().movements().move(
                 session.getRecord().getId(),
                 character.getRecord().getId(),
-                location.getRecord().getId()
+                toLocation.getRecord().getId()
         );
 
         if (!success)
-            return new MoveResult.FailedMove(MoveResult.FailedMove.Type.UNKNOWN, character, characterLocation, location, "unknown");
+            return new MoveResult.FailedMove(MoveResult.FailedMove.Type.UNKNOWN, character, characterLocation, toLocation, "unknown");
         System.out.println("New location of character: " + locationOf(character).getName());
-        return MoveResult.success(character, characterLocation, location);
+        return MoveResult.success(character, characterLocation, toLocation);
     }
 
     @Override
@@ -82,7 +82,7 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
                         .set(LOCATIONS.ID, message.getRecord().getLocationId())
                         .set(LOCATIONS.WORLD_ID, message.getRecord().getWorldId())
                         .build()
-                ).orElseThrow(() -> new EntityNotFound("Could not find location of message " + message, Severity.SYSTEM)),
+                ).orElseThrow(notFound -> new EntityNotFound("Could not find location of message " + message + "\n" + notFound.toString(), Severity.SYSTEM)),
                 context,
                 this
         );

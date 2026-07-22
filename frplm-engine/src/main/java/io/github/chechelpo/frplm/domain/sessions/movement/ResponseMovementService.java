@@ -46,7 +46,7 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
      */
     @Transactional
     public ResponseLocationChangesRecord moveInCurrentResponse(int sessionId, int characterId, int toLocationId){
-        MessagesRecord messagesRecord = messageService.getLastOf(sessionId);
+        MessagesRecord messagesRecord = messageService.getLastMessageOf(sessionId);
         ResponsesRecord response = messageService.getActiveResponseOf(messagesRecord);
         assert Objects.equals(messagesRecord.getActiveResponse(), response.getResponseNum());
 
@@ -59,7 +59,8 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
 
         if (this.exists(key)) {
             this.update(key, EntityDataPayload.of(RESPONSE_LOCATION_CHANGES.LOCATION_ID, toLocationId));
-            return this.find(key).orElseThrow(() -> new UnexpectedException("Couldn't find after update", Severity.SYSTEM));
+            return this.find(key)
+                    .orElseThrow(notFound -> new UnexpectedException("Couldn't find after update: " + notFound.toString(), Severity.SYSTEM));
         } else return this.createAndGet(
                 EntityDataPayload.<ResponseLocationChangesRecord>builder()
                         .set(RESPONSE_LOCATION_CHANGES.SESSION_ID, sessionId)

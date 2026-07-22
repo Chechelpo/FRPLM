@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.prompts.template;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
@@ -84,9 +85,9 @@ class TemplateServiceTest {
         promptTestContext.service.update(promptKey, EntityDataPayload.of(PROMPT_TEMPLATE.CONNECTION_ID, llmConnectionRecord.getId()));
         llmTestContext.service.update(connectionKey, EntityDataPayload.of(LLM_CONNECTION.MAX_TOKENS, maxTokens - 2));
 
-        Optional<PromptTemplateRecord> newRecord = promptTestContext.service.find(promptKey);
+        EntityReader.FindResult<PromptTemplateRecord> newRecord = promptTestContext.service.find(promptKey);
 
-        assertTrue(newRecord.isPresent());
+        assertTrue(newRecord.isFound());
         assertEquals(maxTokens - 2, newRecord.get().getMaxTokens());
     }
 

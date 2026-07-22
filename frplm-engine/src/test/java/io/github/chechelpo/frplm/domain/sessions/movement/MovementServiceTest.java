@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
@@ -85,14 +86,14 @@ class MovementServiceTest {
                             .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
                             .build()
             );
-            Optional<MovementsRecord> movement = movementService.find(EntityKey.<MovementsRecord>builder()
+            EntityReader.FindResult<MovementsRecord> movement = movementService.find(EntityKey.<MovementsRecord>builder()
                     .set(MOVEMENTS.SESSION_ID, thisSession.getId())
                     .set(MOVEMENTS.CHARACTER_ID, userCharacter.getId())
                     .set(MOVEMENTS.AT_TICK, newMessage.getTickNum())
                     .build()
             );
 
-            assertTrue(movement.isPresent(), "No movement registered");
+            assertTrue(movement.isFound(), "No movement registered");
             assertEquals(previousLocation.getId(), movement.get().getPreviousLocationId(), "Movement location id mismatch");
             assertEquals(userCharacter.getId(), movement.get().getCharacterId(), "Movement character id mismatch");
             assertEquals(newMessage.getTickNum(), movement.get().getAtTick(), "Movement at tick mismatch");
@@ -136,7 +137,7 @@ class MovementServiceTest {
             currentLocation = nextLocation;
         }
 
-        Optional<MovementsRecord> movementsRecord = movementService.find(
+        EntityReader.FindResult<MovementsRecord> movementsRecord = movementService.find(
                 EntityKey.<MovementsRecord>builder()
                         .set(MOVEMENTS.SESSION_ID, thisSession.getId())
                         .set(MOVEMENTS.CHARACTER_ID, userCharacter.getId())
@@ -144,7 +145,7 @@ class MovementServiceTest {
                         .build()
         );
 
-        assertTrue(movementsRecord.isPresent(), "No movement record registered");
+        assertTrue(movementsRecord.isFound(), "No movement record registered");
         assertEquals(locations.getFirst().getId(), movementsRecord.get().getPreviousLocationId(), "Movement location id mismatch");
     }
 

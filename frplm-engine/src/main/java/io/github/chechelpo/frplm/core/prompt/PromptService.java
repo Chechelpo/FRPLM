@@ -53,8 +53,7 @@ public class PromptService {
 
     public PromptResult getNewPrompt(int sessionId) {
         SessionImpl session = new SessionImpl(
-            sessionService.find(EntityKey.of(SESSIONS.ID, sessionId))
-                    .orElseThrow(() -> new EntityNotFound("No session with this id", Severity.SYSTEM)),
+            sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow(Severity.SYSTEM),
                 standaloneContext,
                 sessionContext
         );

@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.connection.llm;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostTestContext;
+import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +42,7 @@ class LLMServiceTest {
 
         ApiHostsRecord newHost = llmService.assignHost(con.getId(), newHostUrl);
 
-        LlmConnectionRecord actualCon = llmService.find(conKey).orElseThrow();
+        LlmConnectionRecord actualCon = llmService.find(conKey).orElseThrow(Severity.USER);
         assertEquals(newHost.getId(), actualCon.getHostId().intValue());
         assertEquals(newHostUrl, newHost.getHostUrl());
     }

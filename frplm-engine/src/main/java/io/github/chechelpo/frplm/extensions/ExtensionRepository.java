@@ -120,7 +120,7 @@ final class ExtensionRepository implements EngineRepository {
     public @Unmodifiable @NotNull List<PromptSnapshot> getPrompts() {
         return context.templates().getAll().stream()
                 .map(record -> (PromptSnapshot) new PromptImpl(record, context))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     @Contract(pure = true)

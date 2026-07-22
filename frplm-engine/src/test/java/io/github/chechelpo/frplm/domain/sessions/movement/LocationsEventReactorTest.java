@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationTestContext;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionTestContext;
@@ -83,9 +84,9 @@ class LocationsEventReactorTest {
                 .build();
 
         CurrentLocationsRecord beforeDeletion = currentLocationTestContext.service.find(currentLocationsKey)
-                .orElseThrow(() -> new IllegalStateException("Current locations record not found"));
+                .orElseThrow();
 
-        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(sessionsRecord);
 
         assertTrue(
                 currentLocationTestContext.service.update(currentLocationsKey,
@@ -105,8 +106,8 @@ class LocationsEventReactorTest {
                 ),
                 "Error deleting last message"
         );
-        Optional<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
-        assertTrue(actualLocation.isPresent(), "Character has no current location");
+        EntityReader.FindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
+        assertTrue(actualLocation.isFound(), "Character has no current location");
 
         assertNotEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
         assertEquals(previousLocation.getId(), actualLocation.get().getLocationId(), "Didn't move back to previous location");
@@ -132,9 +133,9 @@ class LocationsEventReactorTest {
                 .build();
 
         CurrentLocationsRecord beforeDeletion = currentLocationTestContext.service.find(currentLocationsKey)
-                .orElseThrow(() -> new IllegalStateException("Current locations record not found"));
+                .orElseThrow();
 
-        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(sessionsRecord);
 
         assertTrue(
                 currentLocationTestContext.service.update(currentLocationsKey,
@@ -155,8 +156,8 @@ class LocationsEventReactorTest {
                 ),
                 "Error deleting last message"
         );
-        Optional<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
-        assertTrue(actualLocation.isPresent(), "Character has no current location");
+        EntityReader.FindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
+        assertTrue(actualLocation.isFound(), "Character has no current location");
 
         assertEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
         assertNotEquals(previousLocation.getId(), actualLocation.get().getLocationId(), "Didn't move back to previous location");
@@ -186,7 +187,7 @@ class LocationsEventReactorTest {
         CharactersRecord userCharacter = context.sessionContext().userCharacter();
         LocationsRecord currentUserLocation = movements.getLocationOf(userCharacter, context.sessionContext().session());
 
-        MessagesRecord lastMessage = messages.service.getLastOf(context.sessionContext().session());
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(context.sessionContext().session());
         EntityKey<MessagesRecord> lastMessageKey = messages.service.keyOf(lastMessage);
 
         //Necessary cause you can't add responses to user messages
@@ -206,7 +207,7 @@ class LocationsEventReactorTest {
         CharactersRecord userCharacter = context.sessionContext().userCharacter();
         List<LocationsRecord> locationsRecordList = context.sessionContext().sessionLocations();
         LocationsRecord startingUserLocation = movements.getLocationOf(userCharacter, sessionsRecord);
-        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(sessionsRecord);
         messages.service.update(
                 messages.service.keyOf(lastMessage),
                 EntityDataPayload.of(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())

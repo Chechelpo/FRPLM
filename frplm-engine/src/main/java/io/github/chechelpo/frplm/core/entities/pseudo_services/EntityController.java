@@ -265,8 +265,7 @@ public abstract class EntityController<
     protected ResponseEntity<EntityDTO> get(@RequestParam Map<String, Object> keyParams) {
         return ResponseEntity.ok(
                 wrapEntity(
-                        service.find(extractKey(keyParams))
-                                .orElseThrow(() -> new EntityNotFound(this.type.getEntityType() + " not found ", Severity.USER))
+                        service.find(extractKey(keyParams)).orElseThrow(Severity.USER)
                 )
         );
     }

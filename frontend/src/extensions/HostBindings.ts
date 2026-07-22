@@ -69,6 +69,11 @@ window.FrplmHost = {
 window.FrplmExtension = {
     /**
      * Fetches the current configuration JSON for an extension.
+     *
+     * Returns an empty object when the extension has no stored
+     * configuration yet (e.g. first time the panel is opened).
+     * This avoids a JSON parse error on the empty 200 body the
+     * backend returns for unconfigured extensions.
      */
     async getConfig(
         extensionId: string
@@ -83,9 +88,21 @@ window.FrplmExtension = {
             );
         }
 
-        return response.json();
-    },
+        const text = await response.text();
 
+        if (!text.trim()) {
+            return {} as ExtensionConfig;
+        }
+
+        try {
+            return JSON.parse(text) as ExtensionConfig;
+        } catch (cause) {
+            throw new Error(
+                `Stored config for ${extensionId} is not valid JSON: ${text}`,
+                { cause }
+            );
+        }
+    },
     /**
      * Saves an extension configuration.
      *
@@ -116,6 +133,15 @@ window.FrplmExtension = {
         }
 
         return true;
+    },
+    logDebug(id: string, message: string): void {
+        console.debug(`[${id}] : ${message}`)
+    },
+    logError(id: string, message: string): void {
+        console.error(`[${id}] : ${message}`)
+    },
+    logInfo(id: string, message: string): void {
+        console.info(`[${id}] : ${message}`)
     },
 
     /**

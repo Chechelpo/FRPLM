@@ -19,8 +19,14 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
         this.world = world;
     }
 
-    public MessagesRecord getRecord() {
-        return record;
+    @Override
+    public boolean isEnabled() {
+        return record.getIsEnabled();
+    }
+
+    @Override
+    public int getTick() {
+        return record.getTickNum();
     }
 
     @Override
@@ -46,5 +52,18 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
     @Override
     public Reference asReference() {
         return new ChatMessage.Reference(this.record.getSessionId(), this.record.getTickNum());
+    }
+
+    @Override
+    public String toString() {
+        return """
+            ---
+            tick %s:
+            %s
+            ---
+            """.formatted(
+                    this.record.getTickNum(),
+            asChatCompletion().toString()
+        );
     }
 }

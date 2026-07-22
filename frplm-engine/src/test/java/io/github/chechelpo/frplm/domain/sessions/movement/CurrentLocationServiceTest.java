@@ -210,7 +210,7 @@ class CurrentLocationServiceTest {
 
         CharactersRecord character = context.sessionContext().userCharacter();
         LocationsRecord currentLocationOfUserCharacter = currentLocationTestContext.service.getLocationOf(character, sessionsRecord);
-        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(sessionsRecord);
 
         EntityKey<CurrentLocationsRecord> currentLocationsKey = EntityKey.<CurrentLocationsRecord>builder()
                 .set(CURRENT_LOCATIONS.SESSION_ID, sessionsRecord.getId())
@@ -218,7 +218,7 @@ class CurrentLocationServiceTest {
                 .build();
 
         CurrentLocationsRecord previousRecord = currentLocationTestContext.service.find(currentLocationsKey)
-                .orElseThrow(() -> new IllegalStateException("No current location found for user character"));
+                .orElseThrow();
         int previousTickNum = previousRecord.getTickNum();
 
         assertDoesNotThrow(() -> currentLocationTestContext.service.update(
@@ -232,7 +232,7 @@ class CurrentLocationServiceTest {
         );
 
         CurrentLocationsRecord nextCurrentLocationsRecord = currentLocationTestContext.service.find(currentLocationsKey)
-                .orElseThrow(() -> new IllegalStateException("No current location found for user character"));
+                .orElseThrow(notFound -> new IllegalStateException("No current location found for user character"));
 
         assertEquals(previousTickNum, nextCurrentLocationsRecord.getTickNum(),
                 "Moving to same location should return the same tick number as its not a movement");
@@ -252,7 +252,7 @@ class CurrentLocationServiceTest {
                 .orElseThrow(() -> new IllegalStateException("No location found to test a movement"));
         edgeTestContext.link(sessionsRecord.getWorldId(), currentLocationOfUserCharacter.getId(), nextLocation.getId());
 
-        MessagesRecord lastMessage = messages.service.getLastOf(sessionsRecord);
+        MessagesRecord lastMessage = messages.service.getLastMessageOf(sessionsRecord);
         MessagesRecord finalLastMessage = lastMessage;
         assertDoesNotThrow(() -> currentLocationTestContext.service.update(
                         EntityKey.<CurrentLocationsRecord>builder()
@@ -266,7 +266,7 @@ class CurrentLocationServiceTest {
                                 .build()),
                 "Error when moving user character"
         );
-        lastMessage = messages.service.getLastOf(sessionsRecord);
+        lastMessage = messages.service.getLastMessageOf(sessionsRecord);
 
         assertEquals(nextLocation.getId(), lastMessage.getLocationId(), "Last message didn't change location");
     }

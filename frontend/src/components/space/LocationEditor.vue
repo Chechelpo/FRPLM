@@ -242,7 +242,7 @@ watch(
 
         <div class="edit-box__title-row">
           <h2 class="edit-box__title">
-            {{ locationName }}
+            {{ locationName }} {{model.location.get('id')}}
           </h2>
 
           <span class="edit-box__count">

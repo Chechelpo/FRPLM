@@ -25,7 +25,7 @@ final class RegionController extends EntityController<RegionRecord, RegionServic
                 .set(REGION.ID, regionId)
                 .set(REGION.WORLD_ID, worldId)
                 .build()
-        ).orElseThrow(() -> new EntityNotFound("No region with this id", Severity.SYSTEM));
+        ).orElseThrow("No region with this id when fetching children regions", Severity.SYSTEM);
 
         return ResponseEntity.ok(
                 wrapEntities(

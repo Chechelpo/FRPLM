@@ -53,10 +53,7 @@ final class EngineHolder {
 
     private SessionsRecord findOrThrowSession(int sessionID) {
         return sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID))
-                .orElseThrow(() -> {
-                    log.error("No session with id {} found", sessionID);
-                    return new EntityNotFound("Could not find session with id " + sessionID, Severity.USER);
-                });
+                .orElseThrow(Severity.SYSTEM);
     }
 
 
@@ -66,8 +63,8 @@ final class EngineHolder {
     ) {
         SessionImpl session = new SessionImpl(findOrThrowSession(sessionID), standaloneContext, sessionContext);
         ConnectionImpl con = (ConnectionImpl) session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("This session has no prompt", Severity.EXPECTED))
-                .getAssignedConnection().orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.EXPECTED));
+                .orElseThrow(() -> new NotInitialized("This session has no prompt", Severity.USER))
+                .getAssignedConnection().orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.USER));
 
         ChatCompletionResponse response = textToTextClient.generate(prompt, con.getRecord())
                 .orElseThrow();
@@ -80,9 +77,11 @@ final class EngineHolder {
                         .build()
         );
         // The following line is needed cause of the deletion by the response service, otherwise content = null
-        generated = sessionContext.messages().find(sessionContext.messages().keyOf(generated)).orElseThrow();
+        generated = sessionContext.messages().find(sessionContext.messages().keyOf(generated)).orElseThrow(Severity.SYSTEM);
 
-        extensionService.runPostGeneration(sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID)).orElseThrow());
+        extensionService.runPostGeneration(
+                sessionContext.sessions().find(EntityKey.of(SESSIONS.ID, sessionID)).orElseThrow(Severity.SYSTEM)
+        );
         return generated;
     }
 
@@ -91,29 +90,27 @@ final class EngineHolder {
                 .set(MESSAGES.SESSION_ID, sessionID)
                 .set(MESSAGES.TICK_NUM, tick_num)
                 .build()
-        ).orElseThrow(() -> {
-            log.error("Tried to regenerate a non-existent message \n sessionId: {} \n tick num: {}", sessionID, tick_num);
-            return new EntityNotFound("No message with this key", Severity.USER);
-        });
+        ).orElseThrow("Tried to regenerate a non-existent message", Severity.USER);
+
         if (previous.getRequestJson() == null)
             throw new IllegalArgumentException("Tried to regenerate a message with no prompt");
         SessionImpl session = new SessionImpl(findOrThrowSession(sessionID), standaloneContext, sessionContext);
 
         ConnectionImpl con = (ConnectionImpl) session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("This session has no prompt", Severity.EXPECTED))
+                .orElseThrow(() -> new NotInitialized("Session " + session.getName() + " has no assigned prompt", Severity.USER))
                 .getAssignedConnection()
-                .orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.EXPECTED));
+                .orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.USER));
 
         var prompt = OBJECT_MAPPER.readValue(previous.getRequestJson(), ChatCompletionRequest.class);
         ChatCompletionResponse response = textToTextClient.generate(prompt, con.getRecord())
                 .orElseThrow();
 
-        extensionService.runPostGeneration(findOrThrowSession(sessionID));
-
         sessionContext.messages().registerNewResponse(sessionID, tick_num, response.choices().getFirst().message().content());
+
+        extensionService.runPostGeneration(findOrThrowSession(sessionID));
 
         return sessionContext.messages().find(
                 sessionContext.messages().keyOf(previous)
-        ).orElseThrow();
+        ).orElseThrow(Severity.SYSTEM);
     }
 }

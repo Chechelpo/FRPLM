@@ -127,10 +127,14 @@ public final class ExtensionService implements ExtensionDBBridge {
     @Override
     public JsonNode getConfig(String extensionId) {
         return store.getConfig(extensionId)
-                .orElse( //This part is for when users inevitably make default config = null at init (I did it already), let them be forgiven for their sins
-                        getExtensionOfType(extensionId, ConfigurableExtension.class)
-                                .orElseThrow(() -> new EntityNotFound("No extension with id " + extensionId, Severity.SYSTEM))
-                                .defaultConfig()
+                .orElseGet( () -> //This part is for when users inevitably make default config = null at init (I did it already), let them be forgiven for their sins
+                        {
+                                JsonNode node = getExtensionOfType(extensionId, ConfigurableExtension.class)
+                                        .orElseThrow(() -> new EntityNotFound("No extension with id " + extensionId, Severity.SYSTEM))
+                                        .defaultConfig();
+                                saveConfig(extensionId, node); //Save new one to prevent this from happening again
+                                return node;
+                        }
                 );
     }
 

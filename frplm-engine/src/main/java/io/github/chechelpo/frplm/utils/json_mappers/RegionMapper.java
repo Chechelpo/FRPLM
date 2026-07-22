@@ -41,7 +41,7 @@ public class RegionMapper {
                         .set(REGION.WORLD_ID, regionRecord.getWorldId())
                         .set(REGION.ID, regionRecord.getParentRegionId())
                 .build()
-            ).orElseThrow(() -> new EntityNotFound("No parent region with id: " + regionRecord.getParentRegionId(), Severity.SYSTEM))
+            ).orElseThrow(notFound -> new EntityNotFound("No parent region with id: " + notFound.toDebugString(), Severity.SYSTEM))
                     .getName();
 
         return OBJECT_MAPPER.valueToTree( new RegionJSON(

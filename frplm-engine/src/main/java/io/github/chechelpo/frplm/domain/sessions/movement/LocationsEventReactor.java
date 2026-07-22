@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
@@ -38,8 +39,9 @@ class LocationsEventReactor {
     private final Movements movements;
     private final MessageService messageService;
     private final MovementService movementService;
+    private final CharacterService characterService;
 
-    LocationsEventReactor(CurrentLocationService currentLocationService, StartingLocationsService startingLocationsService, ResponseMovementService responseMovementService, SessionService sessionService, Movements movements, MessageService messageService, MovementService movementService) {
+    LocationsEventReactor(CurrentLocationService currentLocationService, StartingLocationsService startingLocationsService, ResponseMovementService responseMovementService, SessionService sessionService, Movements movements, MessageService messageService, MovementService movementService, CharacterService characterService) {
         this.currentLocationService = currentLocationService;
         this.startingLocationsService = startingLocationsService;
         this.responseMovementService = responseMovementService;
@@ -47,6 +49,7 @@ class LocationsEventReactor {
         this.movements = movements;
         this.messageService = messageService;
         this.movementService = movementService;
+        this.characterService = characterService;
     }
 
     @EventListener
@@ -129,12 +132,13 @@ class LocationsEventReactor {
 
         if (!event.initialData().assignsField(MESSAGES.LOCATION_ID)){
             log.debug("Assigning by default user character {} location {} (worldId: {} , locationId: {}) to new message of session {}",
-                    characterService.find(EntityKey.of(CHARACTERS.ID, userCharacterId)).orElseThrow().getName(),
+                    characterService.find(EntityKey.of(CHARACTERS.ID, userCharacterId))
+                            .orElseThrow(Severity.SYSTEM).getName(),
                     userCharacterLocation.getName(),
                     userCharacterLocation.getWorldId(),
                     userCharacterLocation.getId(),
                     sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
-                            .orElseThrow()
+                            .orElseThrow(Severity.SYSTEM)
                             .getName()
             );
 
@@ -143,7 +147,7 @@ class LocationsEventReactor {
 
         } else log.trace("Didn't assign default location of user character for new message of session {} (was already assigned)",
                 sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
-                        .orElseThrow()
+                        .orElseThrow(Severity.SYSTEM)
                         .getName()
         );
     }
@@ -177,8 +181,11 @@ class LocationsEventReactor {
         } else userCharacterLocation = getCurrentUserLocation(sessionId);
 
         EntityDataPayload<ResponsesRecord> response = event.initialData();
-        response.set(RESPONSES.WORLD_ID, userCharacterLocation.getWorldId());
-        response.set(RESPONSES.LOCATION_ID, userCharacterLocation.getId());
+        if (!response.assignsField(RESPONSES.LOCATION_ID)){
+            log.debug("Assigning by default user (name {}) character's location in new response");
+            response.set(RESPONSES.WORLD_ID, userCharacterLocation.getWorldId());
+            response.set(RESPONSES.LOCATION_ID, userCharacterLocation.getId());
+        }
     }
 
     private @NotNull LocationsRecord getCurrentUserLocation(int sessionId) {

@@ -30,7 +30,7 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
     }
 
     @Override
-    public String getName(){
+    public String getName() {
         return record.getName();
     }
 
@@ -49,27 +49,30 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
     @Override
     public List<Edge<LocationSnapshot>> getOutEdges() {
         return context.edges().getMatching(
-                EntityKey.<LocationEdgesRecord>builder()
-                        .set(LOCATION_EDGES.WORLD_ID, record.getWorldId())
-                        .set(LOCATION_EDGES.FROM_LOCATION_ID, record.getId())
-                        .build()
-        ).stream()
+                        EntityKey.<LocationEdgesRecord>builder()
+                                .set(LOCATION_EDGES.WORLD_ID, record.getWorldId())
+                                .set(LOCATION_EDGES.FROM_LOCATION_ID, record.getId())
+                                .build()
+                ).stream()
                 .map(record ->
-                    new Edge<LocationSnapshot>(
-                            new LocationImpl(
-                                    context.locations().find(
-                                            EntityKey.<LocationsRecord>builder()
-                                                    .set(LOCATIONS.WORLD_ID, record.getWorldId())
-                                                    .set(LOCATIONS.ID, record.getToLocationId())
-                                                    .build()
-                                    ).orElseThrow(),
-                                    context
-                            ),
-                            record.getEdgedescription(),
-                            record.getTraversable(),
-                            record.getShowDestinationName(),
-                            record.getShowDestinationDescription()
-                    )
+                        new Edge<LocationSnapshot>(
+                                new LocationImpl(
+                                        context.locations().find(
+                                                EntityKey.<LocationsRecord>builder()
+                                                        .set(LOCATIONS.WORLD_ID, record.getWorldId())
+                                                        .set(LOCATIONS.ID, record.getToLocationId())
+                                                        .build()
+                                        ).orElseThrow(
+                                                "Somehow there's an edge in the DB that locations service can't find. Go ape shit right now",
+                                                Severity.SYSTEM
+                                        ),
+                                        context
+                                ),
+                                record.getEdgedescription(),
+                                record.getTraversable(),
+                                record.getShowDestinationName(),
+                                record.getShowDestinationDescription()
+                        )
                 )
                 .toList();
     }
@@ -78,14 +81,19 @@ public class LocationImpl extends StandaloneEntity<LocationsRecord> implements L
     public RegionSnapshot getParentRegion() {
         if (record.getRegionId() == null)
             throw new IllegalStateException("This location has no parent region");
-        return context.regions().find(
-                EntityKey.<RegionRecord>builder()
-                        .set(REGION.WORLD_ID, record.getWorldId())
-                        .set(REGION.ID, record.getRegionId())
-                        .build()
-        )
-                .map(record -> new RegionImpl(record, context))
-                .orElseThrow(() -> new EntityNotFound("This location holds a stale parent region", Severity.SYSTEM));
+        return new RegionImpl(
+                context.regions().find(
+                                EntityKey.<RegionRecord>builder()
+                                        .set(REGION.WORLD_ID, record.getWorldId())
+                                        .set(REGION.ID, record.getRegionId())
+                                        .build()
+                        )
+                        .orElseThrow(notFound -> new EntityNotFound(
+                                "This location holds a stale parent region " + notFound.toString(),
+                                Severity.SYSTEM)
+                        ),
+                context
+        );
     }
 
     @Override

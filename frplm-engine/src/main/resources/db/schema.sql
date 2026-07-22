@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS PROLOG_PREDICATE
     -- Ex.: character/2 character, character transforms into
     -- fears(X, Y):-
     --      character(X), character(Y), fears(X,C), fears(C,Y).
-    type_check   BOOLEAN NOT NULL DEFAULT FALSE,
+    type_check   BOOLEAN      NOT NULL DEFAULT FALSE,
 
     -- Used only for SYSTEM predicates.
     -- Maps the predicate to a Java fact provider.
@@ -60,14 +60,14 @@ CREATE TABLE IF NOT EXISTS PROLOG_PREDICATE
 
 CREATE TABLE IF NOT EXISTS PROLOG_PREDICATE_ARGUMENT
 (
-    predicate_id  INT         NOT NULL
+    predicate_id INT         NOT NULL
         REFERENCES PROLOG_PREDICATE (id)
             ON DELETE CASCADE,
 
-    position      SMALLINT    NOT NULL,
-    name          VARCHAR(64) NOT NULL,
+    position     SMALLINT    NOT NULL,
+    name         VARCHAR(64) NOT NULL,
 
-    type          VARCHAR(32) NOT NULL,
+    type         VARCHAR(32) NOT NULL,
 
     CONSTRAINT pk_prolog_predicate_argument PRIMARY KEY (predicate_id, position),
 
@@ -393,7 +393,7 @@ CREATE TABLE IF NOT EXISTS LOCATIONS
 
     CONSTRAINT pk_locations PRIMARY KEY (world_id, id),
     CONSTRAINT uq_location_name_per_region UNIQUE (world_id, region_id, name),
-    CONSTRAINT fk_location_to_world FOREIGN KEY (world_id) REFERENCES WORLDS(id) ON DELETE CASCADE,
+    CONSTRAINT fk_location_to_world FOREIGN KEY (world_id) REFERENCES WORLDS (id) ON DELETE CASCADE,
     CONSTRAINT fk_location_to_region FOREIGN KEY (world_id, region_id) REFERENCES REGION (world_id, id) ON DELETE CASCADE,
     CONSTRAINT unique_location_name_per_world UNIQUE (name, world_id)
 );
@@ -482,6 +482,7 @@ CREATE TABLE IF NOT EXISTS messages
     request_json    TEXT,                                                         -- Stored, but it could also just be regen. Should only be there for assistant msgs
     content         TEXT,                                                         -- Always derived
 
+    is_enabled      BOOL       NOT NULL DEFAULT TRUE,
     time            INT        NOT NULL,
     world_id        INT        NOT NULL REFERENCES WORLDS (id) ON DELETE CASCADE, -- Derived
     location_id     INT        NOT NULL,                                          -- Derived

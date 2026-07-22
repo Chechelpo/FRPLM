@@ -41,7 +41,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
         EntityKey<LlmConnectionRecord> key = extractKey(params);
 
         LlmConnectionRecord connection = service.find(key)
-                .orElseThrow(() -> new EntityNotFound("Could not find connection to test", Severity.USER));
+                .orElseThrow("Could not find connection to test", Severity.USER);
         ChatCompletionRequest request = ChatCompletionRequest.getTestMessage(
                 service.getValueOf(LLM_CONNECTION.MODEL, key)
                         .orElseThrow(() -> new NotInitialized("Connection model not configured", Severity.USER))
@@ -58,7 +58,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
     public ResponseEntity<ModelResponses> models(@RequestParam Map<String, Object> params) throws EntityNotFound {
         EntityKey<LlmConnectionRecord> key = extractKey(params);
         LlmConnectionRecord llm = service.find(key)
-                    .orElseThrow(() -> new EntityNotFound("Could not find connection to fetch models from", Severity.USER));
+                    .orElseThrow("Could not find connection to fetch models from", Severity.USER);
 
         return ResponseEntity.ok(textToTextClient.modelsOf(llm));
     }
@@ -68,7 +68,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
     @GetMapping("/host/{hostId}")
     public ResponseEntity<Host> getCustomHost(@PathVariable int hostId){
         ApiHostsRecord hostsRecord = hosts.find(EntityKey.of(API_HOSTS.ID, hostId))
-                .orElseThrow(() -> new EntityNotFound("No host with id " + hostId, Severity.EXPECTED));
+                .orElseThrow("No host with id " + hostId, Severity.EXPECTED);
         return ResponseEntity.ok(
                 new Host(hostsRecord.getId(), hostsRecord.getHostUrl())
         );

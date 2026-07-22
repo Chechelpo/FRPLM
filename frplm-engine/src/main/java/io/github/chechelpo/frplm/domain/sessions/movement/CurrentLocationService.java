@@ -82,7 +82,9 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
 
         List<CurrentLocationsRecord> records = store.getAllMatching(key);
         if (records.isEmpty()) {
-            String characterName = characterService.find(EntityKey.of(CHARACTERS.ID, characterId)).orElseThrow().getName();
+            String characterName = characterService.find(EntityKey.of(CHARACTERS.ID, characterId))
+                    .orElseThrow("No character this id when fetching location at session id " + sessionId)
+                    .getName();
             log.error("No current location for character {} in session {}", characterName, sessionId);
             throw new EntityNotFound("Character has no active location", Severity.USER);
         }
@@ -104,7 +106,7 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
 
         //noinspection SpringTransactionalMethodCallsInspection
         previous = this.find(target)
-                .orElseThrow(() -> {
+                .orElseThrow( notFound -> {
                     log.error("No previous location for character {} in session {}", target, target.requireValue(CURRENT_LOCATIONS.SESSION_ID));
                     return new UnexpectedException("This character has no previous location", Severity.SYSTEM);
                 });
@@ -125,7 +127,7 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
             data.set(CURRENT_LOCATIONS.TICK_NUM, previous.getTickNum());
         else { //This is a legitimate movement
             int sessionID = target.requireValue(CURRENT_LOCATIONS.SESSION_ID);
-            data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastOf(sessionID).getTickNum());
+            data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastMessageOf(sessionID).getTickNum());
             movementService.registerMovementChange(
                     previous,
                     data.requireValue(CURRENT_LOCATIONS.TICK_NUM)

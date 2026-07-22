@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -39,20 +40,46 @@ final class MessageStore extends EntityStore<MessagesRecord> {
                 .limit(1)
                 .fetchOneInto(MessagesRecord.class);
     }
+    MessagesRecord getLastEnabled(int sessionId){
+        return ctx.selectFrom(MESSAGES)
+                .where(
+                        MESSAGES.SESSION_ID.eq(sessionId)
+                        .and(MESSAGES.IS_ENABLED.isTrue())
+                )
+                .orderBy(MESSAGES.TICK_NUM.desc())
+                .limit(1)
+                .fetchOne();
+    }
 
     List<MessagesRecord> getLast(int sessionId, int number){
-        return ctx.selectFrom(MESSAGES)
+        Result<MessagesRecord> desc = ctx.selectFrom(MESSAGES)
                 .where(MESSAGES.SESSION_ID.eq(sessionId))
                 .orderBy(MESSAGES.TICK_NUM.desc())
                 .limit(number)
                 .fetch();
+
+        return desc.sortAsc(MESSAGES.TICK_NUM);
+    }
+
+    List<MessagesRecord> getLastEnabled(int sessionId, int number){
+        Result<MessagesRecord> desc = ctx.selectFrom(MESSAGES)
+                .where(MESSAGES.SESSION_ID.eq(sessionId)
+                        .and(MESSAGES.IS_ENABLED.isTrue()))
+                .orderBy(MESSAGES.TICK_NUM.desc())
+                .limit(number)
+                .fetch();
+
+        return desc.sortAsc(MESSAGES.TICK_NUM);
     }
 
     @NonNull List<MessagesRecord> getRange(int sessionId, int from, int to){
+        int span = Math.max(0, to - from + 1);
+
         return ctx.selectFrom(MESSAGES)
                 .where(MESSAGES.SESSION_ID.eq(sessionId))
                 .and(MESSAGES.TICK_NUM.between(from, to))
                 .orderBy(MESSAGES.TICK_NUM.desc())
+                .limit(span)
                 .fetch();
     }
 }
