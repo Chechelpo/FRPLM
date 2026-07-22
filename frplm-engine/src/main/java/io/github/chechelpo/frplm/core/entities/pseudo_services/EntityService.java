@@ -165,6 +165,22 @@ public abstract class EntityService<
         }
     }
 
+    @Override
+    public Optional<String> validateKeyStructure(EntityKey<R> key) {
+        Objects.requireNonNull(key, "Key to validate is null");
+        // Check for unknown fields
+        for (TableField<R, ?> field : key.getValues().keySet())
+            if (!keys.contains(field))
+                return Optional.of("Unknown field in key: " + field.getName());
+
+        // Check if contains all fields
+        for (TableField<R, ?> field : keys)
+            if (!key.assignsField(field))
+                return Optional.of("Key is missing field: " + field.getName());
+
+        return Optional.empty();
+    }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CREATE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

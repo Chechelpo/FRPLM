@@ -235,6 +235,12 @@ public interface EntityReader<R extends TableRecord<R>> {
 
         record Found<R extends TableRecord<R>>(EntityKey<R> target, R result) implements FindResult<R> {}
     }
+    /**
+     * Validates fields present in a key, ignoring assigned values.
+     * @return an error message if the key is invalid
+     */
+    Optional<String> validateKeyStructure(EntityKey<R> key);
+
     FindResult<R> find(EntityKey<R> target);
 
     Result<R> getAll();
