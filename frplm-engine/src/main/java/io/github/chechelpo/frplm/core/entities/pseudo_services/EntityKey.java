@@ -62,6 +62,10 @@ public final class EntityKey<R extends TableRecord<R>>
         return StandardFormats.formatIDUnion(values);
     }
 
+    public boolean assignsField(TableField<R, ?> field){
+        return values.containsKey(field);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
