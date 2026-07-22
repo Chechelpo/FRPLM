@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
-import io.github.chechelpo.frplm.extensions.mapper.ExtensionRepository;
+import io.github.chechelpo.frplm.extensions.snapshot_mappers.ExtensionRepository;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.activation.PostResponseGeneration;
 import io.github.chechelpo.frplm.extensions.api.activation.PrePromptGeneration;

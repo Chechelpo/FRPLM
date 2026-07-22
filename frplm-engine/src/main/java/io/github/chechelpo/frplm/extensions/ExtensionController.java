@@ -3,7 +3,7 @@ package io.github.chechelpo.frplm.extensions;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.api.types.ConfigurableExtension;
-import io.github.chechelpo.frplm.extensions.mapper.ExtensionRepository;
+import io.github.chechelpo.frplm.extensions.snapshot_mappers.ExtensionRepository;
 import org.jooq.JSON;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.CacheControl;

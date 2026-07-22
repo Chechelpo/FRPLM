@@ -1,14 +1,10 @@
-package io.github.chechelpo.frplm.extensions.mapper;
+package io.github.chechelpo.frplm.extensions.snapshot_mappers;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
-import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.PromptSectionEntityImpl;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 

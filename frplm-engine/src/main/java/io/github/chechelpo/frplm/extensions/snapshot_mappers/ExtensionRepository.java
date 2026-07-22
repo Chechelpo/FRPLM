@@ -1,4 +1,4 @@
-package io.github.chechelpo.frplm.extensions.mapper;
+package io.github.chechelpo.frplm.extensions.snapshot_mappers;
 
 import io.github.chechelpo.frplm.extensions.implementations.standalone.*;
 import io.github.chechelpo.frplm.extensions.api.EngineRepository;
