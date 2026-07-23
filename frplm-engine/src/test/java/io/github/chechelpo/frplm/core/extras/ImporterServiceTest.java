@@ -249,7 +249,7 @@ class ImporterServiceTest {
                         .set(REGION.WORLD_ID, worldId)
                         .set(REGION.ID, actualRegion.getParentRegionId())
                         .build();
-                EntityReader.FindResult<RegionRecord> actualParent = regionContext.service.find(parentKey);
+                EntityReader.RecordFindResult<RegionRecord> actualParent = regionContext.service.find(parentKey);
                 assertTrue(actualParent.isFound(), "Couldn't find parent");
                 assertEquals(
                         expectedParentName.get(expectedRegion),

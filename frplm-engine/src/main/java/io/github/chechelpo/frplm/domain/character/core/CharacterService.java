@@ -33,6 +33,10 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
         this.lorebookService = lorebookService;
     }
 
+    public EntityKey<CharactersRecord> keyOf(int characterId){
+        return EntityKey.of(CHARACTERS.ID, characterId);
+    }
+
     @Override
     protected void beforeCreate(EntityDataPayload<CharactersRecord> data, long operationID) {
         if (!data.assignsField(CHARACTERS.LOREBOOK_ID)){
@@ -68,7 +72,7 @@ public class CharacterService extends EntityService<CharactersRecord, CharacterS
         return this.find(EntityKey.of(CHARACTERS.ID, record.getUserPersonaId()))
                 .orElseThrow( notFound -> {
                     log.error("Couldn't find session user character: {}", notFound.toDebugString());
-                    return new EntityNotFound(notFound, Severity.SYSTEM);
+                    return new EntityNotFound((RecordFindResult.NotFound<?>) notFound, Severity.SYSTEM);
                 });
     }
 

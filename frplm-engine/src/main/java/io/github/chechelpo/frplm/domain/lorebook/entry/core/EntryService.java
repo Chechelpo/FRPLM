@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.JsonNode;
@@ -33,24 +34,42 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
-public class EntryService extends EntityService<EntryRecord, EntryStore> {
+public class EntryService extends EntityService<EntryRecord, EntryStore> implements SmartInitializingSingleton {
     private final LorebookService lorebooks;
     private final OutletService outlets;
     private final EntryKeywordService entryKeywordService;
 
-    EntryService(EntryStore entriesStore, LorebookService lorebooks, OutletService outlets, EventBus eventBus, EntryKeywordService entryKeywordService) {
+    EntryService(
+            EntryStore entriesStore,
+            LorebookService lorebooks,
+            OutletService outlets,
+            EventBus eventBus,
+            EntryKeywordService entryKeywordService
+    ) {
         super(entriesStore, eventBus);
         this.lorebooks = lorebooks;
         this.outlets = outlets;
         this.entryKeywordService = entryKeywordService;
     }
+
+    @Override
+    public void afterSingletonsInstantiated() {
+        lorebooks.validateKeyStructure(lorebookKeyOf(1))
+                .ifFailureThrow(msg -> new IllegalStateException("Entry service has wrong key building \n" + msg));
+    }
+
+    private EntityKey<LorebooksRecord> lorebookKeyOf(int lorebookId){
+        return EntityKey.of(LOREBOOKS.ID, lorebookId);
+    }
+
     public Result<EntryRecord> getAllActiveEntriesOf(IntSet lorebookIds){
         return store.getActiveOfLorebooks(lorebookIds);
     }
 
+
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<EntryRecord> data, long operationID) {
-        EntityKey<LorebooksRecord> parentLorebookKey = EntityKey.of(LOREBOOKS.ID, data.requireValue(Entry.ENTRY.LOREBOOK_ID));
+        EntityKey<LorebooksRecord> parentLorebookKey = lorebookKeyOf(data.requireValue(Entry.ENTRY.LOREBOOK_ID));
 
         int newEntryID = lorebooks.incrementAndGet(
                 Lorebooks.LOREBOOKS.NEXT_ENTRY_ID,
@@ -93,7 +112,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> {
             log.error("No such entry with key: {} \n when exchanging lorebooks", entryKey);
             return new EntityNotFound("No such entry with key " + entryKey.toString(), Severity.SYSTEM);
         });
-        LorebooksRecord newLorebook = lorebooks.find(EntityKey.of(LOREBOOKS.ID, toLorebookId)).orElseThrow(notFound -> {
+        LorebooksRecord newLorebook = lorebooks.find(lorebookKeyOf(toLorebookId)).orElseThrow(notFound -> {
             log.error("No such destination lorebook with id {} when exchanging entry: {}", toLorebookId, entry.getName());
             return new EntityNotFound("No such lorebook with id " + toLorebookId, Severity.SYSTEM);
         });

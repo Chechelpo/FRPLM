@@ -146,16 +146,14 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
         // If the movement is from user character, we also update the message location.
         if (updated.assignsField(CURRENT_LOCATIONS.LOCATION_ID) && updated.assignsField(CURRENT_LOCATIONS.TICK_NUM)) {
             if (userCharacterMovement){
-                boolean success = messageService.update(
+                messageService.update(
                         EntityKey.<MessagesRecord>builder()
                                 .set(MESSAGES.SESSION_ID, key.requireValue(CURRENT_LOCATIONS.SESSION_ID))
                                 .set(MESSAGES.TICK_NUM, updated.requireValue(CURRENT_LOCATIONS.TICK_NUM))
                                 .build()
                         ,
                         EntityDataPayload.of(MESSAGES.LOCATION_ID, updated.requireValue(CURRENT_LOCATIONS.LOCATION_ID))
-                );
-                if (!success)
-                    throw new UnexpectedException("Error when updating location of message", Severity.SYSTEM);
+                ).orElseThrow("Couldn't update message location on user movement", Severity.SYSTEM);
             }
 
         }

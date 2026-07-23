@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
@@ -21,12 +22,13 @@ public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implement
     }
 
     @Override
-    public Optional<ConnectionSnapshot> getAssignedConnection() {
-        if (this.record.getConnectionId() == null) return Optional.empty();
+    public FindResult<ConnectionSnapshot, ?, ?> getAssignedConnection() {
+        if (this.record.getConnectionId() == null) 
+            return FindResult.empty("Prompt " + record.getName() + " has no assigned connection");
 
         return context.connections().find(
-                EntityKey.of(LLM_CONNECTION.ID, this.record.getConnectionId().intValue())
-        ).map(rec -> new ConnectionImpl(rec, this.context));
+                EntityKey.of(LLM_CONNECTION.ID, this.record.getConnectionId())
+        ).mapResult(rec -> new ConnectionImpl(rec, this.context));
     }
 
     @Override

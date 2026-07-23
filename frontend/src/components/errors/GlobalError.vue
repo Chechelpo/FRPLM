@@ -1,8 +1,61 @@
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
 import {
   currentGlobalError,
   dismissGlobalError,
 } from "@/core/GlobalError";
+
+/**
+ * Character threshold above which the message is considered "long" and
+ * collapsed by default. Stack traces sent from the frontend for debugging
+ * will typically far exceed this.
+ */
+const LONG_MESSAGE_THRESHOLD = 280;
+
+/**
+ * Number of characters to show in the collapsed preview.
+ */
+const COLLAPSED_PREVIEW_LENGTH = 260;
+
+const isExpanded = ref(false);
+
+const isLongMessage = computed<boolean>(() => {
+  const message = currentGlobalError.value?.message ?? "";
+  return (
+      message.length > LONG_MESSAGE_THRESHOLD ||
+      message.includes("\n")
+  );
+});
+
+const truncatedMessage = computed<string>(() => {
+  const message = currentGlobalError.value?.message ?? "";
+
+  if (message.length <= COLLAPSED_PREVIEW_LENGTH) {
+    return message;
+  }
+
+  /*
+   * Try to cut on a whitespace boundary so we don't split a word in half.
+   */
+  const cut = message.slice(0, COLLAPSED_PREVIEW_LENGTH);
+  const lastSpace = cut.lastIndexOf(" ");
+
+  return `${lastSpace > 0 ? cut.slice(0, lastSpace) : cut}…`;
+});
+
+/*
+ * Collapse the view whenever a new error is shown.
+ */
+watch(
+    () => currentGlobalError.value?.id,
+    () => {
+      isExpanded.value = false;
+    },
+);
+
+function toggleExpanded(): void {
+  isExpanded.value = !isExpanded.value;
+}
 
 function dismiss(): void {
   const error = currentGlobalError.value;
@@ -87,12 +140,41 @@ function dismiss(): void {
                   The operation could not be completed
                 </strong>
 
+                <!-- Collapsed preview for long messages -->
                 <p
+                    v-if="isLongMessage && !isExpanded"
+                    id="global-error-message"
+                    class="edit-box__state-description"
+                >
+                  {{ truncatedMessage }}
+                </p>
+
+                <!-- Full short message (no expand needed) -->
+                <p
+                    v-else-if="!isLongMessage"
                     id="global-error-message"
                     class="edit-box__state-description"
                 >
                   {{ currentGlobalError.message }}
                 </p>
+
+                <!-- Expanded scrollable block for long messages -->
+                <pre
+                    v-if="isLongMessage && isExpanded"
+                    id="global-error-message"
+                    class="global-error__full-message"
+                ><code>{{ currentGlobalError.message }}</code></pre>
+
+                <button
+                    v-if="isLongMessage"
+                    class="global-error__toggle"
+                    type="button"
+                    :aria-expanded="isExpanded"
+                    aria-controls="global-error-message"
+                    @click="toggleExpanded"
+                >
+                  {{ isExpanded ? "Collapse" : "Show full message" }}
+                </button>
               </div>
             </div>
 
@@ -215,6 +297,110 @@ function dismiss(): void {
   stroke-linecap: round;
 }
 
+.global-error__full-message {
+  max-height: min(50dvh, 24rem);
+  min-width: 0;
+  box-sizing: border-box;
+
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+
+  overflow: auto;
+  overscroll-behavior: contain;
+
+  background: rgb(var(--c-surface-raised) / 0.5);
+  border: 1px solid rgb(var(--c-border) / 0.26);
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-monospace);
+  font-size: 0.76rem;
+  font-weight: 450;
+  line-height: 1.55;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  tab-size: 4;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-danger) / 0.5) transparent;
+}
+
+.global-error__full-message::-webkit-scrollbar {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+.global-error__full-message::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.global-error__full-message::-webkit-scrollbar-thumb {
+  background: rgb(var(--c-danger) / 0.4);
+  border: 2px solid transparent;
+  border-radius: var(--radius-round);
+  background-clip: padding-box;
+}
+
+.global-error__full-message::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--c-danger) / 0.6);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.global-error__full-message code {
+  font-family: inherit;
+  font-size: inherit;
+
+  white-space: inherit;
+  overflow-wrap: inherit;
+}
+
+.global-error__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  margin-top: var(--space-2);
+  padding: 0.35rem 0.7rem;
+
+  color: rgb(var(--c-danger-strong));
+
+  background: rgb(var(--c-danger) / 0.1);
+  border: 1px solid rgb(var(--c-danger) / 0.25);
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-primary);
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+      color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+}
+
+.global-error__toggle:hover {
+  color: rgb(var(--c-on-danger));
+
+  background: rgb(var(--c-danger) / 0.85);
+  border-color: rgb(var(--c-danger));
+}
+
+.global-error__toggle:active {
+  transform: scale(0.96);
+}
+
+.global-error__toggle:focus-visible {
+  outline: var(--focus-ring-width) solid
+  rgb(var(--focus-ring-color) / 0.35);
+
+  outline-offset: 2px;
+}
+
 .global-error__details {
   display: grid;
   grid-template-columns:
@@ -304,7 +490,8 @@ function dismiss(): void {
 @media (prefers-reduced-motion: reduce) {
   .global-error-enter-active,
   .global-error-leave-active,
-  .global-error__close {
+  .global-error__close,
+  .global-error__toggle {
     transition: none;
   }
 }

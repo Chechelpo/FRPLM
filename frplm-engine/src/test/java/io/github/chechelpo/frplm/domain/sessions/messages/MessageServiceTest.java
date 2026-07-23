@@ -191,7 +191,7 @@ class MessageServiceTest {
 
             String newContent = "New content: " + ThreadLocalRandom.current().nextInt();
             assertTrue(
-                    messageTestContext.service.update(key, EntityDataPayload.of(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())),
+                    messageTestContext.service.update(key, EntityDataPayload.of(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())).success(),
                     "Could not change message role to assistant"
             );
             messageTestContext.service.registerNewResponse(message.getSessionId(), message.getTickNum(), newContent);
@@ -405,7 +405,7 @@ class MessageServiceTest {
         messageTestContext.service.registerNewResponse(message.getSessionId(), message.getTickNum(), activeResponse3Content);
         ResponsesRecord response3 = messageTestContext.service.getActiveResponseOf(message);
 
-        assertTrue(messageService.update(key, EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, response1.getResponseNum())),
+        assertTrue(messageService.update(key, EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, response1.getResponseNum())).success(),
                 "Couldn't update active response"
         );
         ResponsesRecord firstActualResponse = messageTestContext.service.getActiveResponseOf(message);

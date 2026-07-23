@@ -74,9 +74,13 @@ public class PromptService {
 
     private @NonNull PromptOrchestrator getPromptOrchestrator(@NonNull SessionImpl session) {
         SessionPrompt sessionPrompt = session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("Session has no prompt", Severity.EXPECTED));
+                .orElseThrow(notFound ->
+                        new NotInitialized("Session has no prompt: \n" + notFound.toDebugString(), Severity.USER)
+                );
         ConnectionSnapshot connection = sessionPrompt.getAssignedConnection()
-                .orElseThrow(() -> new NotInitialized("Session has no assigned connection", Severity.EXPECTED));
+                .orElseThrow(notFound ->
+                        new NotInitialized("Session has no assigned connection: \n" + notFound.toDebugString(), Severity.USER)
+                );
 
         return new PromptOrchestrator(
                 new PromptBudgetManager(connection.getModelID(), sessionPrompt.getBudgetConfig(), tokenizerService),

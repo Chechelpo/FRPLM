@@ -115,7 +115,7 @@ class EntityServiceTest {
                 .set(TEST_TABLE.FIRST_ID, firstId)
                 .set(TEST_TABLE.SECOND_ID, secondId)
                 .build();
-        EntityReader.FindResult<TestTableRecord> record = testService.find(key);
+        EntityReader.RecordFindResult<TestTableRecord> record = testService.find(key);
         assertTrue(record.isFound());
         assertEquals(key, testService.keyOf(record.get()), "Mismatch in expected constructed key");
     }
@@ -324,7 +324,7 @@ class EntityServiceTest {
                 .set(TEST_TABLE.FIRST_ID, firstId)
                 .set(TEST_TABLE.SECOND_ID, secondId)
                 .build();
-        EntityReader.FindResult<TestTableRecord> returnValue = testService.find(key);
+        EntityReader.RecordFindResult<TestTableRecord> returnValue = testService.find(key);
         assertTrue(returnValue.isFound());
         assertThrows(UneditableField.class, () -> testService.update(key,
                 EntityDataPayload.of(TEST_TABLE.FIRST_ID, 200))
@@ -389,7 +389,7 @@ class EntityServiceTest {
         for (int i = 0 ; i < testAmount ; i++) {
             EntityKey<TestTableRecord> key = keys.get(i);
             assertTrue(testService.exists(key), "Key " + key + " not found after create");
-            EntityReader.FindResult<TestTableRecord> findResult = testService.find(key);
+            EntityReader.RecordFindResult<TestTableRecord> findResult = testService.find(key);
             assertTrue(findResult.isFound(), "Could not find record of key " + key);
 
             TestTableRecord found = findResult.get();
@@ -403,7 +403,7 @@ class EntityServiceTest {
             EntityKey<TestTableRecord> key = keys.get(i);
             EntityDataPayload<TestTableRecord> newValue = EntityDataPayload
                     .of(TEST_TABLE.DESCRIPTION, TestText.randomText(testAmount + 100 - i, 25, 2000));
-            assertTrue(testService.update(key, newValue), "Update failed for key: " + key);
+            assertTrue(testService.update(key, newValue).success(), "Update failed for key: " + key);
 
             Optional<String> possibleValue = testService.getValueOf(TEST_TABLE.DESCRIPTION, key);
             assertTrue(possibleValue.isPresent(), "Could not find value for key " + key);

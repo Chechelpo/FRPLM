@@ -34,7 +34,7 @@ class OutletServiceTest {
             outletNames[i] = "outlet" + i;
             int outletId = outletService.getOrCreateOutlet(outletNames[i]);
 
-            EntityReader.FindResult<OutletRecord> findResult = outletService.find(EntityKey.of(OUTLET.ID, outletId));
+            EntityReader.RecordFindResult<OutletRecord> findResult = outletService.find(EntityKey.of(OUTLET.ID, outletId));
             assertTrue(findResult.isFound(), "Could not fetch record");
             OutletRecord outletRecord = findResult.get();
             assertEquals(outletRecord.getId(), outletId);

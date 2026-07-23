@@ -95,7 +95,7 @@ class LocationsServiceTest {
                     locations.service.update(
                             locations.service.keyOf(loc),
                             EntityDataPayload.of(LOCATIONS.REGION_ID, region.getId())
-                    ),
+                    ).success(),
                     "Could not link location"
             );
 

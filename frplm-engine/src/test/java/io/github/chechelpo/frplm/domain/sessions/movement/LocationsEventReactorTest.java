@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
-import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
@@ -95,7 +94,7 @@ class LocationsEventReactorTest {
                                 .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
                                 .set(CURRENT_LOCATIONS.TICK_NUM, lastMessage.getTickNum())
                                 .build()
-                ),
+                ).success(),
                 "Error moving user character"
         );
         assertTrue(
@@ -106,7 +105,7 @@ class LocationsEventReactorTest {
                 ),
                 "Error deleting last message"
         );
-        EntityReader.FindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
+        EntityReader.RecordFindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
         assertTrue(actualLocation.isFound(), "Character has no current location");
 
         assertNotEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
@@ -144,7 +143,7 @@ class LocationsEventReactorTest {
                                 .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
                                 .set(CURRENT_LOCATIONS.TICK_NUM, lastMessage.getTickNum())
                                 .build()
-                ),
+                ).success(),
                 "Error moving user character"
         );
         assertThrows(
@@ -156,7 +155,7 @@ class LocationsEventReactorTest {
                 ),
                 "Error deleting last message"
         );
-        EntityReader.FindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
+        EntityReader.RecordFindResult<CurrentLocationsRecord> actualLocation = currentLocationTestContext.service.find(currentLocationsKey);
         assertTrue(actualLocation.isFound(), "Character has no current location");
 
         assertEquals(nextLocation.getId(), actualLocation.get().getLocationId(), "Character is still at next location");
@@ -181,7 +180,7 @@ class LocationsEventReactorTest {
     }
 
     @Test
-    void onNewResponseRegisterLocation() {
+    void onNewResponseRegister_UserLocation() {
         MessageTestContext.Context context = messages.createSessionWithMessages(100, 100);
         SessionsRecord sessionsRecord = context.sessionContext().session();
         CharactersRecord userCharacter = context.sessionContext().userCharacter();

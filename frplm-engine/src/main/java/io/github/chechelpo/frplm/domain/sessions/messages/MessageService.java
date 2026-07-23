@@ -54,6 +54,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     public List<MessagesRecord> getLastEnabledMessages(int sessionId, int number){
         return store.getLastEnabled(sessionId, number);
     }
+    
     /** @return messages in range from <= tick_num <= to (both inclusive) and descending order (last messages first) */
     public List<MessagesRecord> getRange(int sessionId, int from, int to){
         return store.getRange(sessionId, from, to);
@@ -133,7 +134,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         if (data.assignsField(MESSAGES.CONTENT)) changed.set(RESPONSES.CONTENT, data.requireValue(MESSAGES.CONTENT));
         if (data.assignsField(MESSAGES.TIME)) changed.set(RESPONSES.ADVANCES_TIME_BY, data.requireValue(MESSAGES.TIME));
 
-        responseService.update(responseService.keyOf(currentActiveResponse), changed);
+        responseService.update(responseService.keyOf(currentActiveResponse), changed)
+                .orElseThrow("Couldn't update active response of message: " + target);
     }
 
 
@@ -150,7 +152,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         data.set(MESSAGES.TICK_NUM,
                 sessionService.incrementAndGet(
                                 SESSIONS.CURRENT_TICK,
-                                EntityKey.of(SESSIONS.ID, data.requireValue(MESSAGES.SESSION_ID))
+                                sessionService.keyOf(data.requireValue(MESSAGES.SESSION_ID))
                         )
                         .orElseThrow(() -> {
                             log.error("Could not fetch next message tick for new message \n {}", data.assignments());
@@ -197,7 +199,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         if (messageRole != ChatCompletionRole.ASSISTANT)
             throw new InvalidValue("Tried to register a new response of a user message");
 
-        int world_id = sessionService.getValueOf(SESSIONS.WORLD_ID, EntityKey.of(SESSIONS.ID, sessionId))
+        int world_id = sessionService.getValueOf(SESSIONS.WORLD_ID, sessionService.keyOf(sessionId))
                 .orElseThrow(() -> new EntityNotFound("Could not session with id " + sessionId, Severity.SYSTEM));
         registerNewResponse(EntityDataPayload.<ResponsesRecord>builder()
                 .set(RESPONSES.SESSION_ID, sessionId)
@@ -221,7 +223,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
         ResponsesRecord newResponse = responseService.createAndGet(payload);
 
-        this.update(messageKey, EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, newActiveResponseNum));
+        this.update(messageKey, EntityDataPayload.of(MESSAGES.ACTIVE_RESPONSE, newActiveResponseNum))
+                .orElseThrow();
     }
 
     /**
@@ -290,7 +293,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                         .set(RESPONSES.TICK_NUM, record.getTickNum())
                         .set(RESPONSES.RESPONSE_NUM, record.getActiveResponse())
                         .build()
-        ).orElseThrow(Severity.SYSTEM);
+        ).orElseThrow("Couldn't find active response of message: \n" + record, Severity.SYSTEM);
     }
 
     public boolean isFirstMessage(@NotNull MessagesRecord record) {

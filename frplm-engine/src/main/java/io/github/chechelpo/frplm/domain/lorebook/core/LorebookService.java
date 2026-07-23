@@ -33,6 +33,10 @@ public class LorebookService extends EntityService<LorebooksRecord, LorebookStor
         return this.store.getGlobalLorebooks();
     }
 
+    public EntityKey<LorebooksRecord> keyOf(int lorebookId){
+        return EntityKey.of(LOREBOOKS.ID, lorebookId);
+    }
+
     @Transactional(readOnly = true)
     @CheckReturnValue
     public @NotNull LorebooksRecord getLorebookOf(@NotNull CharactersRecord record) throws EntityNotFound {

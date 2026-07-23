@@ -38,6 +38,10 @@ public class WorldService extends EntityService<
         this.lorebooks = lorebooks;
     }
 
+    public EntityKey<WorldsRecord> keyOf(int worldId){
+        return EntityKey.of(WORLDS.ID, worldId);
+    }
+
     @Transactional(readOnly = true)
     @CheckReturnValue
     public WorldsRecord getWorldOf(@NotNull SessionsRecord record) throws EntityNotFound {

@@ -22,8 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import java.util.Optional;
-
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 
@@ -39,11 +37,10 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     @Transactional(readOnly = true)
     @CheckReturnValue
-    public FindResult<PromptTemplateRecord> getOf(@NotNull SessionsRecord record) throws EntityNotFound {
-        if (record.getMainPrompt() == null) return FindResult.notFound(null);
+    public RecordFindResult<PromptTemplateRecord> getOf(@NotNull SessionsRecord record) throws EntityNotFound {
+        if (record.getMainPrompt() == null) return RecordFindResult.notFound(null);
         return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getMainPrompt().shortValue()));
     }
-
 
     @Override
     protected void beforeCreate(EntityDataPayload<PromptTemplateRecord> data, long operationID) {
@@ -86,7 +83,7 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
     private void updateToMaxTokensConnection(@NotNull EntityDataPayload<PromptTemplateRecord> data) {
         data.set(PROMPT_TEMPLATE.MAX_TOKENS,
                 llmService.getValueOf(LLM_CONNECTION.MAX_TOKENS,
-                        EntityKey.of(LLM_CONNECTION.ID, data.requireValue(PROMPT_TEMPLATE.CONNECTION_ID))
+                        llmService.keyOf(data.requireValue(PROMPT_TEMPLATE.CONNECTION_ID))
                 ).orElseThrow(() -> new UnexpectedException("Setting new connection ID with no maxTokens", Severity.USER))
         );
     }

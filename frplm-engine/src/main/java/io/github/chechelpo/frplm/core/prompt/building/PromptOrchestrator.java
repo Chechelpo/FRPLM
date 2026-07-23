@@ -38,8 +38,9 @@ public class PromptOrchestrator implements PromptBuilder {
         List<ChatMessage> messages = tokensManager.fillChatHistoryBudget(session);
 
         List<PromptSectionEntitySnapshot> sections = session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("Prompt is not initialized", Severity.EXPECTED))
-                .getSections().stream()
+                .orElseThrow(notFound ->
+                        new NotInitialized("Prompt is not initialized: \n" + notFound.toDebugString(), Severity.USER)
+                ).getSections().stream()
                 .peek(section -> {
                     if (!tokensManager.hasSpaceFor(section.content(), TextType.PROMPT_SECTION))
                         throw new UnexpectedException("Token use of prompt section is larger than the available budget", Severity.USER);

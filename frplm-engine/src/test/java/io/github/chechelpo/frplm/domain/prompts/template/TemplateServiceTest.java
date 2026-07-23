@@ -14,8 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.Optional;
-
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,7 +83,7 @@ class TemplateServiceTest {
         promptTestContext.service.update(promptKey, EntityDataPayload.of(PROMPT_TEMPLATE.CONNECTION_ID, llmConnectionRecord.getId()));
         llmTestContext.service.update(connectionKey, EntityDataPayload.of(LLM_CONNECTION.MAX_TOKENS, maxTokens - 2));
 
-        EntityReader.FindResult<PromptTemplateRecord> newRecord = promptTestContext.service.find(promptKey);
+        EntityReader.RecordFindResult<PromptTemplateRecord> newRecord = promptTestContext.service.find(promptKey);
 
         assertTrue(newRecord.isFound());
         assertEquals(maxTokens - 2, newRecord.get().getMaxTokens());

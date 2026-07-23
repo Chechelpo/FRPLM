@@ -1,5 +1,8 @@
 package io.github.chechelpo.frplm.utils.prolog.prolog_entity_translators;
 
+import io.github.chechelpo.frplm.extensions.api.standalone.Snapshot;
+import io.github.chechelpo.frplm.extensions.api.standalone.StableReference;
+
 import java.util.Optional;
 
 /**
@@ -16,9 +19,19 @@ import java.util.Optional;
  * </p>
  */
 public interface PrologEntityTranslator {
+
+    sealed interface IdTranslationResult {
+        record MalformedArgument() implements IdTranslationResult {}
+        record EntityDoesNotExist() implements IdTranslationResult {}
+        record Success(String id) implements IdTranslationResult {}
+    }
     /**
      * @return this entity prolog representation, empty() if it does not exist.
      */
     Optional<String> getIdOfRepresentation(String argumentName);
+
+    sealed interface QualifiedNameResult {
+        record Success(String id) implements QualifiedNameResult {}
+    }
     Optional<String> getQualifiedName(String id);
 }

@@ -43,7 +43,7 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
         }
         data.set(
                 REGION.ID,
-                worldService.incrementAndGet(WORLDS.NEXT_REGION_ID, EntityKey.of(WORLDS.ID, data.requireValue(REGION.WORLD_ID)))
+                worldService.incrementAndGet(WORLDS.NEXT_REGION_ID, worldService.keyOf(data.requireValue(REGION.WORLD_ID)))
                         .orElseThrow(() -> new UnexpectedException("Could not fetch id for region " + data, Severity.SYSTEM))
         );
 
@@ -86,7 +86,7 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
 
     @Override
     protected void afterSuccessfulDelete(EntityKey<RegionRecord> id, long operationID, @NonNull RegionRecord record) {
-        boolean lorebookDeleted = lorebookService.delete(EntityKey.of(LOREBOOKS.ID, record.getLorebookId()));
+        boolean lorebookDeleted = lorebookService.delete(lorebookService.keyOf(record.getLorebookId()));
         if (lorebookDeleted)
             log.error("Could not delete associated lorebook when deleting \n {}", record);
 

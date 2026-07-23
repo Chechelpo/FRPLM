@@ -34,10 +34,6 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
         return record.getContent();
     }
 
-    public @NotNull ChatCompletionMessage asCompletionMessage() {
-        ChatCompletionRole role = ChatCompletionRole.fromWireValue(record.getRole());
-        return new ChatCompletionMessage(role,null, record.getContent());
-    }
     @Contract(" -> new")
     public @NotNull SessionLocationImpl getLocation() {
         return world.locationOf(this);

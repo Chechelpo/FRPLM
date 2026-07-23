@@ -49,7 +49,7 @@ public class CurrentLocationTestContext implements DBReload {
                         .set(CURRENT_LOCATIONS.LOCATION_ID, toLocationId)
                         .set(CURRENT_LOCATIONS.TICK_NUM, atTick)
                         .build()
-        );
+        ).orElseThrow().success();
     }
 
     @Override

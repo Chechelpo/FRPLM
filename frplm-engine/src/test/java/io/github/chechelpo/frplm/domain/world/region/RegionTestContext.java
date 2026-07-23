@@ -53,7 +53,7 @@ public class RegionTestContext implements DBReload {
     public void linkRegion(RegionRecord parent, RegionRecord child){
         assertEquals(parent.getWorldId(), child.getWorldId(), "Mismatch in world id");
         assertTrue(
-                service.update(service.keyOf(child), EntityDataPayload.of(REGION.PARENT_REGION_ID, parent.getId())),
+                service.update(service.keyOf(child), EntityDataPayload.of(REGION.PARENT_REGION_ID, parent.getId())).success(),
                 "Could not link region"
         );
     }

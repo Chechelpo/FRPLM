@@ -275,12 +275,12 @@ public abstract class EntityController<
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     protected ResponseEntity<Boolean> patch(@RequestParam Map<String, Object> keyParams, @RequestBody Map<String, Object> patch) {
-        boolean patched = service.update(
+        service.update(
                 extractKey(keyParams),
                 extractPayload(patch)
-        );
+        ).orElseThrow();
 
-        return ResponseEntity.ok(patched);
+        return ResponseEntity.ok(true);
     }
 
     /**

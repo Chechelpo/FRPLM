@@ -21,7 +21,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -86,7 +85,7 @@ class MovementServiceTest {
                             .set(CURRENT_LOCATIONS.LOCATION_ID, nextLocation.getId())
                             .build()
             );
-            EntityReader.FindResult<MovementsRecord> movement = movementService.find(EntityKey.<MovementsRecord>builder()
+            EntityReader.RecordFindResult<MovementsRecord> movement = movementService.find(EntityKey.<MovementsRecord>builder()
                     .set(MOVEMENTS.SESSION_ID, thisSession.getId())
                     .set(MOVEMENTS.CHARACTER_ID, userCharacter.getId())
                     .set(MOVEMENTS.AT_TICK, newMessage.getTickNum())
@@ -137,7 +136,7 @@ class MovementServiceTest {
             currentLocation = nextLocation;
         }
 
-        EntityReader.FindResult<MovementsRecord> movementsRecord = movementService.find(
+        EntityReader.RecordFindResult<MovementsRecord> movementsRecord = movementService.find(
                 EntityKey.<MovementsRecord>builder()
                         .set(MOVEMENTS.SESSION_ID, thisSession.getId())
                         .set(MOVEMENTS.CHARACTER_ID, userCharacter.getId())

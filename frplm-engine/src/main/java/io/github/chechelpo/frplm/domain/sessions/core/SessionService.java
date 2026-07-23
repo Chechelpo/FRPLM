@@ -33,6 +33,11 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
         this.characterService = characters;
         this.startingLocationsService = startingLocationsService;
     }
+
+    public EntityKey<SessionsRecord> keyOf(int sessionId){
+        return EntityKey.of(SESSIONS.ID, sessionId);
+    }
+
     @Transactional(readOnly = true)
     public Optional<Integer> getUserCharacterID(int sessionID) {
         return this.getValueOf(SESSIONS.USER_PERSONA_ID, EntityKey.of(SESSIONS.ID, sessionID));
@@ -44,7 +49,7 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<SessionsRecord> data, long operationID) {
-        EntityKey<CharactersRecord> characterKey = EntityKey.of(CHARACTERS.ID, data.requireValue(SESSIONS.USER_PERSONA_ID));
+        EntityKey<CharactersRecord> characterKey = characterService.keyOf(data.requireValue(SESSIONS.USER_PERSONA_ID));
         boolean canBeUser =  characterService.getValueOf(
                     CHARACTERS.CAN_BE_USER,
                         characterKey

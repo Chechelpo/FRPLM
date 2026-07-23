@@ -7,7 +7,6 @@ import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
-import org.jooq.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +17,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
 import static org.junit.jupiter.api.Assertions.*;
@@ -258,7 +256,7 @@ class EntityControllerTest {
     void getReturnsWrappedEntityWhenServiceFindsRecord() {
         TestTableRecord found = record(1, 2, "found", 0, "found description text");
 
-        when(service.find(any())).thenReturn(EntityReader.FindResult.found(EntityKey.of(TEST_TABLE.FIRST_ID, 1), found));
+        when(service.find(any())).thenReturn(EntityReader.RecordFindResult.found(EntityKey.of(TEST_TABLE.FIRST_ID, 1), found));
 
         ResponseEntity<EntityController.EntityDTO> response = controller.get(Map.of(
                 DTOFields.FirstID.toString(), "1",
@@ -280,7 +278,7 @@ class EntityControllerTest {
 
     @Test
     void getThrowsEntityNotFoundWhenServiceReturnsEmpty() {
-        when(service.find(any())).thenReturn(EntityReader.FindResult.notFound(EntityKey.of(TEST_TABLE.FIRST_ID, 0)));
+        when(service.find(any())).thenReturn(EntityReader.RecordFindResult.notFound(EntityKey.of(TEST_TABLE.FIRST_ID, 0)));
 
         assertThrows(EntityNotFound.class, () ->
                 controller.get(Map.of(
@@ -297,7 +295,9 @@ class EntityControllerTest {
 
     @Test
     void patchDelegatesToServiceUpdateAndReturnsBooleanBody() {
-        when(service.update(any(), any())).thenReturn(true);
+        when(service.update(any(), any())).thenReturn(
+                new EntityUpdater.UpdateResult.Success<>(null, null)
+        );
 
         ResponseEntity<Boolean> response = controller.patch(
                 Map.of(

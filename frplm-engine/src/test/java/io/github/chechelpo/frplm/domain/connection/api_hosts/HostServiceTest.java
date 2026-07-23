@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,7 +32,7 @@ class HostServiceTest {
     void testLLMBackendsRegistered(){
         for (LLMBackend backend : LLMBackend.values()){
             if (backend.toKey().isPresent()){
-                EntityReader.FindResult<ApiHostsRecord> record = hostTestContext.service.find(backend.toKey().get());
+                EntityReader.RecordFindResult<ApiHostsRecord> record = hostTestContext.service.find(backend.toKey().get());
                 assertTrue(record.isFound());
                 ApiHostsRecord llmBackendRecord = record.get();
 

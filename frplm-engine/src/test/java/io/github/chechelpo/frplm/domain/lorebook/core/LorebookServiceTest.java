@@ -106,7 +106,7 @@ class LorebookServiceTest {
                 locationTestContext.service.update(
                     locationTestContext.service.keyOf(locationToUpdate),
                     EntityDataPayload.of(LOCATIONS.NAME, newName)
-            )
+            ).success()
         );
         assertEquals(
                 newName,
@@ -132,7 +132,7 @@ class LorebookServiceTest {
                 worldTestContext.service.update(
                         worldTestContext.service.keyOf(worldToUpdate),
                         EntityDataPayload.of(WORLDS.NAME, newName)
-                ),
+                ).success(),
                 "World update failed"
         );
 
@@ -161,7 +161,7 @@ class LorebookServiceTest {
                 regionTestContext.service.update(
                         regionTestContext.service.keyOf(regionToUpdate),
                         EntityDataPayload.of(REGION.NAME, newName)
-                ),
+                ).success(),
                 "Region update failed"
         );
 
@@ -190,7 +190,7 @@ class LorebookServiceTest {
                 characters.service.update(
                         characters.service.keyOf(characterToUpdate),
                         EntityDataPayload.of(CHARACTERS.NAME, newName)
-                ),
+                ).success(),
                 "Character update failed"
         );
 

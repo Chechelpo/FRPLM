@@ -62,9 +62,7 @@ final class EngineHolder {
             ChatCompletionRequest prompt
     ) {
         SessionImpl session = new SessionImpl(findOrThrowSession(sessionID), standaloneContext, sessionContext);
-        ConnectionImpl con = (ConnectionImpl) session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("This session has no prompt", Severity.USER))
-                .getAssignedConnection().orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.USER));
+        ConnectionImpl con = getConOrThrow(session);
 
         ChatCompletionResponse response = textToTextClient.generate(prompt, con.getRecord())
                 .orElseThrow();
@@ -96,10 +94,7 @@ final class EngineHolder {
             throw new IllegalArgumentException("Tried to regenerate a message with no prompt");
         SessionImpl session = new SessionImpl(findOrThrowSession(sessionID), standaloneContext, sessionContext);
 
-        ConnectionImpl con = (ConnectionImpl) session.getPrompt()
-                .orElseThrow(() -> new NotInitialized("Session " + session.getName() + " has no assigned prompt", Severity.USER))
-                .getAssignedConnection()
-                .orElseThrow(() -> new NotInitialized("This prompt has no connection", Severity.USER));
+        ConnectionImpl con = getConOrThrow(session);
 
         var prompt = OBJECT_MAPPER.readValue(previous.getRequestJson(), ChatCompletionRequest.class);
         ChatCompletionResponse response = textToTextClient.generate(prompt, con.getRecord())
@@ -113,4 +108,20 @@ final class EngineHolder {
                 sessionContext.messages().keyOf(previous)
         ).orElseThrow(Severity.SYSTEM);
     }
+
+    private static ConnectionImpl getConOrThrow(SessionImpl session) {
+        return (ConnectionImpl) session.getPrompt()
+                .orElseThrow(notFound ->
+                        new NotInitialized("Session " + session.getName() + " has no assigned prompt: \n" + notFound.toDebugString(), Severity.USER)
+                )
+                .getAssignedConnection()
+                .orElseThrow(notFound ->
+                        new NotInitialized(
+                                "Couldn't get session " + session.getName() + "prompt's llm connection: \n" + notFound.toDebugString(),
+                                Severity.USER
+                        )
+                );
+    }
+
+
 }

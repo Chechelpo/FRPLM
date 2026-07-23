@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
+import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
@@ -72,9 +73,9 @@ public final class SessionImpl implements Session {
     }
 
     @Override
-    public Optional<SessionPrompt> getPrompt() {
+    public FindResult<SessionPrompt, ?, ?> getPrompt() {
         return context.templates().getOf(this.record)
-                .map(template -> new PromptSessionImpl(template, context, this));
+                .mapResult(template -> new PromptSessionImpl(template, context, this));
     }
 
     @Contract("_ -> new")

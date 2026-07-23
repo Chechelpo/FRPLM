@@ -58,7 +58,8 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
                 .build();
 
         if (this.exists(key)) {
-            this.update(key, EntityDataPayload.of(RESPONSE_LOCATION_CHANGES.LOCATION_ID, toLocationId));
+            this.update(key, EntityDataPayload.of(RESPONSE_LOCATION_CHANGES.LOCATION_ID, toLocationId))
+                    .orElseThrow("Couldn't move in active response" , Severity.SYSTEM);
             return this.find(key)
                     .orElseThrow(notFound -> new UnexpectedException("Couldn't find after update: " + notFound.toString(), Severity.SYSTEM));
         } else return this.createAndGet(

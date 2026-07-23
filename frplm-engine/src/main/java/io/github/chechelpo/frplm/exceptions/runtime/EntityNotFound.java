@@ -10,7 +10,7 @@ public final class EntityNotFound extends RuntimeDomainException {
     public EntityNotFound(@NotNull String message, Severity severity) {
         super(message, severity, HttpStatus.NOT_FOUND);
     }
-    public EntityNotFound(EntityReader.FindResult.NotFound<?> notFound, Severity severity){
+    public EntityNotFound(EntityReader.RecordFindResult.NotFound<?> notFound, Severity severity){
         super(notFound.toDebugString(), severity, HttpStatus.NOT_FOUND);
     }
 }

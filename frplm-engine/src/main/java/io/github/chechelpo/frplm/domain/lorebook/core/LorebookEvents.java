@@ -1,9 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityUpdater;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
@@ -15,6 +13,7 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -44,7 +43,7 @@ final class LorebookEvents {
         this.locationsService = locationsService;
     }
 
-    private boolean updateLorebookName(int lorebookId, String newName){
+    private EntityUpdater.UpdateResult<LorebooksRecord> updateLorebookName(int lorebookId, String newName){
         Objects.requireNonNull(newName);
         return lorebookService.update(
                 EntityKey.of(LOREBOOKS.ID, lorebookId),
@@ -73,14 +72,18 @@ final class LorebookEvents {
         }
     }
 
+    private static @NonNull String getMessage(String name) {
+        return "Couldn't update " + name + "'s lorebook";
+    }
     private void handleWorldNameChange(CRUDCommittedEvent.UpdatedEntity<WorldsRecord> worldEvent) {
         if (!worldEvent.updatedData().assignsField(WORLDS.NAME)) return;
         WorldsRecord world = worldService.find(worldEvent.target())
                 .orElseThrow("Couldn't find parent world when updating its lorebook name", Severity.SYSTEM);
 
-        if (!updateLorebookName(world.getLorebookId(), world.getName()))
-            throw new UnexpectedException("Could not update lorebook name", Severity.SYSTEM);
+        updateLorebookName(world.getLorebookId(), world.getName())
+                .orElseThrow(getMessage(world.getName()), Severity.SYSTEM);
     }
+
     private void handleLocationNameChange(
             CRUDCommittedEvent.UpdatedEntity<LocationsRecord> locationEvent
     ) {
@@ -89,12 +92,8 @@ final class LorebookEvents {
         LocationsRecord location = locationsService.find(locationEvent.target())
                 .orElseThrow("Couldn't find parent location (with name %s) when updating lorebook name".formatted(name), Severity.SYSTEM);
 
-        if (!updateLorebookName(location.getLorebookId(), location.getName())) {
-            throw new UnexpectedException(
-                    "Could not update location's lorebook with new name " + name,
-                    Severity.SYSTEM
-            );
-        }
+        updateLorebookName(location.getLorebookId(), location.getName())
+                .orElseThrow(getMessage(location.getName()), Severity.SYSTEM);
     }
 
     private void handleRegionNameChange(
@@ -109,12 +108,8 @@ final class LorebookEvents {
                         Severity.SYSTEM
                 );
 
-        if (!updateLorebookName(region.getLorebookId(), region.getName())) {
-            throw new UnexpectedException(
-                    "Could not update region's lorebook with new name: " + name,
-                    Severity.SYSTEM
-            );
-        }
+        updateLorebookName(region.getLorebookId(), region.getName())
+                .orElseThrow(getMessage(region.getName()), Severity.SYSTEM);
     }
 
     private void handleCharacterNameChange(
@@ -128,11 +123,7 @@ final class LorebookEvents {
                         Severity.SYSTEM
                 );
 
-        if (!updateLorebookName(character.getLorebookId(), character.getName())) {
-            throw new UnexpectedException(
-                    "Could not update character lorebook name",
-                    Severity.SYSTEM
-            );
-        }
+       updateLorebookName(character.getLorebookId(), character.getName())
+               .orElseThrow(getMessage(character.getName()), Severity.SYSTEM);
     }
 }

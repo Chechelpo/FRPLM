@@ -41,7 +41,16 @@ class LocationsEventReactor {
     private final MovementService movementService;
     private final CharacterService characterService;
 
-    LocationsEventReactor(CurrentLocationService currentLocationService, StartingLocationsService startingLocationsService, ResponseMovementService responseMovementService, SessionService sessionService, Movements movements, MessageService messageService, MovementService movementService, CharacterService characterService) {
+    LocationsEventReactor(
+            CurrentLocationService currentLocationService,
+            StartingLocationsService startingLocationsService,
+            ResponseMovementService responseMovementService,
+            SessionService sessionService,
+            Movements movements,
+            MessageService messageService,
+            MovementService movementService,
+            CharacterService characterService
+    ) {
         this.currentLocationService = currentLocationService;
         this.startingLocationsService = startingLocationsService;
         this.responseMovementService = responseMovementService;
@@ -240,17 +249,8 @@ class LocationsEventReactor {
                         .set(CURRENT_LOCATIONS.LOCATION_ID, newLoc.getLocationId())
                         .build()
                 )
+                        .orElseThrow("Couldn't assign new active response changes. New active response: " + newActiveResponse, Severity.SYSTEM)
         );
-    }
-    /** Assigns the new active response location as the new message location */
-    void onResponseChangeMessageLocation(ResponsesRecord newActiveResponse, EntityDataPayload<MessagesRecord> toUpdate) {
-        toUpdate.set(MESSAGES.WORLD_ID, newActiveResponse.getWorldId());
-        toUpdate.set(MESSAGES.LOCATION_ID, newActiveResponse.getLocationId());
-        log.debug("Changed current location for message {}", toUpdate);
-    }
-
-    void applyLocationChangesOfResponse(int sessionId, int tick_num, int response_num){
-
     }
 
 }

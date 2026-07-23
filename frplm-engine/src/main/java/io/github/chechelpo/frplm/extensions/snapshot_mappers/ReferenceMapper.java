@@ -4,6 +4,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.extensions.api.standalone.Snapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.StableReference;
+import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -43,17 +44,16 @@ sealed abstract class ReferenceMapper<
     }
 
     final void validate(){
-        Optional<String> validationError = reader.validateKeyStructure(toKey.apply(getExampleReference()));
-        if (validationError.isPresent())
-            throw new IllegalStateException(
-                    """
-                    Reference mapper of type %s has an invalid toKey() function:
-                    %s
-                    """.formatted(
-                            type,
-                            validationError.get()
-                    )
-            );
+         reader.validateKeyStructure(toKey.apply(getExampleReference()))
+                 .ifFailureThrow(msg -> new IllegalStateException(
+                         """
+                         Reference mapper of type %s has an invalid toKey() function:
+                         %s
+                         """.formatted(
+                                 type,
+                                 msg
+                         )
+                 ));
     }
 
     @Contract(pure=true, value = "-> new")
@@ -63,14 +63,13 @@ sealed abstract class ReferenceMapper<
         return type;
     }
 
-    public @NotNull Optional<E> resolve(ExtensionContext context, String reference) {
+    public @NotNull FindResult<E, ?, ?> resolve(ExtensionContext context, String reference) {
         return getWithReference(context, referenceParser.apply(reference));
     }
 
-    public final @NotNull Optional<E> getWithReference(ExtensionContext context, S reference){
-        return reader
-                .find(toKey.apply(reference))
-                .map(record -> toSnapshot.apply(record, context));
+    public final @NotNull FindResult<E, ?, ?> getWithReference(ExtensionContext context, S reference){
+        return reader.find(toKey.apply(reference))
+                .mapResult(record -> toSnapshot.apply(record, context));
     }
 
     protected final @NotNull @Unmodifiable List<E> getAll(ExtensionContext context){

@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.extensions.snapshot_mappers;
 
+import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.*;
 import io.github.chechelpo.frplm.extensions.api.EngineRepository;
 import io.github.chechelpo.frplm.extensions.api.standalone.*;
@@ -44,17 +45,17 @@ public final class ExtensionRepository implements EngineRepository, SmartInitial
     }
 
     @Override
-    public <E extends Snapshot<?>> Optional<E> resolve(Class<E> type, String reference) {
+    public <E extends Snapshot<?>> FindResult<E, ?, ?> resolve(Class<E> type, String reference) {
         Objects.requireNonNull(type, "Mapper type is null");
-        if (reference == null) return Optional.empty();
+        Objects.requireNonNull(reference, "Reference is null");
 
         return getOrThrowMapperWithoutReference(type).resolve(context, reference);
     }
 
     @Override
-    public <S extends StableReference, E extends Snapshot<S>> Optional<E> get(Class<E> type, S reference) {
+    public <S extends StableReference, E extends Snapshot<S>> FindResult<E, ?, ?> get(Class<E> type, S reference) {
         Objects.requireNonNull(type, "Mapper type is null");
-        if (reference == null) return Optional.empty();
+        Objects.requireNonNull(reference, "Reference is null");
 
         return getOrThrowMapperWithReference(type).getWithReference(context, reference);
     }

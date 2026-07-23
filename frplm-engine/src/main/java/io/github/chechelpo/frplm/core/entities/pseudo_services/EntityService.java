@@ -7,20 +7,16 @@ import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.events.crud.CRUDDraftEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.*;
-import io.github.chechelpo.frplm.exceptions.runtime.*;
-import io.github.chechelpo.frplm.exceptions.runtime.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.Constraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.utils.ValidationResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.Field;
 import org.jooq.Result;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
-import org.jspecify.annotations.NonNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +25,7 @@ import java.util.*;
 public abstract class EntityService<
         R extends TableRecord<R>,
         Store extends EntityStore<R>
-        > implements EntityReader<R> {
+        > implements EntityReader<R>, EntityUpdater<R> {
     private final static EnumSet<EntityConfigs.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final EventBus eventBus;
     // Fields
@@ -73,13 +69,13 @@ public abstract class EntityService<
     public boolean isKey(TableField<R, ?> field) {
         return keys.contains(field);
     }
+
     public EntityKey<R> keyOf(R record){
-        EntityKey.Builder<R> builder = EntityKey.builder();
-        for (TableField<R, ?> field : keys) {
-            builder.unsafeSet(field, record.getValue(field));
-        }
-        return builder.build();
+        Map<TableField<R, ?>, Object> assignments = new HashMap<>();
+        keys.forEach(keyField -> assignments.put(keyField, record.get(keyField)));
+        return new EntityKey<>(assignments, false);
     }
+
     public List<EntityKey<R>> keysOf(List<R> records){
         return records.stream().map(this::keyOf).toList();
     }
@@ -166,19 +162,19 @@ public abstract class EntityService<
     }
 
     @Override
-    public Optional<String> validateKeyStructure(EntityKey<R> key) {
+    public ValidationResult validateKeyStructure(EntityKey<R> key) {
         Objects.requireNonNull(key, "Key to validate is null");
         // Check for unknown fields
         for (TableField<R, ?> field : key.getValues().keySet())
             if (!keys.contains(field))
-                return Optional.of("Unknown field in key: " + field.getName());
+                return ValidationResult.error("Unknown field in key: " + field.getName());
 
         // Check if contains all fields
         for (TableField<R, ?> field : keys)
             if (!key.assignsField(field))
-                return Optional.of("Key is missing field: " + field.getName());
+                return ValidationResult.error("Key is missing field: " + field.getName());
 
-        return Optional.empty();
+        return ValidationResult.success();
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -285,17 +281,17 @@ public abstract class EntityService<
 
     @Override
     @Transactional(readOnly = true)
-    public FindResult<R> find(EntityKey<R> key){
+    public RecordFindResult<R> find(EntityKey<R> key){
         Objects.requireNonNull(key);
         long operationID = eventBus.nextOperationID();
         beforeRetrieve(key, true, operationID);
         log.debug("Finding record with id {}", key);
 
         R record = store.get(key);
-        if (record == null) return new FindResult.NotFound<>(key);
+        if (record == null) return new RecordFindResult.NotFound<>(key);
         afterRetrieve(List.of(record), operationID);
 
-        return new FindResult.Found<>(key, record);
+        return new RecordFindResult.Found<>(key, record);
     }
 
     @Transactional(readOnly = true)
@@ -401,17 +397,25 @@ public abstract class EntityService<
     }
 
     @Transactional
-    public boolean update(EntityKey<R> id, EntityDataPayload<R> update) {
-        Objects.requireNonNull(id);
+    @Override
+    public UpdateResult<R> update(EntityKey<R> target, EntityDataPayload<R> update) {
+        Objects.requireNonNull(target);
         Objects.requireNonNull(update);
+        if (!exists(target)) return new UpdateResult.NoSuchEntity<>(RecordFindResult.notFound(target), update);
+
         long operationID = eventBus.nextOperationID();
-        log.trace("Updating entity {} with new data {}", id, update);
-        beforeUpdate(id, update, operationID);
+        log.trace("Updating entity {} with new data {}", target, update);
+        beforeUpdate(target, update, operationID);
 
-        boolean success = store.update(id, update);
-        if (success) afterSuccessfulUpdate(id, update, operationID);
+        try{
+            boolean success = store.update(target, update);
+            if (!success) return new UpdateResult.Failure<>(target, update, new IllegalStateException("Unexpected exception"));
+        }catch (Exception e){
+            return new UpdateResult.Failure<>(target, update, e);
+        }
 
-        return success;
+        afterSuccessfulUpdate(target, update, operationID);
+        return new UpdateResult.Success<>(target, update);
     }
 
     @Transactional
@@ -644,7 +648,7 @@ public abstract class EntityService<
 
         long operationID = eventBus.nextOperationID();
         beforeDelete(id, operationID);
-        Optional<R> staleRecord = this.find(id).asOptional();
+        Optional<R> staleRecord = this.find(id).found();
         if (staleRecord.isEmpty()) {
             log.error("No such entity to delete with ID {}", id);
             return false;

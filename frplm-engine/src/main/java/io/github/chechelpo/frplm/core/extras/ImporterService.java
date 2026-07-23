@@ -130,7 +130,7 @@ final class ImporterService {
             regionService.update(
                     regionService.keyOf(child),
                     EntityDataPayload.of(REGION.PARENT_REGION_ID, parentRegion.getId())
-            );
+            ).orElseThrow();
 
             i++;
             j++;

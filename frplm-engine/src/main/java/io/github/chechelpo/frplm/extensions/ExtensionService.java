@@ -65,7 +65,7 @@ public final class ExtensionService implements ExtensionDBBridge {
         extensions.stream()
                 .filter(ext -> !store.exists(ext.extensionId()))
                 .forEach(ext -> {
-                    registerExtension(ext.extensionId(), ext.defaultConfig());
+                    registerExtension(ext.extensionId(), ext.getDefaultConfig());
                 });
         extensions.forEach(ext -> ext.setRepository(extensionRepository));
     }
@@ -129,11 +129,11 @@ public final class ExtensionService implements ExtensionDBBridge {
         return store.getConfig(extensionId)
                 .orElseGet( () -> //This part is for when users inevitably make default config = null at init (I did it already), let them be forgiven for their sins
                         {
-                                JsonNode node = getExtensionOfType(extensionId, ConfigurableExtension.class)
+                                JsonNode config = getExtensionOfType(extensionId, ConfigurableExtension.class)
                                         .orElseThrow(() -> new EntityNotFound("No extension with id " + extensionId, Severity.SYSTEM))
-                                        .defaultConfig();
-                                saveConfig(extensionId, node); //Save new one to prevent this from happening again
-                                return node;
+                                        .getDefaultConfig();
+                                saveConfig(extensionId, config); //Save new one to prevent this from happening again
+                                return config;
                         }
                 );
     }

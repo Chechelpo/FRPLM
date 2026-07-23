@@ -120,7 +120,7 @@ public class Movements {
                         .set(CURRENT_LOCATIONS.LOCATION_ID, toLocationId)
                         .set(CURRENT_LOCATIONS.TICK_NUM, changesRecord.getTickNum())
                         .build()
-        );
+        ).orElseThrow("Couldn't apply move");
     }
 
     public CharactersRecord[] getAtLocation(int sessionId, int locationId) {
