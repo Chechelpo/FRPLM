@@ -355,6 +355,7 @@ async function createNewRegion(): Promise<void> {
                   <div class="locations-layout__editor">
                     <LocationEditor
                         v-if="locationToEdit"
+                        :key="locationToEdit.hashKey()"
                         :model-value="{
                         location: locationToEdit as Location,
                         all_locations: childrenLocations as Location[],
