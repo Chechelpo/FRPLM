@@ -26,6 +26,7 @@ public class CharacterMapper {
             String name,
             String description,
             boolean can_be_user,
+            boolean is_archetype,
             String welcome_message,
             JsonNode lorebook
     ){}
@@ -35,6 +36,7 @@ public class CharacterMapper {
                 record.getName(),
                 record.getDescription(),
                 record.getCanBeUser(),
+                record.getIsArchetype(),
                 record.getWelcomeMessage(),
                 lorebookMapper.jsonFrom(lorebookService.getLorebookOf(record))
         ));
@@ -48,6 +50,7 @@ public class CharacterMapper {
                         .set(CHARACTERS.NAME, json.name)
                         .set(CHARACTERS.DESCRIPTION, json.description)
                         .set(CHARACTERS.CAN_BE_USER, json.can_be_user)
+                        .set(CHARACTERS.IS_ARCHETYPE, json.is_archetype)
                         .set(CHARACTERS.WELCOME_MESSAGE, json.welcome_message)
                         .build()
                 ,

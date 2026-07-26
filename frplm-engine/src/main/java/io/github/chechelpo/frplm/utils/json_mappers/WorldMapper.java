@@ -43,6 +43,7 @@ public class WorldMapper {
 
     private record WorldJson(
             String name,
+            String description,
             JsonNode lorebook,
             List<JsonNode> regions,
             List<JsonNode> locations,
@@ -55,6 +56,7 @@ public class WorldMapper {
         );
         return MAPPER.valueToTree(new WorldJson(
                 record.getName(),
+                record.getDescription(),
                 lorebookFrom(record),
                 regionService.getMatching(EntityKey.of(REGION.WORLD_ID, record.getId())).stream()
                         .map(regionMapper::toJson)
@@ -78,6 +80,7 @@ public class WorldMapper {
         return new NewWorldOrder(
                 EntityDataPayload.<WorldsRecord>builder()
                         .set(WORLDS.NAME, json.name)
+                        .set(WORLDS.DESCRIPTION, json.description)
                         .build(),
                 lorebookExporter.orderFrom(json.lorebook),
                 json.locations.stream()

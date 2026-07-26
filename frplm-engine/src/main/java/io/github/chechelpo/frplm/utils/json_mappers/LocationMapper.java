@@ -20,25 +20,26 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 public class LocationMapper {
     private static final ObjectMapper MAPPER = new ObjectMapper();
-    private final EdgeService edgeService;
     private final LorebookService lorebookService;
     private final LorebookMapper lorebookExporter;
-    private final StartingLocationsService startingLocationsService;
     private final CharacterService characterService;
     private final CharacterMapper characterExporter;
     private final RegionService regionService;
 
-    public LocationMapper(EdgeService edgeService, LorebookService lorebookService, LorebookMapper lorebookExporter, StartingLocationsService startingLocationsService, CharacterService characterService, CharacterMapper characterExporter, RegionService regionService) {
-        this.edgeService = edgeService;
+    public LocationMapper(
+            LorebookService lorebookService,
+            LorebookMapper lorebookExporter,
+            CharacterService characterService,
+            CharacterMapper characterExporter,
+            RegionService regionService
+    ) {
         this.lorebookService = lorebookService;
         this.lorebookExporter = lorebookExporter;
-        this.startingLocationsService = startingLocationsService;
         this.characterService = characterService;
         this.characterExporter = characterExporter;
         this.regionService = regionService;
@@ -46,28 +47,34 @@ public class LocationMapper {
 
     public record LocationJSON(
             String name,
+            String description,
             String parent_region_name,
             JsonNode lorebook,
             List<JsonNode> charactersHere
-    ){}
+    ) {
+    }
 
-    public JsonNode jsonFrom(@NonNull LocationsRecord record){
+    public JsonNode jsonFrom(@NonNull LocationsRecord record) {
         return MAPPER.valueToTree(getJSONRecord(record));
     }
 
     @TestOnly
-    LocationJSON getJSONRecord(@NonNull LocationsRecord record){
+    LocationJSON getJSONRecord(@NonNull LocationsRecord record) {
         String parentRegionName = null;
         if (record.getRegionId() != null)
-            parentRegionName = regionService.find(EntityKey.<RegionRecord>builder()
+            parentRegionName = regionService.find(
+                    EntityKey.<RegionRecord>builder()
                             .set(REGION.ID, record.getRegionId())
                             .set(REGION.WORLD_ID, record.getWorldId())
                             .build()
-                    ).orElseThrow(notFound -> new EntityNotFound("No region with id %s when exporting \n %s".formatted(notFound.toString(),record.getRegionId(), record), Severity.SYSTEM))
-                    .getName();
+            ).orElseThrow(
+                    "No region with id " + record.getRegionId() + " when exporting parent of location: " + record.getName(),
+                    Severity.SYSTEM
+            ).getName();
 
         return new LocationJSON(
                 record.getName(),
+                record.getDescription(),
                 parentRegionName,
                 fetchLorebook(record),
                 characterService.getStartingAt(record.getWorldId(), record.getId()).stream()
@@ -76,20 +83,23 @@ public class LocationMapper {
         );
     }
 
-    JsonNode fetchLorebook(LocationsRecord fromRecord){
+    JsonNode fetchLorebook(LocationsRecord fromRecord) {
         return lorebookExporter.jsonFrom(lorebookService.getLorebookOf(fromRecord));
     }
 
-    public NewLocationOrder orderFrom(JsonNode node){
+    public NewLocationOrder orderFrom(JsonNode node) {
         LocationJSON json = MAPPER.treeToValue(node, LocationJSON.class);
         if (json.lorebook == null)
             throw new IllegalArgumentException("Location lorebook of " + json.name + " is null");
 
         return new NewLocationOrder(
-                EntityDataPayload.of(LOCATIONS.NAME, json.name),
+                EntityDataPayload.<LocationsRecord>builder()
+                        .set(LOCATIONS.NAME, json.name)
+                        .set(LOCATIONS.DESCRIPTION, json.description)
+                        .build(),
                 json.parent_region_name,
                 lorebookExporter.orderFrom(json.lorebook),
-                json.charactersHere == null ? List.of():
+                json.charactersHere == null ? List.of() :
                         json.charactersHere.stream()
                                 .map(characterExporter::fromJson)
                                 .toList()

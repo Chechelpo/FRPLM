@@ -30,6 +30,7 @@ public class RegionMapper {
 
     private record RegionJSON(
             String name,
+            String description,
             String parent_name,
             JsonNode lorebook
     ){}
@@ -46,6 +47,7 @@ public class RegionMapper {
 
         return OBJECT_MAPPER.valueToTree( new RegionJSON(
                 regionRecord.getName(),
+                regionRecord.getDescription(),
                 parentRegionName,
                 lorebookMapper.jsonFrom(lorebookService.getLorebookOf(regionRecord))
         ));
@@ -59,6 +61,7 @@ public class RegionMapper {
         return new NewRegionOrder(
                 EntityDataPayload.<RegionRecord>builder()
                         .set(REGION.NAME, regionJSON.name)
+                        .set(REGION.DESCRIPTION, regionJSON.description)
                         .build(),
                 lorebookMapper.orderFrom(regionJSON.lorebook),
                 regionJSON.parent_name

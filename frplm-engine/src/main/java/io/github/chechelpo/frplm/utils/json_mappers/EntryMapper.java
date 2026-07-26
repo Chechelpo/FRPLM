@@ -28,6 +28,7 @@ public class EntryMapper {
     record EntryJSON(
             String name,
             String content,
+            String embed_text,
             Set<String> keywords,
             String outlet,
 
@@ -39,42 +40,51 @@ public class EntryMapper {
             Integer stick_through,
             Short injection_order,
             short strategy,
+
             Boolean prevent_further_recursion,
             Boolean non_recursable,
-            Short scan_depth
-    ){}
+            Boolean delay_until_recursion,
 
-    public JsonNode jsonFrom(@NonNull EntryRecord entry){
+            Short scan_depth,
+            Short group_id
+    ) {
+    }
+
+    public JsonNode jsonFrom(@NonNull EntryRecord entry) {
         return MAPPER.valueToTree(new EntryJSON(
-                entry.getName(),
-                entry.getContent(),
-                fetchKeywords(entry),
-                fetchOutlet(entry),
+                        entry.getName(),
+                        entry.getContent(),
+                        entry.getEmbedText(),
+                        fetchKeywords(entry),
+                        fetchOutlet(entry),
 
-                entry.getEnabled(),
-                entry.getProbability(),
-                entry.getDelay(),
-                entry.getCooldown(),
-                entry.getStickThrough(),
-                entry.getPosition(),
-                entry.getStrategy(),
-                entry.getPreventFurtherRecursion(),
-                entry.getNonRecursable(),
-                entry.getScanDepth()
-        )
+                        entry.getEnabled(),
+                        entry.getProbability(),
+                        entry.getDelay(),
+                        entry.getCooldown(),
+                        entry.getStickThrough(),
+                        entry.getPosition(),
+                        entry.getStrategy(),
+                        entry.getPreventFurtherRecursion(),
+                        entry.getNonRecursable(),
+                        entry.getDelayUntilRecursion(),
+                        entry.getScanDepth(),
+                        entry.getGroupId()
+                )
         );
     }
 
-    Set<String> fetchKeywords(@NonNull EntryRecord entry){
+    Set<String> fetchKeywords(@NonNull EntryRecord entry) {
         return entryKeywordService.keywordsOfEntry(entry.getLorebookId(), entry.getEntryId());
     }
-    String fetchOutlet(@NonNull EntryRecord entry){
+
+    String fetchOutlet(@NonNull EntryRecord entry) {
         if (entry.getOutlet() == null) return null;
         return outletService.getOutletName(entry.getOutlet())
                 .orElse(null);
     }
 
-    public NewEntryOrder orderFrom(JsonNode node){
+    public NewEntryOrder orderFrom(JsonNode node) {
         EntryJSON json = MAPPER.treeToValue(node, EntryJSON.class);
         int outletId = outletService.getOrCreateOutlet(json.outlet);
 
@@ -82,6 +92,7 @@ public class EntryMapper {
                 json.keywords,
                 EntityDataPayload.<EntryRecord>builder()
                         .set(ENTRY.NAME, json.name)
+                        .set(ENTRY.EMBED_TEXT, json.embed_text)
                         .set(ENTRY.CONTENT, json.content)
                         .set(ENTRY.OUTLET, outletId)
 
@@ -92,9 +103,13 @@ public class EntryMapper {
                         .set(ENTRY.STICK_THROUGH, json.stick_through)
                         .set(ENTRY.POSITION, (short) json.injection_order)
                         .set(ENTRY.STRATEGY, (short) json.strategy)
+
                         .set(ENTRY.PREVENT_FURTHER_RECURSION, json.prevent_further_recursion)
                         .set(ENTRY.NON_RECURSABLE, json.non_recursable)
+                        .set(ENTRY.DELAY_UNTIL_RECURSION, json.delay_until_recursion)
+
                         .set(ENTRY.SCAN_DEPTH, json.scan_depth)
+                        .set(ENTRY.GROUP_ID, json.group_id)
                         .build()
         );
     }
