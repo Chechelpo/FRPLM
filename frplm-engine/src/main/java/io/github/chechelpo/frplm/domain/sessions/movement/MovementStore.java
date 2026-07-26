@@ -2,10 +2,12 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.annotations.Store;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 
 import java.util.List;
@@ -30,6 +32,17 @@ final class MovementStore extends EntityStore<MovementsRecord> {
                 .limit(1)
                 .fetchOne(MOVEMENTS.PREVIOUS_LOCATION_ID);
     }
+/*
+    public Result<CharactersRecord> getPresentAtTickInLocation(int sessionId, int atTick, int locationId){
+        ctx.transaction( configuration -> {
+            DSLContext tx = DSL.using(configuration);
+
+            Result<MovementsRecord> movementsRecords = tx.selectFrom(MOVEMENTS)
+                    .where(MOVEMENTS.SESSION_ID.eq(sessionId))
+                    .fetch();
+        });
+    }
+*/
     /**
      * Rollback movements made on a particular tick, sacrificing them to transform them to a current location
      * Assumes movements contains a backlog of movement from location at tick.

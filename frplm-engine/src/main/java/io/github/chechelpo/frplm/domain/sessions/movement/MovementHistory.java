@@ -5,18 +5,20 @@ import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidMove;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Result;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
-class MovementService extends EntityService<MovementsRecord, MovementStore> {
+class MovementHistory extends EntityService<MovementsRecord, MovementStore> {
 
-    MovementService(
+    MovementHistory(
             @NotNull MovementStore store,
             @NotNull EventBus eventBus)
     {
@@ -26,6 +28,10 @@ class MovementService extends EntityService<MovementsRecord, MovementStore> {
     public Integer getLocationBeforeTick(int characterId, int sessionId, int tick) {
         return store.getLocationBeforeTick(characterId, sessionId, tick);
     }
+    /*
+    public Result<CharactersRecord> getPresentAtTickInLocation(int sessionId, int tick, int locationId){
+        return store.getPresentAtTickInLocation(sessionId, tick, locationId);
+    }*/
 
     @Transactional
     void registerMovementChange(CurrentLocationsRecord previous, int atTick)

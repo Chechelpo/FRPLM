@@ -471,6 +471,7 @@ CREATE TABLE messages
     role            varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
     request_json    TEXT,                                       -- Stored, but it could also just be regen. Should only be there for assistant msgs
     content         TEXT,            -- Always derived
+    reasoning       TEXT,
 
     is_enabled      BOOL       NOT NULL DEFAULT TRUE,
     time            INT        NOT NULL,
@@ -480,9 +481,10 @@ CREATE TABLE messages
     active_response SMALLINT   NOT NULL DEFAULT 0,              -- ID of the response that's currently active
     response_num    SMALLINT   NOT NULL DEFAULT 0,              -- Response num counter to assign keys.
 
-    PRIMARY KEY (session_id, tick_num),
-    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id),
-    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant')
+    CONSTRAINT pk_messages PRIMARY KEY (session_id, tick_num),
+    CONSTRAINT fk_message_to_location FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
+    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant'),
+    CONSTRAINT reasoning_only_for_generated_messages CHECK (reasoning IS NULL OR role = 'assistant')
 );
 
 DROP TABLE IF EXISTS extras CASCADE;
@@ -507,15 +509,16 @@ CREATE TABLE IF NOT EXISTS responses
     response_num     SMALLINT NOT NULL,
 
     location_id      INT      NOT NULL,
-    world_id         INT      NOT NULL REFERENCES WORLDS (id),
+    world_id         INT      NOT NULL REFERENCES WORLDS (id) ON DELETE CASCADE,
 
     advances_time_by INT      NOT NULL,
     content          TEXT     NOT NULL,
+    reasoning        TEXT,
 
-    PRIMARY KEY (session_id, tick_num, response_num),
-    FOREIGN KEY (location_id, world_id) REFERENCES LOCATIONS (id, world_id) ON DELETE CASCADE,
+    CONSTRAINT pk_responses PRIMARY KEY (session_id, tick_num, response_num),
+    CONSTRAINT fk_responses_locations FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
 
-    FOREIGN KEY (session_id, tick_num)
+    CONSTRAINT fk_responses_messages FOREIGN KEY (session_id, tick_num)
         REFERENCES messages (session_id, tick_num)
         ON DELETE CASCADE
 );

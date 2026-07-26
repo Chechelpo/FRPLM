@@ -11,7 +11,6 @@ import {DTO} from "@/types/DTOs";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {fetchApi} from "@/services/apiClient";
 import {Character} from "@/domain/Characters";
-import {API_BASE} from "@/config";
 
 export type WorldKey = { id: number }
 export type WorldData = {

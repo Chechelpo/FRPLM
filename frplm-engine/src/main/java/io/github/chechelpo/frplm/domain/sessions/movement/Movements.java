@@ -27,6 +27,7 @@ public class Movements {
     private final SessionService sessionService;
     private final CharacterService characterService;
     private final EdgeService edgeService;
+    private final MovementHistory movementHistory;
 
     Movements(
             CurrentLocationService currentLocationService,
@@ -34,13 +35,14 @@ public class Movements {
             MessageService messageService,
             SessionService sessionService,
             CharacterService characterService,
-            EdgeService edgeService) {
+            EdgeService edgeService, MovementHistory movementHistory) {
         this.currentLocationService = currentLocationService;
         this.responseMovementService = responseMovementService;
         this.messageService = messageService;
         this.sessionService = sessionService;
         this.characterService = characterService;
         this.edgeService = edgeService;
+        this.movementHistory = movementHistory;
     }
 
     public void rollbackLocationsTo(int sessionId, int tickNumber) {
@@ -122,11 +124,25 @@ public class Movements {
                         .build()
         ).orElseThrow("Couldn't apply move");
     }
+/*
+    public CharactersRecord[] getPresent(int sessionId, int tickNum) {
+        MessagesRecord lastMessage = messageService.getLastMessageOf(sessionId);
+        if (lastMessage.getTickNum() == tickNum)
+            return currentLocationService.getAtLocation(lastMessage.getSessionId(), lastMessage.getTickNum());
 
-    public CharactersRecord[] getAtLocation(int sessionId, int locationId) {
-        return currentLocationService.getAtLocation(sessionId, locationId);
+        MessagesRecord message = messageService.find(EntityKey.<MessagesRecord>builder()
+                .set(MESSAGES.SESSION_ID, sessionId)
+                .set(MESSAGES.TICK_NUM, tickNum)
+                .build()
+        ).orElseThrow("No message when getting present", Severity.USER);
+
+        return movementHistory.getPresentAtTickInLocation(
+                message.getSessionId(),
+                message.getTickNum(),
+                message.getLocationId()
+        ).toArray(CharactersRecord[]::new);
     }
-
+*/
     public CharactersRecord[] getAtLocation(@NotNull LocationsRecord location, @NotNull SessionsRecord session) {
         return currentLocationService.getAtLocation(location, session);
     }

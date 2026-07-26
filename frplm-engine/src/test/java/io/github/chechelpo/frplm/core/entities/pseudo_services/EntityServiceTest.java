@@ -235,7 +235,7 @@ class EntityServiceTest {
                         unknownKey
                 );
 
-        assertTrue(
+        assertFalse(
                 unknownResult.isPresent(),
                 "Decrement unexpectedly succeeded for an unregistered entity"
         );

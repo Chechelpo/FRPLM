@@ -201,6 +201,14 @@ final class EntryFieldsHelper extends ABSControllerAwareHelper<
                         .setConstraints(BoolConstraint.builder())
                         .build()
         );
+        register_field(ENTRY.GROUP_ID)
+                .setInfo(FieldInfo.numberField(FieldType.SHORT)
+                        .setConstraints(NumberConstraint.builder(FieldType.SHORT)
+                                .nullable()
+                        )
+                        .build()
+                );
+
         register_field(
                 "scan_depth",
                 Entry.ENTRY.SCAN_DEPTH,

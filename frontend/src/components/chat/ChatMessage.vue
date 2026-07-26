@@ -10,10 +10,10 @@ import {
 import MarkdownIt from "markdown-it";
 import DOMPurify from "dompurify";
 
-import { Message } from "@/domain/Session";
-import { Location } from "@/domain/World";
-import { Character } from "@/domain/Characters";
-import { ChatCompletionRole } from "@/types/ChatCompletions";
+import {Message} from "@/domain/Session";
+import {Location} from "@/domain/World";
+import {Character} from "@/domain/Characters";
+import {ChatCompletionRole} from "@/types/ChatCompletions";
 
 import WindowPrompt from "@/components/utils/prompts/WindowPrompt.vue";
 import LocationEditor from "@/components/space/LocationEditor.vue";
@@ -84,12 +84,6 @@ const renderedContent = computed<string>(() => {
   return DOMPurify.sanitize(renderedHtml);
 });
 
-function getMessageContent(): string {
-  const content = props.message.get("content");
-
-  return content == null ? "" : String(content);
-}
-
 function beginMessageEdit(): void {
   messageDraft.value = displayedContent.value;
   editingMessage.value = true;
@@ -115,6 +109,34 @@ async function saveMessageEdit(): Promise<void> {
     savingMessage.value = false;
   }
 }
+/* -------------------------------------------------------------------------- */
+/* Reasoning                                                                  */
+/* -------------------------------------------------------------------------- */
+const reasoningExpanded = ref(false);
+
+const reasoningContent = computed<string>(() => {
+  const reasoning = props.message.get("reasoning");
+
+  return reasoning == null ? "" : String(reasoning);
+});
+
+const hasReasoning = computed<boolean>(
+    () => reasoningContent.value.trim().length > 0,
+);
+
+const renderedReasoning = computed<string>(() => {
+  const renderedHtml = markdown.render(reasoningContent.value);
+
+  return DOMPurify.sanitize(renderedHtml);
+});
+
+const reasoningPanelId = computed<string>(() => {
+  const messageKey = String(
+      props.message.get("tick_num") ?? "current",
+  ).replace(/[^a-zA-Z0-9_-]/g, "-");
+
+  return `chat-message-reasoning-${messageKey}-${activeResponse.value}`;
+});
 
 /* -------------------------------------------------------------------------- */
 /* Alternative responses                                                      */
@@ -143,9 +165,10 @@ async function changeActiveResponse(
       nextResponse,
   );
 
-  displayedContent.value = getMessageContent();
+  displayedContent.value = props.message.get("content");
   messageDraft.value = displayedContent.value;
   editingMessage.value = false;
+  reasoningExpanded.value = false;
 
   await loadMessageContext();
 }
@@ -157,6 +180,7 @@ async function regenerateMessage(): Promise<void> {
 
   regeneratingMessage.value = true;
   editingMessage.value = false;
+  reasoningExpanded.value = false;
   displayedContent.value = "";
 
   try {
@@ -167,7 +191,7 @@ async function regenerateMessage(): Promise<void> {
     if (success) {
       await loadMessageContext();
     } else {
-      displayedContent.value = getMessageContent();
+      displayedContent.value = props.message.get("content");
     }
   } finally {
     regeneratingMessage.value = false;
@@ -217,7 +241,7 @@ async function loadMessageContext(): Promise<void> {
   location.value = nextLocation;
   presentCharacters.value = nextCharacters;
 
-  displayedContent.value = getMessageContent();
+  displayedContent.value = props.message.get("content");
   messageDraft.value = displayedContent.value;
 
   console.debug(
@@ -236,6 +260,7 @@ watch(
     () => props.message,
     () => {
       editingMessage.value = false;
+      reasoningExpanded.value = false;
       selectedCharacter.value = null;
       editingCharacter.value = false;
 
@@ -246,9 +271,7 @@ watch(
 
 <template>
   <article
-      :class="[
-      'edit-box',
-      'chat-message',
+      :class="['edit-box','chat-message',
       isAssistantMessage
         ? 'edit-box--accent'
         : 'edit-box--primary',
@@ -299,7 +322,7 @@ watch(
                   viewBox="0 0 24 24"
                   aria-hidden="true"
               >
-                <path d="m15 18-6-6 6-6" />
+                <path d="m15 18-6-6 6-6"/>
               </svg>
             </button>
 
@@ -325,7 +348,7 @@ watch(
                   viewBox="0 0 24 24"
                   aria-hidden="true"
               >
-                <path d="m9 18 6-6-6-6" />
+                <path d="m9 18 6-6-6-6"/>
               </svg>
             </button>
           </div>
@@ -344,7 +367,7 @@ watch(
                 viewBox="0 0 24 24"
                 aria-hidden="true"
             >
-              <path d="M12 20h9" />
+              <path d="M12 20h9"/>
               <path
                   d="
                   M16.5 3.5
@@ -379,7 +402,7 @@ watch(
                   viewBox="0 0 24 24"
                   aria-hidden="true"
               >
-                <path d="M20 6 9 17l-5-5" />
+                <path d="M20 6 9 17l-5-5"/>
               </svg>
 
               {{ savingMessage ? "Saving..." : "Save" }}
@@ -418,11 +441,11 @@ watch(
                 viewBox="0 0 24 24"
                 aria-hidden="true"
             >
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="m19 6-1 14H6L5 6" />
-              <path d="M10 11v5" />
-              <path d="M14 11v5" />
+              <path d="M3 6h18"/>
+              <path d="M8 6V4h8v2"/>
+              <path d="m19 6-1 14H6L5 6"/>
+              <path d="M10 11v5"/>
+              <path d="M14 11v5"/>
             </svg>
           </button>
         </div>
@@ -454,7 +477,7 @@ watch(
                   a8 8 0 1 1 16 0Z
                 "
               />
-              <circle cx="12" cy="10" r="2.5" />
+              <circle cx="12" cy="10" r="2.5"/>
             </svg>
 
             {{ location.get("name") }}
@@ -482,7 +505,68 @@ watch(
           </div>
         </div>
       </div>
+
+
     </header>
+
+    <section
+        v-if="isAssistantMessage && hasReasoning && !regeneratingMessage"
+        class="chat-message__reasoning"
+        aria-label="Assistant reasoning"
+    >
+      <button
+          type="button"
+          class="chat-message__reasoning-toggle"
+          :aria-expanded="reasoningExpanded"
+          :aria-controls="reasoningPanelId"
+          @click="reasoningExpanded = !reasoningExpanded"
+      >
+        <span class="chat-message__reasoning-title">
+          <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+          >
+            <path d="M9.5 4.5a3.5 3.5 0 0 0-3.22 4.87A3.5 3.5 0 0 0 7.5 16h1"/>
+            <path d="M14.5 4.5a3.5 3.5 0 0 1 3.22 4.87A3.5 3.5 0 0 1 16.5 16h-1"/>
+            <path d="M9.5 4.5V19"/>
+            <path d="M14.5 4.5V19"/>
+            <path d="M9.5 8h2"/>
+            <path d="M12.5 12h2"/>
+            <path d="M9.5 16h2"/>
+          </svg>
+
+          Reasoning
+        </span>
+
+        <span class="chat-message__reasoning-action">
+          {{ reasoningExpanded ? "Hide" : "Show" }}
+
+          <svg
+              :class="[
+              'chat-message__reasoning-chevron',
+              {
+                'chat-message__reasoning-chevron--expanded':
+                  reasoningExpanded,
+              },
+            ]"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6"/>
+          </svg>
+        </span>
+      </button>
+
+      <div
+          v-show="reasoningExpanded"
+          :id="reasoningPanelId"
+          class="
+          chat-message__reasoning-content
+          chat-message__content--readonly
+        "
+          v-html="renderedReasoning"
+      />
+    </section>
 
     <div
         class="
@@ -679,9 +763,8 @@ watch(
 
   cursor: pointer;
 
-  transition:
-      color var(--duration-fast) var(--ease-standard),
-      background-color var(--duration-fast) var(--ease-standard);
+  transition: color var(--duration-fast) var(--ease-standard),
+  background-color var(--duration-fast) var(--ease-standard);
 }
 
 .chat-message__response-button:hover:not(:disabled) {
@@ -693,10 +776,7 @@ watch(
   position: relative;
   z-index: 1;
 
-  outline:
-      var(--focus-ring-width)
-      solid
-      rgb(var(--focus-ring-color) / 0.28);
+  outline: var(--focus-ring-width) solid rgb(var(--focus-ring-color) / 0.28);
 
   outline-offset: -3px;
 }
@@ -748,9 +828,7 @@ watch(
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap:
-      var(--space-2)
-      var(--space-4);
+  gap: var(--space-2) var(--space-4);
 
   padding: var(--space-2) var(--space-3);
 
@@ -811,10 +889,9 @@ watch(
 
   cursor: pointer;
 
-  transition:
-      color var(--duration-fast) var(--ease-standard),
-      background-color var(--duration-fast) var(--ease-standard),
-      border-color var(--duration-fast) var(--ease-standard);
+  transition: color var(--duration-fast) var(--ease-standard),
+  background-color var(--duration-fast) var(--ease-standard),
+  border-color var(--duration-fast) var(--ease-standard);
 }
 
 .chat-message__context-button:hover {
@@ -825,10 +902,7 @@ watch(
 }
 
 .chat-message__context-button:focus-visible {
-  outline:
-      var(--focus-ring-width)
-      solid
-      rgb(var(--focus-ring-color) / 0.3);
+  outline: var(--focus-ring-width) solid rgb(var(--focus-ring-color) / 0.3);
 
   outline-offset: 2px;
 }
@@ -845,6 +919,124 @@ watch(
 }
 
 /* -------------------------------------------------------------------------- */
+/* Reasoning                                                                  */
+/* -------------------------------------------------------------------------- */
+
+.chat-message__reasoning {
+  width: 100%;
+  min-width: 0;
+
+  background: rgb(var(--c-surface-raised) / 0.24);
+  border-top: 1px solid rgb(var(--c-border) / 0.18);
+  border-bottom: 1px solid rgb(var(--c-border) / 0.18);
+}
+
+.chat-message__reasoning-toggle {
+  width: 100%;
+  min-height: 2.75rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  padding: var(--space-2) var(--space-4);
+
+  color: rgb(var(--c-muted));
+
+  background: transparent;
+  border: 0;
+
+  font-family: var(--font-primary);
+
+  cursor: pointer;
+
+  transition: color var(--duration-fast) var(--ease-standard),
+  background-color var(--duration-fast) var(--ease-standard);
+}
+
+.chat-message__reasoning-toggle:hover {
+  color: rgb(var(--c-fg-strong));
+
+  background: rgb(var(--edit-box-accent) / 0.07);
+}
+
+.chat-message__reasoning-toggle:focus-visible {
+  outline: var(--focus-ring-width) solid rgb(var(--focus-ring-color) / 0.3);
+
+  outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.chat-message__reasoning-title,
+.chat-message__reasoning-action {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chat-message__reasoning-title {
+  gap: var(--space-2);
+
+  color: rgb(var(--c-fg-strong));
+
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.chat-message__reasoning-title svg {
+  width: 1rem;
+  height: 1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chat-message__reasoning-action {
+  gap: var(--space-1);
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.chat-message__reasoning-chevron {
+  width: 0.9rem;
+  height: 0.9rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.chat-message__reasoning-chevron--expanded {
+  transform: rotate(180deg);
+}
+
+.chat-message__reasoning-content {
+  max-height: 28rem;
+  overflow: auto;
+
+  padding: var(--space-3) var(--space-4) var(--space-4);
+
+  color: rgb(var(--c-muted));
+
+  border-top: 1px solid rgb(var(--c-border) / 0.14);
+
+  font-size: 0.86rem;
+  line-height: 1.6;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--edit-box-accent) / 0.45) transparent;
+}
+
+/* -------------------------------------------------------------------------- */
 /* Content                                                                    */
 /* -------------------------------------------------------------------------- */
 
@@ -855,12 +1047,11 @@ watch(
 
   padding: 0;
 
-  background:
-      linear-gradient(
-          145deg,
-          rgb(var(--c-surface) / 0.74),
-          rgb(var(--c-surface-2) / 0.48)
-      );
+  background: linear-gradient(
+      145deg,
+      rgb(var(--c-surface) / 0.74),
+      rgb(var(--c-surface-2) / 0.48)
+  );
 }
 
 .chat-message__content {
@@ -895,17 +1086,14 @@ watch(
 
   resize: vertical;
 
-  transition:
-      background-color var(--duration-normal) var(--ease-standard),
-      box-shadow var(--duration-normal) var(--ease-standard);
+  transition: background-color var(--duration-normal) var(--ease-standard),
+  box-shadow var(--duration-normal) var(--ease-standard);
 }
 
 .chat-message__content--editor:focus {
   background: rgb(var(--c-surface-raised) / 0.24);
 
-  box-shadow:
-      inset 0 0 0 var(--focus-ring-width)
-      rgb(var(--focus-ring-color) / 0.18);
+  box-shadow: inset 0 0 0 var(--focus-ring-width) rgb(var(--focus-ring-color) / 0.18);
 }
 
 .chat-message__content--editor::selection {
@@ -938,10 +1126,7 @@ watch(
 .chat-message__content--readonly :deep(h4),
 .chat-message__content--readonly :deep(h5),
 .chat-message__content--readonly :deep(h6) {
-  margin:
-      var(--space-5)
-      0
-      var(--space-2);
+  margin: var(--space-5) 0 var(--space-2);
 
   color: rgb(var(--c-fg-strong));
 
@@ -958,23 +1143,19 @@ watch(
 .chat-message__content--readonly :deep(a) {
   color: rgb(var(--c-primary-strong));
 
-  text-decoration-color:
-      rgb(var(--c-primary) / 0.55);
+  text-decoration-color: rgb(var(--c-primary) / 0.55);
   text-underline-offset: 0.16em;
 }
 
 .chat-message__content--readonly :deep(a:hover) {
   color: rgb(var(--c-accent-2));
 
-  text-decoration-color:
-      rgb(var(--c-accent) / 0.8);
+  text-decoration-color: rgb(var(--c-accent) / 0.8);
 }
 
 .chat-message__content--readonly :deep(ul),
 .chat-message__content--readonly :deep(ol) {
-  margin:
-      var(--space-3)
-      0;
+  margin: var(--space-3) 0;
 
   padding-left: var(--space-6);
 }
@@ -984,34 +1165,22 @@ watch(
 }
 
 .chat-message__content--readonly :deep(blockquote) {
-  margin:
-      var(--space-4)
-      0;
+  margin: var(--space-4) 0;
 
-  padding:
-      var(--space-2)
-      var(--space-3);
+  padding: var(--space-2) var(--space-3);
 
   color: rgb(var(--c-muted));
 
   background: rgb(var(--edit-box-accent) / 0.055);
-  border-left:
-      3px solid
-      rgb(var(--edit-box-accent) / 0.68);
-  border-radius:
-      0
-      var(--radius-sm)
-      var(--radius-sm)
-      0;
+  border-left: 3px solid rgb(var(--edit-box-accent) / 0.68);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .chat-message__content--readonly :deep(pre) {
   max-width: 100%;
   overflow-x: auto;
 
-  margin:
-      var(--space-4)
-      0;
+  margin: var(--space-4) 0;
 
   padding: var(--space-3);
 
@@ -1024,9 +1193,7 @@ watch(
   box-shadow: inset 0 1px 3px rgb(var(--c-shadow) / 0.07);
 
   scrollbar-width: thin;
-  scrollbar-color:
-      rgb(var(--edit-box-accent) / 0.45)
-      transparent;
+  scrollbar-color: rgb(var(--edit-box-accent) / 0.45) transparent;
 }
 
 .chat-message__content--readonly :deep(code) {
@@ -1055,13 +1222,12 @@ watch(
 
   margin: var(--space-5) 0;
 
-  background:
-      linear-gradient(
-          90deg,
-          transparent,
-          rgb(var(--c-border) / 0.48),
-          transparent
-      );
+  background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--c-border) / 0.48),
+      transparent
+  );
 
   border: 0;
 }
@@ -1079,9 +1245,7 @@ watch(
 
 .chat-message__content--readonly :deep(th),
 .chat-message__content--readonly :deep(td) {
-  padding:
-      var(--space-2)
-      var(--space-3);
+  padding: var(--space-2) var(--space-3);
 
   border: 1px solid rgb(var(--c-border) / 0.3);
 
@@ -1137,8 +1301,11 @@ watch(
     margin-right: auto;
   }
 
-  .chat-message__content {
-    padding: var(--space-3);
+  .chat-message__content,
+  .chat-message__reasoning-toggle,
+  .chat-message__reasoning-content {
+    padding-right: var(--space-3);
+    padding-left: var(--space-3);
   }
 
   .chat-message__context-group {
@@ -1150,6 +1317,8 @@ watch(
 @media (prefers-reduced-motion: reduce) {
   .chat-message__response-button,
   .chat-message__context-button,
+  .chat-message__reasoning-toggle,
+  .chat-message__reasoning-chevron,
   .chat-message__content--editor {
     transition: none;
   }

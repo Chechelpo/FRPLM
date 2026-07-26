@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.connection.api_keys;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
+import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.encryption.EncryptorService;
@@ -38,7 +39,7 @@ class SecretServiceTest {
         ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);
         EntityKey<ApiKeysRecord> apiEntityKey = EntityKey.of(API_KEYS.KEY_ID, record.getKeyId());
 
-        assertThrows(UnsupportedOperationException.class, () -> secrets.secretService.createAndGet(
+        assertThrows(InvalidValue.class, () -> secrets.secretService.createAndGet(
                 EntityDataPayload.of(API_KEYS.API_KEY_KEY_VERSION, 3))
         );
         assertThrows(UnsupportedOperationException.class, () -> secrets.secretService.find(apiEntityKey));

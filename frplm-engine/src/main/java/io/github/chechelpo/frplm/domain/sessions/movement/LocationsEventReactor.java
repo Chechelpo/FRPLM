@@ -38,7 +38,7 @@ class LocationsEventReactor {
     private final SessionService sessionService;
     private final Movements movements;
     private final MessageService messageService;
-    private final MovementService movementService;
+    private final MovementHistory movementService;
     private final CharacterService characterService;
 
     LocationsEventReactor(
@@ -48,7 +48,7 @@ class LocationsEventReactor {
             SessionService sessionService,
             Movements movements,
             MessageService messageService,
-            MovementService movementService,
+            MovementHistory movementService,
             CharacterService characterService
     ) {
         this.currentLocationService = currentLocationService;
@@ -171,7 +171,7 @@ class LocationsEventReactor {
 
     /** Applies the current location of user character as this response location */
     @EventListener
-    void onNewResponseRegisterLocation(CRUDDraftEvent.@NotNull CreateEntityDraft<?> rawEvent) {
+    void onNewResponseRewindLocations(CRUDDraftEvent.@NotNull CreateEntityDraft<?> rawEvent) {
         if (rawEvent.type() != EntityConfigs.Types.RESPONSES) return;
 
         CRUDDraftEvent.CreateEntityDraft<ResponsesRecord> event = (CRUDDraftEvent.CreateEntityDraft<ResponsesRecord>) rawEvent;
@@ -187,7 +187,9 @@ class LocationsEventReactor {
             userCharacterLocation = getStartingLocationByWorld(sessionId, world_id)
                     .orElseThrow(() -> new EntityNotFound("Could not fetch the starting location of user character", Severity.SYSTEM));*/
             return;
-        } else userCharacterLocation = getCurrentUserLocation(sessionId);
+        }
+        movements.rollbackLocationsTo(sessionId, tickNum - 1);
+        userCharacterLocation = getCurrentUserLocation(sessionId);
 
         EntityDataPayload<ResponsesRecord> response = event.initialData();
         if (!response.assignsField(RESPONSES.LOCATION_ID)){

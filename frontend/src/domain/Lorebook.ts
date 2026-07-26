@@ -240,7 +240,7 @@ export class Entry extends ABSEntity<EntryKey, EntryData> {
 
 export async function getAllKeywords() : Promise<string[]>{
     return await fetchApi(
-        `${API_BASE}/${EntityTypes.KEYWORD}`,
+        `api/${EntityTypes.KEYWORD}`,
         {
             method:'GET'
         }

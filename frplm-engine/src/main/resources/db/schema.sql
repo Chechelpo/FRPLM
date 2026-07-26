@@ -479,8 +479,9 @@ CREATE TABLE IF NOT EXISTS messages
     tick_num        INT        NOT NULL,
 
     role            varchar(9) NOT NULL CHECK (role = 'user' OR role = 'assistant'),
-    request_json    TEXT,                                                         -- Stored, but it could also just be regen. Should only be there for assistant msgs
-    content         TEXT,                                                         -- Always derived
+    request_json    TEXT,
+    content         TEXT,
+    reasoning       TEXT,
 
     is_enabled      BOOL       NOT NULL DEFAULT TRUE,
     time            INT        NOT NULL,
@@ -491,8 +492,9 @@ CREATE TABLE IF NOT EXISTS messages
     response_num    SMALLINT   NOT NULL DEFAULT 0,                                -- Response num counter to assign keys.
 
     CONSTRAINT pk_messages PRIMARY KEY (session_id, tick_num),
-    CONSTRAINT fk_message_location FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
-    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant')
+    CONSTRAINT fk_message_to_location FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,
+    CONSTRAINT request_json_only_for_generated_messages CHECK (request_json IS NULL OR role = 'assistant'),
+    CONSTRAINT reasoning_only_for_generated_messages CHECK (reasoning IS NULL OR role = 'assistant')
 );
 
 CREATE TABLE IF NOT EXISTS extras
@@ -519,6 +521,7 @@ CREATE TABLE IF NOT EXISTS responses
 
     advances_time_by INT      NOT NULL,
     content          TEXT     NOT NULL,
+    reasoning        TEXT,
 
     CONSTRAINT pk_responses PRIMARY KEY (session_id, tick_num, response_num),
     CONSTRAINT fk_responses_locations FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id) ON DELETE CASCADE,

@@ -67,10 +67,24 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
             validateActiveResponse(target, data.requireValue(MESSAGES.ACTIVE_RESPONSE));
             applyActiveResponseValues(target, data);
         }
+        throwIfAssignsPromptButIsUserMessage(data);
+        throwIfAssignsReasoningButIsUserMessage(data);
 
         super.beforeUpdate(target, data, operationID);
     }
 
+    private static void throwIfAssignsReasoningButIsUserMessage(EntityDataPayload<MessagesRecord> data) {
+        if (
+                data.assignsField(MESSAGES.REASONING) &&
+                !data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
+        ) throw new InvalidValue("Can't assign reasoning to a user message");
+    }
+    private static void throwIfAssignsPromptButIsUserMessage(EntityDataPayload<MessagesRecord> data){
+        if (
+                data.assignsField(MESSAGES.REQUEST_JSON) &&
+                        !data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
+        ) throw new InvalidValue("Can't assign request_json to a user message");
+    }
     /**
      * Ignored if it's a user message. Ignored if the active response is already this response.
      */
@@ -143,11 +157,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<MessagesRecord> data, long operationID) {
         applyDefaultsOfLastMessage(data);
-        boolean isAssistantMessage = data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue());
-        if (data.assignsField(MESSAGES.REQUEST_JSON) && !isAssistantMessage) {
-            log.error("Cannot assign request JSON as user role");
-            throw new InvalidValue("Cannot assign request JSON as user role");
-        }
+        throwIfAssignsPromptButIsUserMessage(data);
+        throwIfAssignsReasoningButIsUserMessage(data);
 
         data.set(MESSAGES.TICK_NUM,
                 sessionService.incrementAndGet(

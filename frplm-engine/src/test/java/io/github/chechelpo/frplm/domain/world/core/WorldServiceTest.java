@@ -56,7 +56,7 @@ class WorldServiceTest {
             LorebooksRecord lorebook = lorebookTestContext.service.getLorebookOf(record);
 
             assertTrue(this.context.service.delete(context.service.keyOf(record)), "Error deleting character");
-            assertTrue(lorebookTestContext.service.find(
+            assertFalse(lorebookTestContext.service.find(
                     lorebookTestContext.service.keyOf(lorebook)
             ).isFound(), "Stale lorebook referencing world");
         }

@@ -43,7 +43,7 @@ class MovementServiceTest {
     @Autowired
     private EdgeTestContext edgeTestContext;
     @Autowired
-    private MovementService movementService;
+    private MovementHistory movementService;
     @Autowired
     private MovementFieldsHelper fields;
     @Autowired

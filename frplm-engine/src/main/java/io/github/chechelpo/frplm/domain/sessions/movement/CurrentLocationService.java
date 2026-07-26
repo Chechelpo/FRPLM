@@ -25,7 +25,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Service
 class CurrentLocationService extends EntityService<CurrentLocationsRecord, CurrentLocationStore> {
-    private final MovementService movementService;
+    private final MovementHistory movementService;
     private final LocationsService locationsService;
     private final CharacterService characterService;
     private final MessageService messageService;
@@ -35,7 +35,7 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
             @NotNull CurrentLocationStore store,
             @NotNull LocationsService locationsService,
             @NotNull EventBus eventBus,
-            @NotNull MovementService movements,
+            @NotNull MovementHistory movements,
             CharacterService characterService, MessageService messageService, SessionService sessionService) {
         super(store, eventBus);
         this.movementService = movements;

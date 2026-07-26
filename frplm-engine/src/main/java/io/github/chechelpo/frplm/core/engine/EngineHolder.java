@@ -117,7 +117,7 @@ final class EngineHolder {
                 .getAssignedConnection()
                 .orElseThrow(notFound ->
                         new NotInitialized(
-                                "Couldn't get session " + session.getName() + "prompt's llm connection: \n" + notFound.toDebugString(),
+                                "Couldn't get session " + session.getName() + " prompt's llm connection: \n" + notFound.toDebugString(),
                                 Severity.USER
                         )
                 );

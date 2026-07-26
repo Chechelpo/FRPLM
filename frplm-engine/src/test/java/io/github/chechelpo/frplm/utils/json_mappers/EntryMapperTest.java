@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordsTes
 import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.test_utils.Asserts;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,10 +60,10 @@ class EntryMapperTest {
 
         assertEquals(Set.of(keywordA, keywordB), order.keywords(), "Mismatch in keywords");
 
-        String actualName = order.entryInfo().requireValue(ENTRY.NAME);
-        String actualContent = order.entryInfo().requireValue(ENTRY.CONTENT);
-
-        assertEquals(relevantEntry.getName(), actualName);
-        assertEquals(relevantEntry.getContent(), actualContent);
+        Asserts.assertRecordEqualsPayloadMinusFields(
+                relevantEntry,
+                order.entryInfo(),
+                Set.of(ENTRY.LOREBOOK_ID, ENTRY.ENTRY_ID, ENTRY.OUTLET)
+        );
     }
 }

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.MOVEMENTS;
 
 @Component
-final class MovementFieldsHelper extends ABSHelper<MovementsRecord, MovementService> {
-    MovementFieldsHelper(MovementService service) {
+final class MovementFieldsHelper extends ABSHelper<MovementsRecord, MovementHistory> {
+    MovementFieldsHelper(MovementHistory service) {
         super(service);
 
         register_field(

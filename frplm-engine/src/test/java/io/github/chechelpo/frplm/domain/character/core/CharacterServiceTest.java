@@ -66,7 +66,7 @@ class CharacterServiceTest {
             LorebooksRecord lorebook = lorebookTestContext.service.getLorebookOf(record);
 
             assertTrue(this.characterService.delete(characterService.keyOf(record)), "Error deleting character");
-            assertTrue(lorebookTestContext.service.find(
+            assertFalse(lorebookTestContext.service.find(
                     lorebookTestContext.service.keyOf(lorebook)
             ).isFound(), "Stale lorebook referencing character");
         }

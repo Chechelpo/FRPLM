@@ -160,6 +160,7 @@ export type MessageData = {
     location_id:number,
     time: number,
     prompt?: string,
+    reasoning : string | null,
     role:ChatCompletionRole,
     content:string,
     response_num:number,

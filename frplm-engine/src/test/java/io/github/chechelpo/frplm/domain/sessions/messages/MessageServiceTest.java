@@ -53,7 +53,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testFirstMessageCreation(){
+    void testFirstMessageCreation() {
         CharactersRecord character = characters.createAndGetRecords(1).getFirst();
         LocationsRecord location = locations.createAndGetTestLocationsOfSameWorld(1).getFirst();
         String firstMessage = "First message";
@@ -67,10 +67,10 @@ class MessageServiceTest {
         );
 
         startingLocations.service.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
-                        .set(STARTING_LOCATIONS.WORLD_ID, location.getWorldId())
-                        .set(STARTING_LOCATIONS.LOCATION_ID, location.getId())
-                        .set(STARTING_LOCATIONS.CHARACTER_ID, character.getId())
-                        .build()
+                .set(STARTING_LOCATIONS.WORLD_ID, location.getWorldId())
+                .set(STARTING_LOCATIONS.LOCATION_ID, location.getId())
+                .set(STARTING_LOCATIONS.CHARACTER_ID, character.getId())
+                .build()
         );
 
         int sessionId = sessionContext.service.createAndGet(
@@ -87,7 +87,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void delete_rejectsDeletionOfOlderMessages(){
+    void delete_rejectsDeletionOfOlderMessages() {
         int messageAmount = 1000;
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, messageAmount);
 
@@ -107,7 +107,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void delete_acceptsNormalDeletions(){
+    void delete_acceptsNormalDeletions() {
         int messageAmount = 1000;
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, messageAmount);
 
@@ -116,7 +116,7 @@ class MessageServiceTest {
         Important: This must start from message amount + 1 cause the engine hands out weak ids based on increment and get so
         the first id is actually 1 and not 0.
          */
-        for(int i = messageAmount+1 ; i > 0 ; i--)
+        for (int i = messageAmount + 1; i > 0; i--)
             assertTrue(
                     messageTestContext.service.delete(
                             EntityKey.<MessagesRecord>builder()
@@ -129,17 +129,17 @@ class MessageServiceTest {
     }
 
     @Test
-    void create_deniesPromptsForUserMessages(){
+    void create_deniesPromptsForUserMessages() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, 100);
 
         int sessionId = context.sessionContext().session().getId();
         assertThrows(
                 InvalidValue.class,
                 () -> messageService.createAndGet(EntityDataPayload.<MessagesRecord>builder()
-                                .set(MESSAGES.SESSION_ID, sessionId)
-                                .set(MESSAGES.REQUEST_JSON, "This should throw")
-                                .set(MESSAGES.CONTENT, "Test")
-                                .set(MESSAGES.ROLE, ChatCompletionRole.USER.wireValue())
+                        .set(MESSAGES.SESSION_ID, sessionId)
+                        .set(MESSAGES.REQUEST_JSON, "This should throw")
+                        .set(MESSAGES.CONTENT, "Test")
+                        .set(MESSAGES.ROLE, ChatCompletionRole.USER.wireValue())
                         .build()
                 ),
                 "Could create a user message with a prompt value"
@@ -147,12 +147,28 @@ class MessageServiceTest {
     }
 
     @Test
-    void onCreate_ResponseCreated(){
+    void create_deniesReasoningForUserMessages() {
+        MessageTestContext.Context context = messageTestContext.createSessionWithMessages(1, 1);
+        int sessionId = context.sessionContext().session().getId();
+        assertThrows(
+                InvalidValue.class,
+                () -> messageService.createAndGet(EntityDataPayload.<MessagesRecord>builder()
+                        .set(MESSAGES.SESSION_ID, sessionId)
+                        .set(MESSAGES.REASONING, "Aa")
+                        .set(MESSAGES.CONTENT, "test")
+                        .set(MESSAGES.ROLE, ChatCompletionRole.USER.wireValue())
+                        .build()
+                )
+        );
+    }
+
+    @Test
+    void onCreate_ResponseCreated() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, 100);
 
         List<MessagesRecord> messages = context.messages();
 
-        for (MessagesRecord message: messages){
+        for (MessagesRecord message : messages) {
             System.out.printf("Checking message tick %s. Response number %s %n", message.getTickNum(), message.getResponseNum());
             assertTrue(message.getResponseNum() > 0, "This message has no responses");
 
@@ -164,7 +180,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void newResponse_rejectsUserMessages(){
+    void newResponse_rejectsUserMessages() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(1, 1);
         MessagesRecord message = context.messages().getFirst();
         EntityKey<MessagesRecord> key = messageService.keyOf(message);
@@ -178,12 +194,12 @@ class MessageServiceTest {
     }
 
     @Test
-    void messageUpdate_UpdatesActiveResponse(){
+    void messageUpdate_UpdatesActiveResponse() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, 100);
 
         List<MessagesRecord> messages = context.messages();
 
-        for (MessagesRecord message: messages){
+        for (MessagesRecord message : messages) {
             System.out.printf("Checking message tick %s. Response number %s %n", message.getTickNum(), message.getResponseNum());
 
             EntityKey<MessagesRecord> key = messageTestContext.service.keyOf(message);
@@ -207,13 +223,13 @@ class MessageServiceTest {
     }
 
     @Test
-    void changingUserMessageActiveResponse_Throws(){
+    void changingUserMessageActiveResponse_Throws() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(100, 100);
         List<MessagesRecord> messages = context.messages();
 
         boolean atLeastOneUserMessage = false;
-        for (MessagesRecord message: messages){
-            if ( !message.getRole().equals(ChatCompletionRole.USER.wireValue())) continue;
+        for (MessagesRecord message : messages) {
+            if (!message.getRole().equals(ChatCompletionRole.USER.wireValue())) continue;
             atLeastOneUserMessage = true;
 
             ResponsesRecord previousActiveResponse = messageTestContext.service.getActiveResponseOf(message);
@@ -390,7 +406,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void changingActiveResponse(){
+    void changingActiveResponse() {
         MessageTestContext.Context context = messageTestContext.createSessionWithMessages(2, 1);
         MessagesRecord message = context.messages().getFirst();
         EntityKey<MessagesRecord> key = messageTestContext.service.keyOf(message);
