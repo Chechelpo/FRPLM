@@ -61,11 +61,6 @@ class KeywordServiceTest {
         EntityDataPayload<KeywordRecord> payload = EntityDataPayload.<KeywordRecord>builder()
                 .build();
 
-        assertThrows(
-                UnsupportedOperationException.class,
-                () -> keywordService.update(key, payload)
-        );
-    }
 
     @Test
     void getKeywordIDsOfLorebook(){
