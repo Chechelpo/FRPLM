@@ -3,9 +3,11 @@ import {computed, ref, watch} from "vue";
 import {
   ChatCompletionRole,
 } from "@/types/ChatCompletions";
+import {tokenize} from "@/services/tokenizer";
 import {PromptDTO} from "@/types/DTOs";
 import {Entry, Lorebook} from "@/domain/Lorebook";
 import {DomainPromptDTO, toDomainPrompt} from "@/utils/PromptThings";
+import {tokenizerConnectionId} from "@/services/tokenizer";
 
 const props = defineProps<{
   modelValue: PromptDTO;
@@ -93,6 +95,116 @@ function roleLabel(role: ChatCompletionRole): string {
 function roleClass(role: ChatCompletionRole): string {
   return `chat-request-message-role-${role}`;
 }
+
+/*
+ * Token counts are only available when a tokenizer connection has been
+ * selected application-wide. Components degrade gracefully otherwise.
+ */
+const tokenizerAvailable = computed<boolean>(() => tokenizerConnectionId.value != null);
+
+const rawRequestTokenCount = ref<number | null>(null);
+const rawRequestTokenPending = ref(false);
+const messageTokenCounts = ref<Record<number, number | null>>({});
+const messageTokenPending = ref<Record<number, boolean>>({});
+const entryTokenPending = ref<Record<string, boolean>>({});
+
+let tokenizationSequence = 0;
+/**
+ * Counts tokens for a single value, tracking pending state in a provided
+ * record so the UI can show a per-item spinner.
+ */
+async function countFor(
+    key: string | number,
+    text: string,
+    counts: Record<string, number | null>,
+    pending: Record<string, boolean>,
+): Promise<void> {
+  if (!tokenizerAvailable.value || !text) {
+    counts[String(key)] = null;
+    delete pending[String(key)];
+    return;
+  }
+
+  pending[String(key)] = true;
+
+  try {
+    const result = await tokenize(text);
+    counts[String(key)] = result;
+  } catch (error) {
+    counts[String(key)] = null;
+    console.warn("Token count failed", error);
+  } finally {
+    delete pending[String(key)];
+  }
+}
+
+/**
+ * Aggregated token count of the complete raw request payload.
+ */
+async function refreshRawRequestTokenCount(): Promise<void> {
+  if (!tokenizerAvailable.value) {
+    rawRequestTokenCount.value = null;
+    rawRequestTokenPending.value = false;
+    return;
+  }
+
+  const sequence = ++tokenizationSequence;
+  rawRequestTokenPending.value = true;
+
+  try {
+    const joined = domainPrompt.value.rawRequest.messages
+        .map((m) => m.content)
+        .join("\n");
+    const result = await tokenize(joined);
+
+    if (sequence === tokenizationSequence) {
+      rawRequestTokenCount.value = result;
+    }
+  } catch (error) {
+    if (sequence === tokenizationSequence) {
+      rawRequestTokenCount.value = null;
+    }
+    console.warn("Raw request token count failed", error);
+  } finally {
+    if (sequence === tokenizationSequence) {
+      rawRequestTokenPending.value = false;
+    }
+  }
+}
+
+function refreshMessageTokenCounts(): void {
+  if (!tokenizerAvailable.value) {
+    messageTokenCounts.value = {};
+    messageTokenPending.value = {};
+    return;
+  }
+  for (const [index, message] of domainPrompt.value.rawRequest.messages.entries()) {
+    void countFor(
+        index,
+        message.content,
+        messageTokenCounts.value,
+        messageTokenPending.value,
+    );
+  }
+}
+
+watch(
+    () => domainPrompt.value.rawRequest,
+    () => {
+      void refreshRawRequestTokenCount();
+      refreshMessageTokenCounts();
+    },
+    {immediate: true},
+);
+
+watch(tokenizerConnectionId, () => {
+  void refreshRawRequestTokenCount();
+  refreshMessageTokenCounts();
+  entryTokenPending.value = {};
+});
+async function tokenizeEntry(entry:Entry) : Promise<number> {
+  return await tokenize(entry.get('content')!);
+}
 </script>
 
 <template>
@@ -132,12 +244,19 @@ function roleClass(role: ChatCompletionRole): string {
           class="chat-request-message"
       >
         <header class="chat-request-message-header">
+              <span
+                  class="chat-request-message-role"
+                  :class="roleClass(message.role)"
+              >
+                {{ roleLabel(message.role) }}
+              </span>
           <span
-              class="chat-request-message-role"
-              :class="roleClass(message.role)"
+              v-if="tokenizerAvailable"
+              class="chat-request-message-tokens"
           >
-            {{ roleLabel(message.role) }}
-          </span>
+                tokens:
+                {{ messageTokenPending[index] ? "…" : (messageTokenCounts[index] ?? "—") }}
+              </span>
           <span class="chat-request-message-index">#{{ index + 1 }}</span>
         </header>
 
@@ -185,6 +304,13 @@ function roleClass(role: ChatCompletionRole): string {
               <pre class="entry-content">{{
                   entry.get('content') ?? '(no content)'
                 }}</pre>
+              <div
+                  v-if="tokenizerAvailable"
+                  class="entry-token-count"
+              >
+                tokens:
+                {{  tokenizeEntry(entry) }}
+              </div>
             </div>
           </li>
         </ul>
@@ -203,6 +329,36 @@ function roleClass(role: ChatCompletionRole): string {
 </template>
 
 <style scoped>
+/* ... existing code ... */
+.chat-request-message-index {
+  margin-left: auto;
+  color: var(--muted-text, #94a3b8);
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.chat-request-token-summary {
+  color: var(--muted-text, #94a3b8);
+  font-size: 0.8rem;
+  font-family: var(--font-monospace, monospace);
+}
+
+.chat-request-message-tokens {
+  color: var(--muted-text, #94a3b8);
+  font-size: 0.72rem;
+  font-family: var(--font-monospace, monospace);
+}
+
+.entry-token-count {
+  margin-top: 0.35rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--muted-text, #94a3b8);
+  background: var(--secondary-background, #44403c);
+  border-radius: 0.4rem;
+  font-size: 0.72rem;
+  font-family: var(--font-monospace, monospace);
+}
+/* ... existing code ... */
 .chat-request-viewer {
   width: 100%;
   display: flex;

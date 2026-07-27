@@ -80,7 +80,7 @@ public final class SessionImpl implements Session {
 
     @Contract("_ -> new")
     public @NotNull ChatMessage getLastMessage(boolean filterEnabled) {
-        if (!filterEnabled) new ChatMessageImpl(
+        if (!filterEnabled) return new ChatMessageImpl(
                 sessionContext.messages().getLastMessageOf(this.record),
                 context,
                 world

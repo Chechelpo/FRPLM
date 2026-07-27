@@ -251,7 +251,7 @@ class EntryServiceTest {
                     .keywordsOfEntry(exchangedEntry.getLorebookId(), exchangedEntry.getEntryId());
 
             assertNotNull(exchangedEntry, "Exchange entry returned null");
-            assertTrue(entryService.find(initialKey).isFound(), "Stale reference: Could find entry with previous key after exchange");
+            assertFalse(entryService.find(initialKey).isFound(), "Stale reference: Could find entry with previous key after exchange");
             assertEquals(secondLorebook.getId(), exchangedEntry.getLorebookId(), "Mismatch in lorebook id");
             assertEquals(exchangedEntry.getContent(), entry.getContent(), "Different content");
             assertEquals(expectedKeywords, actualKeywords, "Mismatch in keywords after exchange");

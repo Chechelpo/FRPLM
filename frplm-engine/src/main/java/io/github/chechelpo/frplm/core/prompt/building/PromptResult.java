@@ -4,6 +4,6 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatComp
 
 public record PromptResult(
         ChatCompletionRequest request,
-        LorebooksManager lorebooksManager
+        LorebookManagerImpl lorebooksManager
 ) {
 }

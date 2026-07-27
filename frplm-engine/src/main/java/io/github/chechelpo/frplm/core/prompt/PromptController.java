@@ -46,12 +46,12 @@ final class PromptController {
         return ResponseEntity.ok(
                 new PromptDTO(
                         lorebookController.wrapEntities(
-                                newPrompt.lorebooksManager().usedLorebooks().stream()
+                                newPrompt.lorebooksManager().activeLorebooks().stream()
                                         .map(LorebookImpl.class::cast)
                                         .map(LorebookImpl::getRecord)
                                         .toList()
                         ),
-                        entryController.wrapEntities(newPrompt.lorebooksManager().activatedEntries()),
+                        entryController.wrapEntities(newPrompt.lorebooksManager().activeEntries()),
                         newPrompt.request()
                 )
         );

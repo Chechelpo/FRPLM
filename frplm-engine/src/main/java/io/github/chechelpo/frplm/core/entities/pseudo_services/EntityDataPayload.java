@@ -33,7 +33,9 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         obj.setValues(values);
         return obj;
     }
-
+    public static <Rec extends TableRecord<Rec>> @NotNull EntityDataPayload<Rec> of() {
+        return EntityDataPayload.<Rec>builder().build();
+    }
     public static <Rec extends TableRecord<Rec>, T> @NotNull EntityDataPayload<Rec> of(
             TableField<Rec, T> field,
             T value

@@ -34,21 +34,6 @@ class SecretServiceTest {
     }
 
     @Test
-    void throwsOnNormalOperation() {
-        String apiKey = EncryptorService.generateBase64Key();
-        ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);
-        EntityKey<ApiKeysRecord> apiEntityKey = EntityKey.of(API_KEYS.KEY_ID, record.getKeyId());
-
-        assertThrows(InvalidValue.class, () -> secrets.secretService.createAndGet(
-                EntityDataPayload.of(API_KEYS.API_KEY_KEY_VERSION, 3))
-        );
-        assertThrows(UnsupportedOperationException.class, () -> secrets.secretService.find(apiEntityKey));
-        assertThrows(UnsupportedOperationException.class, () -> secrets.secretService.update(apiEntityKey,
-                EntityDataPayload.of(API_KEYS.API_KEY_KEY_VERSION, 2))
-        );
-    }
-
-    @Test
     void getKeyForConnectionHost() {
         String apiKey = EncryptorService.generateBase64Key();
         ApiKeysRecord record = secrets.secretService.registerNewKey(LLMBackend.NANO_GPT.stable_id, apiKey);

@@ -55,11 +55,6 @@ class KeywordServiceTest {
         assertTrue(keywordService.existsWith(keyword));
     }
 
-    @Test
-    void update_alwaysThrowsUnsupportedOperationException() {
-        EntityKey<KeywordRecord> key = EntityKey.of(KEYWORD.ID, 1);
-        EntityDataPayload<KeywordRecord> payload = EntityDataPayload.<KeywordRecord>builder()
-                .build();
 
 
     @Test

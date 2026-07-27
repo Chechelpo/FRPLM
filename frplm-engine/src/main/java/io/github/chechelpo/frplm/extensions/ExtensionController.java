@@ -28,6 +28,7 @@ final class ExtensionController {
 
     private record ConfigurableExtensionDTO(
             String id,
+            boolean enabled,
             String displayName,
             String description
     ){}
@@ -39,6 +40,7 @@ final class ExtensionController {
                 service.getConfigurableExtensions().stream()
                         .map(ext -> new ConfigurableExtensionDTO(
                                 ext.extensionId(),
+                                ext.isEnabled(),
                                 ext.displayName(),
                                 ext.description()
                         )).toList()
@@ -79,8 +81,9 @@ final class ExtensionController {
     }
 
     /* User activated : ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-    @PostMapping("/{extensionId}/config")
-    JSON activate(@PathVariable String extensionId, @RequestBody JsonNode order){
-        return null;
+    @PostMapping("/{extensionId}")
+    ResponseEntity<Boolean> activateOrDisableExtension(@PathVariable String extensionId, @RequestParam boolean isEnabled){
+        service.setEnabled(extensionId, isEnabled);
+        return ResponseEntity.ok(true);
     }
 }

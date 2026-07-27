@@ -46,6 +46,18 @@ final class ExtensionStore {
         return Optional.of(mapper.readTree(json.data()));
     }
 
+    public void setEnabled(boolean value, String extensionId){
+        this.ctx.update(EXTENSION)
+                .set(EXTENSION.IS_ENABLED, value)
+                .where(EXTENSION.ID.eq(extensionId))
+                .execute();
+    }
+    public boolean isEnabled(String extensionId){
+        return this.ctx.selectFrom(EXTENSION)
+                .where(EXTENSION.ID.eq(extensionId))
+                .fetchOne(EXTENSION.IS_ENABLED);
+    }
+
     public boolean exists(String extensionID){
         return this.ctx.fetchExists(
                 this.ctx.selectOne()

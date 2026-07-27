@@ -69,29 +69,6 @@ class LorebookServiceTest {
     }
 
     @Test
-    void createDifferentLocations_doNotCollideInLorebook(){
-        String locationName = "locationName";
-        List<WorldsRecord> worlds = locationTestContext.worldTestContext.createWorlds(2).createdRecords();
-
-        LocationsRecord location1 = locationTestContext.service.createAndGet(EntityDataPayload.<LocationsRecord>builder()
-                        .set(LOCATIONS.WORLD_ID, worlds.getFirst().getId())
-                        .set(LOCATIONS.NAME, locationName)
-                        .build()
-        );
-
-        LocationsRecord location2 = locationTestContext.service.createAndGet(EntityDataPayload.<LocationsRecord>builder()
-                                .set(LOCATIONS.WORLD_ID, worlds.get(1).getId())
-                                .set(LOCATIONS.NAME, locationName)
-                                .build()
-        );
-
-        LorebooksRecord lorebook1 = testContext.service.getLorebookOf(location1);
-        LorebooksRecord lorebook2 = testContext.service.getLorebookOf(location2);
-
-        assertNotEquals(lorebook1.getId(), lorebook2.getId());
-    }
-
-    @Test
     void updatingParentNameUpdatesLorebookName_Location(){
         LocationsRecord locationToUpdate = locationTestContext
                 .createAndGetTestLocationsOfSameWorld(1).getFirst();

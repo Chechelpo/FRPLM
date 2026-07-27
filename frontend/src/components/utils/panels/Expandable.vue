@@ -191,21 +191,6 @@ defineExpose({
                 :info="props.info"
             />
           </div>
-
-          <span
-              v-if="props.showEnabledToggle"
-              class="expandable__status"
-              :class="{
-              'expandable__status--enabled':
-                enabledState,
-            }"
-          >
-            {{
-              enabledState
-                  ? "On"
-                  : "Off"
-            }}
-          </span>
         </div>
 
         <p

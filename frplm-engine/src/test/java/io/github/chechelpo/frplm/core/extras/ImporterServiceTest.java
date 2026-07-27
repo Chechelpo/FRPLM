@@ -48,7 +48,7 @@ class ImporterServiceLorebookTest {
 
     @Captor ArgumentCaptor<EntityDataPayload<LorebooksRecord>> payloadCaptor;
 
-    ImporterService importerService
+    ImporterService importerService;
     @BeforeEach
     void setUp(){
         importerService = new ImporterService(

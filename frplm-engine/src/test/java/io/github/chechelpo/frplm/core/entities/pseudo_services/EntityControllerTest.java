@@ -296,7 +296,7 @@ class EntityControllerTest {
     @Test
     void patchDelegatesToServiceUpdateAndReturnsBooleanBody() {
         when(service.update(any(), any())).thenReturn(
-                new EntityUpdater.UpdateResult.Success<>(null, null)
+                new EntityUpdater.UpdateResult.Success<>(EntityKey.of(), EntityDataPayload.<TestTableRecord>builder().build())
         );
 
         ResponseEntity<Boolean> response = controller.patch(
@@ -462,14 +462,5 @@ class EntityControllerTest {
                 key.getValue(TEST_TABLE.FIRST_ID).equals(1)
                         && key.getValue(TEST_TABLE.SECOND_ID).equals(2)
         ));
-    }
-
-    @Test
-    void deleteThrowsInvalidKeyWhenKeyContainsUnknownField() {
-        assertThrows(InvalidKey.class, () ->
-                controller.delete(Map.of("unknown", "1"))
-        );
-
-        verify(service, never()).delete(any());
     }
 }

@@ -52,6 +52,16 @@ async function loadPanelScript(ext: ExtensionDTO) {
     failedPanels.value.add(ext.id);
   }
 }
+
+async function setEnabled(extension: ExtensionDTO, value:boolean){
+  const response = await fetchApi(
+      `api/extensions/${encodeURIComponent(extension.id)}?isEnabled=${value}`,
+      {
+        method:'POST'
+      }
+  )
+}
+
 onMounted(async () => {
   extensions.value = await fetchExtensions();
   for (const ext of extensions.value) {
@@ -65,6 +75,9 @@ onMounted(async () => {
       v-for="extension in extensions"
       :key="extension.id"
       :title="extension.displayName"
+      show-enabled-toggle
+      :enabled="extension.enabled"
+      @enabled-change="enabled => setEnabled(extension, enabled)"
   >
     <!-- Render the Web Component if it loaded successfully -->
     <component

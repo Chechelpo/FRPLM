@@ -3,6 +3,7 @@ import {fetchApi} from "@/services/apiClient";
 
 export type ExtensionDTO = {
     id: string;
+    enabled: boolean;
     displayName: string;
     description: string;
 }

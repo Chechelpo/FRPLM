@@ -98,6 +98,9 @@ public final class EntityKey<R extends TableRecord<R>>
         return new Builder<>();
     }
 
+    public static <Rec extends TableRecord<Rec>> EntityKey<Rec> of(){
+        return EntityKey.<Rec>builder().build();
+    }
     @CheckReturnValue
     public static <Rec extends TableRecord<Rec>, T> @Unmodifiable @NotNull EntityKey<Rec> of(
             @NotNull TableField<Rec, T> field,

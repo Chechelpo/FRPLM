@@ -5,6 +5,8 @@ import io.github.chechelpo.frplm.domain.lorebook.LorebookContext;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
+import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
+import io.github.chechelpo.frplm.extensions.api.prompts.OutletManager;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptBuilder;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
@@ -14,7 +16,6 @@ import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
 
@@ -27,7 +28,11 @@ public class PromptOrchestrator implements PromptBuilder {
 
     private final PromptBudgetManager tokensManager;
     private final PromptRenderer promptBuilder;
-    private final LorebooksManager lorebookManager;
+    private final MacroManager macroManager;
+
+    private final LorebookManagerImpl lorebookManager;
+    private final io.github.chechelpo.frplm.core.prompt.building.OutletManagerImpl outletManager;
+
     private final Session session;
 
     public PromptOrchestrator(
@@ -37,7 +42,18 @@ public class PromptOrchestrator implements PromptBuilder {
     ) {
         List<ChatMessage> messages = tokensManager.fillChatHistoryBudget(session);
 
-        List<PromptSectionEntitySnapshot> sections = session.getPrompt()
+        List<PromptSectionEntitySnapshot> sections = getSections(tokensManager, session);
+        this.session = session;
+        this.promptBuilder = new PromptRenderer(messages, sections.stream().map(SectionManager::new).toList());
+        this.tokensManager = tokensManager;
+
+        this.lorebookManager = new LorebookManagerImpl(lorebookContext.entries, lorebookContext.entryKeywords, tokensManager);
+        this.outletManager = new io.github.chechelpo.frplm.core.prompt.building.OutletManagerImpl(lorebookContext.outlets, lorebookManager);
+        this.macroManager = new MacroManager(outletManager);
+    }
+
+    private static @NonNull ArrayList<PromptSectionEntitySnapshot> getSections(@NonNull PromptBudgetManager tokensManager, Session session) {
+        return session.getPrompt()
                 .orElseThrow(notFound ->
                         new NotInitialized("Prompt is not initialized: \n" + notFound.toDebugString(), Severity.USER)
                 ).getSections().stream()
@@ -46,16 +62,14 @@ public class PromptOrchestrator implements PromptBuilder {
                         throw new UnexpectedException("Token use of prompt section is larger than the available budget", Severity.USER);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
-        this.session = session;
-        this.promptBuilder = new PromptRenderer(messages, sections.stream().map(SectionManager::new).toList());
-        this.tokensManager = tokensManager;
-        this.lorebookManager = new LorebooksManager(lorebookContext, tokensManager);
     }
 
 
     public PromptResult render(){
         lorebookManager.activateEntries(promptBuilder);
-        List<ChatCompletionMessage> messages = promptBuilder.render(lorebookManager);
+        macroManager.addEntries(lorebookManager.activeEntries());
+
+        List<ChatCompletionMessage> messages = promptBuilder.render(macroManager);
         SessionPrompt prompt = session.getPrompt().orElseThrow();
 
         return new PromptResult(
@@ -72,7 +86,7 @@ public class PromptOrchestrator implements PromptBuilder {
 
     @Override
     public @UnmodifiableView List<LorebookSnapshot> getLorebooks() {
-        return lorebookManager.getLorebooks();
+        return lorebookManager.activeLorebooks();
     }
 
     @Override
@@ -106,8 +120,26 @@ public class PromptOrchestrator implements PromptBuilder {
         return this;
     }
 
-    /*
-    public PromptBuilder injectAtOutlet(String outlet, String content) {
-        throw new UnsupportedOperationException("Macros not yet implemented");
-    }*/
+    @Override
+    public PromptBuilder appendAtMacro(String macro, String content) {
+        macroManager.appendAtMacro(macro, content);
+        return this;
+    }
+
+    @Override
+    public PromptBuilder prependAtMacro(String macro, String content) {
+        macroManager.prependAtMacro(macro, content);
+        return this;
+    }
+
+    @Override
+    public PromptBuilder addAtMacro(String macro, String content, int atIndex) {
+        macroManager.injectAtMacro(macro, content, atIndex);
+        return this;
+    }
+
+    @Override
+    public OutletManager getOutletManager() {
+        return outletManager;
+    }
 }

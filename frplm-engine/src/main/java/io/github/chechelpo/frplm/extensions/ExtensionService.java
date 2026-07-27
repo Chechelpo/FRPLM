@@ -58,10 +58,7 @@ public final class ExtensionService implements ExtensionDBBridge {
     @PostConstruct
     void initializeExtensions(){
         logger.info("Initializing extensions");
-        extensions.stream()
-                .filter(ConfigurableExtension.class::isInstance)
-                .map(ConfigurableExtension.class::cast)
-                .forEach(ext -> ext.setDBBridge(this));
+        extensions.forEach(ext -> ext.setExtensionDBBridge(this));
         extensions.stream()
                 .filter(ext -> !store.exists(ext.extensionId()))
                 .forEach(ext -> {
@@ -72,6 +69,10 @@ public final class ExtensionService implements ExtensionDBBridge {
 
     private void logExtensionError(Extension e, String errorMessage){
         logger.error("Extension {} error : \n {}", e.extensionId(), errorMessage);
+    }
+
+    void setEnabled(String extensionId, boolean value){
+        this.store.setEnabled(value, extensionId);
     }
 
     <T extends Extension> @NonNull Optional<T> getExtensionOfType(String extensionId, Class<T> type){
@@ -85,6 +86,7 @@ public final class ExtensionService implements ExtensionDBBridge {
     public void runPrePromptGeneration(SessionsRecord session, PromptBuilder builder){
         SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
         extensions.stream()
+                .filter(Extension::isEnabled)
                 .filter(PrePromptGeneration.class::isInstance)
                 .map(PrePromptGeneration.class::cast)
                 .forEach(ext -> {
@@ -99,6 +101,7 @@ public final class ExtensionService implements ExtensionDBBridge {
     public void runPostGeneration(SessionsRecord session){
         SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
         extensions.stream()
+                .filter(Extension::isEnabled)
                 .filter(PostResponseGeneration.class::isInstance)
                 .map(PostResponseGeneration.class::cast)
                 .forEach(ext -> {
@@ -117,10 +120,10 @@ public final class ExtensionService implements ExtensionDBBridge {
             store.createExtension(extensionId, initialConfig);
     }
 
-    public List<ConfigurableExtension> getConfigurableExtensions(){
+    public List<? extends ConfigurableExtension<?>> getConfigurableExtensions(){
         return extensions.stream()
                 .filter(ConfigurableExtension.class::isInstance)
-                .map(ConfigurableExtension.class::cast)
+                .map(ext -> (ConfigurableExtension<?>) ext)
                 .toList();
     }
 
@@ -143,7 +146,10 @@ public final class ExtensionService implements ExtensionDBBridge {
         return OBJECT_MAPPER.treeToValue(getConfig(extensionId), recordType);
     }
 
-
+    @Override
+    public boolean isEnabled(String extensionId) {
+        return store.isEnabled(extensionId);
+    }
 
     @NotNull Optional<io.WebAsset> getExtensionAsset(String extensionID, String path){
         Optional<ConfigurableExtension> configExtension = extensions.stream()

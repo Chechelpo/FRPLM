@@ -22,7 +22,7 @@ public enum DefaultSections {
             "World information",
             StandardOutlet.WORLD_INFO,
             " <START> World Information \n"
-                    + StandardOutlet.WORLD_INFO.asMacro(),
+                    + StandardOutlet.WORLD_INFO.getMacro().getName(),
             false
     ),
     LOCATION_INFO(2,
@@ -30,7 +30,7 @@ public enum DefaultSections {
             "Location information",
             StandardOutlet.LOCATION_INFO,
             "<START> location info \n"
-                    + StandardOutlet.LOCATION_INFO.asMacro(),
+                    + StandardOutlet.LOCATION_INFO.getMacro().getName(),
             false
     ),
     CHARACTER_INFO(4,
@@ -38,7 +38,7 @@ public enum DefaultSections {
             "Character information",
             StandardOutlet.CHARACTER_INFO,
             "<START> Character information \n "
-                    + StandardOutlet.CHARACTER_INFO.asMacro(),
+                    + StandardOutlet.CHARACTER_INFO.getMacro().getName(),
             false
     ),
     CHAT_HISTORY(5,

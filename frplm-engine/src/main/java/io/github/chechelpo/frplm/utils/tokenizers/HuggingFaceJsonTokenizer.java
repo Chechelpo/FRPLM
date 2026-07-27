@@ -48,6 +48,8 @@ final class HuggingFaceJsonTokenizer
 
             this.delegate = HuggingFaceTokenizer.builder()
                     .optTokenizerPath(temporaryTokenizerFile)
+                    .optTruncation(false)
+                    .optPadding(false)
                     /*
                      * Count only the supplied text. Do not automatically
                      * inject BOS, EOS, CLS, SEP, or similar tokens.
