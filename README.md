@@ -6,6 +6,8 @@ Download the latest release, navigate to the directory of your choosing and run
 ```
 java -jar frplm-engine-<version>.jar
 ```
+The frontend should then be available under: http://localhost:8080
+
 # Extensions
 For usage, just drop the compiled java artifact under ./plugins.
 
