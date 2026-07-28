@@ -11,9 +11,12 @@ public enum DefaultSections {
             "System explanation",
             null,
             """
-                    You are embedded in a larger world simulation engine. Your job is to play out this world, based on the
-                    information you've been given. You must keep narrative constrained exclusively to this knowledge, only
-                    inventing things that would be completely inconsequential to the overall world (ex.: villagers small talk).
+You are embedded in a larger world simulation engine. Your job is to play out this world, based on the information you've been given. You must keep narrative constrained exclusively to this knowledge, only inventing things that would be completely inconsequential to the overall world (ex.: villagers small talk).
+
+User is {{user_name}} and you are in charge of the rest of the characters and setting.
+
+Notes:
+ - Present characters may remain unmentioned if they don't contribute to this particular scene.
                     """,
             true
     ),
@@ -21,27 +24,47 @@ public enum DefaultSections {
             ChatCompletionRole.SYSTEM,
             "World information",
             StandardOutlet.WORLD_INFO,
-            " <START> World Information \n"
-                    + StandardOutlet.WORLD_INFO.getMacro().getName(),
+            """
+            < {{world_name}} information>
+            {{outlet:world_info}}
+            </ {{world_name}} information>
+            """,
             false
     ),
     LOCATION_INFO(2,
             ChatCompletionRole.SYSTEM,
             "Location information",
             StandardOutlet.LOCATION_INFO,
-            "<START> location info \n"
-                    + StandardOutlet.LOCATION_INFO.getMacro().getName(),
+            """
+            < {{location_name}} info>\s
+            {{outlet:location_info}}
+            </ {{location_name}} info>
+            """,
             false
     ),
     CHARACTER_INFO(4,
             ChatCompletionRole.SYSTEM,
             "Character information",
             StandardOutlet.CHARACTER_INFO,
-            "<START> Character information \n "
-                    + StandardOutlet.CHARACTER_INFO.getMacro().getName(),
+            """
+            < Characters information >
+            {{outlet:character_info}}
+            </ Characters information >
+            """,
             false
     ),
-    CHAT_HISTORY(5,
+    LOREBOOKS(5,
+            ChatCompletionRole.SYSTEM,
+            "General lorebooks",
+            null,
+            """
+            < Additional information >
+            {{outlet:lorebook}}
+            </ Additional information >
+            """,
+            false
+    ),
+    CHAT_HISTORY(6,
             ChatCompletionRole.USER,
             "Chat history",
             null,
