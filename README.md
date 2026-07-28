@@ -6,6 +6,10 @@ Download the latest release, navigate to the directory of your choosing and run
 ```
 java -jar frplm-engine-<version>.jar
 ```
+# Extensions
+For usage, just drop the compiled java artifact under ./plugins.
+
+See https://github.com/Chechelpo/frplm-extension-sdk for a guide on how to create them.
 
 ## License
 
