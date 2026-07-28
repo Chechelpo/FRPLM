@@ -1,5 +1,5 @@
 # Frplm
-A LLM frontend framework specifically designed for long-term sessions with a focus on a world rather than individual characters. 
+A LLM web-app specifically designed for long-term sessions with a focus on a world rather than individual characters. 
 
 # Current features
 These are included in the latest release:
