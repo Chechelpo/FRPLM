@@ -12,7 +12,6 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.Generati
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ReasoningEffort;
 
 import java.util.List;
-import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 
@@ -37,7 +36,9 @@ public class PromptImpl extends StandaloneEntity<PromptTemplateRecord> implement
                 record.getStreaming(),
                 record.getExcludeReasoning(),
                 record.getMaxTokens(),
-                ReasoningEffort.fromId(record.getReasoningEffort())
+                getAssignedConnection()
+                        .map(con -> ReasoningEffort.value(record.getReasoningEffort(), con.getModelID()))
+                        .orElse(null)
         );
     }
 

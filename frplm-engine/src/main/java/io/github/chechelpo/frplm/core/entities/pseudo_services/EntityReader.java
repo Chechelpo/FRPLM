@@ -80,6 +80,9 @@ public interface EntityReader<R extends TableRecord<R>> {
                         RecordFindResult.Found<R>
                 >
         {
+            public NotFound {
+                Objects.requireNonNull(target);
+            }
 
             // ---- Debug-friendly accessors ----
 
@@ -124,8 +127,11 @@ public interface EntityReader<R extends TableRecord<R>> {
              * message or a {@code log.debug(...)} line.
              */
             public String toDebugString() {
-                return "No %s entity found; \nkey=%s; \ncondition=[%s]"
-                        .formatted(recordTypeName(), target, keyConditionSql());
+                return "No %s entity found; \nkey=%s"
+                        .formatted(
+                                target == null || target.isEmpty() ? "" : recordTypeName(),
+                                target
+                        );
             }
 
             private TableField<R, ?> firstField() {

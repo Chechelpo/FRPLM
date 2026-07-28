@@ -225,7 +225,7 @@ let contextLoadSequence = 0;
 
 async function loadMessageContext(): Promise<void> {
   const loadSequence = ++contextLoadSequence;
-
+  console.log(`[ChatMessage] ${props.message}`);
   const [
     nextLocation,
     nextCharacters,
@@ -245,10 +245,12 @@ async function loadMessageContext(): Promise<void> {
   messageDraft.value = displayedContent.value;
 
   console.debug(
-      `${props.message.get("tick_num")} : ` +
-      `${nextLocation?.get("name") ?? "Unknown location"} ` +
-      `with present characters ` +
-      `${presentCharacterNames.value.join(", ")}`,
+      `[ChatMessage] tick ${props.message.get('tick_num')}
+        Reasoning:
+          ${props.message.get('reasoning')}
+        Content:
+          ${props.message.get('content')}
+      `
   );
 }
 

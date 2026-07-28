@@ -3,6 +3,8 @@ package io.github.chechelpo.frplm.utils.integrations;
 import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionResponse;
+import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.GenerationConfig;
+import io.github.chechelpo.frplm.utils.integrations.model_reasoning_efforts.ReasoningTranslator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +29,7 @@ final class OpenAICompatible {
     private final WebClient restClient;
 
     private static final int MAX_IN_MEMORY_SIZE = 100 * 1024 * 1024; // 16 MiB
-
+    private ReasoningTranslator translator;
     OpenAICompatible(String host) {
         this.restClient = WebClient.builder()
                 .baseUrl(host)
@@ -44,6 +46,7 @@ final class OpenAICompatible {
                                 .maxInMemorySize(MAX_IN_MEMORY_SIZE)
                 )
                 .build();
+        this.translator = new ReasoningTranslator();
     }
 
     public WebClient getRestClient(){
@@ -53,10 +56,24 @@ final class OpenAICompatible {
     public @NotNull Optional<ChatCompletionResponse> generateNonStreaming(ChatCompletionRequest request, String apiKey) {
         WebClient.RequestBodyUriSpec process = restClient.post();
         if (apiKey != null) process.header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
+        request = new ChatCompletionRequest(
+                request.modelID(),
+                request.generationParameters(),
+                new GenerationConfig(
+                        false,
+                        request.configurationParameters().exclude_reasoning(),
+                        request.configurationParameters().maxTokens(),
+                        translator.getReasoning(request.configurationParameters().reasoningEffort(), request.modelID())
+                        ),
+                request.responseFormat(),
+                request.messages()
+        );
+
         try{
-            return Optional.ofNullable(process
+            ChatCompletionResponse response = process
                     .uri(CHAT_COMPLETION_ENDPOINT)
-                    .bodyValue(OBJECT_MAPPER.writeValueAsString(request))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(request)
                     .retrieve()
                     .onStatus(
                             HttpStatusCode::isError,
@@ -65,16 +82,27 @@ final class OpenAICompatible {
                                     .defaultIfEmpty("")
                                     .flatMap(errorBody -> Mono.error(
                                             new IllegalStateException(
-                                                    "LLM provider returned HTTP "
-                                                            + clientResponse.statusCode()
-                                                            + ": "
-                                                            + errorBody
+                                                    "LLM provider returned HTTP %s: %s"
+                                                            .formatted(
+                                                                    clientResponse.statusCode(),
+                                                                    errorBody
+                                                            )
                                             )
                                     ))
                     )
                     .bodyToMono(ChatCompletionResponse.class)
-                    .block(Duration.ofSeconds(DEFAULT_LLM_TIMEOUT.getSeconds()))
-            );
+                    .block(Duration.ofSeconds(DEFAULT_LLM_TIMEOUT.getSeconds()));
+
+            if (response == null) {
+                log.warn("LLM provider returned an empty response");
+            } else {
+                log.info(
+                        "LLM response: {}",
+                        OBJECT_MAPPER.writeValueAsString(response)
+                );
+            }
+
+            return Optional.ofNullable(response);
         } catch (Exception e){
             log.error(e.getMessage());
             return Optional.empty();

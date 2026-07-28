@@ -9,6 +9,7 @@ import { route_to } from "@/app/router";
 import { EntityTypes } from "@/domain/EntityTypes";
 
 import GlobalError from "@/components/errors/GlobalError.vue";
+import Support from "@/components/utils/Support.vue";
 
 interface NavigationItem {
   label: string;
@@ -147,6 +148,8 @@ const navigationItems: NavigationItem[] = [
               </span>
             </a>
           </RouterLink>
+
+          <Support />
         </nav>
       </div>
     </header>

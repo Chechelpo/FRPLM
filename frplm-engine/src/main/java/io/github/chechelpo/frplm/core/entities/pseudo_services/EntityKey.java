@@ -33,6 +33,10 @@ public final class EntityKey<R extends TableRecord<R>>
         return (T) Objects.requireNonNull(values.get(field), field.getName() + " is not assigned by this key");
     }
 
+    public boolean isEmpty(){
+        return values.isEmpty();
+    }
+
     public @NotNull Condition @NotNull [] getEqualityConditions() {
         return values.entrySet().stream()
                 .map(e -> {

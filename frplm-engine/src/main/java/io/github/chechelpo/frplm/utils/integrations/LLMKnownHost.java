@@ -6,7 +6,7 @@ import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatComp
 
 import java.util.Optional;
 
-public interface LLMKnownHost {
+interface LLMKnownHost {
     Optional<ChatCompletionResponse> generate(ChatCompletionRequest request, String apiKey);
     ModelResponses models(String apiKey);
     Integer tokenize(String modelId, String text, String apiKey);

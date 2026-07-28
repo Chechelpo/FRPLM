@@ -381,7 +381,7 @@ CREATE TABLE IF NOT EXISTS REGION
 
 CREATE TABLE IF NOT EXISTS LOCATIONS
 (
-    --PK
+    -- PK
     id          INT             NOT NULL,
     world_id    INT             NOT NULL REFERENCES WORLDS (id) ON DELETE CASCADE,
     region_id   INT             NOT NULL,

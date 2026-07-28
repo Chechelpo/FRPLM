@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
@@ -51,6 +52,13 @@ final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
                         .requireOnCreate()
                         .build()
         );
+        register_field(RESPONSES.REASONING)
+                .setInfo(FieldInfo.stringField()
+                        .setConstraints(StringConstraint.builder()
+                                .nullable()
+                        )
+                        .build()
+                );
         register_field(
                 RESPONSES.ADVANCES_TIME_BY,
                 FieldInfo.numberField(FieldType.INTEGER)

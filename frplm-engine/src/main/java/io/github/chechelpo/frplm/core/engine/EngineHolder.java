@@ -71,6 +71,7 @@ final class EngineHolder {
                         .set(MESSAGES.ROLE, ChatCompletionRole.ASSISTANT.wireValue())
                         .set(MESSAGES.SESSION_ID, session.getRecord().getId())
                         .set(MESSAGES.CONTENT, response.choices().getFirst().message().content())
+                        .set(MESSAGES.REASONING, response.choices().getFirst().message().reasoning())
                         .set(MESSAGES.REQUEST_JSON, OBJECT_MAPPER.writeValueAsString(prompt))
                         .build()
         );
@@ -100,7 +101,12 @@ final class EngineHolder {
         ChatCompletionResponse response = textToTextClient.generate(prompt, con.getRecord())
                 .orElseThrow();
 
-        sessionContext.messages().registerNewResponse(sessionID, tick_num, response.choices().getFirst().message().content());
+        sessionContext.messages().registerNewResponse(
+                sessionID,
+                tick_num,
+                response.choices().getFirst().message().content(),
+                response.choices().getFirst().message().reasoning()
+        );
 
         extensionService.runPostGeneration(findOrThrowSession(sessionID));
 

@@ -117,6 +117,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         ).then(async response => await response.json() as PromptDTO)
     }
     public async generateNewMessage(request:ChatCompletionRequest) : Promise<Message> {
+        if (!request) throw new Error("Request is null for new message");
         return await fetchApi(
             `api/engine/generate/${this.get('id')}`,
             {
