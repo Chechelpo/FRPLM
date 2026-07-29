@@ -16,10 +16,17 @@ java -jar frplm-engine-<version>.jar
 ```
 The frontend should then be available under: http://localhost:8080
 
+<img width="1905" height="896" alt="image" src="https://github.com/user-attachments/assets/5d552bce-710d-4348-8970-d47c57d7420a" />
+
 # Extensions
 For usage, just drop the compiled java artifact under ./plugins.
 
 See https://github.com/Chechelpo/frplm-extension-sdk for a guide on how to develop them.
+
+# Support
+I post both on ko-fi and patreon.
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/N4N01T3UQQ)
+[![Support me on Patreon](https://img.shields.io/badge/Support_me_on-Patreon-FF424D?logo=patreon)](https://www.patreon.com/Simulith)
 
 ## License
 
