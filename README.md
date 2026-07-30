@@ -1,4 +1,4 @@
-# Frplm
+# Simulith
 <img width="1912" height="859" alt="Screenshot_20260728_154028" src="https://github.com/user-attachments/assets/88998f12-5ef7-4f30-a4fb-f6a874f1fc12" />
 A LLM web-app specifically designed for long-term sessions with a focus on a world rather than individual characters. 
 
