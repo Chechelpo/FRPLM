@@ -287,8 +287,8 @@ CREATE TABLE IF NOT EXISTS PROMPT_SECTION
 (
     prompt_id  smallint     NOT NULL REFERENCES PROMPT_TEMPLATE (id),
     section_id SMALLINT     NOT NULL,
-    name       VARCHAR(128) NOT NULL UNIQUE,
-    position   SMALLINT     NOT NULL UNIQUE,
+    name       VARCHAR(128) NOT NULL,
+    position   SMALLINT     NOT NULL,
 
     at_depth   int, -- Overrides position and instead renders it at a certain chat depth.
 
@@ -296,7 +296,7 @@ CREATE TABLE IF NOT EXISTS PROMPT_SECTION
     role       VARCHAR(9)   NOT NULL DEFAULT 'user',
     content    TEXT         NOT NULL DEFAULT ' ',
 
-    PRIMARY KEY (prompt_id, section_id),
+    CONSTRAINT pk_prompt_section PRIMARY KEY (prompt_id, section_id),
     CONSTRAINT chk_unique_name_per_template
         UNIQUE (prompt_id, section_id, name),
     CONSTRAINT chk_unique_position_per_section
