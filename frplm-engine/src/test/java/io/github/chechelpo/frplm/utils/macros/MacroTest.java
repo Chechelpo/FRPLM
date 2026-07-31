@@ -186,7 +186,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "Before {{toReplaceMacro}} after",
                     "injected value"
-            );
+            ).newContent();
 
             assertEquals(
                     "Before injected value after",
@@ -201,7 +201,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "{{value}} + {{value}} = {{value}}",
                     "X"
-            );
+            ).newContent();
 
             assertEquals("X + X = X", result);
         }
@@ -213,7 +213,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "{{USERNAME}} / {{UserName}} / {{username}}",
                     "Marco"
-            );
+            ).newContent();
 
             assertEquals("Marco / Marco / Marco", result);
         }
@@ -225,7 +225,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "Result: {{field.value+}}",
                     "42"
-            );
+            ).newContent();
 
             assertEquals("Result: 42", result);
         }
@@ -237,7 +237,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "Price: {{price}}",
                     "$100"
-            );
+            ).newContent();
 
             assertEquals("Price: $100", result);
         }
@@ -251,7 +251,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "Path: {{path}}",
                     replacement
-            );
+            ).newContent();
 
             assertEquals(
                     "Path: C:\\users\\marco",
@@ -268,7 +268,7 @@ class MacroTest {
             String result = macro.replaceAt(
                     "{{value}}",
                     replacement
-            );
+            ).newContent();
 
             assertEquals(replacement, result);
         }
@@ -281,7 +281,7 @@ class MacroTest {
 
             assertEquals(
                     content,
-                    macro.replaceAt(content, "replacement")
+                    macro.replaceAt(content, "replacement").newContent()
             );
         }
 
@@ -293,7 +293,7 @@ class MacroTest {
 
             assertEquals(
                     content,
-                    macro.replaceAt(content, "Marco")
+                    macro.replaceAt(content, "Marco").newContent()
             );
         }
 
@@ -304,7 +304,7 @@ class MacroTest {
 
             assertEquals(
                     content,
-                    macro.replaceAt(content, null)
+                    macro.replaceAt(content, null).newContent()
             );
         }
 
@@ -315,7 +315,7 @@ class MacroTest {
 
             assertEquals(
                     content,
-                    macro.replaceAt(content, "")
+                    macro.replaceAt(content, "").newContent()
             );
         }
 
@@ -326,7 +326,7 @@ class MacroTest {
 
             assertEquals(
                     content,
-                    macro.replaceAt(content, "   \t")
+                    macro.replaceAt(content, "   \t").newContent()
             );
         }
 

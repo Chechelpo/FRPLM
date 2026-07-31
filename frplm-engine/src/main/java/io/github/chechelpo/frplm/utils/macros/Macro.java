@@ -59,13 +59,33 @@ public sealed class Macro permits Outlet {
         );
     }
 
-    public String replaceAt(String content, String toInject) {
+    public record ReplacementResult(String newContent, boolean injected){}
+    public ReplacementResult replaceAt(String content, String toInject) {
         Objects.requireNonNull(content);
-        if (toInject == null || toInject.isBlank()) return content;
 
-        return this.asPattern()
-                .matcher(content)
-                .replaceAll(Matcher.quoteReplacement(toInject));
+        if (toInject == null || toInject.isBlank()) {
+            return new ReplacementResult(content, false);
+        }
+
+        Matcher matcher = this.asPattern().matcher(content);
+        StringBuilder output = null;
+        String quotedReplacement = Matcher.quoteReplacement(toInject);
+
+        while (matcher.find()) {
+            if (output == null) {
+                output = new StringBuilder(content.length());
+            }
+
+            matcher.appendReplacement(output, quotedReplacement);
+        }
+
+        if (output == null) {
+            return new ReplacementResult(content, false);
+        }
+
+        matcher.appendTail(output);
+
+        return new ReplacementResult(output.toString(), true);
     }
 
     @Override

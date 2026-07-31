@@ -121,7 +121,7 @@ class OutletTest {
             String result = outlet.replaceAt(
                     "Before {{outlet:content}} after",
                     "injected"
-            );
+            ).newContent();
 
             assertEquals(
                     "Before injected after",
@@ -136,7 +136,7 @@ class OutletTest {
             String result = outlet.replaceAt(
                     "{{outlet:content}} / {{outlet:content}}",
                     "value"
-            );
+            ).newContent();
 
             assertEquals("value / value", result);
         }
@@ -148,7 +148,7 @@ class OutletTest {
             String result = outlet.replaceAt(
                     "{{OUTLET:CONTENT}}",
                     "value"
-            );
+            ).newContent();
 
             assertEquals("value", result);
         }
@@ -184,7 +184,7 @@ class OutletTest {
             String result = outlet.replaceAt(
                     "{{outlet:main.content+}}",
                     "value"
-            );
+            ).newContent();
 
             assertEquals("value", result);
         }
@@ -197,7 +197,7 @@ class OutletTest {
             String result = outlet.replaceAt(
                     "{{outlet:path}}",
                     replacement
-            );
+            ).newContent();
 
             assertEquals(replacement, result);
         }

@@ -59,9 +59,18 @@ final class SectionManager {
 
     void injectAtDetectedMacros(MacroManager macroManager){
         this.renderedContent = unrenderedContent;
-        for (Macro macro : macroManager.getMacros()){
-            Optional<String> toInject = macroManager.renderMacro(macro);
-            toInject.ifPresent(s -> this.renderedContent = macro.replaceAt(renderedContent, s));
+
+        boolean replaced = true;
+        while (replaced) {
+            replaced = false;
+            for (Macro macro : macroManager.getMacros()){
+                Optional<String> toInject = macroManager.renderMacro(macro);
+                if (toInject.isPresent()) {
+                    Macro.ReplacementResult result = macro.replaceAt(renderedContent, toInject.get());
+                    this.renderedContent = result.newContent();
+                    replaced = true;
+                }
+            }
         }
     }
 
