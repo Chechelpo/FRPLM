@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS PROMPT_SECTION
     role       VARCHAR(9)   NOT NULL DEFAULT 'user',
     content    TEXT         NOT NULL DEFAULT ' ',
 
-    PRIMARY KEY (prompt_id, section_id),
+    CONSTRAINT pk_prompt_section PRIMARY KEY (prompt_id, section_id),
     CONSTRAINT chk_unique_name_per_template
         UNIQUE (prompt_id, section_id, name),
     CONSTRAINT chk_unique_position_per_section
