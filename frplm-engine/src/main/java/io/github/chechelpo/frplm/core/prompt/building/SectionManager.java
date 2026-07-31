@@ -68,7 +68,7 @@ final class SectionManager {
                 if (toInject.isPresent()) {
                     Macro.ReplacementResult result = macro.replaceAt(renderedContent, toInject.get());
                     this.renderedContent = result.newContent();
-                    replaced = true;
+                    replaced = result.injected();
                 }
             }
         }
