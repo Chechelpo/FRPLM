@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.extensions;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
+import io.github.chechelpo.frplm.domain.character.tags.CharacterTagsService;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
@@ -15,6 +16,7 @@ import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
 import io.github.chechelpo.frplm.domain.sessions.movement.Movements;
+import io.github.chechelpo.frplm.domain.tags.TagService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
@@ -34,7 +36,10 @@ public class EngineContextConfiguration {
             HostService hosts,
             SecretService secretService,
 
+            TagService tags,
+
             CharacterService characters,
+            CharacterTagsService characterTags,
             StartingLocationsService startingLocations,
 
             WorldService worlds,
@@ -50,14 +55,18 @@ public class EngineContextConfiguration {
             OutletService outlets,
             TemplateService templates,
             SectionService sections,
-            TokenizerService tokenizerService) {
+            TokenizerService tokenizerService
+    ) {
         return new ExtensionContext(
                 llmService,
                 tokenizerService,
                 hosts,
                 secretService,
 
+                tags,
+
                 characters,
+                characterTags,
                 startingLocations,
 
                 worlds,
