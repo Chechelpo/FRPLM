@@ -7,9 +7,9 @@ import io.github.chechelpo.frplm.core.prompt.building.PromptResult;
 import io.github.chechelpo.frplm.domain.lorebook.LorebookContext;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.extensions.ExtensionService;
+import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
@@ -21,7 +21,7 @@ import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
@@ -61,8 +61,9 @@ public class PromptService {
 
         orchestrator.addLorebook(session.getWorld().lorebook());
         SessionLocation currentLocation = session.getUserCharacter().getCurrentLocation();
-        orchestrator.addLorebook(currentLocation.getParentRegion().lorebook());
         orchestrator.addLorebook(currentLocation.lorebook());
+        addRegionsLorebooks(currentLocation.getParentRegion(), orchestrator);
+
         currentLocation.getCharactersHere().stream()
                 .map(SessionCharacter::lorebook)
                 .forEach(orchestrator::addLorebook);
@@ -70,6 +71,16 @@ public class PromptService {
         extension.runPrePromptGeneration(session.getRecord(), orchestrator);
 
         return orchestrator.render();
+    }
+
+    void addRegionsLorebooks(@NonNull RegionSnapshot root, PromptOrchestrator orchestrator){
+        orchestrator.addLorebook(root.lorebook());
+
+        Optional<RegionSnapshot> next = root.parent();
+        while (next.isPresent()) {
+            orchestrator.addLorebook(next.get().lorebook());
+            next = next.get().parent();
+        }
     }
 
     private @NonNull PromptOrchestrator getPromptOrchestrator(@NonNull SessionImpl session) {
