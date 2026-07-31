@@ -68,7 +68,7 @@ class ImporterServiceLorebookTest {
         NewEntryOrder entryOrder = mock(NewEntryOrder.class);
         when(entryOrder.keywords()).thenReturn(Set.of());
         NewLorebookOrder order = new NewLorebookOrder(payload, List.of(entryOrder));
-
+        when(entryOrder.entryInfo()).thenReturn(EntityDataPayload.of());
         LorebooksRecord result = importerService.executeLorebook(order);
 
         assertSame(fakeRecord, result);

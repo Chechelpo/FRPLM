@@ -34,6 +34,7 @@ public sealed class Macro permits Outlet {
 
     @Contract(pure = true)
     public static @NotNull String stripUnresolvedMacros(@NotNull String content) {
+        Objects.requireNonNull(content);
         String withoutMacroOnlyLines = UNRESOLVED_MACRO_LINE
                 .matcher(content)
                 .replaceAll("");
