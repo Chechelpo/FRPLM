@@ -12,7 +12,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.MESSA
 @RequestMapping(MESSAGES_URL)
 public final class MessageController extends EntityController<MessagesRecord, MessageService> {
     MessageController(MessageService service) {
-        super(service);
+        super(service, null);
     }
 
     record ResponseDTO(int activeResponse, int withinResponse, int responseCount){}

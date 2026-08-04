@@ -1,184 +1,154 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
-import io.github.chechelpo.frplm.domain.prompts.section.DefaultSections;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.FloatConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.IntegerConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.domain.prompts.section.DefaultSections;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ReasoningEffort;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 
 @Component
-final class TemplateFieldsHelper extends ABSControllerAwareHelper<
-        PromptTemplateRecord,
-        TemplateService,
-        TemplateController
-        > {
+final class TemplateFieldsHelper
+        extends EntityControllerFieldValidator<PromptTemplateRecord> {
+    TemplateFieldsHelper() {
+        super(EntityConfigs.Types.PROMPT_TEMPLATES);
+    }
 
-    TemplateFieldsHelper(TemplateService service, TemplateController controller) {
-        super(service, controller);
+    @Override
+    protected List<DTOField<PromptTemplateRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(PROMPT_TEMPLATE.ID, "id"),
+                DTOField.of(PROMPT_TEMPLATE.CONNECTION_ID, "connection_id"),
+                DTOField.of(PROMPT_TEMPLATE.NAME, "name"),
+                DTOField.of(PROMPT_TEMPLATE.MAX_TOKENS, "max_tokens"),
+                DTOField.of(PROMPT_TEMPLATE.STREAMING, "streaming"),
 
-        register_field(
-                "id",
-                PROMPT_TEMPLATE.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .readOnly()
-                                .key()
-                        )
-                        .build()
-        );
-        register_field(
-                "connection_id",
-                PROMPT_TEMPLATE.CONNECTION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint
-                                .builder(FieldType.INTEGER)
-                                .nullable()
-                        )
-                        .build()
-        );
+                DTOField.of(PROMPT_TEMPLATE.TEMPERATURE, "temperature"),
+                DTOField.of(PROMPT_TEMPLATE.TOP_P, "top_p"),
+                DTOField.of(PROMPT_TEMPLATE.FREQUENCY_PENALTY, "frequency_penalty"),
+                DTOField.of(PROMPT_TEMPLATE.PRESENCE_PENALTY, "presence_penalty"),
+                DTOField.of(PROMPT_TEMPLATE.REPETITION_PENALTY, "repetition_penalty"),
+                DTOField.of(PROMPT_TEMPLATE.TOP_K, "top_k"),
 
-        register_field(
-                "name",
-                PROMPT_TEMPLATE.NAME,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder().setMaxLength(255))
-                        .build()
-        );
+                DTOField.of(PROMPT_TEMPLATE.EXCLUDE_REASONING, "exclude_reasoning"),
+                DTOField.of(PROMPT_TEMPLATE.REASONING_EFFORT, "reasoning_effort"),
 
-        register_field(
-                "max_tokens",
-                PROMPT_TEMPLATE.MAX_TOKENS,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .setMin(0L)
-                        )
-                        .build()
+                DTOField.of(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, "chat_history_budget"),
+                DTOField.of(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, "lorebooks_budget")
         );
-        register_field(
-                "streaming",
-                PROMPT_TEMPLATE.STREAMING,
-                FieldInfo.booleanField()
-                        .build()
-        );
+    }
 
-        // Gen params
-        register_field(
-                "temperature",
-                PROMPT_TEMPLATE.TEMPERATURE,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
-        register_field(
-                "top_p",
-                PROMPT_TEMPLATE.TOP_P,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
-        register_field(
-                "frequency_penalty",
-                PROMPT_TEMPLATE.FREQUENCY_PENALTY,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
-        register_field(
-                "presence_penalty",
-                PROMPT_TEMPLATE.PRESENCE_PENALTY,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
-        register_field(
-                "repetition_penalty",
-                PROMPT_TEMPLATE.REPETITION_PENALTY,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
-        register_field(
-                "top_k",
-                PROMPT_TEMPLATE.TOP_K,
-                FieldInfo.floatField(FieldType.FLOAT)
-                        .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                .setMax(2D)
-                                .setMin(0D)
-                        )
-                        .build()
-        );
+    @Override
+    protected List<FieldInfo<PromptTemplateRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(PROMPT_TEMPLATE.ID)
+                        .key()
+                        .build(),
 
-        register_field(
-                "exclude_reasoning",
-                PROMPT_TEMPLATE.EXCLUDE_REASONING,
-                FieldInfo.booleanField()
-                        .build()
-        );
-        register_field(
-                "reasoning_effort",
-                PROMPT_TEMPLATE.REASONING_EFFORT,
-                FieldInfo.numberField(FieldType.SHORT)
-                        .setConstraints(NumberConstraint.builder(FieldType.SHORT)
-                                .setPossibleValues(ReasoningEffort.possible_values())
+                FieldInfo.builder(PROMPT_TEMPLATE.CONNECTION_ID)
+                        .nullable()
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.NAME)
+                        .setConstraints(
+                                StringConstraint.builder()
+                                        .setMaxLength(255)
                         )
                         .build(),
-                (short) ReasoningEffort.Maximum.id
-        );
 
-        registerControllerField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)
-                .setDtoName("chat_history_budget")
-                .setInfo(
-                        FieldInfo.floatField(FieldType.FLOAT)
-                                .setConstraints(
-                                        FloatConstraint.builder(FieldType.FLOAT)
-                                        .setMax(1D)
-                                        .setMin(0D)
-                                )
-                                .build()
-                );
-
-        registerControllerField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
-                .setDtoName("lorebooks_budget")
-                .setInfo(
-                        FieldInfo.floatField(FieldType.FLOAT)
-                                .setConstraints(FloatConstraint.builder(FieldType.FLOAT)
-                                        .setMax(1D)
-                                        .setMin(0D)
-                                )
-                                .build()
-                );
-
-        register_field(
-                null,
-                PROMPT_TEMPLATE.NEXT_SECTION_ID,
-                FieldInfo.numberField(FieldType.SHORT)
-                        .setConstraints(NumberConstraint.builder(FieldType.SHORT)
-                                .readOnly()
+                FieldInfo.builder(PROMPT_TEMPLATE.MAX_TOKENS)
+                        .setConstraints(
+                                IntegerConstraint.builder()
+                                        .setMin(0)
                         )
                         .build(),
-                DefaultSections.maxReservedSectionID()
+
+                FieldInfo.builder(PROMPT_TEMPLATE.STREAMING)
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.TEMPERATURE)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(2F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.TOP_P)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(2F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.FREQUENCY_PENALTY)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(2F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.PRESENCE_PENALTY)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(2F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.REPETITION_PENALTY)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(2F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.TOP_K)
+                        .setConstraints(
+                                IntegerConstraint.builder()
+                                        .setMin(0)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.EXCLUDE_REASONING)
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.REASONING_EFFORT)
+                        .addAllowedValues(ReasoningEffort.possible_values())
+                        .setDefaultValue(ReasoningEffort.Maximum.id)
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(1F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
+                        .setConstraints(
+                                FloatConstraint.builder()
+                                        .setMin(0F)
+                                        .setMax(1F)
+                        )
+                        .build(),
+
+                FieldInfo.builder(PROMPT_TEMPLATE.NEXT_SECTION_ID)
+                        .readOnly()
+                        .setDefaultValue(DefaultSections.maxReservedSectionID())
+                        .build()
         );
     }
 }

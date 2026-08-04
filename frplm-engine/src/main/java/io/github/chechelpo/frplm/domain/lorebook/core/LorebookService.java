@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -22,8 +23,8 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 
 @Component
 public class LorebookService extends EntityService<LorebooksRecord, LorebookStore> {
-    LorebookService(LorebookStore store, EventBus eventBus) {
-        super(store, eventBus);
+    LorebookService(LorebookStore store, FieldValidator<LorebooksRecord> validator, EventBus eventBus) {
+        super(store, validator, eventBus);
     }
 
     /**

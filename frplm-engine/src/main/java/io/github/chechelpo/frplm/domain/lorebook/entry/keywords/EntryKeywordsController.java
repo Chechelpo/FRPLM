@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
@@ -16,8 +18,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRI
 @RestController
 @RequestMapping(ENTRIES_KEYWORDS_URL)
 final class EntryKeywordsController extends EntityController<EntryKeywordsRecord, EntryKeywordService> {
-    public EntryKeywordsController(EntryKeywordService service) {
-        super(service);
+    public EntryKeywordsController(EntryKeywordService service, DTOMapper<EntryKeywordsRecord> mapper) {
+        super(service, mapper);
     }
 
     @GetMapping("/{lorebookID}")

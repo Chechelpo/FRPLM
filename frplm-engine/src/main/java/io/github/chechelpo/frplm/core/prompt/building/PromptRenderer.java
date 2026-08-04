@@ -19,6 +19,8 @@ final class PromptRenderer {
     public PromptRenderer(List<ChatMessage> chatHistory, @NonNull List<SectionManager> initialSections){
         this.chatHistory = chatHistory;
         sections.addAll(initialSections);
+        sections.stream().filter(SectionManager::isChatHistorySection).findAny()
+                .orElseThrow(() -> new IllegalStateException("There's no chat history section in this prompt"));
     }
 
     List<ChatMessage> getChatHistory(){

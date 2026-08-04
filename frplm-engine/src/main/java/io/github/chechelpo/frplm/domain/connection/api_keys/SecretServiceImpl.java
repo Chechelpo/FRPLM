@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.connection.api_keys;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
@@ -16,8 +17,13 @@ import java.util.Optional;
 non-sealed class SecretServiceImpl extends EntityService<ApiKeysRecord, SecretStore> implements SecretService {
     private final EncryptorService encryptor;
 
-    SecretServiceImpl(@NotNull EncryptorService encryptor, @NotNull SecretStore secretsStore, EventBus eventBus) {
-        super(secretsStore, eventBus);
+    SecretServiceImpl(
+            FieldValidator<ApiKeysRecord> validator,
+            @NotNull EncryptorService encryptor,
+            @NotNull SecretStore secretsStore,
+            EventBus eventBus
+    ) {
+        super(secretsStore, validator, eventBus);
         this.encryptor = encryptor;
     }
 

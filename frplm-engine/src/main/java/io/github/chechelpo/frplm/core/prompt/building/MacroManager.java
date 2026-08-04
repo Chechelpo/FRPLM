@@ -27,12 +27,6 @@ final class MacroManager {
         return injections.get(macro);
     }
 
-    void addEntry(EntryRecord entry){
-        Objects.requireNonNull(entry);
-        Objects.requireNonNull(outletManager);
-        appendAtMacro(outletManager.getOutletOf(entry), entry.getContent());
-    }
-
     void addEntries(List<EntryRecord> entries) {
         Objects.requireNonNull(entries);
         Objects.requireNonNull(outletManager);

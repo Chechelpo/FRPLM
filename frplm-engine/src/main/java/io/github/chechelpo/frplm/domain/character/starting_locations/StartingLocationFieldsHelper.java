@@ -1,95 +1,72 @@
 package io.github.chechelpo.frplm.domain.character.starting_locations;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.BoolConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.IntegerConstraint;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
+import it.unimi.dsi.fastutil.Pair;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jooq.TableField;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.STARTING_LOCATIONS;
+
 @Component
-public final class StartingLocationFieldsHelper extends ABSControllerAwareHelper<
-        StartingLocationsRecord,
-        StartingLocationsService,
-        StartingLocationsController
->
-{
-    StartingLocationFieldsHelper(
-            StartingLocationsService service,
-            StartingLocationsController controller
-    ) {
-        super(service, controller);
+public final class StartingLocationFieldsHelper
+        extends EntityControllerFieldValidator<StartingLocationsRecord> {
 
-        register_field(
-                "worldID",
-                StartingLocations.STARTING_LOCATIONS.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+    StartingLocationFieldsHelper() {
+        super(EntityConfigs.Types.STARTING_LOCATIONS);
+    }
+
+    @Override
+    protected List<FieldInfo<StartingLocationsRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(STARTING_LOCATIONS.WORLD_ID)
                         .requireOnCreate()
-                        .build()
+                        .key()
+                        .build(),
 
-        );
-        register_field(
-                "characterID",
-                StartingLocations.STARTING_LOCATIONS.CHARACTER_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+                FieldInfo.builder(STARTING_LOCATIONS.CHARACTER_ID)
                         .requireOnCreate()
-                        .build()
-        );
+                        .key()
+                        .build(),
 
-        register_field(
-                "locationID",
-                StartingLocations.STARTING_LOCATIONS.LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+                FieldInfo.builder(STARTING_LOCATIONS.LOCATION_ID)
                         .requireOnCreate()
-                        .build()
-        );
-        register_field(
-                "reason_why",
-                StartingLocations.STARTING_LOCATIONS.REASON_WHY,
-                FieldInfo.stringField()
-                        .build()
+                        .key()
+                        .build(),
 
-        );
+                FieldInfo.builder(STARTING_LOCATIONS.REASON_WHY)
+                        .build(),
 
+                FieldInfo.builder(STARTING_LOCATIONS.IS_STATIC)
+                        .build(),
 
-        register_field(
-                "is_static",
-                StartingLocations.STARTING_LOCATIONS.IS_STATIC,
-                FieldInfo.booleanField()
+                FieldInfo.builder(STARTING_LOCATIONS.TTL)
                         .setConstraints(
-                                BoolConstraint.builder()
+                                IntegerConstraint.builder()
+                                        .setMin(0)
                         )
                         .build()
         );
-        register_field(
-                "ttl",
-                StartingLocations.STARTING_LOCATIONS.TTL,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .setMin(0L)
-                                .build()
-                        )
-                        .build()
+    }
+
+    @Contract(" -> new")
+    @Override
+    protected @NonNull @Unmodifiable List<DTOField<StartingLocationsRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(STARTING_LOCATIONS.WORLD_ID, "worldID"),
+                DTOField.of(STARTING_LOCATIONS.CHARACTER_ID, "characterID"),
+                DTOField.of(STARTING_LOCATIONS.LOCATION_ID, "locationID"),
+                DTOField.of(STARTING_LOCATIONS.REASON_WHY, "reason_why"),
+                DTOField.of(STARTING_LOCATIONS.IS_STATIC, "is_static"),
+                DTOField.of(STARTING_LOCATIONS.TTL, "ttl")
         );
     }
 }

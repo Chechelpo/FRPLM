@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.events.EventBus;
@@ -18,12 +19,9 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -34,17 +32,19 @@ public class LocationsService extends EntityService<
     private final LorebookService lorebooks;
     private final WorldService worlds;
 
-    LocationsService(LocationStore store, LorebookService lorebooks, WorldService worlds, EventBus bus) {
-        super(store, bus);
+    LocationsService(LocationStore store,
+                     FieldValidator<LocationsRecord> validator,
+                     LorebookService lorebooks, WorldService worlds, EventBus bus) {
+        super(store, validator, bus);
         this.lorebooks = lorebooks;
         this.worlds = worlds;
     }
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<LocationsRecord> data, long operationID) {
-        if (!data.assignsField(LOCATIONS.LOREBOOK_ID)){
+        if (!data.assigns(LOCATIONS.LOREBOOK_ID)){
             EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-            lorebookData.set(LOREBOOKS.NAME, data.requireValue(LOCATIONS.NAME));
+            lorebookData.set(LOREBOOKS.NAME, data.require(LOCATIONS.NAME));
             lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.LOCATION_INFO.stable_id);
 
             data.set(
@@ -56,12 +56,12 @@ public class LocationsService extends EntityService<
             );
         }
 
-        EntityKey<WorldsRecord> worldKey = EntityKey.of(Worlds.WORLDS.ID, data.requireValue(Locations.LOCATIONS.WORLD_ID));
+        EntityKey<WorldsRecord> worldKey = EntityKey.of(Worlds.WORLDS.ID, data.require(Locations.LOCATIONS.WORLD_ID));
         int locationID = worlds.incrementAndGet(
                 Worlds.WORLDS.NEXT_LOCATION_ID,
                 worldKey
         ).orElseThrow(() -> {
-                    log.error("Couldn't get the next location ID for world {}", data.requireValue(Locations.LOCATIONS.WORLD_ID));
+                    log.error("Couldn't get the next location ID for world {}", data.require(Locations.LOCATIONS.WORLD_ID));
                     return new UnexpectedException("Couldn't get the next location ID", Severity.SYSTEM);
                 }
         );
@@ -96,8 +96,8 @@ public class LocationsService extends EntityService<
 
         //noinspection unchecked
         CRUDDraftEvent.DeleteEntityDraft<RegionRecord> event = (CRUDDraftEvent.DeleteEntityDraft<RegionRecord>) rawEvent;
-        int worldId = event.key().requireValue(REGION.WORLD_ID);
-        int regionId = event.key().requireValue(REGION.ID);
+        int worldId = event.key().require(REGION.WORLD_ID);
+        int regionId = event.key().require(REGION.ID);
 
         if (!store.getMatching(
                 EntityDataPayload.<LocationsRecord>builder()

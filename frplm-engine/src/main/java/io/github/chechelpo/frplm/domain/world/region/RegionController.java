@@ -1,6 +1,8 @@
 package io.github.chechelpo.frplm.domain.world.region;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -14,8 +16,9 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.REGIO
 @RestController
 @RequestMapping(REGIONS_URL)
 final class RegionController extends EntityController<RegionRecord, RegionService> {
-    RegionController(RegionService service) {
-        super(service);
+
+    RegionController(RegionService service, DTOMapper<RegionRecord> dTOMapper) {
+        super(service, dTOMapper);
     }
 
 

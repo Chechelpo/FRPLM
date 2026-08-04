@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
@@ -41,12 +42,13 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
 
     EntryService(
             EntryStore entriesStore,
+            FieldValidator<EntryRecord> validator,
             LorebookService lorebooks,
             OutletService outlets,
             EventBus eventBus,
             EntryKeywordService entryKeywordService
     ) {
-        super(entriesStore, eventBus);
+        super(entriesStore, validator, eventBus);
         this.lorebooks = lorebooks;
         this.outlets = outlets;
         this.entryKeywordService = entryKeywordService;
@@ -69,7 +71,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<EntryRecord> data, long operationID) {
-        EntityKey<LorebooksRecord> parentLorebookKey = lorebookKeyOf(data.requireValue(Entry.ENTRY.LOREBOOK_ID));
+        EntityKey<LorebooksRecord> parentLorebookKey = lorebookKeyOf(data.require(Entry.ENTRY.LOREBOOK_ID));
 
         int newEntryID = lorebooks.incrementAndGet(
                 Lorebooks.LOREBOOKS.NEXT_ENTRY_ID,
@@ -89,7 +91,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
 
     @Override
     protected void beforeUpdate(@NotNull EntityKey<EntryRecord> target, @NotNull EntityDataPayload<EntryRecord> data, long operationID) {
-        if (data.assignsField(Entry.ENTRY.OUTLET) && data.requireValue(Entry.ENTRY.OUTLET) != null)
+        if (data.assigns(Entry.ENTRY.OUTLET) && data.require(Entry.ENTRY.OUTLET) != null)
             throw new InvalidValue("Cannot update an outlet entry through normal outlet. Use updateOutlet() instead.");
         super.beforeUpdate(target, data, operationID);
     }

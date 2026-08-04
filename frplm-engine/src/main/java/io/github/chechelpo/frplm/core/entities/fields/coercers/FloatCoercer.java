@@ -1,20 +1,14 @@
 package io.github.chechelpo.frplm.core.entities.fields.coercers;
 
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class FloatCoercer extends Coercer<Float> {
-    private FloatCoercer() {
-        super(FieldType.FLOAT);
-    }
+final class FloatCoercer implements Coercer<Float> {
+    static final FloatCoercer instance = new FloatCoercer();
 
-    @Contract("-> new")
-    public static @NotNull FloatCoercer create() {
-        return new FloatCoercer();
-    }
+    private FloatCoercer(){}
 
     @Override
     @Contract(value = "_ -> !null", pure = true)
@@ -59,7 +53,7 @@ public final class FloatCoercer extends Coercer<Float> {
             @Nullable Object value
     ) {
         return Either.left(new CoerceError(
-                "Cannot coerce '" + value + "' to " + this.type
+                "Cannot coerce '" + value + "' to  float"
         ));
     }
 }

@@ -1,8 +1,9 @@
 package io.github.chechelpo.frplm.domain.world.edge;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import io.github.chechelpo.frplm.domain.world.location.LocationController;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
@@ -19,17 +20,17 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
 @Component
 @RequestMapping(EntityConfigs.EDGES_URL)
 final class EdgeController extends EntityController<LocationEdgesRecord, EdgeService> {
-    private final LocationController locationController;
+    private final DTOMapper<LocationsRecord> locationMapper;
 
-    EdgeController(EdgeService service, LocationController locationController) {
-        super(service);
-        this.locationController = locationController;
+    EdgeController(EdgeService service, DTOMapper<LocationEdgesRecord> mapper, DTOMapper<LocationsRecord> locationMapper) {
+        super(service, mapper);
+        this.locationMapper = locationMapper;
     }
 
     @GetMapping("/{worldId}/{locationId}/neighbours")
     public ResponseEntity<EntityDTO[]> getNeighbours(@PathVariable int locationId, @PathVariable int worldId) {
         return ResponseEntity.ok(
-                locationController.wrapEntities(
+                locationMapper.wrapRecords(
                         service.neighboursOf(EntityKey.<LocationsRecord>builder()
                                 .set(LOCATIONS.WORLD_ID, worldId)
                                 .set(LOCATIONS.ID, locationId)

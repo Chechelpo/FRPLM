@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
@@ -9,6 +10,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptSection;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
@@ -27,8 +29,13 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 public class SectionService extends EntityService<PromptSectionRecord, SectionStore> {
     private final TemplateService templateService;
 
-    SectionService(SectionStore store, TemplateService templateService, EventBus eventBus) {
-        super(store, eventBus);
+    SectionService(
+            SectionStore store,
+            FieldValidator<PromptSectionRecord> validator,
+            TemplateService templateService,
+            EventBus eventBus
+    ) {
+        super(store, validator, eventBus);
         this.templateService = templateService;
     }
 
@@ -63,7 +70,7 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<PromptSectionRecord> data, long operationID) {
         EntityKey<PromptTemplateRecord> key = EntityKey.of(PROMPT_TEMPLATE.ID,
-                data.requireValue(PROMPT_SECTION.PROMPT_ID)
+                data.require(PROMPT_SECTION.PROMPT_ID)
         );
         short sectionID = templateService.incrementAndGet(
                     PROMPT_TEMPLATE.NEXT_SECTION_ID,
@@ -74,16 +81,16 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
         });
 
         data.set(PromptSection.PROMPT_SECTION.SECTION_ID, sectionID);
-        data.set(PROMPT_SECTION.POSITION, data.requireValue(PROMPT_SECTION.SECTION_ID));
+        data.set(PROMPT_SECTION.POSITION, data.require(PROMPT_SECTION.SECTION_ID));
 
         super.beforeCreate(data, operationID);
     }
 
     @Override
     protected void beforeDelete(@NotNull EntityKey<PromptSectionRecord> key, long operationID) {
-        if (!DefaultSections.canDelete(Short.toUnsignedInt(key.requireValue(PROMPT_SECTION.SECTION_ID)))) {
+        if (!DefaultSections.canDelete(Short.toUnsignedInt(key.require(PROMPT_SECTION.SECTION_ID)))) {
             DefaultSections triedToDeleteSection = DefaultSections.fromSectionID(
-                    Short.toUnsignedInt(key.requireValue(PROMPT_SECTION.SECTION_ID)));
+                    Short.toUnsignedInt(key.require(PROMPT_SECTION.SECTION_ID)));
             log.error("Attempted to delete a protected default section off a template name {}", triedToDeleteSection);
             throw new InvalidKey("Protected default section can't be deleted", Severity.USER);
         }
@@ -100,7 +107,10 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
         CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord> createdTemplateEntity =
                 (CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord>) createdTemplateEvent;
 
-        short promptID = createdTemplateEntity.key().getValue(PROMPT_TEMPLATE.ID);
+        short promptID = createdTemplateEntity.key().getAssignment(PROMPT_TEMPLATE.ID)
+                .orElseThrow(ignored ->
+                        new UnexpectedException("Expected new record to assign prompt template id ", Severity.SYSTEM)
+                );
         log.debug("Inserting standard sections for {}", createdTemplateEntity.record().getValue(PROMPT_TEMPLATE.NAME));
         for (DefaultSections section : DefaultSections.values()) {
             this.store.createAndGet(

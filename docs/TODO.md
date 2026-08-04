@@ -6,3 +6,11 @@ Early access 0.1.0
    - Test a campaign ✓
    - Update frplm-build-helper matching the new extension-sdk version templates ✓
    - Publish the new extension-sdk under version 0.1.3 ✓
+
+0.2.0
+ - Add editing directly on-graph
+ - Add prolog predicates
+ - Add prolog goals to:
+   - Edge visibility
+   - Traversability
+   - As entry activation step (post-keywords)

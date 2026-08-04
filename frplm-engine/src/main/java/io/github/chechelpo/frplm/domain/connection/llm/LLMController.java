@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.connection.llm;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -29,8 +30,14 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LLM_C
 final class LLMController extends EntityController<LlmConnectionRecord, LLMService> {
     private final T2TClient textToTextClient;
     private final HostService hosts;
-    LLMController(LLMService service, SecretService secretService, HostService hostService) {
-        super(service);
+
+    LLMController(
+            LLMService service,
+            DTOMapper<LlmConnectionRecord> validator,
+            SecretService secretService,
+            HostService hostService
+    ) {
+        super(service, validator);
         textToTextClient = new T2TClient(secretService, hostService);
         this.hosts = hostService;
     }
@@ -38,7 +45,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
     record TestResponse(boolean status, String message){}
     @GetMapping("/test")
     public ResponseEntity<TestResponse> test(@RequestParam Map<String, Object> params) throws EntityNotFound {
-        EntityKey<LlmConnectionRecord> key = extractKey(params);
+        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(params, true);
 
         LlmConnectionRecord connection = service.find(key)
                 .orElseThrow("Could not find connection to test", Severity.USER);
@@ -56,7 +63,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
 
     @GetMapping("/models")
     public ResponseEntity<ModelResponses> models(@RequestParam Map<String, Object> params) throws EntityNotFound {
-        EntityKey<LlmConnectionRecord> key = extractKey(params);
+        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(params, true);
         LlmConnectionRecord llm = service.find(key)
                     .orElseThrow("Could not find connection to fetch models from", Severity.USER);
 

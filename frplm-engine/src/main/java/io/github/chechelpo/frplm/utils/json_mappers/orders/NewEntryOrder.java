@@ -18,7 +18,7 @@ public record NewEntryOrder(Set<String> keywords, EntityDataPayload<EntryRecord>
                 Info: %s
                 
                 """.formatted(
-                        entryInfo.getValue(ENTRY.NAME).orElse("No name"),
+                        entryInfo.getAssignment(ENTRY.NAME).orElse("No name"),
                         keywords,
                         entryInfo
         );

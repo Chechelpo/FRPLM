@@ -1,6 +1,8 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +17,8 @@ public final class CharacterController extends EntityController<
         >
 {
 
-    CharacterController(CharacterService service) {
-        super(service);
+    CharacterController(CharacterService service, EntityControllerFieldValidator<CharactersRecord> validator) {
+        super(service, validator);
     }
 
     @GetMapping( "/{worldID}")

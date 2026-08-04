@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
@@ -34,10 +35,11 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
     CurrentLocationService(
             @NotNull CurrentLocationStore store,
             @NotNull LocationsService locationsService,
+            FieldValidator<CurrentLocationsRecord> validator,
             @NotNull EventBus eventBus,
             @NotNull MovementHistory movements,
             CharacterService characterService, MessageService messageService, SessionService sessionService) {
-        super(store, eventBus);
+        super(store, validator, eventBus);
         this.movementService = movements;
         this.locationsService = locationsService;
         this.characterService = characterService;
@@ -107,7 +109,7 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
         //noinspection SpringTransactionalMethodCallsInspection
         previous = this.find(target)
                 .orElseThrow( notFound -> {
-                    log.error("No previous location for character {} in session {}", target, target.requireValue(CURRENT_LOCATIONS.SESSION_ID));
+                    log.error("No previous location for character {} in session {}", target, target.require(CURRENT_LOCATIONS.SESSION_ID));
                     return new UnexpectedException("This character has no previous location", Severity.SYSTEM);
                 });
 
@@ -116,21 +118,21 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
                         .set(LOCATIONS.ID, previous.getLocationId())
                         .build();
         EntityKey<LocationsRecord> nextLocation = EntityKey.<LocationsRecord>builder()
-                        .set(LOCATIONS.WORLD_ID, data.requireValue(CURRENT_LOCATIONS.WORLD_ID))
-                        .set(LOCATIONS.ID, data.requireValue(CURRENT_LOCATIONS.LOCATION_ID))
+                        .set(LOCATIONS.WORLD_ID, data.require(CURRENT_LOCATIONS.WORLD_ID))
+                        .set(LOCATIONS.ID, data.require(CURRENT_LOCATIONS.LOCATION_ID))
                         .build();
 
-        if (!Objects.equals(previous.getWorldId(), data.requireValue(CURRENT_LOCATIONS.WORLD_ID)))
+        if (!Objects.equals(previous.getWorldId(), data.require(CURRENT_LOCATIONS.WORLD_ID)))
             throw new InvalidValue("Previous world id mismatch");
 
-        if (nextLocation.requireValue(LOCATIONS.ID) == previousLocation.requireValue(LOCATIONS.ID))
+        if (nextLocation.require(LOCATIONS.ID) == previousLocation.require(LOCATIONS.ID))
             data.set(CURRENT_LOCATIONS.TICK_NUM, previous.getTickNum());
         else { //This is a legitimate movement
-            int sessionID = target.requireValue(CURRENT_LOCATIONS.SESSION_ID);
+            int sessionID = target.require(CURRENT_LOCATIONS.SESSION_ID);
             data.set(CURRENT_LOCATIONS.TICK_NUM, messageService.getLastMessageOf(sessionID).getTickNum());
             movementService.registerMovementChange(
                     previous,
-                    data.requireValue(CURRENT_LOCATIONS.TICK_NUM)
+                    data.require(CURRENT_LOCATIONS.TICK_NUM)
             );
         }
 
@@ -139,20 +141,20 @@ class CurrentLocationService extends EntityService<CurrentLocationsRecord, Curre
 
     @Override
     protected void afterSuccessfulUpdate(@NotNull EntityKey<CurrentLocationsRecord> key, @NotNull EntityDataPayload<CurrentLocationsRecord> updated, long operationID) {
-        int movedCharacterId = key.requireValue(CURRENT_LOCATIONS.CHARACTER_ID);
-        int sessionID = key.requireValue(CURRENT_LOCATIONS.SESSION_ID);
+        int movedCharacterId = key.require(CURRENT_LOCATIONS.CHARACTER_ID);
+        int sessionID = key.require(CURRENT_LOCATIONS.SESSION_ID);
         boolean userCharacterMovement = movedCharacterId == sessionService.getUserCharacterID(sessionID).orElseThrow();
 
         // If the movement is from user character, we also update the message location.
-        if (updated.assignsField(CURRENT_LOCATIONS.LOCATION_ID) && updated.assignsField(CURRENT_LOCATIONS.TICK_NUM)) {
+        if (updated.assigns(CURRENT_LOCATIONS.LOCATION_ID) && updated.assigns(CURRENT_LOCATIONS.TICK_NUM)) {
             if (userCharacterMovement){
                 messageService.update(
                         EntityKey.<MessagesRecord>builder()
-                                .set(MESSAGES.SESSION_ID, key.requireValue(CURRENT_LOCATIONS.SESSION_ID))
-                                .set(MESSAGES.TICK_NUM, updated.requireValue(CURRENT_LOCATIONS.TICK_NUM))
+                                .set(MESSAGES.SESSION_ID, key.require(CURRENT_LOCATIONS.SESSION_ID))
+                                .set(MESSAGES.TICK_NUM, updated.require(CURRENT_LOCATIONS.TICK_NUM))
                                 .build()
                         ,
-                        EntityDataPayload.of(MESSAGES.LOCATION_ID, updated.requireValue(CURRENT_LOCATIONS.LOCATION_ID))
+                        EntityDataPayload.of(MESSAGES.LOCATION_ID, updated.require(CURRENT_LOCATIONS.LOCATION_ID))
                 ).orElseThrow("Couldn't update message location on user movement", Severity.SYSTEM);
             }
 

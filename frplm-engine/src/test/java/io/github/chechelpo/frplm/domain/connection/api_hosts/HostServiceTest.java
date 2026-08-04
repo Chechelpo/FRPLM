@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.connection.api_hosts;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({HostTestContext.class})
 class HostServiceTest {
     @Autowired HostTestContext hostTestContext;
+    @Autowired
+    private StableRecordCreator stableRecordCreator;
 
     @BeforeEach
     void setUp() {
-        hostTestContext.reload();
+        stableRecordCreator.run();
     }
 
     @Test

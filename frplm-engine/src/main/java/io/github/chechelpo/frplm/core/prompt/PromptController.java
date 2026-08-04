@@ -1,12 +1,15 @@
 package io.github.chechelpo.frplm.core.prompt;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.core.prompt.building.PromptResult;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookController;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryController;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.LorebookImpl;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -23,18 +26,18 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_B
 final class PromptController {
 
     private final PromptService promptService;
-    private final LorebookController lorebookController;
-    private final EntryController entryController;
+    private final DTOMapper<LorebooksRecord> lorebookMapper;
+    private final DTOMapper<EntryRecord> entryMapper;
 
-    public PromptController(PromptService promptService, LorebookController lorebookController, EntryController entryController) {
+    public PromptController(PromptService promptService, DTOMapper<LorebooksRecord> lorebookMapper, DTOMapper<EntryRecord> entryMapper) {
         this.promptService = promptService;
-        this.lorebookController = lorebookController;
-        this.entryController = entryController;
+        this.lorebookMapper = lorebookMapper;
+        this.entryMapper = entryMapper;
     }
 
     private record PromptDTO(
-            EntityController.EntityDTO[] lorebooks,
-            EntityController.EntityDTO[] activatedEntries,
+            EntityDTO[] lorebooks,
+            EntityDTO[] activatedEntries,
             ChatCompletionRequest rawRequest
     ) {}
     @GetMapping(
@@ -45,13 +48,13 @@ final class PromptController {
         PromptResult newPrompt = promptService.getNewPrompt(sessionID);
         return ResponseEntity.ok(
                 new PromptDTO(
-                        lorebookController.wrapEntities(
+                        lorebookMapper.wrapRecords(
                                 newPrompt.lorebooksManager().activeLorebooks().stream()
                                         .map(LorebookImpl.class::cast)
                                         .map(LorebookImpl::getRecord)
                                         .toList()
                         ),
-                        entryController.wrapEntities(newPrompt.lorebooksManager().activeEntries()),
+                        entryMapper.wrapRecords(newPrompt.lorebooksManager().activeEntries()),
                         newPrompt.request()
                 )
         );

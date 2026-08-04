@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.prolog.arguments;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.prolog.predicates.PrologPredicateService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -21,14 +22,19 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.PROLOG_PREDICATE_A
 public class PrologArgumentService extends EntityService<PrologPredicateArgumentRecord, PrologArgumentStore> {
     private final PrologPredicateService prologPredicateService;
 
-    PrologArgumentService(@NonNull PrologArgumentStore store, @NotNull EventBus eventBus, PrologPredicateService prologPredicateService) {
-        super(store, eventBus);
+    PrologArgumentService(
+            @NonNull PrologArgumentStore store,
+            FieldValidator<PrologPredicateArgumentRecord> validator,
+            @NotNull EventBus eventBus,
+            PrologPredicateService prologPredicateService
+    ) {
+        super(store, validator, eventBus);
         this.prologPredicateService = prologPredicateService;
     }
 
     @Override
     protected void beforeCreate(@NonNull EntityDataPayload<PrologPredicateArgumentRecord> data, long operationID) {
-        if (!data.assignsField(PROLOG_PREDICATE_ARGUMENT.POSITION)) setDefaultPosition(data);
+        if (!data.assigns(PROLOG_PREDICATE_ARGUMENT.POSITION)) setDefaultPosition(data);
         super.beforeCreate(data, operationID);
     }
     private void setDefaultPosition(@NonNull EntityDataPayload<PrologPredicateArgumentRecord> data) {
@@ -38,8 +44,10 @@ public class PrologArgumentService extends EntityService<PrologPredicateArgument
                         PROLOG_PREDICATE.ARITY,
                         EntityKey.of(
                                 PROLOG_PREDICATE.ID,
-                                data.getValue(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID)
-                                        .orElseThrow(() -> new ExpectedField("New prolog predicate argument has no predicate parent id", Severity.USER))
+                                data.getAssignment(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID)
+                                        .orElseThrow(a ->
+                                                new ExpectedField("New prolog predicate argument has no predicate parent id", Severity.USER)
+                                        )
                                 )
                 ).orElseThrow(() -> new EntityNotFound("Couldn't find parent predicate", Severity.USER))
         );
@@ -55,7 +63,7 @@ public class PrologArgumentService extends EntityService<PrologPredicateArgument
     protected void afterSuccessfulDelete(EntityKey<PrologPredicateArgumentRecord> id, long operationID, PrologPredicateArgumentRecord record) {
         prologPredicateService.decrementAndGet(
                 PROLOG_PREDICATE.ARITY,
-                EntityKey.of(PROLOG_PREDICATE.ID, id.requireValue(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID))
+                EntityKey.of(PROLOG_PREDICATE.ID, id.require(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID))
         );
         super.afterSuccessfulDelete(id, operationID, record);
     }

@@ -1,15 +1,13 @@
 package io.github.chechelpo.frplm.core.entities.fields.coercers;
 
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class StringCoercer extends Coercer<String> {
-    StringCoercer() {
-        super(FieldType.STRING);
-    }
+final class StringCoercer implements Coercer<String> {
+    static final StringCoercer instance = new StringCoercer();
+    private StringCoercer(){}
 
     @Contract(value="-> new", pure=true)
     public static @NotNull StringCoercer create() {

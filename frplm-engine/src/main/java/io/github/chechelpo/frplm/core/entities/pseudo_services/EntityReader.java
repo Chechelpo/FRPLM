@@ -15,8 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+
 import org.jooq.Condition;
 
 public interface EntityReader<R extends TableRecord<R>> {
@@ -103,7 +102,7 @@ public interface EntityReader<R extends TableRecord<R>> {
             }
 
             public int keyFieldCount() {
-                return target.getValues().size();
+                return target.assignments().size();
             }
 
 
@@ -135,7 +134,7 @@ public interface EntityReader<R extends TableRecord<R>> {
             }
 
             private TableField<R, ?> firstField() {
-                return target.getValues().keySet().iterator().next();
+                return target.assignments().keySet().iterator().next();
             }
 
             @Override

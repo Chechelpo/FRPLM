@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.connection.llm;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.events.EventBus;
@@ -19,8 +20,8 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 public class LLMService extends EntityService<LlmConnectionRecord, LLMStore> {
     private final HostService hostService;
 
-    LLMService(LLMStore store, EventBus eventBus, HostService hostService) {
-        super(store, eventBus);
+    LLMService(LLMStore store, DTOMapper<LlmConnectionRecord> mapper, EventBus eventBus, HostService hostService) {
+        super(store, mapper, eventBus);
         this.hostService = hostService;
     }
 

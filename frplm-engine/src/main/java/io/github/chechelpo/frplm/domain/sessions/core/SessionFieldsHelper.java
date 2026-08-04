@@ -1,76 +1,60 @@
 package io.github.chechelpo.frplm.domain.sessions.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.IntegerConstraint;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 @Component
-final class SessionFieldsHelper extends ABSControllerAwareHelper<SessionsRecord, SessionService, SessionController> {
-    SessionFieldsHelper(SessionService service, SessionController controller) {
-        super(service, controller);
+final class SessionFieldsHelper extends EntityControllerFieldValidator<SessionsRecord> {
+    SessionFieldsHelper() {
+        super(EntityConfigs.Types.SESSIONS);
+    }
 
-        register_field(
-                "id",
-                SESSIONS.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .build()
+    @Override
+    protected List<DTOField<SessionsRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(SESSIONS.ID, "id"),
+                DTOField.of(SESSIONS.CURRENT_TICK, "current_tick"),
+                DTOField.of(SESSIONS.NAME, "name"),
+                DTOField.of(SESSIONS.USER_PERSONA_ID, "user_id"),
+                DTOField.of(SESSIONS.WORLD_ID, "world_id"),
+                DTOField.of(SESSIONS.MAIN_PROMPT, "template_id")
         );
+    }
 
-        register_field(
-                "current_tick",
-                SESSIONS.CURRENT_TICK,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-                ,
-                0
-        );
-        register_field(
-                "name",
-                SESSIONS.NAME,
-                FieldInfo.stringField()
-                        .build()
-        );
+    @Override
+    protected List<FieldInfo<SessionsRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(SESSIONS.ID)
+                        .key()
+                        .build(),
 
-        register_field(
-                "user_id",
-                SESSIONS.USER_PERSONA_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
+                FieldInfo.builder(SESSIONS.CURRENT_TICK)
+                        .setDefaultValue(0)
+                        .build(),
+
+                FieldInfo.builder(SESSIONS.NAME)
+                        .build(),
+
+                FieldInfo.builder(SESSIONS.USER_PERSONA_ID)
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "world_id",
-                SESSIONS.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                .readOnly()
-                        )
+                FieldInfo.builder(SESSIONS.WORLD_ID)
+                        .readOnly()
                         .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(SESSIONS.MAIN_PROMPT)
+                        .nullable()
                         .build()
         );
-
-
-        register_field(
-                "template_id",
-                SESSIONS.MAIN_PROMPT,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .nullable()
-                        )
-                        .build()
-        );
-
     }
 }

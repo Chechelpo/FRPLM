@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.sessions.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.events.EventBus;
@@ -28,8 +29,14 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
     private final CharacterService characterService;
     private final StartingLocationsService startingLocationsService;
 
-    SessionService(SessionStore store, CharacterService characters, EventBus eventBus, StartingLocationsService startingLocationsService) {
-        super(store, eventBus);
+    SessionService(
+            SessionStore store,
+            FieldValidator<SessionsRecord> validator,
+            CharacterService characters,
+            EventBus eventBus, 
+            StartingLocationsService startingLocationsService
+    ) {
+        super(store, validator, eventBus);
         this.characterService = characters;
         this.startingLocationsService = startingLocationsService;
     }
@@ -49,7 +56,7 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<SessionsRecord> data, long operationID) {
-        EntityKey<CharactersRecord> characterKey = characterService.keyOf(data.requireValue(SESSIONS.USER_PERSONA_ID));
+        EntityKey<CharactersRecord> characterKey = characterService.keyOf(data.require(SESSIONS.USER_PERSONA_ID));
         boolean canBeUser =  characterService.getValueOf(
                     CHARACTERS.CAN_BE_USER,
                         characterKey
@@ -58,7 +65,7 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
 
         if (!canBeUser) throw new InvalidValue("Picked character can't be user");
         List<LocationsRecord> thisStartingLocations = startingLocationsService
-                .startingLocationAt(characterKey, data.requireValue(SESSIONS.WORLD_ID));
+                .startingLocationAt(characterKey, data.require(SESSIONS.WORLD_ID));
 
         if (thisStartingLocations.isEmpty())
             throw new InvalidValue("This character has no starting locations in this world");
@@ -71,7 +78,7 @@ public class SessionService extends EntityService<SessionsRecord, SessionStore> 
 
         CRUDCommittedEvent.DeletedEntity<MessagesRecord> event = (CRUDCommittedEvent.DeletedEntity<MessagesRecord>) rawEvent;
         log.debug("Message deleted, updating tick num");
-        if (!store.decrementTickNum(event.key().requireValue(MESSAGES.SESSION_ID))){
+        if (!store.decrementTickNum(event.key().require(MESSAGES.SESSION_ID))){
             log.error("Couldn't decrement session tick after message deletion");
             throw new IllegalStateException("Couldn't decrement session tick after message deletion");
         }

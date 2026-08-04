@@ -130,23 +130,30 @@ class LocationsEventReactor {
 
         CRUDDraftEvent.CreateEntityDraft<MessagesRecord> event = (CRUDDraftEvent.CreateEntityDraft<MessagesRecord>) rawEvent;
 
-        int sessionId = event.initialData().requireValue(MESSAGES.SESSION_ID);
+        int sessionId = event.initialData().require(MESSAGES.SESSION_ID);
         int userCharacterId = sessionService.getUserCharacterID(sessionId)
                 .orElseThrow(() -> new UnexpectedException("User character not found", Severity.SYSTEM));
 
         LocationsRecord userCharacterLocation;
-        if (messageService.isFirstMessage(event.initialData().requireValue(MESSAGES.TICK_NUM)))
+        if (messageService.isFirstMessage(event.initialData().require(MESSAGES.TICK_NUM)))
             userCharacterLocation = getStartingLocationBySession(userCharacterId, sessionId);
         else userCharacterLocation = movements.getLocationOf(userCharacterId, sessionId);
 
-        if (!event.initialData().assignsField(MESSAGES.LOCATION_ID)){
+        if (!event.initialData().assigns(MESSAGES.LOCATION_ID)){
             log.debug("Assigning by default user character {} location {} (worldId: {} , locationId: {}) to new message of session {}",
                     characterService.find(EntityKey.of(CHARACTERS.ID, userCharacterId))
                             .orElseThrow(Severity.SYSTEM).getName(),
                     userCharacterLocation.getName(),
                     userCharacterLocation.getWorldId(),
                     userCharacterLocation.getId(),
-                    sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
+                    sessionService.find(
+                            EntityKey.of(
+                                    SESSIONS.ID,
+                                    event.initialKey().getAssignment(MESSAGES.SESSION_ID)
+                                            .orElseThrow(field ->
+                                                    new UnexpectedException("Couldn't get sessionId ", Severity.SYSTEM)
+                                            )
+                            ))
                             .orElseThrow(Severity.SYSTEM)
                             .getName()
             );
@@ -155,7 +162,7 @@ class LocationsEventReactor {
             event.initialData().set(MESSAGES.LOCATION_ID, userCharacterLocation.getId());
 
         } else log.trace("Didn't assign default location of user character for new message of session {} (was already assigned)",
-                sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().orElseThrow().requireValue(MESSAGES.SESSION_ID)))
+                sessionService.find(EntityKey.of(SESSIONS.ID, event.initialKey().require(MESSAGES.SESSION_ID)))
                         .orElseThrow(Severity.SYSTEM)
                         .getName()
         );
@@ -175,8 +182,8 @@ class LocationsEventReactor {
         if (rawEvent.type() != EntityConfigs.Types.RESPONSES) return;
 
         CRUDDraftEvent.CreateEntityDraft<ResponsesRecord> event = (CRUDDraftEvent.CreateEntityDraft<ResponsesRecord>) rawEvent;
-        int sessionId = event.initialData().requireValue(RESPONSES.SESSION_ID);
-        int tickNum = event.initialData().requireValue(RESPONSES.TICK_NUM);
+        int sessionId = event.initialData().require(RESPONSES.SESSION_ID);
+        int tickNum = event.initialData().require(RESPONSES.TICK_NUM);
 
         LocationsRecord userCharacterLocation;
         if (messageService.isFirstMessage(tickNum)){
@@ -192,7 +199,7 @@ class LocationsEventReactor {
         userCharacterLocation = getCurrentUserLocation(sessionId);
 
         EntityDataPayload<ResponsesRecord> response = event.initialData();
-        if (!response.assignsField(RESPONSES.LOCATION_ID)){
+        if (!response.assigns(RESPONSES.LOCATION_ID)){
             log.debug("Assigning by default user (name {}) character's location in new response");
             response.set(RESPONSES.WORLD_ID, userCharacterLocation.getWorldId());
             response.set(RESPONSES.LOCATION_ID, userCharacterLocation.getId());
@@ -222,14 +229,14 @@ class LocationsEventReactor {
         if (rawEvent.type() != EntityConfigs.Types.MESSAGES) return;
 
         CRUDCommittedEvent.UpdatedEntity<MessagesRecord> event = (CRUDCommittedEvent.UpdatedEntity<MessagesRecord>) rawEvent;
-        if (!event.updatedData().assignsField(MESSAGES.ACTIVE_RESPONSE)) return;
+        if (!event.updatedData().assigns(MESSAGES.ACTIVE_RESPONSE)) return;
 
         EntityKey<MessagesRecord> target = event.target();
         EntityDataPayload<MessagesRecord> data = event.updatedData();
 
-        int sessionId = target.requireValue(MESSAGES.SESSION_ID);
-        int tickNum = target.requireValue(MESSAGES.TICK_NUM);
-        short newActiveResponseNum = data.requireValue(MESSAGES.ACTIVE_RESPONSE);
+        int sessionId = target.require(MESSAGES.SESSION_ID);
+        int tickNum = target.require(MESSAGES.TICK_NUM);
+        short newActiveResponseNum = data.require(MESSAGES.ACTIVE_RESPONSE);
         ResponsesRecord newActiveResponse = messageService.getActiveResponseOf(target);
 
         //onResponseChangeMessageLocation(newActiveResponse, event.updatedData());

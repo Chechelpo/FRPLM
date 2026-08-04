@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
@@ -20,8 +22,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRI
 @Component
 @RequestMapping(ENTRIES_URL)
 public final class EntryController extends EntityController<EntryRecord, EntryService> {
-    EntryController(EntryService service, LorebookService lorebookService) {
-        super(service);
+    EntryController(EntryService service, DTOMapper<EntryRecord> mapper) {
+        super(service, mapper);
     }
 
     @PatchMapping(ENTITY_PATH + "/{lorebook_id}/{entryID}")

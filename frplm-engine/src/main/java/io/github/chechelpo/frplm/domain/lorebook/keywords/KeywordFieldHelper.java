@@ -1,41 +1,38 @@
 package io.github.chechelpo.frplm.domain.lorebook.keywords;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.KEYWORD;
 
 @Component
-final class KeywordFieldHelper extends ABSControllerAwareHelper<KeywordRecord, KeywordServiceImpl, KeywordController> {
-    public KeywordFieldHelper(KeywordServiceImpl service, KeywordController controller) {
-        super(service, controller);
-        register_field(
-                "id",
-                KEYWORD.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
-                        .build()
-        );
+final class KeywordFieldHelper extends EntityControllerFieldValidator<KeywordRecord> {
+    KeywordFieldHelper() {
+        super(EntityConfigs.Types.KEYWORDS);
+    }
 
-        register_field(
-                "name",
-                KEYWORD.KEYWORD_,
-                FieldInfo.stringField()
-                        .setConstraints(
-                                StringConstraint.builder()
-                                        .readOnly()
-                                        .build()
-                        )
+    @Override
+    protected List<DTOField<KeywordRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(KEYWORD.ID, "id"),
+                DTOField.of(KEYWORD.KEYWORD_, "name")
+        );
+    }
+
+    @Override
+    protected List<FieldInfo<KeywordRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(KEYWORD.ID)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(KEYWORD.KEYWORD_)
+                        .readOnly()
                         .requireOnCreate()
                         .build()
         );

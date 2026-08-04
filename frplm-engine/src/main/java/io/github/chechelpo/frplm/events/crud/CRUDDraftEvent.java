@@ -15,7 +15,7 @@ public sealed interface CRUDDraftEvent extends CRUDEvent{
     record CreateEntityDraft<R extends TableRecord<R>>(
             @NotNull EntityConfigs.Types type,
             long operationID,
-            @NotNull Optional<EntityKey<R>> initialKey,
+            @NotNull EntityKey<R> initialKey,
             @NotNull EntityDataPayload<R> initialData
     ) implements CRUDDraftEvent {}
 

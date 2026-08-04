@@ -17,7 +17,7 @@ import static org.jooq.impl.DSL.trueCondition;
  * Record used for identifying a specific table entry.
  * @param <R> table record class which can be identified by an instance of this class
  */
-public final class EntityKey<R extends TableRecord<R>>
+public final class EntityKey<R extends TableRecord<R>> implements DataPayload<R>
 {
     //Type checking done at FieldsABS, not here
     private final Map<TableField<R, ?>, Object> values;
@@ -26,15 +26,31 @@ public final class EntityKey<R extends TableRecord<R>>
         this.values = values;
     }
 
-    public @UnmodifiableView Map<TableField<R, ?>, Object> getValues() {
-        return values;
-    }
-    public @NotNull <T> T requireValue(TableField<R, ?> field) {
-        return (T) Objects.requireNonNull(values.get(field), field.getName() + " is not assigned by this key");
-    }
-
+    @Override
     public boolean isEmpty(){
         return values.isEmpty();
+    }
+    @Override
+    public @UnmodifiableView Map<TableField<R, ?>, Object> assignments() {
+        return values;
+    }
+
+    public <T> @NotNull Assignment<R,T> getAssignment(TableField<R, T> field){
+        if (values.containsKey(field)) //noinspection unchecked
+            return Assignment.ofAssigned(field, (T) values.get(field));
+        return Assignment.ofUnassigned(field);
+    }
+
+    @Override
+    public boolean assigns(TableField<R, ?> field) {
+        return values.containsKey(field);
+    }
+
+    @Override
+    public void consume(Assignment<R, ?> assignment) {
+        if (!assignment.isAssigned()) return;
+
+        values.put(assignment.field, assignment.get());
     }
 
     public @NotNull Condition @NotNull [] getEqualityConditions() {
@@ -53,9 +69,6 @@ public final class EntityKey<R extends TableRecord<R>>
         return c;
     }
 
-    public <T> @NotNull T getValue(TableField<R, T> field){
-        return (T) values.get(field);
-    }
     public <T> @NotNull Optional<T> get(TableField<R, T> field){
         return (Optional<T>) Optional.ofNullable(values.get(field));
     }
@@ -150,7 +163,6 @@ public final class EntityKey<R extends TableRecord<R>>
             return this;
         }
 
-        @Deprecated
         Builder<R> unsafeSet(@NotNull TableField<R, ?> field, Object value){
             values.put(field, value);
             return this;

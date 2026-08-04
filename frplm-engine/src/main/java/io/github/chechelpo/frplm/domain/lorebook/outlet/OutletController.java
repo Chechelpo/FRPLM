@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
@@ -16,8 +18,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.OUTLE
 @RestController
 @RequestMapping(OUTLET_URL)
 final class OutletController extends EntityController<OutletRecord, OutletServiceImpl> {
-    OutletController(OutletServiceImpl service) {
-        super(service);
+    OutletController(OutletServiceImpl service, DTOMapper<OutletRecord> mapper) {
+        super(service, mapper);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidMove;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -20,9 +21,10 @@ class MovementHistory extends EntityService<MovementsRecord, MovementStore> {
 
     MovementHistory(
             @NotNull MovementStore store,
+            FieldValidator<MovementsRecord> validator,
             @NotNull EventBus eventBus)
     {
-        super(store, eventBus);
+        super(store, validator, eventBus);
     }
 
     public Integer getLocationBeforeTick(int characterId, int sessionId, int tick) {

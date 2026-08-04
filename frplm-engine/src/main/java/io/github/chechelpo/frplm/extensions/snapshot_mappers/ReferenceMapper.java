@@ -21,7 +21,7 @@ sealed abstract class ReferenceMapper<
         S extends StableReference,
         E extends Snapshot<S>
         >
-        permits CharacterMapper, ConnectionMapper, EntryMapper, LocationMapper, LorebookMapper, PromptMapper, RegionMapper, SectionMapper, WorldMapper
+        permits CharacterMapper, ConnectionMapper, EntryMapper, LocationMapper, LorebookMapper, PromptMapper, RegionMapper, SectionMapper, TagMapper, WorldMapper
 {
     private final Class<E> type;
     private final EntityReader<R> reader;

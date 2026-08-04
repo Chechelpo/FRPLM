@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
 import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -20,8 +21,13 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 public class EntryKeywordService extends EntityService<EntryKeywordsRecord, EntryKeywordStore> {
     private final KeywordService keywordService;
 
-    EntryKeywordService(EntryKeywordStore store, EventBus eventBus, KeywordService keywordService) {
-        super(store, eventBus);
+    EntryKeywordService(
+            EntryKeywordStore store,
+            DTOMapper<EntryKeywordsRecord> mapper,
+            EventBus eventBus,
+            KeywordService keywordService
+    ) {
+        super(store, mapper, eventBus);
         this.keywordService = keywordService;
     }
 

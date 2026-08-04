@@ -54,7 +54,7 @@ final class EntryKeywordStore extends EntityStore<EntryKeywordsRecord> {
 
     public IntSet getKeywordIDsOfLorebook(@NotNull EntityKey<LorebooksRecord> key){
         List<Integer> keywordIDs = ctx.selectDistinct(ENTRY_KEYWORDS)
-                .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(key.getValue(LOREBOOKS.ID)))
+                .where(ENTRY_KEYWORDS.LOREBOOK_ID.eq(key.require(LOREBOOKS.ID)))
                 .fetch(ENTRY_KEYWORDS.KEYWORD_ID);
         return IntSetFactory.ofValues(keywordIDs);
     }

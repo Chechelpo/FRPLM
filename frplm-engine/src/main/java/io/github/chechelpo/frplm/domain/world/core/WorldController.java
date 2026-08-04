@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.springframework.stereotype.Component;
@@ -15,7 +16,7 @@ public final class WorldController extends EntityController<
         WorldService
         >
 {
-    WorldController(WorldService service) {
-        super(service);
+    WorldController(WorldService service, DTOMapper<WorldsRecord> mapper) {
+        super(service, mapper);
     }
 }

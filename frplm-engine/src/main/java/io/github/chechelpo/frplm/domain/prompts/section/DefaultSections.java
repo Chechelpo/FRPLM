@@ -4,6 +4,9 @@ import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public enum DefaultSections {
     SYSTEM_EXPLANATION(
             0,
@@ -13,7 +16,7 @@ public enum DefaultSections {
             """
 You are embedded in a larger world simulation engine. Your job is to play out this world, based on the information you've been given. You must keep narrative constrained exclusively to this knowledge, only inventing things that would be completely inconsequential to the overall world (ex.: villagers small talk).
 
-User is {{user_name}} and you are in charge of the rest of the characters and setting.
+User is {{user}} and you are in charge of the rest of the characters and setting.
 
 Notes:
  - Present characters may remain unmentioned if they don't contribute to this particular scene.
@@ -25,9 +28,9 @@ Notes:
             "World information",
             StandardOutlet.WORLD_INFO,
             """
-            < {{world_name}} information>
+            < {{world}} information>
             {{outlet:world_info}}
-            </ {{world_name}} information>
+            </ {{world}} information>
             """,
             false
     ),
@@ -36,9 +39,20 @@ Notes:
             "Location information",
             StandardOutlet.LOCATION_INFO,
             """
-            < {{location_name}} info>\s
+            < {{location}} info>\s
             {{outlet:location_info}}
-            </ {{location_name}} info>
+            </ {{location}} info>
+            """,
+            false
+    ),
+    REGION_INFO(3,
+            ChatCompletionRole.SYSTEM,
+            "Region information",
+            StandardOutlet.LOCATION_INFO,
+            """
+            < {{region}} info>\s
+            {{outlet:location_info}}
+            </ {{region}} info>
             """,
             false
     ),
@@ -72,6 +86,21 @@ Notes:
             false
     ),
     ;
+
+    static {
+        Set<String> seenNames = new HashSet<>();
+        Set<Short> seenIds = new HashSet<>();
+        for (DefaultSections section : DefaultSections.values()){
+            if (seenNames.contains(section.name()))
+                throw new IllegalStateException("Duplicate default section name: " + section.name);
+            if (seenIds.contains(section.sectionID))
+                throw new IllegalStateException("Duplicate default section Id: " + section.sectionID);
+
+            seenNames.add(section.name());
+            seenIds.add(section.sectionID);
+        }
+    }
+
     public final short sectionID;
     public final short startingPosition;
     public final boolean canDelete;

@@ -3,16 +3,7 @@ package io.github.chechelpo.frplm.core.entities.pseudo_services;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
-import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import io.github.chechelpo.frplm.core.entities.fields.coercers.Coercer;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
-import io.github.chechelpo.frplm.utils.format.Either;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jooq.Result;
-import org.jooq.TableField;
 import org.jooq.TableRecord;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -37,17 +28,13 @@ public abstract class EntityController<
     private static final EnumSet<EntityConfigs.Types> REGISTERED_CONTROLLERS_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final Logger log;
 
-    private final HashMap<String, TableField<R, ?>> to_table_field = new HashMap<>();
-    private final HashMap<TableField<R, ?>, String> to_name = new HashMap<>();
-    private final HashMap<TableField<R, ?>, Coercer<?>> field_coercers = new HashMap<>();
-
     protected final S service;
+    protected final DTOMapper<R> mapper;
     private final EntityConfigs.Types type;
 
-    protected EntityController(S service) {
+    protected EntityController(S service, DTOMapper<R> mapper) {
         this.type = service.getType();
-        //if (REGISTERED_CONTROLLERS_TYPES.contains(type))
-        //    throw new IllegalStateException("Duplicate controller for type " + type);
+        this.mapper = mapper;
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
         log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
         log.trace("Controller {} created", type);
@@ -56,177 +43,9 @@ public abstract class EntityController<
         REGISTERED_CONTROLLERS_TYPES.add(type);
     }
 
-    protected EntityController(S service, boolean isSingleton) {
-        this.type = service.getType();
-        if (isSingleton && REGISTERED_CONTROLLERS_TYPES.contains(type))
-            throw new IllegalStateException("Duplicate controller for type " + type);
-        this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
-        log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));
-        log.trace("Controller {} created", type);
-
-        this.service = service;
-        if (isSingleton) REGISTERED_CONTROLLERS_TYPES.add(type);
-    }
-
-
-    void registerPublicField(@NotNull TableField<R, ?> field, @Nullable String name, @Nullable Coercer<?> coercer) {
-        if (name == null) return;
-        if (to_table_field.containsKey(name))
-            throw new IllegalStateException("Duplicate field name " + name);
-
-        if (coercer != null)
-            field_coercers.put(field, coercer);
-
-        to_table_field.put(name, field);
-        to_name.put(field, name);
-    }
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Translators
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    protected EntityKey<R> extractKey(@NotNull Map<String, Object> params) {
-        Either<DataFormatter.FormatError<R>, Map<TableField<R, ?>, Object>> coercedParams = DataFormatter.coerceValues(
-                params,
-                to_table_field,
-                field_coercers
-        );
-        if (coercedParams.isLeft()) {
-            log.error("Error when extracting key with params {} \n Message: {}",
-                    params,
-                    coercedParams.leftOrThrow().getMessage()
-            );
-            throw new InvalidKey(coercedParams.leftOrThrow().getMessage(), Severity.USER);
-        }
-
-        return new EntityKey<>(coercedParams.rightOrThrow(), true);
-    }
-
-    protected EntityDataPayload<R> extractPayload(@NotNull Map<String, Object> params) {
-        Either<DataFormatter.FormatError<R>, Map<TableField<R, ?>, Object>> coercedParams = DataFormatter.coerceValues(
-                params,
-                to_table_field,
-                field_coercers
-        );
-        if (coercedParams.isLeft()) {
-            log.error("Error when extracting data with params {} \n Message: {}",
-                    params,
-                    coercedParams.leftOrThrow().getMessage()
-            );
-            throw new InvalidValue(coercedParams.leftOrThrow().getMessage());
-        }
-
-
-        return new EntityDataPayload<>(coercedParams.rightOrThrow());
-    }
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // DTOs
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    /**
-     * Transport class used for structured communication of entities
-     * Structured the following way in a JSON:
-     * <pre>
-     *     "type" : entity_type,
-     *     "key" : {
-     *         id[0] : id[0].value,
-     *         ...,
-     *         id[n] : id[n].value
-     *     },
-     *     "data" : {
-     *         attr[0] : attr[0].value,
-     *         ... ,
-     *         attr[n] : attr[n].value
-     *     }
-     * </pre>
-     */
-    public record EntityDTO(
-            String type,
-            Map<String, Object> key,
-            Map<String, Object> payload
-    ) {
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static final class Builder {
-            private String type;
-            private final Map<String, Object> key = new LinkedHashMap<>();
-            private final Map<String, Object> payload = new LinkedHashMap<>();
-
-            public Builder type(String type) {
-                this.type = type;
-                return this;
-            }
-
-            public Builder setKey(String name, Object value) {
-                key.put(name, value);
-                return this;
-            }
-
-            public Builder setPayload(String name, Object value) {
-                payload.put(name, value);
-                return this;
-            }
-
-            public EntityDTO build() {
-                return new EntityDTO(type, key, payload);
-            }
-        }
-    }
-
-    public final EntityDTO @NotNull [] wrapEntities(@NotNull R... records) {
-        EntityDTO[] dtos = new EntityDTO[records.length];
-        for (int i = 0; i < records.length; i++)
-            dtos[i] = wrapEntity(records[i]);
-
-        return dtos;
-    }
-
-    public final <T extends List<R>> EntityDTO @NotNull [] wrapEntities(@NotNull T records) {
-        EntityDTO[] dtos = new EntityDTO[records.size()];
-        for (int i = 0; i < records.size(); i++)
-            dtos[i] = wrapEntity(records.get(i));
-
-        return dtos;
-    }
-    public final <T extends Result<R>> EntityDTO @NotNull [] wrapEntities(@NotNull T records) {
-        EntityDTO[] dtos = new EntityDTO[records.size()];
-        for (int i = 0; i < records.size(); i++)
-            dtos[i] = wrapEntity(records.get(i));
-
-        return dtos;
-    }
-
-    public final @Nullable EntityDTO wrapEntity(@Nullable R record) {
-        if (record == null) return null;
-        EntityDTO.Builder builder = new EntityDTO.Builder().type(this.type.getEntityType());
-        for (Map.Entry<TableField<R, ?>, String> entry : to_name.entrySet()) {
-            if (service.isKey(entry.getKey())) {
-                builder.setKey(
-                        to_name.get(entry.getKey()),
-                        record.getValue(entry.getKey())
-                );
-            } else {
-                builder.setPayload(
-                        to_name.get(entry.getKey()),
-                        record.getValue(entry.getKey())
-                );
-            }
-        }
-        EntityDTO entity = builder.build();
-        log.debug("Entity {} \n {}", entity.type, entity);
-        return entity;
-    }
-
-    protected record FieldsDTO(
-            String name,
-            Coercer<?> presentation
-    ) {
-    }
-
     private URI locationOf(EntityDTO dto) {
         UriComponentsBuilder builder =
                 ServletUriComponentsBuilder.fromCurrentRequestUri();
@@ -234,6 +53,16 @@ public abstract class EntityController<
         dto.key().forEach(builder::queryParam);
 
         return builder.build().encode().toUri();
+    }
+
+    public EntityDTO wrapEntity(R record){
+        return mapper.wrapRecord(record);
+    }
+    public EntityDTO[] wrapEntities(R... records){
+        return mapper.wrapRecords(List.of(records));
+    }
+    protected EntityDTO[] wrapEntities(List<R> records){
+        return mapper.wrapRecords(records);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -250,8 +79,15 @@ public abstract class EntityController<
     protected ResponseEntity<EntityDTO[]> query(@RequestParam(required = false) Map<String, Object> query) {
         if (query == null) return ResponseEntity.badRequest().build();
 
-        if (query.isEmpty()) return ResponseEntity.ok(wrapEntities(service.getAll()));
-        else return ResponseEntity.ok(wrapEntities(service.getMatching(extractKey(query))));
+        if (query.isEmpty())
+            return ResponseEntity.ok(
+                    mapper.wrapRecords(service.getAll())
+            );
+        else return ResponseEntity.ok(
+                mapper.wrapRecords(
+                        service.getMatching(mapper.getKeyFromDTO(query, false))
+                )
+        );
     }
 
     /**
@@ -264,8 +100,10 @@ public abstract class EntityController<
     )
     protected ResponseEntity<EntityDTO> get(@RequestParam Map<String, Object> keyParams) {
         return ResponseEntity.ok(
-                wrapEntity(
-                        service.find(extractKey(keyParams)).orElseThrow(Severity.USER)
+                mapper.wrapRecord(
+                        service.find(
+                                mapper.getKeyFromDTO(keyParams, true)
+                        ).orElseThrow(Severity.USER)
                 )
         );
     }
@@ -276,8 +114,8 @@ public abstract class EntityController<
     )
     protected ResponseEntity<Boolean> patch(@RequestParam Map<String, Object> keyParams, @RequestBody Map<String, Object> patch) {
         service.update(
-                extractKey(keyParams),
-                extractPayload(patch)
+                mapper.getKeyFromDTO(keyParams, true),
+                mapper.getDataFrom(patch, false)
         ).orElseThrow();
 
         return ResponseEntity.ok(true);
@@ -301,8 +139,8 @@ public abstract class EntityController<
         if (initialData != null) allParams.putAll(initialData);
         log.debug("Creating new entity with params: \n {}", allParams);
 
-        R record = service.createAndGet(extractPayload(allParams));
-        EntityDTO dto = wrapEntity(record);
+        R record = service.createAndGet(mapper.getDataFrom(allParams, true));
+        EntityDTO dto = mapper.wrapRecord(record);
         try {
             return ResponseEntity.created(locationOf(dto)).body(dto);
         } catch (Exception e) {
@@ -315,7 +153,7 @@ public abstract class EntityController<
     @DeleteMapping(value = ENTITY_PATH)
     protected ResponseEntity<Boolean> delete(@RequestParam Map<String, Object> keyParams) {
         return ResponseEntity.ok(
-                service.delete(extractKey(keyParams))
+                service.delete(mapper.getKeyFromDTO(keyParams, true))
         );
     }
 }

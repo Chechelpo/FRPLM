@@ -1,72 +1,67 @@
 package io.github.chechelpo.frplm.domain.connection.llm;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.IntegerConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
+import static io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection.LLM_CONNECTION;
+
 @Component
-final class LLMFieldsHelper extends ABSControllerAwareHelper<LlmConnectionRecord, LLMService, LLMController> {
-    LLMFieldsHelper(LLMService service, LLMController controller) {
-        super(service, controller);
+final class LLMFieldsHelper extends EntityControllerFieldValidator<LlmConnectionRecord> {
 
-        register_field(
-                "id",
-                LlmConnection.LLM_CONNECTION.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .readOnly()
-                                .key()
-                                .build()
-                        )
-                        .build()
-        );
+    LLMFieldsHelper() {
+        super(EntityConfigs.Types.LLM_CONNECTION);
+    }
 
-        register_field(
-                "name",
-                LlmConnection.LLM_CONNECTION.NAME,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .setMaxLength(255)
-                                .build()
-                        )
-                        .build()
-        );
+    @Override
+    protected List<FieldInfo<LlmConnectionRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(LLM_CONNECTION.ID)
+                        .readOnly()
+                        .key()
+                        .build(),
 
-        register_field(
-                "host_id",
-                LlmConnection.LLM_CONNECTION.HOST_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+                FieldInfo.builder(LLM_CONNECTION.NAME)
                         .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .nullable()
+                                StringConstraint.builder()
+                                        .setMaxLength(255)
                         )
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "modelID",
-                LlmConnection.LLM_CONNECTION.MODEL,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .setMaxLength(255)
+                FieldInfo.builder(LLM_CONNECTION.HOST_ID)
+                        .nullable()
+                        .build(),
+
+                FieldInfo.builder(LLM_CONNECTION.MODEL)
+                        .setConstraints(
+                                StringConstraint.builder()
+                                        .setMaxLength(255)
                         )
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "max_tokens",
-                LlmConnection.LLM_CONNECTION.MAX_TOKENS,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .setMin(0l)
+                FieldInfo.builder(LLM_CONNECTION.MAX_TOKENS)
+                        .setConstraints(
+                                IntegerConstraint.builder().setMin(0)
                         )
                         .build()
         );
     }
 
+    @Override
+    protected List<DTOField<LlmConnectionRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(LLM_CONNECTION.ID,         "id"),
+                DTOField.of(LLM_CONNECTION.NAME,       "name"),
+                DTOField.of(LLM_CONNECTION.HOST_ID,    "host_id"),
+                DTOField.of(LLM_CONNECTION.MODEL,      "modelID"),
+                DTOField.of(LLM_CONNECTION.MAX_TOKENS, "max_tokens")
+        );
+    }
 }
+

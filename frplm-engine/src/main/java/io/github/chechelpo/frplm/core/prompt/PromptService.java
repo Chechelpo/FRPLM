@@ -21,12 +21,14 @@ import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import java.util.*;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 @Component
 public class PromptService {
+    private EnumMap<PromptPhase, List<PromptPipelineSection>> steps = new EnumMap<>(PromptPhase.class);
+
     private final ExtensionService extension;
     private final SessionContext sessionContext;
     private final ExtensionContext standaloneContext;
@@ -41,7 +43,8 @@ public class PromptService {
             SessionContext sessionContext,
             LorebookContext lorebookContext,
             SessionService sessionService,
-            TokenizerService tokenizerService
+            TokenizerService tokenizerService,
+            List<PromptPipelineSection> generationPipeline
     ){
         this.extension = extensions;
         this.sessionContext = sessionContext;
@@ -49,25 +52,29 @@ public class PromptService {
         this.lorebookContext = lorebookContext;
         this.sessionService = sessionService;
         this.tokenizerService = tokenizerService;
+
+        generationPipeline.forEach(step ->
+                steps.computeIfAbsent(
+                        step.requestPhase(),
+                        ignored -> new ArrayList<>()
+                        ).add(step)
+                );
     }
 
     public PromptResult getNewPrompt(int sessionId) {
         SessionImpl session = new SessionImpl(
-            sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow(Severity.SYSTEM),
+            sessionService.find(EntityKey.of(SESSIONS.ID, sessionId))
+                    .orElseThrow("Couldn't find session id " + sessionId + " when generating new prompt", Severity.SYSTEM),
                 standaloneContext,
                 sessionContext
         );
+
         PromptOrchestrator orchestrator = getPromptOrchestrator(session);
 
-        orchestrator.addLorebook(session.getWorld().lorebook());
-        SessionLocation currentLocation = session.getUserCharacter().getCurrentLocation();
-        orchestrator.addLorebook(currentLocation.getParentRegion().lorebook());
-        orchestrator.addLorebook(currentLocation.lorebook());
-        currentLocation.getCharactersHere().stream()
-                .map(SessionCharacter::lorebook)
-                .forEach(orchestrator::addLorebook);
-
-        extension.runPrePromptGeneration(session.getRecord(), orchestrator);
+        steps.getOrDefault(PromptPhase.CONTEXT_BUILDING, List.of()).forEach(step -> step.run(session, orchestrator));
+        extension.runPrePromptGeneration(session, orchestrator);
+        steps.getOrDefault(PromptPhase.CONTEXT_PROCESSING, List.of()).forEach(step -> step.run(session, orchestrator));
+        steps.getOrDefault(PromptPhase.PRE_RENDER, List.of()).forEach(step -> step.run(session, orchestrator));
 
         return orchestrator.render();
     }
@@ -75,11 +82,17 @@ public class PromptService {
     private @NonNull PromptOrchestrator getPromptOrchestrator(@NonNull SessionImpl session) {
         SessionPrompt sessionPrompt = session.getPrompt()
                 .orElseThrow(notFound ->
-                        new NotInitialized("Session has no prompt: \n" + notFound.toDebugString(), Severity.USER)
+                        new NotInitialized(
+                                "Session " + session.getName() + " has no assigned prompt: \n" + notFound.toDebugString(),
+                                Severity.USER
+                        )
                 );
         ConnectionSnapshot connection = sessionPrompt.getAssignedConnection()
                 .orElseThrow(notFound ->
-                        new NotInitialized("Session has no assigned connection: \n" + notFound.toDebugString(), Severity.USER)
+                        new NotInitialized(
+                                "Session " + session.getName() + " has no assigned connection: \n" + notFound.toDebugString(),
+                                Severity.USER
+                        )
                 );
 
         return new PromptOrchestrator(

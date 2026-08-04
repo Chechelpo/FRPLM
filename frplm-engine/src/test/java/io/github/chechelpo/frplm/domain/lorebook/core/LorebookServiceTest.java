@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,10 +38,12 @@ class LorebookServiceTest {
     private RegionTestContext regionTestContext;
     @Autowired
     private WorldTestContext worldTestContext;
+    @Autowired
+    private StableRecordCreator stableRecordCreator;
 
     @BeforeEach
     void setUp() {
-        testContext.reload();
+        stableRecordCreator.run();
     }
 
     @Test

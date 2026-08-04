@@ -31,7 +31,7 @@ public class PromptOrchestrator implements PromptBuilder {
     private final MacroManager macroManager;
 
     private final LorebookManagerImpl lorebookManager;
-    private final io.github.chechelpo.frplm.core.prompt.building.OutletManagerImpl outletManager;
+    private final OutletManagerImpl outletManager;
 
     private final Session session;
 
@@ -48,7 +48,7 @@ public class PromptOrchestrator implements PromptBuilder {
         this.tokensManager = tokensManager;
 
         this.lorebookManager = new LorebookManagerImpl(lorebookContext.entries, lorebookContext.entryKeywords, tokensManager);
-        this.outletManager = new io.github.chechelpo.frplm.core.prompt.building.OutletManagerImpl(lorebookContext.outlets, lorebookManager);
+        this.outletManager = new OutletManagerImpl(lorebookContext.outlets, lorebookManager);
         this.macroManager = new MacroManager(outletManager);
     }
 

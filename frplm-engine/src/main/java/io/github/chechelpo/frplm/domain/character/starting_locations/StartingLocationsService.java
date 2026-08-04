@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.character.starting_locations;
 
 import ch.qos.logback.classic.Level;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
@@ -21,8 +22,13 @@ public class StartingLocationsService extends EntityService<
         StartingLocationsStore
         > {
     private final CharacterService characterService;
-    StartingLocationsService(StartingLocationsStore store, CharacterService characterService, EventBus bus) {
-        super(store,bus);
+    StartingLocationsService(
+            StartingLocationsStore store,
+            FieldValidator<StartingLocationsRecord> validator,
+            CharacterService characterService,
+            EventBus bus
+    ) {
+        super(store, validator, bus);
         log.setLevel(Level.DEBUG);
         this.characterService = characterService;
     }
@@ -40,6 +46,6 @@ public class StartingLocationsService extends EntityService<
         return startingLocationAt(characterService.keyOf(character), worldID);
     }
     public @NotNull List<LocationsRecord> startingLocationAt(EntityKey<CharactersRecord> key, int worldID) {
-        return store.getStartingLocationAt(key.requireValue(CHARACTERS.ID), worldID);
+        return store.getStartingLocationAt(key.require(CHARACTERS.ID), worldID);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -18,8 +19,8 @@ import java.util.Optional;
 
 @Service
 non-sealed class OutletServiceImpl extends EntityService<OutletRecord, OutletStore> implements OutletService {
-    OutletServiceImpl(OutletStore store, EventBus eventBus) {
-        super(store, eventBus);
+    OutletServiceImpl(OutletStore store, FieldValidator<OutletRecord> validator, EventBus eventBus) {
+        super(store, validator, eventBus);
     }
 
     @Override

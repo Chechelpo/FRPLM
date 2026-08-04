@@ -1,5 +1,8 @@
 package io.github.chechelpo.frplm.domain.connection.api_keys;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
@@ -15,8 +18,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_K
 @RestController
 @RequestMapping(API_KEYS_URL)
 final class SecretController extends EntityController<ApiKeysRecord, SecretServiceImpl> {
-    SecretController(SecretServiceImpl service) {
-        super(service);
+    SecretController(SecretServiceImpl service, DTOMapper<ApiKeysRecord> record) {
+        super(service, record);
     }
 
     private record NewApiKeyRequest(String key) {}

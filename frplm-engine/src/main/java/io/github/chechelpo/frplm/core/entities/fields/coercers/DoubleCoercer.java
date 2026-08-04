@@ -1,20 +1,12 @@
 package io.github.chechelpo.frplm.core.entities.fields.coercers;
 
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class DoubleCoercer extends Coercer<Double> {
-    private DoubleCoercer() {
-        super(FieldType.DOUBLE);
-    }
-
-    @Contract("-> new")
-    public static @NotNull DoubleCoercer create() {
-        return new DoubleCoercer();
-    }
+final class DoubleCoercer implements Coercer<Double> {
+    static final DoubleCoercer instance = new DoubleCoercer();
 
     @Override
     @Contract(value = "_ -> !null", pure = true)
@@ -59,7 +51,7 @@ public final class DoubleCoercer extends Coercer<Double> {
             @Nullable Object value
     ) {
         return Either.left(new CoerceError(
-                "Cannot coerce '" + value + "' to " + this.type
+                "Cannot coerce '" + value + "' to double"
         ));
     }
 }

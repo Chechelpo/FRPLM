@@ -10,8 +10,6 @@ import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.event.EventListener;
@@ -76,7 +74,7 @@ final class LorebookEvents {
         return "Couldn't update " + name + "'s lorebook";
     }
     private void handleWorldNameChange(CRUDCommittedEvent.UpdatedEntity<WorldsRecord> worldEvent) {
-        if (!worldEvent.updatedData().assignsField(WORLDS.NAME)) return;
+        if (!worldEvent.updatedData().assigns(WORLDS.NAME)) return;
         WorldsRecord world = worldService.find(worldEvent.target())
                 .orElseThrow("Couldn't find parent world when updating its lorebook name", Severity.SYSTEM);
 
@@ -87,8 +85,8 @@ final class LorebookEvents {
     private void handleLocationNameChange(
             CRUDCommittedEvent.UpdatedEntity<LocationsRecord> locationEvent
     ) {
-        if (!locationEvent.updatedData().assignsField(LOCATIONS.NAME)) return;
-        String name = locationEvent.updatedData().requireValue(LOCATIONS.NAME);
+        if (!locationEvent.updatedData().assigns(LOCATIONS.NAME)) return;
+        String name = locationEvent.updatedData().require(LOCATIONS.NAME);
         LocationsRecord location = locationsService.find(locationEvent.target())
                 .orElseThrow("Couldn't find parent location (with name %s) when updating lorebook name".formatted(name), Severity.SYSTEM);
 
@@ -99,8 +97,8 @@ final class LorebookEvents {
     private void handleRegionNameChange(
             CRUDCommittedEvent.UpdatedEntity<RegionRecord> regionEvent
     ) {
-        if (!regionEvent.updatedData().assignsField(REGION.NAME)) return;
-        String name = regionEvent.updatedData().requireValue(REGION.NAME);
+        if (!regionEvent.updatedData().assigns(REGION.NAME)) return;
+        String name = regionEvent.updatedData().require(REGION.NAME);
 
         RegionRecord region = regionService.find(regionEvent.target())
                 .orElseThrow(
@@ -115,7 +113,7 @@ final class LorebookEvents {
     private void handleCharacterNameChange(
             CRUDCommittedEvent.UpdatedEntity<CharactersRecord> characterEvent
     ) {
-        if (!characterEvent.updatedData().assignsField(CHARACTERS.NAME)) return;
+        if (!characterEvent.updatedData().assigns(CHARACTERS.NAME)) return;
 
         CharactersRecord character = characterService.find(characterEvent.target())
                 .orElseThrow(

@@ -1,10 +1,8 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.*;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -27,8 +25,12 @@ public final class LocationController extends EntityController<LocationsRecord, 
     private final StartingLocationsService startLocService;
     private final RegionService regionService;
 
-    LocationController(LocationsService service, StartingLocationsService startLocService, RegionService regionService) {
-        super(service);
+    LocationController(LocationsService service,
+                       DTOMapper<LocationsRecord> mapper,
+                       StartingLocationsService startLocService,
+                       RegionService regionService
+    ) {
+        super(service, mapper);
         this.startLocService = startLocService;
         this.regionService = regionService;
     }

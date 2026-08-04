@@ -1,12 +1,10 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
-import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
-import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
+import org.jooq.Result;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
@@ -24,72 +22,26 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class EntityControllerTest {
+
     private TestService service;
+    private DTOMapper<TestTableRecord> mapper;
     private TestController controller;
-    private TestControllerFields fields;
-
-    enum DTOFields{
-        FirstID("first_id"),
-        SecondID("second_id"),
-        Name("name"),
-        Description("description"),
-        Counter("counter")
-        ;
-        private final String value;
-        DTOFields(String value){
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return value;
-        }
-    }
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     void setUp() {
         service = mock(TestService.class);
+        mapper = mock(DTOMapper.class);
 
-        when(service.getType()).thenReturn(EntityConfigs.Types.TEST_ENTITY);
-        when(service.isKey(TEST_TABLE.FIRST_ID)).thenReturn(true);
-        when(service.isKey(TEST_TABLE.SECOND_ID)).thenReturn(true);
-        when(service.isKey(TEST_TABLE.NAME)).thenReturn(false);
-        when(service.isKey(TEST_TABLE.DESCRIPTION)).thenReturn(false);
-        when(service.isKey(TEST_TABLE.COUNTER)).thenReturn(false);
+        when(service.getType())
+                .thenReturn(EntityConfigs.Types.TEST_ENTITY);
 
-        controller = new TestController(service);
-        fields = new TestControllerFields(service,controller);
+        controller = new TestController(service, mapper);
+    }
 
-
-        fields.register_field(
-                DTOFields.FirstID.toString(),
-                TEST_TABLE.FIRST_ID,
-                FieldInfo.numberField(FieldType.INTEGER).build()
-        );
-
-        fields.register_field(
-                DTOFields.SecondID.toString(),
-                TEST_TABLE.SECOND_ID,
-                FieldInfo.numberField(FieldType.INTEGER).build()
-        );
-
-        fields.register_field(
-                DTOFields.Name.toString(),
-                TEST_TABLE.NAME,
-                FieldInfo.stringField().build()
-        );
-
-        fields.register_field(
-                DTOFields.Description.toString(),
-                TEST_TABLE.DESCRIPTION,
-                FieldInfo.stringField().build()
-        );
-
-        fields.register_field(
-                DTOFields.Counter.toString(),
-                TEST_TABLE.COUNTER,
-                FieldInfo.numberField(FieldType.INTEGER).build()
-        );
+    @AfterEach
+    void tearDown() {
+        RequestContextHolder.resetRequestAttributes();
     }
 
     private static TestTableRecord record(
@@ -110,357 +62,554 @@ class EntityControllerTest {
         return record;
     }
 
-    @Test
-    void registerPublicFieldRejectsDuplicateDtoName() {
-        assertThrows(IllegalStateException.class, () ->
-                controller.registerPublicField(
-                        TEST_TABLE.COUNTER,
-                        DTOFields.Name.toString(),
-                        FieldInfo.numberField(FieldType.INTEGER).build().format
-                )
-        );
-    }
-
-    @Test
-    void registerPublicFieldIgnoresNullDtoName() {
-        assertDoesNotThrow(() ->
-                controller.registerPublicField(
-                        TEST_TABLE.NAME,
-                        null,
-                        FieldInfo.stringField().build().format
-                )
-        );
-    }
-
-    @Test
-    void extractKeyCoercesRegisteredExternalNames() {
-        EntityKey<TestTableRecord> key = controller.extractKey(Map.of(
-                DTOFields.FirstID.toString(), "1",
-                DTOFields.SecondID.toString(), "2"
-        ));
-
-        assertEquals(1, key.getValue(TEST_TABLE.FIRST_ID));
-        assertEquals(2, key.getValue(TEST_TABLE.SECOND_ID));
-    }
-
-    @Test
-    void extractKeyThrowsInvalidKeyWhenExternalNameIsUnknown() {
-        assertThrows(InvalidKey.class, () ->
-                controller.extractKey(Map.of("unknown", "1"))
-        );
-    }
-
-    @Test
-    void extractPayloadCoercesRegisteredExternalNames() {
-        EntityDataPayload<TestTableRecord> payload = controller.extractPayload(Map.of(
-                DTOFields.FirstID.toString(), "1",
-                DTOFields.SecondID.toString(), "2",
-                DTOFields.Name.toString(), "created",
-                DTOFields.Description.toString(), "created description text",
-                DTOFields.Counter.toString(), "10"
-        ));
-
-        assertEquals(1, payload.requireValue(TEST_TABLE.FIRST_ID));
-        assertEquals(2, payload.requireValue(TEST_TABLE.SECOND_ID));
-        assertEquals("created", payload.requireValue(TEST_TABLE.NAME));
-        assertEquals("created description text", payload.requireValue(TEST_TABLE.DESCRIPTION));
-        assertEquals(10, payload.requireValue(TEST_TABLE.COUNTER));
-    }
-
-    @Test
-    void extractPayloadThrowsInvalidValueWhenExternalNameIsUnknown() {
-        assertThrows(InvalidValue.class, () ->
-                controller.extractPayload(Map.of("unknown", "value"))
-        );
-    }
-
-    @Test
-    void wrapEntityReturnsNullWhenRecordIsNull() {
-        assertNull(controller.wrapEntity(null));
-    }
-
-    @Test
-    void wrapEntitySplitsKeyAndPayloadFields() {
-        TestTableRecord record = record(
-                1,
-                2,
-                "entity-name",
-                7,
-                "entity description text"
-        );
-
-        EntityController.EntityDTO dto = controller.wrapEntity(record);
-
-        assertNotNull(dto);
-        assertEquals(EntityConfigs.Types.TEST_ENTITY.getEntityType(), dto.type());
-
-        assertEquals(2, dto.key().size());
-        assertEquals(1, dto.key().get(DTOFields.FirstID.toString()));
-        assertEquals(2, dto.key().get(DTOFields.SecondID.toString()));
-
-        assertEquals(3, dto.payload().size());
-        assertEquals("entity-name", dto.payload().get(DTOFields.Name.toString()));
-        assertEquals(7, dto.payload().get(DTOFields.Counter.toString()));
-        assertEquals("entity description text", dto.payload().get(DTOFields.Description.toString()));
-    }
-
-    @Test
-    void wrapEntitiesVarargsWrapsAllRecords() {
-        TestTableRecord first = record(1, 1, "first", 0, "first description text");
-        TestTableRecord second = record(2, 2, "second", 1, "second description text");
-
-        EntityController.EntityDTO[] dtos = controller.wrapEntities(first, second);
-
-        assertEquals(2, dtos.length);
-        assertEquals(1, dtos[0].key().get(DTOFields.FirstID.toString()));
-        assertEquals(2, dtos[1].key().get(DTOFields.FirstID.toString()));
-    }
-
-    @Test
-    void wrapEntitiesListWrapsAllRecords() {
-        TestTableRecord first = record(1, 1, "first", 0, "first description text");
-        TestTableRecord second = record(2, 2, "second", 1, "second description text");
-
-        EntityController.EntityDTO[] dtos = controller.wrapEntities(List.of(first, second));
-
-        assertEquals(2, dtos.length);
-        assertEquals("first", dtos[0].payload().get(DTOFields.Name.toString()));
-        assertEquals("second", dtos[1].payload().get(DTOFields.Name.toString()));
-    }
-
-    @Test
-    void queryWithBodyDelegatesToGetMatchingAndReturnsWrappedDtos() {
-        /*TestTableRecord matching = record(10, 100, "matching", 0, "matching description text");
-
-        when(service.getMatching(any())).thenReturn(new Result(matching));
-
-        ResponseEntity<EntityController.EntityDTO[]> response = controller.query(Map.of(
-                DTOFields.FirstID.toString(), "10"
-        ));
-
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().length);
-
-        assertEquals(10, response.getBody()[0].key().get(DTOFields.FirstID.toString()));
-        assertEquals(100, response.getBody()[0].key().get(DTOFields.SecondID.toString()));
-        assertEquals("matching", response.getBody()[0].payload().get(DTOFields.Name.toString()));
-
-        verify(service).getMatching(argThat(key ->
-                key.getValue(TEST_TABLE.FIRST_ID).equals(10)
-        ));
-        verify(service, never()).getAll();*/
-    }
-
-    @Test
-    void getReturnsWrappedEntityWhenServiceFindsRecord() {
-        TestTableRecord found = record(1, 2, "found", 0, "found description text");
-
-        when(service.find(any())).thenReturn(EntityReader.RecordFindResult.found(EntityKey.of(TEST_TABLE.FIRST_ID, 1), found));
-
-        ResponseEntity<EntityController.EntityDTO> response = controller.get(Map.of(
-                DTOFields.FirstID.toString(), "1",
-                DTOFields.SecondID.toString(), "2"
-        ));
-
-        assertEquals(200, response.getStatusCode().value());
-        assertNotNull(response.getBody());
-
-        assertEquals(1, response.getBody().key().get(DTOFields.FirstID.toString()));
-        assertEquals(2, response.getBody().key().get(DTOFields.SecondID.toString()));
-        assertEquals("found", response.getBody().payload().get(DTOFields.Name.toString()));
-
-        verify(service).find(argThat(key ->
-                key.getValue(TEST_TABLE.FIRST_ID).equals(1)
-                        && key.getValue(TEST_TABLE.SECOND_ID).equals(2)
-        ));
-    }
-
-    @Test
-    void getThrowsEntityNotFoundWhenServiceReturnsEmpty() {
-        when(service.find(any())).thenReturn(EntityReader.RecordFindResult.notFound(EntityKey.of(TEST_TABLE.FIRST_ID, 0)));
-
-        assertThrows(EntityNotFound.class, () ->
-                controller.get(Map.of(
-                        DTOFields.FirstID.toString(), "1",
-                        DTOFields.SecondID.toString(), "2"
-                ))
-        );
-
-        verify(service).find(argThat(key ->
-                key.getValue(TEST_TABLE.FIRST_ID).equals(1)
-                        && key.getValue(TEST_TABLE.SECOND_ID).equals(2)
-        ));
-    }
-
-    @Test
-    void patchDelegatesToServiceUpdateAndReturnsBooleanBody() {
-        when(service.update(any(), any())).thenReturn(
-                new EntityUpdater.UpdateResult.Success<>(EntityKey.of(), EntityDataPayload.<TestTableRecord>builder().build())
-        );
-
-        ResponseEntity<Boolean> response = controller.patch(
+    private static EntityDTO dto(
+            int firstId,
+            int secondId,
+            String name,
+            Integer counter,
+            String description
+    ) {
+        return new TestDTO(
+                EntityConfigs.Types.TEST_ENTITY.getEntityType(),
                 Map.of(
-                        DTOFields.FirstID.toString(), "1",
-                        DTOFields.SecondID.toString(), "2"
+                        "first_id", firstId,
+                        "second_id", secondId
                 ),
-                Map.of(DTOFields.Description.toString(), "updated description text")
+                Map.of(
+                        "name", name,
+                        "counter", counter,
+                        "description", description
+                )
         );
+    }
+
+    @Test
+    void wrapEntityDelegatesToMapper() {
+        TestTableRecord source =
+                record(1, 2, "entity", 7, "description");
+
+        EntityDTO expected =
+                dto(1, 2, "entity", 7, "description");
+
+        when(mapper.wrapRecord(source)).thenReturn(expected);
+
+        EntityDTO result = controller.wrapEntity(source);
+
+        assertSame(expected, result);
+        verify(mapper).wrapRecord(source);
+    }
+
+    @Test
+    void wrapEntityPassesNullToMapper() {
+        when(mapper.wrapRecord(null)).thenReturn(null);
+
+        EntityDTO result = controller.wrapEntity(null);
+
+        assertNull(result);
+        verify(mapper).wrapRecord(null);
+    }
+
+    @Test
+    void wrapEntitiesVarargsDelegatesToMapper() {
+        TestTableRecord first =
+                record(1, 1, "first", 0, "first description");
+
+        TestTableRecord second =
+                record(2, 2, "second", 1, "second description");
+
+        EntityDTO[] expected = {
+                dto(1, 1, "first", 0, "first description"),
+                dto(2, 2, "second", 1, "second description")
+        };
+
+        when(mapper.wrapRecords(List.of(first, second)))
+                .thenReturn(expected);
+
+        EntityDTO[] result =
+                controller.wrapEntities(first, second);
+
+        assertSame(expected, result);
+        verify(mapper).wrapRecords(List.of(first, second));
+    }
+
+    @Test
+    void wrapEntitiesListDelegatesToMapper() {
+        TestTableRecord first =
+                record(1, 1, "first", 0, "first description");
+
+        TestTableRecord second =
+                record(2, 2, "second", 1, "second description");
+
+        List<TestTableRecord> records = List.of(first, second);
+
+        EntityDTO[] expected = {
+                dto(1, 1, "first", 0, "first description"),
+                dto(2, 2, "second", 1, "second description")
+        };
+
+        when(mapper.wrapRecords(records)).thenReturn(expected);
+
+        EntityDTO[] result = controller.wrapList(records);
+
+        assertSame(expected, result);
+        verify(mapper).wrapRecords(records);
+    }
+
+    @Test
+    void queryReturnsBadRequestWhenQueryIsNull() {
+        ResponseEntity<EntityDTO[]> response =
+                controller.query(null);
+
+        assertEquals(400, response.getStatusCode().value());
+        assertNull(response.getBody());
+
+        verifyNoInteractions(mapper);
+        verify(service, never()).getAll();
+        verify(service, never()).getMatching(any(EntityKey.class));
+    }
+
+    @Test
+    void queryWithoutParametersReturnsAllWrappedRecords() {
+        @SuppressWarnings("unchecked")
+        Result<TestTableRecord> records = mock(Result.class);
+
+        EntityDTO[] expected = {
+                dto(1, 2, "first", 0, "description")
+        };
+
+        when(service.getAll()).thenReturn(records);
+        when(mapper.wrapRecords(records)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO[]> response =
+                controller.query(Map.of());
+
+        assertEquals(200, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+
+        verify(service).getAll();
+        verify(mapper).wrapRecords(records);
+        verify(mapper, never()).getKeyFromDTO(any(), anyBoolean());
+        verify(service, never()).getMatching(any(EntityKey.class));
+    }
+
+    @Test
+    void queryWithParametersUsesPartialKey() {
+        Map<String, Object> query = Map.of("first_id", "10");
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.of(TEST_TABLE.FIRST_ID, 10);
+
+        @SuppressWarnings("unchecked")
+        Result<TestTableRecord> records = mock(Result.class);
+
+        EntityDTO[] expected = {
+                dto(10, 20, "matching", 0, "description")
+        };
+
+        when(mapper.getKeyFromDTO(query, false)).thenReturn(key);
+        when(service.getMatching(key)).thenReturn(records);
+        when(mapper.wrapRecords(records)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO[]> response =
+                controller.query(query);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+
+        verify(mapper).getKeyFromDTO(query, false);
+        verify(service).getMatching(key);
+        verify(mapper).wrapRecords(records);
+        verify(service, never()).getAll();
+    }
+
+    @Test
+    void getReturnsWrappedRecordWhenEntityExists() {
+        Map<String, Object> keyParameters = Map.of(
+                "first_id", "1",
+                "second_id", "2"
+        );
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .build();
+
+        TestTableRecord found =
+                record(1, 2, "found", 0, "description");
+
+        EntityDTO expected =
+                dto(1, 2, "found", 0, "description");
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(key);
+
+        when(service.find(key)).thenReturn(
+                EntityReader.RecordFindResult.found(key, found)
+        );
+
+        when(mapper.wrapRecord(found)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO> response =
+                controller.get(keyParameters);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+
+        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(service).find(key);
+        verify(mapper).wrapRecord(found);
+    }
+
+    @Test
+    void getThrowsEntityNotFoundWhenEntityDoesNotExist() {
+        Map<String, Object> keyParameters = Map.of(
+                "first_id", "1",
+                "second_id", "2"
+        );
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .build();
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(key);
+
+        when(service.find(key)).thenReturn(
+                EntityReader.RecordFindResult.notFound(key)
+        );
+
+        assertThrows(
+                EntityNotFound.class,
+                () -> controller.get(keyParameters)
+        );
+
+        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(service).find(key);
+        verify(mapper, never()).wrapRecord(any());
+    }
+
+    @Test
+    void patchDelegatesToMapperAndService() {
+        Map<String, Object> keyParameters = Map.of(
+                "first_id", "1",
+                "second_id", "2"
+        );
+
+        Map<String, Object> patchParameters = Map.of(
+                "description", "updated description"
+        );
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .build();
+
+        EntityDataPayload<TestTableRecord> payload =
+                EntityDataPayload.of(
+                        TEST_TABLE.DESCRIPTION,
+                        "updated description"
+                );
+
+        EntityUpdater.UpdateResult.Success<TestTableRecord> success =
+                new EntityUpdater.UpdateResult.Success<>(key, payload);
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(key);
+
+        when(mapper.getDataFrom(patchParameters, false))
+                .thenReturn(payload);
+
+        when(service.update(key, payload)).thenReturn(success);
+
+        ResponseEntity<Boolean> response =
+                controller.patch(keyParameters, patchParameters);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals(Boolean.TRUE, response.getBody());
 
-        verify(service).update(
-                argThat(key ->
-                        key.getValue(TEST_TABLE.FIRST_ID).equals(1)
-                                && key.getValue(TEST_TABLE.SECOND_ID).equals(2)
-                ),
-                argThat(payload ->
-                        payload.requireValue(TEST_TABLE.DESCRIPTION)
-                                .equals("updated description text")
-                )
-        );
+        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(mapper).getDataFrom(patchParameters, false);
+        verify(service).update(key, payload);
     }
 
     @Test
-    void patchThrowsInvalidValueWhenPatchContainsUnknownField() {
-        assertThrows(InvalidValue.class, () ->
-                controller.patch(
-                        Map.of(
-                                DTOFields.FirstID.toString(), "1",
-                                DTOFields.SecondID.toString(), "2"
-                        ),
-                        Map.of("unknown", "value")
+    void patchPropagatesMapperFailureWithoutCallingService() {
+        Map<String, Object> keyParameters =
+                Map.of("first_id", "1");
+
+        Map<String, Object> patchParameters =
+                Map.of("unknown", "value");
+
+        RuntimeException failure =
+                new RuntimeException("Invalid payload");
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(EntityKey.of(TEST_TABLE.FIRST_ID, 1));
+
+        when(mapper.getDataFrom(patchParameters, false))
+                .thenThrow(failure);
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> controller.patch(
+                        keyParameters,
+                        patchParameters
                 )
         );
 
+        assertSame(failure, thrown);
         verify(service, never()).update(any(), any());
     }
 
     @Test
-    void createMergesInitialKeyAndInitialDataAndReturnsCreatedResponse() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/test/entity");
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+    void createMergesKeyAndPayloadParameters() throws Exception {
+        installRequestContext("/test/entity");
 
-        try {
-            TestTableRecord created = record(
-                    1,
-                    2,
-                    "created",
-                    0,
-                    "created description text"
-            );
-
-            when(service.createAndGet(any())).thenReturn(created);
-
-            ResponseEntity<EntityController.EntityDTO> response = controller.create(
-                    Map.of(
-                            DTOFields.FirstID.toString(), "1",
-                            DTOFields.SecondID.toString(), "2"
-                    ),
-                    Map.of(
-                            DTOFields.Name.toString(), "created",
-                            DTOFields.Description.toString(), "created description text"
-                    )
-            );
-
-            assertEquals(201, response.getStatusCode().value());
-            assertNotNull(response.getBody());
-
-            assertEquals(1, response.getBody().key().get(DTOFields.FirstID.toString()));
-            assertEquals(2, response.getBody().key().get(DTOFields.SecondID.toString()));
-            assertEquals("created", response.getBody().payload().get(DTOFields.Name.toString()));
-            assertEquals("created description text", response.getBody().payload().get(DTOFields.Description.toString()));
-
-            URI location = response.getHeaders().getLocation();
-            assertNotNull(location);
-            assertTrue(location.toString().contains("first_id=1"));
-            assertTrue(location.toString().contains("second_id=2"));
-
-            verify(service).createAndGet(argThat(payload ->
-                    payload.requireValue(TEST_TABLE.FIRST_ID).equals(1)
-                            && payload.requireValue(TEST_TABLE.SECOND_ID).equals(2)
-                            && payload.requireValue(TEST_TABLE.NAME).equals("created")
-                            && payload.requireValue(TEST_TABLE.DESCRIPTION).equals("created description text")
-            ));
-        } finally {
-            RequestContextHolder.resetRequestAttributes();
-        }
-    }
-
-    @Test
-    void createWithNullInitialDataUsesOnlyInitialKeyParams() throws Exception {
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setRequestURI("/test/entity");
-        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
-
-        try {
-            TestTableRecord created = record(
-                    1,
-                    2,
-                    "created by service",
-                    0,
-                    "created description text"
-            );
-
-            when(service.createAndGet(any())).thenReturn(created);
-
-            ResponseEntity<EntityController.EntityDTO> response = controller.create(
-                    Map.of(
-                            DTOFields.FirstID.toString(), "1",
-                            DTOFields.SecondID.toString(), "2"
-                    ),
-                    null
-            );
-
-            assertEquals(201, response.getStatusCode().value());
-            assertNotNull(response.getBody());
-
-            assertEquals(1, response.getBody().key().get(DTOFields.FirstID.toString()));
-            assertEquals(2, response.getBody().key().get(DTOFields.SecondID.toString()));
-
-            verify(service).createAndGet(argThat(payload ->
-                    payload.requireValue(TEST_TABLE.FIRST_ID).equals(1)
-                            && payload.requireValue(TEST_TABLE.SECOND_ID).equals(2)
-                            && !payload.assignsField(TEST_TABLE.NAME)
-                            && !payload.assignsField(TEST_TABLE.DESCRIPTION)
-            ));
-        } finally {
-            RequestContextHolder.resetRequestAttributes();
-        }
-    }
-
-    @Test
-    void createThrowsInvalidValueWhenInitialDataContainsUnknownField() {
-        assertThrows(InvalidValue.class, () ->
-                controller.create(
-                        Map.of(
-                                DTOFields.FirstID.toString(), "1",
-                                DTOFields.SecondID.toString(), "2"
-                        ),
-                        Map.of("unknown", "value")
-                )
+        Map<String, Object> initialKey = Map.of(
+                "first_id", "1",
+                "second_id", "2"
         );
 
+        Map<String, Object> initialData = Map.of(
+                "name", "created",
+                "description", "created description"
+        );
+
+        EntityDataPayload<TestTableRecord> payload =
+                EntityDataPayload.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .set(TEST_TABLE.NAME, "created")
+                        .set(
+                                TEST_TABLE.DESCRIPTION,
+                                "created description"
+                        )
+                        .build();
+
+        TestTableRecord created = record(
+                1,
+                2,
+                "created",
+                0,
+                "created description"
+        );
+
+        EntityDTO expected = dto(
+                1,
+                2,
+                "created",
+                0,
+                "created description"
+        );
+
+        when(mapper.getDataFrom(
+                argThat(parameters ->
+                        parameters.size() == 4
+                                && parameters.get("first_id").equals("1")
+                                && parameters.get("second_id").equals("2")
+                                && parameters.get("name").equals("created")
+                                && parameters.get("description")
+                                .equals("created description")
+                ),
+                eq(true)
+        )).thenReturn(payload);
+
+        when(service.createAndGet(payload)).thenReturn(created);
+        when(mapper.wrapRecord(created)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO> response =
+                controller.create(initialKey, initialData);
+
+        assertEquals(201, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+
+        URI location = response.getHeaders().getLocation();
+
+        assertNotNull(location);
+        assertTrue(location.toString().contains("first_id=1"));
+        assertTrue(location.toString().contains("second_id=2"));
+
+        verify(service).createAndGet(payload);
+        verify(mapper).wrapRecord(created);
+    }
+
+    @Test
+    void createWithNullBodyUsesOnlyKeyParameters() throws Exception {
+        installRequestContext("/test/entity");
+
+        Map<String, Object> initialKey = Map.of(
+                "first_id", "1",
+                "second_id", "2"
+        );
+
+        EntityDataPayload<TestTableRecord> payload =
+                EntityDataPayload.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .build();
+
+        TestTableRecord created =
+                record(1, 2, "generated", 0, "generated description");
+
+        EntityDTO expected =
+                dto(1, 2, "generated", 0, "generated description");
+
+        when(mapper.getDataFrom(initialKey, true))
+                .thenReturn(payload);
+
+        when(service.createAndGet(payload)).thenReturn(created);
+        when(mapper.wrapRecord(created)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO> response =
+                controller.create(initialKey, null);
+
+        assertEquals(201, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+
+        verify(mapper).getDataFrom(initialKey, true);
+        verify(service).createAndGet(payload);
+    }
+
+    @Test
+    void createReturnsOkWhenLocationGenerationFails() throws Exception {
+        /*
+         * No request context is installed. ServletUriComponentsBuilder throws,
+         * and the controller intentionally falls back to HTTP 200 with the DTO.
+         */
+
+        Map<String, Object> initialKey =
+                Map.of("first_id", "1");
+
+        EntityDataPayload<TestTableRecord> payload =
+                EntityDataPayload.of(TEST_TABLE.FIRST_ID, 1);
+
+        TestTableRecord created =
+                record(1, 2, "created", 0, "description");
+
+        EntityDTO expected =
+                dto(1, 2, "created", 0, "description");
+
+        when(mapper.getDataFrom(initialKey, true))
+                .thenReturn(payload);
+
+        when(service.createAndGet(payload)).thenReturn(created);
+        when(mapper.wrapRecord(created)).thenReturn(expected);
+
+        ResponseEntity<EntityDTO> response =
+                controller.create(initialKey, null);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertSame(expected, response.getBody());
+        assertNull(response.getHeaders().getLocation());
+    }
+
+    @Test
+    void createPropagatesMapperFailureWithoutCallingService() {
+        Map<String, Object> initialKey =
+                Map.of("first_id", "1");
+
+        Map<String, Object> initialData =
+                Map.of("unknown", "value");
+
+        RuntimeException failure =
+                new RuntimeException("Invalid creation payload");
+
+        when(mapper.getDataFrom(any(), eq(true)))
+                .thenThrow(failure);
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> controller.create(initialKey, initialData)
+        );
+
+        assertSame(failure, thrown);
         verify(service, never()).createAndGet(any());
     }
 
     @Test
-    void deleteDelegatesToServiceDeleteAndReturnsBooleanBody() {
-        when(service.delete(any())).thenReturn(true);
+    void deleteDelegatesToMapperAndService() {
+        Map<String, Object> keyParameters = Map.of(
+                "first_id", "1",
+                "second_id", "2"
+        );
 
-        ResponseEntity<Boolean> response = controller.delete(Map.of(
-                DTOFields.FirstID.toString(), "1",
-                DTOFields.SecondID.toString(), "2"
-        ));
+        EntityKey<TestTableRecord> key =
+                EntityKey.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.SECOND_ID, 2)
+                        .build();
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(key);
+
+        when(service.delete(key)).thenReturn(true);
+
+        ResponseEntity<Boolean> response =
+                controller.delete(keyParameters);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals(Boolean.TRUE, response.getBody());
 
-        verify(service).delete(argThat(key ->
-                key.getValue(TEST_TABLE.FIRST_ID).equals(1)
-                        && key.getValue(TEST_TABLE.SECOND_ID).equals(2)
-        ));
+        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(service).delete(key);
+    }
+
+    @Test
+    void deleteReturnsFalseWhenServiceDoesNotDeleteRecord() {
+        Map<String, Object> keyParameters =
+                Map.of("first_id", "99");
+
+        EntityKey<TestTableRecord> key =
+                EntityKey.of(TEST_TABLE.FIRST_ID, 99);
+
+        when(mapper.getKeyFromDTO(keyParameters, true))
+                .thenReturn(key);
+
+        when(service.delete(key)).thenReturn(false);
+
+        ResponseEntity<Boolean> response =
+                controller.delete(keyParameters);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(Boolean.FALSE, response.getBody());
+    }
+
+    private static void installRequestContext(String requestUri) {
+        MockHttpServletRequest request =
+                new MockHttpServletRequest();
+
+        request.setRequestURI(requestUri);
+
+        RequestContextHolder.setRequestAttributes(
+                new ServletRequestAttributes(request)
+        );
+    }
+
+    private record TestDTO(
+            String type,
+            Map<String, Object> key,
+            Map<String, Object> payload
+    ) implements EntityDTO {
+    }
+
+    private static final class TestController extends
+            EntityController<TestTableRecord, TestService> {
+
+        private TestController(
+                TestService service,
+                DTOMapper<TestTableRecord> mapper
+        ) {
+            super(service, mapper);
+        }
+
+        private EntityDTO[] wrapList(
+                List<TestTableRecord> records
+        ) {
+            return wrapEntities(records);
+        }
     }
 }

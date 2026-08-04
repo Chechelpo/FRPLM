@@ -90,7 +90,7 @@ public class MessageTestContext implements DBReload {
     }
 
     public void assertMessageEquals(MessagesRecord expected, MessagesRecord actual, boolean includeKeys){
-        Set<TableField<MessagesRecord, ?>> keyFields = includeKeys ? service.getKeyFields() : Set.of();
+        Set<TableField<MessagesRecord, ?>> keyFields = includeKeys ? fields.keyFields() : Set.of();
         Asserts.assertEqualsMinusFields(expected, actual, keyFields);
     }
 

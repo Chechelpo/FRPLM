@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.domain.sessions.movement;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -27,9 +28,10 @@ public class ResponseMovementService extends EntityService<ResponseLocationChang
     ResponseMovementService(
             @NotNull ResponseMovementStore store,
             @NotNull EventBus eventBus,
+            FieldValidator<ResponseLocationChangesRecord> validator,
             MessageService messageService
     ) {
-        super(store, eventBus);
+        super(store, validator, eventBus);
         this.messageService = messageService;
     }
 

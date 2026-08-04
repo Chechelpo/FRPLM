@@ -1,100 +1,65 @@
 package io.github.chechelpo.frplm.domain.world.edge;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 
 @Component
-final class EdgeFieldsHelper extends ABSControllerAwareHelper<
-        LocationEdgesRecord,
-        EdgeService,
-        EdgeController
-        > {
+final class EdgeFieldsHelper
+        extends EntityControllerFieldValidator<LocationEdgesRecord> {
 
-    EdgeFieldsHelper(
-            EdgeService service,
-            EdgeController controller
-    ) {
-        super(service, controller);
+    EdgeFieldsHelper() {
+        super(EntityConfigs.Types.EDGES);
+    }
 
-        register_field(
-                "from_id",
-                LOCATION_EDGES.FROM_LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+    @Override
+    protected List<DTOField<LocationEdgesRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(LOCATION_EDGES.FROM_LOCATION_ID, "from_id"),
+                DTOField.of(LOCATION_EDGES.TO_LOCATION_ID, "to_id"),
+                DTOField.of(LOCATION_EDGES.WORLD_ID, "world_id"),
+                DTOField.of(LOCATION_EDGES.EDGEDESCRIPTION, "edge_description"),
+                DTOField.of(LOCATION_EDGES.SHOW_DESTINATION_NAME, "show_destination_name"),
+                DTOField.of(LOCATION_EDGES.SHOW_DESTINATION_DESCRIPTION, "show_destination_description"),
+                DTOField.of(LOCATION_EDGES.TRAVERSABLE, "is_traversable")
+        );
+    }
+
+    @Override
+    protected List<FieldInfo<LocationEdgesRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(LOCATION_EDGES.FROM_LOCATION_ID)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "to_id",
-                LOCATION_EDGES.TO_LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+                FieldInfo.builder(LOCATION_EDGES.TO_LOCATION_ID)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "world_id",
-                LOCATION_EDGES.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .readOnly()
-                                        .key()
-                                        .build()
-                        )
+                FieldInfo.builder(LOCATION_EDGES.WORLD_ID)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                "edge_description",
-                LOCATION_EDGES.EDGEDESCRIPTION,
-                FieldInfo.stringField()
-                        .setConstraints(
-                                StringConstraint.builder()
-                                        .allows_outlets()
-                                        .build()
-                        )
-                        .build()
-        );
+                FieldInfo.builder(LOCATION_EDGES.EDGEDESCRIPTION)
+                        .build(),
 
-        register_field(
-                "show_destination_name",
-                LOCATION_EDGES.SHOW_DESTINATION_NAME,
-                FieldInfo.booleanField()
-                        .build()
-        );
+                FieldInfo.builder(LOCATION_EDGES.SHOW_DESTINATION_NAME)
+                        .build(),
 
-        register_field(
-                "show_destination_description",
-                LOCATION_EDGES.SHOW_DESTINATION_DESCRIPTION,
-                FieldInfo.booleanField()
-                        .build()
-        );
+                FieldInfo.builder(LOCATION_EDGES.SHOW_DESTINATION_DESCRIPTION)
+                        .build(),
 
-        register_field(
-                "is_traversable",
-                LOCATION_EDGES.TRAVERSABLE,
-                FieldInfo.booleanField()
+                FieldInfo.builder(LOCATION_EDGES.TRAVERSABLE)
                         .build()
         );
     }

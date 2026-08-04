@@ -10,8 +10,8 @@ import java.util.List;
 class TestService extends EntityService<TestTableRecord, TestStore> {
     private List<EntityKey<TestTableRecord>> created_entities = new ArrayList<>();
 
-    TestService(@NotNull TestStore store, @NotNull EventBus eventBus) {
-        super(store, eventBus, true);
+    TestService(@NotNull TestStore store, FieldValidator<TestTableRecord> validator, @NotNull EventBus eventBus) {
+        super(store, validator, eventBus);
     }
 
     @Override

@@ -1,20 +1,13 @@
 package io.github.chechelpo.frplm.core.entities.fields.coercers;
 
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public final class BoolCoercer extends Coercer<Boolean> {
-    private BoolCoercer(FieldType type) {
-        super(type);
-    }
-
-    @Contract(" -> new")
-    public static @NotNull BoolCoercer create() {
-        return new BoolCoercer(FieldType.BOOLEAN);
-    }
+final class BoolCoercer implements Coercer<Boolean> {
+    static final BoolCoercer instance = new BoolCoercer();
+    private BoolCoercer(){}
 
     @Override
     @Contract(value = "_ -> !null", pure = true)

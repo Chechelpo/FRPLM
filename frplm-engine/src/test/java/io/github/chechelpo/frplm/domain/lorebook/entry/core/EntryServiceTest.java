@@ -223,9 +223,9 @@ class EntryServiceTest {
 
         for (NewEntryOrder order : newEntriesOrders) {
             Optional<EntryRecord> thisOrderRecord = createdRecords.stream()
-                    .filter(record -> record.getName().equals(order.entryInfo().requireValue(ENTRY.NAME)))
+                    .filter(record -> record.getName().equals(order.entryInfo().require(ENTRY.NAME)))
                     .findFirst();
-            assertTrue(thisOrderRecord.isPresent(), "Couldn't find imported entry with name " + order.entryInfo().requireValue(ENTRY.NAME));
+            assertTrue(thisOrderRecord.isPresent(), "Couldn't find imported entry with name " + order.entryInfo().require(ENTRY.NAME));
 
             Set<String> keywordsOfThisEntry = Set.of(order.keywords().toArray(String[]::new));
             Set<String> actualKeywordsOfThisEntry = keywords.keywordsOfEntry(thisOrderRecord.get().getLorebookId(), thisOrderRecord.get().getEntryId());

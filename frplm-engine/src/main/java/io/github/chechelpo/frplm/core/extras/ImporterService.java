@@ -17,8 +17,6 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.utils.json_mappers.LorebookMapper;
 import io.github.chechelpo.frplm.utils.json_mappers.WorldMapper;
 import io.github.chechelpo.frplm.utils.json_mappers.orders.*;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.*;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.*;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
@@ -124,7 +122,7 @@ final class ImporterService {
             if (parentRegion == null) throw new IllegalArgumentException("Null parent region");
             RegionRecord child = regionsWithParents.get(j);
 
-            if (!Objects.equals(child.getName(), order.payload().requireValue(REGION.NAME)))
+            if (!Objects.equals(child.getName(), order.payload().require(REGION.NAME)))
                 throw new IllegalStateException("The names don't match, the assertion failed");
 
             regionService.update(

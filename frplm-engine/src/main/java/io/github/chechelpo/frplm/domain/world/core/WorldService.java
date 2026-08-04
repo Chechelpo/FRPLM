@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -19,10 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
-
-import java.util.Optional;
-
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
@@ -33,8 +30,13 @@ public class WorldService extends EntityService<
         > {
     private final LorebookService lorebooks;
 
-    WorldService(WorldStore store, LorebookService lorebooks, EventBus eventBus) {
-        super(store, eventBus);
+    WorldService(
+            WorldStore store,
+            FieldValidator<WorldsRecord> validator,
+            LorebookService lorebooks,
+            EventBus eventBus
+    ) {
+        super(store, validator, eventBus);
         this.lorebooks = lorebooks;
     }
 
@@ -55,9 +57,9 @@ public class WorldService extends EntityService<
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<WorldsRecord> data, long operationID) {
-        if (!data.assignsField(WORLDS.LOREBOOK_ID)){
+        if (!data.assigns(WORLDS.LOREBOOK_ID)){
             EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-            lorebookData.set(LOREBOOKS.NAME, data.requireValue(WORLDS.NAME));
+            lorebookData.set(LOREBOOKS.NAME, data.require(WORLDS.NAME));
             lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id);
 
             data.set(

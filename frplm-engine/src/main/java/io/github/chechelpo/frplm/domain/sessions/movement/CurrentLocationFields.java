@@ -1,57 +1,44 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CurrentLocationsRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.CURRENT_LOCATIONS;
 
 @Component
-final class CurrentLocationFields extends ABSHelper<CurrentLocationsRecord, CurrentLocationService> {
-    CurrentLocationFields(CurrentLocationService service) {
-        super(service);
-        register_field(
-                CURRENT_LOCATIONS.SESSION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
+final class CurrentLocationFields
+        extends EntityFieldsValidator<CurrentLocationsRecord> {
+
+    CurrentLocationFields() {
+        super();
+    }
+
+    @Override
+    protected List<FieldInfo<CurrentLocationsRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(CURRENT_LOCATIONS.SESSION_ID)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                CURRENT_LOCATIONS.CHARACTER_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
+                FieldInfo.builder(CURRENT_LOCATIONS.CHARACTER_ID)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                CURRENT_LOCATIONS.TICK_NUM,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER))
+                FieldInfo.builder(CURRENT_LOCATIONS.TICK_NUM)
                         .requireOnCreate()
-                        .build()
-        );
+                        .build(),
 
-        register_field(
-                CURRENT_LOCATIONS.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-        );
+                FieldInfo.builder(CURRENT_LOCATIONS.WORLD_ID)
+                        .build(),
 
-        register_field(
-                CURRENT_LOCATIONS.LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+                FieldInfo.builder(CURRENT_LOCATIONS.LOCATION_ID)
                         .build()
         );
     }

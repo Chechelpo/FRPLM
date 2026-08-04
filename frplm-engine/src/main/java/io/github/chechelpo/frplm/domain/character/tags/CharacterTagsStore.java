@@ -28,4 +28,17 @@ final class CharacterTagsStore extends EntityStore<CharacterTagsRecord> {
                 .where(id.getEqualityConditions())
                 .fetchInto(TagsRecord.class);
     }
+
+    public boolean characterHasTag(int characterId, int tagId){
+        return ctx.fetchExists(
+                ctx.selectOne()
+                    .from(TAGS)
+                    .join(CHARACTER_TAGS)
+                    .on(CHARACTER_TAGS.TAG_ID.eq(TAGS.ID))
+                    .where(
+                            CHARACTER_TAGS.CHAR_ID.eq(characterId)
+                                    .and(CHARACTER_TAGS.TAG_ID.eq(tagId))
+                    )
+        );
+    }
 }

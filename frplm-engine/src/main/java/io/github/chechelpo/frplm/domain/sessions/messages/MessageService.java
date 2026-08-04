@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
@@ -30,10 +31,11 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     MessageService(
             MessageStore store,
             EventBus eventBus,
+            FieldValidator<MessagesRecord> validator,
             SessionService sessionService,
             ResponseService responseService
     ) {
-        super(store, eventBus);
+        super(store, validator, eventBus);
         this.sessionService = sessionService;
         this.responseService = responseService;
     }
@@ -68,8 +70,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @Override
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeUpdate(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data, long operationID) {
-        if (data.assignsField(MESSAGES.ACTIVE_RESPONSE)) {
-            validateActiveResponse(target, data.requireValue(MESSAGES.ACTIVE_RESPONSE));
+        if (data.assigns(MESSAGES.ACTIVE_RESPONSE)) {
+            validateActiveResponse(target, data.require(MESSAGES.ACTIVE_RESPONSE));
             applyActiveResponseValues(target, data);
         }
         //throwIfAssignsPromptButIsUserMessage(data);
@@ -80,15 +82,15 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
     private static void throwIfAssignsReasoningButIsUserMessage(EntityDataPayload<MessagesRecord> data) {
         if (
-                data.assignsField(MESSAGES.REASONING) &&
-                        !data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
+                data.assigns(MESSAGES.REASONING) &&
+                        !data.require(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
         ) throw new InvalidValue("Can't assign reasoning to a user message");
     }
 
     private static void throwIfAssignsPromptButIsUserMessage(EntityDataPayload<MessagesRecord> data) {
         if (
-                data.assignsField(MESSAGES.REQUEST_JSON) &&
-                        !data.requireValue(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
+                data.assigns(MESSAGES.REQUEST_JSON) &&
+                        !data.require(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
         ) throw new InvalidValue("Can't assign request_json to a user message");
     }
 
@@ -96,8 +98,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
      * Ignored if it's a user message. Ignored if the active response is already this response.
      */
     void validateActiveResponse(EntityKey<MessagesRecord> target, short active_response) {
-        int sessionId = target.requireValue(MESSAGES.SESSION_ID);
-        int tick_num = target.requireValue(MESSAGES.TICK_NUM);
+        int sessionId = target.require(MESSAGES.SESSION_ID);
+        int tick_num = target.require(MESSAGES.TICK_NUM);
         MessagesRecord record = this.find(target)
                 .orElseThrow(notFound -> {
                     log.error("No message found for session id {} tick num {}", sessionId, tick_num);
@@ -123,9 +125,9 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @Contract(mutates = "param2")
     private void applyActiveResponseValues(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
         ResponsesRecord newActiveResponse = responseService.find(EntityKey.<ResponsesRecord>builder()
-                .set(RESPONSES.SESSION_ID, target.requireValue(MESSAGES.SESSION_ID))
-                .set(RESPONSES.TICK_NUM, target.requireValue(MESSAGES.TICK_NUM))
-                .set(RESPONSES.RESPONSE_NUM, data.requireValue(MESSAGES.ACTIVE_RESPONSE))
+                .set(RESPONSES.SESSION_ID, target.require(MESSAGES.SESSION_ID))
+                .set(RESPONSES.TICK_NUM, target.require(MESSAGES.TICK_NUM))
+                .set(RESPONSES.RESPONSE_NUM, data.require(MESSAGES.ACTIVE_RESPONSE))
                 .build()
         ).orElseThrow(notFound -> new EntityNotFound("Not Found when applying active response: " + notFound.toString(), Severity.SYSTEM));
 
@@ -139,8 +141,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @Override
     protected void afterSuccessfulUpdate(EntityKey<MessagesRecord> key, EntityDataPayload<MessagesRecord> updated, long operationID) {
         if (
-                !updated.assignsField(MESSAGES.ACTIVE_RESPONSE) &&
-                        updated.assignsField(MESSAGES.LOCATION_ID) || updated.assignsField(MESSAGES.CONTENT) || updated.assignsField(MESSAGES.TIME)
+                !updated.assigns(MESSAGES.ACTIVE_RESPONSE) &&
+                        updated.assigns(MESSAGES.LOCATION_ID) || updated.assigns(MESSAGES.CONTENT) || updated.assigns(MESSAGES.TIME)
         )
             updateActiveResponse(key, updated);
 
@@ -152,12 +154,12 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         ResponsesRecord currentActiveResponse = this.getActiveResponseOf(target);
         EntityDataPayload<ResponsesRecord> changed = EntityDataPayload.<ResponsesRecord>builder().build();
 
-        if (data.assignsField(MESSAGES.LOCATION_ID))
-            changed.set(RESPONSES.LOCATION_ID, data.requireValue(MESSAGES.LOCATION_ID));
-        if (data.assignsField(MESSAGES.CONTENT)) changed.set(RESPONSES.CONTENT, data.requireValue(MESSAGES.CONTENT));
-        if (data.assignsField(MESSAGES.REASONING))
-            changed.set(RESPONSES.REASONING, data.requireValue(MESSAGES.REASONING));
-        if (data.assignsField(MESSAGES.TIME)) changed.set(RESPONSES.ADVANCES_TIME_BY, data.requireValue(MESSAGES.TIME));
+        if (data.assigns(MESSAGES.LOCATION_ID))
+            changed.set(RESPONSES.LOCATION_ID, data.require(MESSAGES.LOCATION_ID));
+        if (data.assigns(MESSAGES.CONTENT)) changed.set(RESPONSES.CONTENT, data.require(MESSAGES.CONTENT));
+        if (data.assigns(MESSAGES.REASONING))
+            changed.set(RESPONSES.REASONING, data.require(MESSAGES.REASONING));
+        if (data.assigns(MESSAGES.TIME)) changed.set(RESPONSES.ADVANCES_TIME_BY, data.require(MESSAGES.TIME));
 
         responseService.update(responseService.keyOf(currentActiveResponse), changed)
                 .orElseThrow("Couldn't update active response of message: " + target);
@@ -172,7 +174,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         data.set(MESSAGES.TICK_NUM,
                 sessionService.incrementAndGet(
                                 SESSIONS.CURRENT_TICK,
-                                sessionService.keyOf(data.requireValue(MESSAGES.SESSION_ID))
+                                sessionService.keyOf(data.require(MESSAGES.SESSION_ID))
                         )
                         .orElseThrow(() -> {
                             log.error("Could not fetch next message tick for new message \n {}", data.assignments());
@@ -239,8 +241,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     private void registerNewResponse(EntityDataPayload<ResponsesRecord> payload) {
         EntityKey<MessagesRecord> messageKey = EntityKey.<MessagesRecord>builder()
-                .set(MESSAGES.SESSION_ID, payload.requireValue(RESPONSES.SESSION_ID))
-                .set(MESSAGES.TICK_NUM, payload.requireValue(RESPONSES.TICK_NUM))
+                .set(MESSAGES.SESSION_ID, payload.require(RESPONSES.SESSION_ID))
+                .set(MESSAGES.TICK_NUM, payload.require(RESPONSES.TICK_NUM))
                 .build();
         short newActiveResponseNum = this.incrementAndGet(MESSAGES.RESPONSE_NUM, messageKey)
                 .orElseThrow(() -> new UnexpectedException("Couldn't increment response num", Severity.SYSTEM));
@@ -262,8 +264,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
      */
     @Override
     protected void beforeDelete(@NotNull EntityKey<MessagesRecord> id, long operationID) {
-        int sessionId = id.requireValue(MESSAGES.SESSION_ID);
-        int requestedTick = id.requireValue(MESSAGES.TICK_NUM);
+        int sessionId = id.require(MESSAGES.SESSION_ID);
+        int requestedTick = id.require(MESSAGES.TICK_NUM);
 
         MessagesRecord lastMessage = getLastMessageOf(sessionId);
         int lastTick = lastMessage.getTickNum();
@@ -284,21 +286,21 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     }
 
     private void applyDefaultsOfLastMessage(@NotNull EntityDataPayload<MessagesRecord> data) {
-        MessagesRecord lastMessage = getLastMessageOf(data.requireValue(MESSAGES.SESSION_ID));
+        MessagesRecord lastMessage = getLastMessageOf(data.require(MESSAGES.SESSION_ID));
         if (lastMessage != null) {
             log.trace("Applying last message defaults");
-            if (!data.assignsField(MESSAGES.LOCATION_ID))
+            if (!data.assigns(MESSAGES.LOCATION_ID))
                 data.set(MESSAGES.LOCATION_ID, lastMessage.getLocationId());
 
-            if (!data.assignsField(MESSAGES.TIME))
+            if (!data.assigns(MESSAGES.TIME))
                 data.set(MESSAGES.TIME, lastMessage.getTime());
 
-            if (!data.assignsField(MESSAGES.WORLD_ID))
+            if (!data.assigns(MESSAGES.WORLD_ID))
                 data.set(MESSAGES.WORLD_ID, lastMessage.getWorldId());
-            else if (!Objects.equals(data.requireValue(MESSAGES.WORLD_ID), lastMessage.getWorldId())) {
+            else if (!Objects.equals(data.require(MESSAGES.WORLD_ID), lastMessage.getWorldId())) {
                 log.error("WORLD ID mismatch: \n last: {} vs \n new: {}",
                         lastMessage.getWorldId(),
-                        data.requireValue(MESSAGES.WORLD_ID)
+                        data.require(MESSAGES.WORLD_ID)
                 );
                 throw new IllegalArgumentException("World id mismatch");
             }

@@ -1,80 +1,54 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSES;
 
 @Component
-final class ResponseFields extends ABSHelper<ResponsesRecord, ResponseService> {
-    ResponseFields(ResponseService service) {
-        super(service);
+final class ResponseFields
+        extends EntityFieldsValidator<ResponsesRecord> {
 
-        register_field(
-                RESPONSES.SESSION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .requireOnCreate()
-                        .build()
-        );
-        register_field(
-                RESPONSES.TICK_NUM,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .requireOnCreate()
-                        .build()
-        );
-        register_field(
-                RESPONSES.RESPONSE_NUM,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .requireOnCreate()
-                        .build()
-        );
-
-        register_field(
-                RESPONSES.CONTENT,
-                FieldInfo.stringField()
-                        .requireOnCreate()
-                        .build()
-        );
-        register_field(RESPONSES.REASONING)
-                .setInfo(FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .nullable()
-                        )
-                        .build()
-                );
-        register_field(
-                RESPONSES.ADVANCES_TIME_BY,
-                FieldInfo.numberField(FieldType.INTEGER)
+    @Override
+    protected List<FieldInfo<ResponsesRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(RESPONSES.SESSION_ID)
+                        .key()
                         .requireOnCreate()
                         .build(),
-                0
-        );
-        register_field(
-                RESPONSES.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+
+                FieldInfo.builder(RESPONSES.TICK_NUM)
+                        .key()
                         .requireOnCreate()
-                        .build()
-        );
-        register_field(
-                RESPONSES.LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.RESPONSE_NUM)
+                        .key()
+                        .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.CONTENT)
+                        .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.REASONING)
+                        .nullable()
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.ADVANCES_TIME_BY)
+                        .requireOnCreate()
+                        .setDefaultValue(0)
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.WORLD_ID)
+                        .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(RESPONSES.LOCATION_ID)
                         .requireOnCreate()
                         .build()
         );

@@ -1,10 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
-import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
 import io.github.chechelpo.frplm.events.EventBus;
+import io.github.chechelpo.frplm.exceptions.runtime.ExpectedField;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UneditableField;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
@@ -39,50 +36,8 @@ class EntityServiceTest {
         when(eventBus.nextOperationID()).thenReturn(1L, 2L, 3L, 4L, 5L);
 
         testStore = new TestStore(dslContext);
-        testService = new TestService(testStore, eventBus);
-        testFields = new TestFields(testService);
-        testFields.register_field(
-                TEST_TABLE.FIRST_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .requireOnCreate()
-                        .build()
-        );
-        testFields.register_field(
-                TEST_TABLE.SECOND_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .requireOnCreate()
-                        .build()
-        );
-        testFields.register_field(
-                TEST_TABLE.NAME,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .setMaxLength(255)
-                        )
-                        .build()
-        );
-        testFields.register_field(
-                TEST_TABLE.COUNTER,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-        );
-        testFields.register_field(
-                TEST_TABLE.DESCRIPTION,
-                FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .nullable()
-                                .setMinLength(20)
-                        )
-                        .build()
-        );
+        testFields = new TestFields();
+        testService = new TestService(testStore, testFields, eventBus);
     }
     @BeforeEach
     public void beforeEach() {
@@ -97,8 +52,8 @@ class EntityServiceTest {
 
     @Test
     void isKey() {
-        assertTrue(testService.isKey(TEST_TABLE.FIRST_ID), "Test service first id is not key");
-        assertTrue(testService.isKey(TEST_TABLE.SECOND_ID), "Test service second id is not key");
+        assertTrue(testFields.isKey(TEST_TABLE.FIRST_ID), "Test service first id is not key");
+        assertTrue(testFields.isKey(TEST_TABLE.SECOND_ID), "Test service second id is not key");
     }
     @Test
     void keyOf() {
@@ -326,10 +281,10 @@ class EntityServiceTest {
                 .build();
         EntityReader.RecordFindResult<TestTableRecord> returnValue = testService.find(key);
         assertTrue(returnValue.isFound());
-        assertThrows(UneditableField.class, () -> testService.update(key,
-                EntityDataPayload.of(TEST_TABLE.FIRST_ID, 200))
+        assertThrows(InvalidValue.class, () ->
+                testService.update(key, EntityDataPayload.of(TEST_TABLE.FIRST_ID, 200))
         );
-        assertThrows(UneditableField.class, () -> testService.update(key,
+        assertThrows(InvalidValue.class, () -> testService.update(key,
                 EntityDataPayload.of(TEST_TABLE.SECOND_ID, 300)
         ));
     }
@@ -338,8 +293,8 @@ class EntityServiceTest {
         EntityDataPayload<TestTableRecord> data = EntityDataPayload.of(TEST_TABLE.FIRST_ID, 1);
         EntityDataPayload<TestTableRecord> data2 = EntityDataPayload.of(TEST_TABLE.SECOND_ID, 2);
 
-        assertThrows(InvalidValue.class, () -> testService.createAndGet(data));
-        assertThrows(InvalidValue.class, () -> testService.createAndGet(data2));
+        assertThrows(ExpectedField.class, () -> testService.createAndGet(data));
+        assertThrows(ExpectedField.class, () -> testService.createAndGet(data2));
     }
     @Test
     public void testNonNullableField(){
@@ -394,8 +349,8 @@ class EntityServiceTest {
 
             TestTableRecord found = findResult.get();
             EntityDataPayload<TestTableRecord> payload = data.get(i);
-            assertEquals(found.getName(), payload.requireValue(TEST_TABLE.NAME), "Name is not equal on record " + i);
-            assertEquals(found.getDescription(), payload.requireValue(TEST_TABLE.DESCRIPTION), "Description is not equal on record " + i);
+            assertEquals(found.getName(), payload.require(TEST_TABLE.NAME), "Name is not equal on record " + i);
+            assertEquals(found.getDescription(), payload.require(TEST_TABLE.DESCRIPTION), "Description is not equal on record " + i);
         }
 
         //Assert updates  remain unchanged
@@ -407,7 +362,7 @@ class EntityServiceTest {
 
             Optional<String> possibleValue = testService.getValueOf(TEST_TABLE.DESCRIPTION, key);
             assertTrue(possibleValue.isPresent(), "Could not find value for key " + key);
-            assertEquals(newValue.requireValue(TEST_TABLE.DESCRIPTION), possibleValue.get(), "Mismatch after update");
+            assertEquals(newValue.require(TEST_TABLE.DESCRIPTION), possibleValue.get(), "Mismatch after update");
         }
         //Delete without issues
         keys.forEach(entityKey -> {

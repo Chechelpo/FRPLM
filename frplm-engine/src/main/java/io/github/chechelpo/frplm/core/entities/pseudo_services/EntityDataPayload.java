@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EntityDataPayload<R extends TableRecord<R>> {
+public final class EntityDataPayload<R extends TableRecord<R>> implements DataPayload<R> {
     private final Map<TableField<R, ?>, Object> assignments;
 
     EntityDataPayload(Map<TableField<R, ?>, Object> assignments) {
@@ -45,6 +45,36 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
                 .build();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return assignments.isEmpty();
+    }
+    @Override
+    public Map<TableField<R, ?>, Object> assignments() {
+        return assignments;
+    }
+
+    @Override
+    public <T> Assignment<R, T> getAssignment(TableField<R, T> field) {
+        if (assignments.containsKey(field))
+            //noinspection unchecked
+            return Assignment.ofAssigned(field, (T) assignments.get(field));
+
+        return Assignment.ofUnassigned(field);
+    }
+
+    @Override
+    public boolean assigns(TableField<R, ?> field) {
+        return assignments.containsKey(field);
+    }
+
+    @Override
+    public void consume(Assignment<R, ?> assignment) {
+        if (!assignment.isAssigned()) return;
+
+        assignments.put(assignment.field, assignment.get());
+    }
+
     public <T> void set(TableField<R, T> field, T value) {
         assignments.put(field, value);
     }
@@ -61,29 +91,12 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         assignments.putAll(values);
     }
 
-    public boolean assignsField(TableField<R, ?> field) {
-        return assignments.containsKey(field);
-    }
-
-    public <T> T requireValue(TableField<R, T> field) {
-        if (assignments.containsKey(field))
-            return (T) assignments.get(field);
-
-        throw new IllegalArgumentException("Unknown field or unassigned field:  " + field.getName());
-    }
-
+    /** @deprecated use {@link #getAssignment(TableField)} instead **/
     @SuppressWarnings("unchecked")
     public <T> @NotNull Optional<T> getValue(TableField<R, T> field) {
         return Optional.ofNullable((T) assignments.get(field));
     }
 
-    public boolean isEmpty() {
-        return assignments.isEmpty();
-    }
-
-    public Map<TableField<R, ?>, Object> assignments() {
-        return assignments;
-    }
 
     /**
      * Converts every assignment into an equality condition.
@@ -151,6 +164,10 @@ public final class EntityDataPayload<R extends TableRecord<R>> {
         }
 
         public <T> @NotNull Builder<Rec> set(TableField<Rec, T> field, T value) {
+            assignments.put(field, value);
+            return this;
+        }
+        @NotNull Builder<Rec> unsafeSet(TableField<Rec, ?> field, Object value) {
             assignments.put(field, value);
             return this;
         }

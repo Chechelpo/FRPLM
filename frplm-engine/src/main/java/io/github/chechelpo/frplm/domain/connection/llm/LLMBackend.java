@@ -2,12 +2,14 @@ package io.github.chechelpo.frplm.domain.connection.llm;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import io.github.chechelpo.frplm.interfaces.StableRecord;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.DSLContext;
+import org.jooq.Table;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -17,6 +19,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
+import static org.jooq.impl.DSL.max;
 
 /**
  * They are all assumed to be chat-completions.
@@ -116,13 +119,32 @@ public enum LLMBackend implements StableRecord<ApiHostsRecord> {
     }
 
     @Override
+    public void runCustomConfig(DSLContext dslContext) {
+        Integer nextId = dslContext.select(max(API_HOSTS.ID).plus(1))
+                .from(API_HOSTS)
+                .fetchOneInto(Integer.class);
+
+        if (nextId == null) {
+            nextId = 1;
+        }
+
+        dslContext.execute("ALTER TABLE API_HOSTS ALTER COLUMN ID RESTART WITH " + nextId);
+    }
+
+    @Override
+    public Table<ApiHostsRecord> getTable() {
+        return API_HOSTS;
+    }
+
+    @Override
     @Contract(pure = true)
     public Optional<EntityDataPayload<ApiHostsRecord>> toPayload() {
         if (host == null || stable_id == null) return Optional.empty();
 
-        return Optional.of(EntityDataPayload.<ApiHostsRecord>builder()
-                .set(API_HOSTS.HOST_URL, this.host.toString())
-                .set(API_HOSTS.ID, this.stable_id)
+        return Optional.of(
+                EntityDataPayload.<ApiHostsRecord>builder()
+                    .set(API_HOSTS.HOST_URL, this.host.toString())
+                    .set(API_HOSTS.ID, this.stable_id)
                 .build()
         );
     }

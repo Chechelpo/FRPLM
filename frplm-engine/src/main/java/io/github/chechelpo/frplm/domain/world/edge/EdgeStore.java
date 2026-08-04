@@ -22,7 +22,7 @@ final class EdgeStore extends EntityStore<LocationEdgesRecord> {
     }
 
     public @NotNull List<LocationsRecord> getNeighboursOf(@NotNull EntityKey<LocationsRecord> key){
-        var locationId = key.getValue(LOCATIONS.ID);
+        int locationId = key.requireNonNull(LOCATIONS.ID);
 
         return ctx
                 .selectFrom(LOCATIONS)

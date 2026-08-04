@@ -24,7 +24,7 @@ public final class GenerateJooq {
                                 )
                                 .withTarget(new Target()
                                         .withPackageName("io.github.chechelpo.frplm.jooq.generated")
-                                        .withDirectory("frplm-engine/src/main/generated")
+                                        .withDirectory("src/main/generated")
                                 )
                         );
         GenerationTool.generate(configuration);

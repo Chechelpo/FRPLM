@@ -108,7 +108,7 @@ class EdgeServiceTest {
 
             EntityKey<LocationsRecord> fromKey = locations.service.keyOf(fromLocation);
             EntityKey<LocationsRecord> toKey = locations.service.keyOf(toLocation);
-            int worldId = fromKey.requireValue(LOCATIONS.WORLD_ID);
+            int worldId = fromKey.require(LOCATIONS.WORLD_ID);
             assertNotEquals(fromKey, toKey, "Keys are the same");
 
 

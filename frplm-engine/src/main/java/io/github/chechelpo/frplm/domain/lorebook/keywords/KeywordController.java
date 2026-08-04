@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.keywords;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
@@ -17,11 +19,12 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.KEYWO
 @RestController
 @RequestMapping(KEYWORDS_URL)
 final class KeywordController extends EntityController<KeywordRecord, KeywordServiceImpl> {
-    private final EntryKeywordService entryKeywordService;
 
-    KeywordController(KeywordServiceImpl service, EntryKeywordService entryKeywordsService) {
-        super(service);
-        this.entryKeywordService = entryKeywordsService;
+    KeywordController(
+            KeywordServiceImpl service,
+            DTOMapper<KeywordRecord> mapper
+    ) {
+        super(service, mapper);
     }
 
     @GetMapping

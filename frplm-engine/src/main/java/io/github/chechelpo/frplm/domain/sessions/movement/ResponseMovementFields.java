@@ -1,64 +1,45 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
 
 @Component
-public class ResponseMovementFields extends ABSHelper<ResponseLocationChangesRecord, ResponseMovementService> {
-    public ResponseMovementFields(ResponseMovementService service) {
-        super(service);
-        register_field(
-                RESPONSE_LOCATION_CHANGES.SESSION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .build()
-        );
-        register_field(
-                RESPONSE_LOCATION_CHANGES.TICK_NUM,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .build()
-        );
-        register_field(
-                RESPONSE_LOCATION_CHANGES.RESPONSE_NUM,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .build()
-        );
+public class ResponseMovementFields
+        extends EntityFieldsValidator<ResponseLocationChangesRecord> {
 
-        register_field(
-                RESPONSE_LOCATION_CHANGES.CHARACTER_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                        )
-                        .build()
-        );
+    public ResponseMovementFields() {
+        super();
+    }
 
-        register_field(
-                RESPONSE_LOCATION_CHANGES.WORLD_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-        );
-        register_field(
-                RESPONSE_LOCATION_CHANGES.LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+    @Override
+    protected List<FieldInfo<ResponseLocationChangesRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.SESSION_ID)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.TICK_NUM)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.RESPONSE_NUM)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.CHARACTER_ID)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.WORLD_ID)
+                        .build(),
+
+                FieldInfo.builder(RESPONSE_LOCATION_CHANGES.LOCATION_ID)
                         .build()
         );
     }

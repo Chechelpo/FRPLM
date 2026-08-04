@@ -2,16 +2,18 @@ package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
-import io.github.chechelpo.frplm.interfaces.StableRecord;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import io.github.chechelpo.frplm.utils.macros.Macro;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.DSLContext;
+import org.jooq.Table;
 
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
+import static org.jooq.impl.DSL.max;
 
 /**
  * Contains standard outlets as well as outlet logic. An outlet is any macro in the form: "{{outlet:name}}"
@@ -48,6 +50,23 @@ public enum StandardOutlet implements StableRecord<OutletRecord> {
     }
 
 
+    @Override
+    public void runCustomConfig(DSLContext ctx) {
+        Integer nextId = ctx.select(max(OUTLET.ID).plus(1))
+                .from(OUTLET)
+                .fetchOneInto(Integer.class);
+
+        if (nextId == null) {
+            nextId = 1;
+        }
+
+        ctx.execute("ALTER TABLE OUTLET ALTER COLUMN ID RESTART WITH " + nextId);
+    }
+
+    @Override
+    public Table<OutletRecord> getTable() {
+        return OUTLET;
+    }
 
     @Contract(" -> new")
     @Override

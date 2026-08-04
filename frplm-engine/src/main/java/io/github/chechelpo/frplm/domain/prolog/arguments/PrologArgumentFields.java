@@ -1,57 +1,48 @@
 package io.github.chechelpo.frplm.domain.prolog.arguments;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSHelper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PrologPredicateArgumentRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.PROLOG_PREDICATE_ARGUMENT;
 
 @Component
-final class PrologArgumentFields extends ABSHelper<PrologPredicateArgumentRecord, PrologArgumentService> {
-    PrologArgumentFields(PrologArgumentService service) {
-        super(service);
+final class PrologArgumentFields
+        extends EntityFieldsValidator<PrologPredicateArgumentRecord> {
 
-        register_field(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID)
-                .setInfo(FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
+    PrologArgumentFields() {
+        super();
+    }
+
+    @Override
+    protected List<FieldInfo<PrologPredicateArgumentRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(PROLOG_PREDICATE_ARGUMENT.PREDICATE_ID)
+                        .key()
+                        .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(PROLOG_PREDICATE_ARGUMENT.POSITION)
+                        .key()
+                        .requireOnCreate()
+                        .build(),
+
+                FieldInfo.builder(PROLOG_PREDICATE_ARGUMENT.NAME)
+                        .build(),
+
+                FieldInfo.builder(PROLOG_PREDICATE_ARGUMENT.TYPE)
+                        .addAllowedValues(
+                                Arrays.stream(PrologArgumentType.values())
+                                        .map(PrologArgumentType::getTableValue)
+                                        .toList()
                         )
                         .requireOnCreate()
+                        .setDefaultValue(PrologArgumentType.TEXT.getTableValue())
                         .build()
-                );
-
-        register_field(PROLOG_PREDICATE_ARGUMENT.POSITION)
-                .setInfo(FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                                .build()
-                        )
-                        .requireOnCreate()
-                        .build()
-                );
-
-        register_field(PROLOG_PREDICATE_ARGUMENT.NAME).setInfo(FieldInfo.stringField().build());
-
-        register_field(PROLOG_PREDICATE_ARGUMENT.TYPE)
-                .setInfo(FieldInfo.stringField()
-                        .setConstraints(StringConstraint.builder()
-                                .setPossibleValues(
-                                        Arrays.stream(PrologArgumentType.values())
-                                                .map(PrologArgumentType::getTableValue)
-                                                .toArray(String[]::new)
-                                )
-                        )
-                        .requireOnCreate()
-                        .build()
-                )
-                .withDefaultValue(PrologArgumentType.TEXT.getTableValue());
+        );
     }
 }

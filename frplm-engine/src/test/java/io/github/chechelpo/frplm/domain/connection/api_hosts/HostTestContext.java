@@ -15,7 +15,5 @@ public class HostTestContext implements DBReload{
 
     @Override
     public void reload() {
-        fields.ensureLLMBackendExists();
-        fields.restartIdentityAfterCurrentMax();
     }
 }

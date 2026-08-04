@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
@@ -13,8 +15,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SECTI
 @RestController
 @RequestMapping(SECTIONS_URL)
 final class SectionController extends EntityController<PromptSectionRecord, SectionService> {
-    SectionController(SectionService service) {
-        super(service);
+    SectionController(SectionService service, DTOMapper<PromptSectionRecord> mapper) {
+        super(service, mapper);
     }
 
     @GetMapping("/ofTemplate/{templateKey}")

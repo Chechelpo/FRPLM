@@ -3,11 +3,11 @@ package io.github.chechelpo.frplm.domain.world.region;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
@@ -26,24 +26,30 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     private final LorebookService lorebookService;
     private final WorldService worldService;
 
-    RegionService(@NonNull RegionStore store, @NotNull EventBus eventBus, LorebookService lorebookService, WorldService worldService) {
-        super(store, eventBus);
+    RegionService(
+            @NonNull RegionStore store,
+            FieldValidator<RegionRecord> validator,
+            @NotNull EventBus eventBus,
+            LorebookService lorebookService,
+            WorldService worldService
+    ) {
+        super(store, validator, eventBus);
         this.lorebookService = lorebookService;
         this.worldService = worldService;
     }
 
     @Override
     protected void beforeCreate(@NonNull EntityDataPayload<RegionRecord> data, long operationID) {
-        if (!data.assignsField(REGION.LOREBOOK_ID)) {
+        if (!data.assigns(REGION.LOREBOOK_ID)) {
             int lorebookId = lorebookService.createAndGet(
-                    EntityDataPayload.of(Lorebooks.LOREBOOKS.NAME, data.requireValue(REGION.NAME)),
+                    EntityDataPayload.of(Lorebooks.LOREBOOKS.NAME, data.require(REGION.NAME)),
                     LOREBOOKS.ID
             );
             data.set(REGION.LOREBOOK_ID, lorebookId);
         }
         data.set(
                 REGION.ID,
-                worldService.incrementAndGet(WORLDS.NEXT_REGION_ID, worldService.keyOf(data.requireValue(REGION.WORLD_ID)))
+                worldService.incrementAndGet(WORLDS.NEXT_REGION_ID, worldService.keyOf(data.require(REGION.WORLD_ID)))
                         .orElseThrow(() -> new UnexpectedException("Could not fetch id for region " + data, Severity.SYSTEM))
         );
 
@@ -52,11 +58,11 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
 
     @Override
     protected void beforeUpdate(@NotNull EntityKey<RegionRecord> target, EntityDataPayload<RegionRecord> data, long operationID) {
-        if (data.assignsField(REGION.PARENT_REGION_ID) && data.requireValue(REGION.PARENT_REGION_ID) != null) {
+        if (data.assigns(REGION.PARENT_REGION_ID) && data.require(REGION.PARENT_REGION_ID) != null) {
             if (updateCreatesCycle(
-                    target.requireValue(REGION.WORLD_ID),
-                    target.requireValue(REGION.ID),
-                    data.requireValue(REGION.PARENT_REGION_ID))
+                    target.require(REGION.WORLD_ID),
+                    target.require(REGION.ID),
+                    data.require(REGION.PARENT_REGION_ID))
             ) throw new InvalidValue("This parent region assignment will create a cycle");
         }
         super.beforeUpdate(target, data, operationID);

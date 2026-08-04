@@ -1,6 +1,8 @@
 package io.github.chechelpo.frplm.domain.character.starting_locations;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +14,7 @@ final class StartingLocationsController extends EntityController<
         StartingLocationsService
         > {
 
-    StartingLocationsController(StartingLocationsService service) {
-        super(service);
+    StartingLocationsController(StartingLocationsService service, EntityControllerFieldValidator<StartingLocationsRecord> validator) {
+        super(service, validator);
     }
 }

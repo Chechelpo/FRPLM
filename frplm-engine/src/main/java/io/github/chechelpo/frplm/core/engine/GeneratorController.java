@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.core.engine;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookController;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryController;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageController;
@@ -38,7 +39,7 @@ final class GeneratorController {
 
 
     @PostMapping("/generate/{sessionID}")
-    ResponseEntity<MessageController.EntityDTO> generate(
+    ResponseEntity<EntityDTO> generate(
             @PathVariable int sessionID,
             @RequestBody GenerationOptions options
     ) throws EntityNotFound {
@@ -54,7 +55,7 @@ final class GeneratorController {
     }
 
     @PostMapping("/regenerate")
-    ResponseEntity<MessageController.EntityDTO> regenerate(
+    ResponseEntity<EntityDTO> regenerate(
             @RequestParam int sessionID,
             @RequestParam int tick_num,
             @RequestBody(required = false) GenerationOptions options

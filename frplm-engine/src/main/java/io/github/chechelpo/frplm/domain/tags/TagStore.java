@@ -20,10 +20,10 @@ final class TagStore extends EntityStore<TagsRecord> {
     int countUsages(@NotNull EntityKey<TagsRecord> key){
         Integer number = ctx.selectCount()
                 .from(CHARACTER_TAGS)
-                .where(CHARACTER_TAGS.TAG_ID.eq(key.getValue(TAGS.ID)))
+                .where(CHARACTER_TAGS.TAG_ID.eq(key.require(TAGS.ID)))
                 .fetchOne(0, Integer.class);
         if (number == null){
-            throw new IllegalStateException("No tag found with id " + key.getValue(TAGS.ID));
+            throw new IllegalStateException("No tag found with id " + key.getAssignment(TAGS.ID));
         }
         return number;
     }

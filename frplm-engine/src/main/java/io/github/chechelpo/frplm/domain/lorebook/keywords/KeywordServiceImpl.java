@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.keywords;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
@@ -12,8 +13,12 @@ import java.util.OptionalInt;
 
 @Component
 non-sealed class KeywordServiceImpl extends EntityService<KeywordRecord, KeywordStore> implements KeywordService {
-    KeywordServiceImpl(KeywordStore store, EventBus eventBus) {
-        super(store, eventBus);
+    KeywordServiceImpl(
+            KeywordStore store,
+            FieldValidator<KeywordRecord> validator,
+            EventBus eventBus
+    ) {
+        super(store, validator, eventBus);
     }
 
     @Override

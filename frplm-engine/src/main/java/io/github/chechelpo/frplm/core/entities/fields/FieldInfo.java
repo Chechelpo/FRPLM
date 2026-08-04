@@ -2,111 +2,268 @@ package io.github.chechelpo.frplm.core.entities.fields;
 
 import io.github.chechelpo.frplm.core.entities.fields.coercers.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.*;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldKind;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.*;
+import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Table;
+import org.jooq.TableField;
+import org.jooq.TableRecord;
+import org.jooq.UniqueKey;
+import org.jspecify.annotations.NonNull;
+
+import java.util.*;
+import java.util.function.Function;
 
 /**
+ *
  */
-public final class FieldInfo<T extends FieldKind>{
-    public final @NotNull FieldType type;
-    public final @NotNull Coercer<T> format;
-    public final @NotNull Constraint<T, ?> constraints;
-    public final boolean require;
+public final class FieldInfo<R extends TableRecord<R>, T> {
+    public final @NotNull TableField<R, T> field;
+    public final @NotNull Coercer<T> coercer;
+    public final @NotNull Constraint<T> constraint;
+
+    private final Set<T> allowedValues;
+    private final List<Function<T, Optional<String>>> customConstraints;
+    private final T defaultValue;
+
+    private final boolean assignedDefaultValue;
+    /**
+     * Whether this field must be provided by payload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
+     */
+    public final boolean isRequired;
+    /**
+     * Whether this field can be targeted by a {@link EntityUpdater#update(EntityKey, EntityDataPayload)} call
+     */
+    public final boolean isReadOnly;
+    /**
+     * Whether this field at least partially identifies the entity (along with others). Forces read only if present
+     */
+    public final boolean isKey;
+    /**
+     * Whether this field can be set to null
+     */
+    public final boolean isNullable;
 
     @Contract(pure = true)
-    private FieldInfo(@NotNull FieldInfoBuilder<T> builder) {
-        this.type = builder.type;
-        this.format = builder.coercer;
-        this.require = builder.require;
-        this.constraints = builder.constraints;
+    private FieldInfo(@NotNull FieldInfo.Builder<R, T> builder) {
+        this.field = Objects.requireNonNull(builder.field);
+        this.coercer = Objects.requireNonNull(builder.coercer, "Coercer for field : " + field.getName());
+
+        this.constraint = Objects.requireNonNull(builder.constraints);
+        this.customConstraints = builder.customConstraints;
+
+        this.allowedValues = builder.allowedValues == null ? null : Set.copyOf(builder.allowedValues);
+        this.defaultValue = builder.defaultValue;
+
+        this.isRequired = builder.require;
+        this.isReadOnly = builder.key || builder.readOnly;
+        this.isNullable = builder.isNullable;
+        this.isKey = builder.key;
+        this.assignedDefaultValue = builder.assignedDefaultValue;
+
+        validateFieldInfo();
     }
 
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.StringKind> stringField() {
-        return new FieldInfoBuilder<>(FieldType.STRING);
+    private void validateFieldInfo() {
+        if (this.isKey && this.isNullable)
+            throw new IllegalStateException("Nullable key detected in field " + field.getName());
+
+        if (assignedDefaultValue){
+            Optional<String> defaultValueError = this.validate(defaultValue, false);
+            if (defaultValueError.isPresent())
+                throw new IllegalStateException(
+                        "Default value " + defaultValueError.get() + " doesn't pass validations on-create for field " + field.getName()
+                );
+        }
     }
 
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.NumberKind> numberField(@NotNull FieldType type) {
-        if (type.isValidNumber())
-            return new FieldInfoBuilder<>(type);
-        throw new IllegalArgumentException("Type " + type + " is not supported");
+    public DataPayload.Assignment<R, T> getDefaultValue() {
+        if (!this.assignedDefaultValue) return DataPayload.Assignment.ofUnassigned(field);
+        return DataPayload.Assignment.ofAssigned(field, defaultValue);
     }
 
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.FloatKind> floatField(@NotNull FieldType type) {
-        if (type.isValidFloat())
-           return new FieldInfoBuilder<>(type);
-        throw new IllegalArgumentException("Type " + type + " is not supported");
+    @SuppressWarnings("unchecked")
+    public @NonNull Optional<String> validate(Object value, boolean isEditing) {
+        if (isEditing && this.isReadOnly)
+            return Optional.of(field.getName() + " is read only ");
+        if (value == null)
+            return this.isNullable ? Optional.empty() : Optional.of(field.getName() + " is not nullable ");
+
+        Class<?> expectedType = boxedType(field.getType());
+        if (!expectedType.isInstance(value))
+            return Optional.of(
+                    "Wrong data type for %s value %s. Expected type %s Got %s".formatted(
+                            field.getName(),
+                            value,
+                            field.getType(),
+                            value.getClass()
+                    )
+            );
+        T castedValue = (T) value;
+        if (this.allowedValues != null && !allowedValues.contains(castedValue))
+            return Optional.of("Value " + castedValue + " not allowed. Allowed values are: " + allowedValues);
+
+        Optional<String> constraintError = constraint.returnReasonIfInvalid(castedValue);
+        if (constraintError.isPresent()) return constraintError;
+
+        return customConstraints.isEmpty() ?
+                Optional.empty()
+                :
+                customConstraints.stream()
+                        .map(customConstraint -> customConstraint.apply(castedValue))
+                        .filter(Optional::isPresent)
+                        .findFirst()
+                        .flatMap(Function.identity());
     }
 
-    @Contract(value = " -> new", pure = true)
-    public static @NotNull FieldInfoBuilder<FieldKind.BooleanKind> booleanField() {
-        return new FieldInfoBuilder<>(FieldType.BOOLEAN);
+    @Contract(pure = true)
+    public @NonNull Either<Coercer.CoerceError, T> coerce(Object value) {
+        return this.coercer.coerce(value);
     }
 
-    public static class FieldInfoBuilder<T extends FieldKind> {
-        private final FieldType type;
-        private Coercer<T> coercer;
-        private Constraint<T, ?> constraints;
-        private boolean require;
+    public static <R extends TableRecord<R>, T> FieldInfo.Builder<R, T> builder(TableField<R, T> field) {
+        return new Builder<>(field);
+    }
 
-        private FieldInfoBuilder(FieldType type) {
-            this.type = type;
-            this.constraints = (Constraint<T, ?>) getDefaultConstraint(type);
-            this.coercer = getDefaultCoercer(type);
+    public static class Builder<R extends TableRecord<R>, T> {
+        private final TableField<R, T> field;
+        private final Coercer<T> coercer;
+        private Constraint<T> constraints = null;
+        private List<Function<T, Optional<String>>> customConstraints = new ArrayList<>();
+
+        private Set<T> allowedValues = null;
+
+        private boolean assignedDefaultValue = false;
+        private T defaultValue = null;
+
+        private boolean require = false;
+        private boolean readOnly = false;
+        private boolean key = false;
+        private boolean isNullable = false;
+
+        private Builder(TableField<R, T> field) {
+            this.field = field;
+
+            this.key = isPrimaryKeyField(field);
+            this.coercer = CoercerCreator.getCoercerForClass(field.getType());
+            this.isNullable = field.getDataType().nullable();
         }
 
-        public FieldInfoBuilder<T> setCoercer(Coercer coercer) {
-            this.coercer = coercer;
-            return this;
+        public TableField<R, T> field() {
+            return this.field;
         }
-        public <C extends Constraint<T, ?>> FieldInfoBuilder<T> setConstraints(
-                Constraint.@NotNull ABSConstraintsBuilder<C, ?> builder
+
+        private void createAllowedValuesIfNull() {
+            if (this.allowedValues == null)
+                this.allowedValues = new HashSet<>();
+        }
+
+        public <C extends Constraint<T>> Builder<R, T> setConstraints(
+                Constraint.@NotNull ABSConstraintsBuilder<T, C, ?> builder
         ) {
             return setConstraints(builder.build());
         }
-        public FieldInfoBuilder<T> setConstraints(Constraint<T, ?> constraints) {
+
+        public Builder<R, T> setConstraints(Constraint<T> constraints) {
             this.constraints = constraints;
             return this;
         }
-        public FieldInfoBuilder<T> requireOnCreate() {
+
+        public Builder<R, T> addCustomConstraint(Function<T, Optional<String>> function) {
+            this.customConstraints.add(function);
+            return this;
+        }
+
+        public Builder<R, T> setDefaultValue(T value) {
+            this.assignedDefaultValue = true;
+            this.defaultValue = value;
+            return this;
+        }
+
+        public Builder<R, T> addAllowedValues(T... values) {
+            createAllowedValuesIfNull();
+            allowedValues.addAll(List.of(values));
+            return this;
+        }
+
+        public Builder<R, T> addAllowedValues(List<T> values) {
+            createAllowedValuesIfNull();
+            allowedValues.addAll(values);
+            return this;
+        }
+
+        public Builder<R, T> addAllowedValue(T value) {
+            createAllowedValuesIfNull();
+            allowedValues.add(value);
+            return this;
+        }
+
+
+        /**
+         * Whether this field at least partially identifies the entity (along with others). Forces read only if present
+         */
+        public Builder<R, T> key() {
+            this.key = true;
+            return this;
+        }
+
+        /**
+         * Whether this field can be targeted by a {@link EntityUpdater#update(EntityKey, EntityDataPayload)} call
+         */
+        public Builder<R, T> readOnly() {
+            this.readOnly = true;
+            return this;
+        }
+
+        /**
+         * Whether this field must be provided by payload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
+         */
+        public Builder<R, T> requireOnCreate() {
             this.require = true;
             return this;
         }
 
-        public FieldInfo<T> build() {
-            return new FieldInfo<T>(this);
+        public Builder<R, T> nullable() {
+            this.isNullable = true;
+            return this;
+        }
+
+        public FieldInfo<R, T> build() {
+            if (this.constraints == null)
+                this.constraints = DefaultConstraints.getDefaultConstraintForClass(field.getType());
+
+            return new FieldInfo<>(this);
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T extends FieldKind> @NotNull Constraint<T, ?> getDefaultConstraint(
-            @NotNull FieldType type
-    ) {
-        return switch (type) {
-            case STRING -> (Constraint<T, ?>) StringConstraint.builder()
-                    .build();
+    private static Class<?> boxedType(Class<?> type) {
+        if (!type.isPrimitive()) {
+            return type;
+        }
 
-            case BOOLEAN -> (Constraint<T, ?>) new BoolConstraint(new BoolConstraint.BoolConstraintsBuilder());
+        if (type == byte.class) return Byte.class;
+        if (type == short.class) return Short.class;
+        if (type == int.class) return Integer.class;
+        if (type == long.class) return Long.class;
+        if (type == float.class) return Float.class;
+        if (type == double.class) return Double.class;
+        if (type == boolean.class) return Boolean.class;
+        if (type == char.class) return Character.class;
 
-            case BYTE, SHORT, INTEGER, LONG -> (Constraint<T, ?>) NumberConstraint.builder(type)
-                    .build();
-
-            case FLOAT, DOUBLE -> (Constraint<T, ?>) new FloatConstraint.FloatConstraintsBuilder(type)
-                    .build();
-        };
+        throw new IllegalArgumentException("Unsupported primitive type: " + type);
     }
 
-    private static @NotNull Coercer getDefaultCoercer(@NotNull FieldType type) {
-        return switch (type) {
-            case STRING -> StringCoercer.create();
-            case BYTE, INTEGER, LONG, SHORT -> NumberCoercer.create(type);
-            case FLOAT -> FloatCoercer.create();
-            case DOUBLE -> DoubleCoercer.create();
-            case BOOLEAN -> BoolCoercer.create();
-        };
+
+    private static boolean isPrimaryKeyField(TableField<?, ?> field) {
+        var table = field.getTable();
+        if (table == null) {
+            return false;
+        }
+
+        var primaryKey = table.getPrimaryKey();
+        return primaryKey != null
+                && primaryKey.getFields().stream()
+                .anyMatch(primaryKeyField -> primaryKeyField.equals(field));
     }
 }

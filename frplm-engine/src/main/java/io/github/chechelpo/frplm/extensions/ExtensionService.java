@@ -83,15 +83,14 @@ public final class ExtensionService implements ExtensionDBBridge {
                 .findFirst();
     }
 
-    public void runPrePromptGeneration(SessionsRecord session, PromptBuilder builder){
-        SessionImpl impl = new SessionImpl(session, extensionRepository.getContext(), sessionContext);
+    public void runPrePromptGeneration(SessionImpl sessionImpl, PromptBuilder builder){
         extensions.stream()
                 .filter(Extension::isEnabled)
                 .filter(PrePromptGeneration.class::isInstance)
                 .map(PrePromptGeneration.class::cast)
                 .forEach(ext -> {
                     try{
-                        ext.run(impl, builder);
+                        ext.run(sessionImpl, builder);
                     }catch(RuntimeException e){
                         logExtensionError((Extension) ext, e.getMessage());
                     }

@@ -1,22 +1,15 @@
 package io.github.chechelpo.frplm.core.prompt.building;
 
-
-import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
-import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import io.github.chechelpo.frplm.utils.macros.Macro;
 import org.jetbrains.annotations.Contract;
-import org.jooq.Record2;
-import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 final class SectionManager {
     private final String unrenderedContent;
@@ -40,6 +33,13 @@ final class SectionManager {
         this.role = role;
         this.position = position;
         this.isChatHistorySection = false;
+    }
+
+    public String getUnrenderedContent(){
+        return unrenderedContent;
+    }
+    public String getRenderedContent(){
+        return renderedContent;
     }
 
     @Contract(" -> new")
@@ -74,7 +74,5 @@ final class SectionManager {
         }
     }
 
-    public String getUnrenderedContent(){
-        return unrenderedContent;
-    }
+
 }

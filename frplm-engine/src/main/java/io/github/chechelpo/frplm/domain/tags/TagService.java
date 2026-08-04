@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.domain.tags;
 
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
@@ -18,8 +19,8 @@ import static io.github.chechelpo.frplm.jooq.generated.tables.Tags.TAGS;
 
 @Component
 public class TagService extends EntityService<TagsRecord, TagStore> {
-    TagService(TagStore store, EventBus eventBus) {
-        super(store, eventBus);
+    TagService(TagStore store, FieldValidator<TagsRecord> validator, EventBus eventBus) {
+        super(store, validator, eventBus);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -33,7 +34,7 @@ public class TagService extends EntityService<TagsRecord, TagStore> {
 
         EntityKey<TagsRecord> key = builder.set(
                 TAGS.ID,
-                deletedKey.getValue(CHARACTER_TAGS.TAG_ID)
+                deletedKey.getAssignment(CHARACTER_TAGS.TAG_ID).orElseThrow()
         ).build();
 
         if (this.store.countUsages(key) == 0)

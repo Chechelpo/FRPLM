@@ -1,75 +1,58 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
-import io.github.chechelpo.frplm.core.entities.fields.coercers.NumberCoercer;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
 @Component
-public final class WorldFieldsHelper extends ABSControllerAwareHelper<
-        WorldsRecord,
-        WorldService,
-        WorldController
-        > {
-    WorldFieldsHelper(
-            WorldService service,
-            WorldController controller
-    ) {
-        super(service, controller);
+public final class WorldFieldsHelper
+        extends EntityControllerFieldValidator<WorldsRecord> {
 
-        register_field(
-                "id",
-                WORLDS.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(
-                                NumberConstraint.builder(FieldType.INTEGER)
-                                        .key()
-                                        .readOnly()
-                                        .build()
-                        )
-                        .setCoercer(NumberCoercer.create(FieldType.INTEGER))
-                        .build()
+    WorldFieldsHelper() {
+        super(EntityConfigs.Types.WORLDS);
+    }
+
+    @Override
+    protected List<DTOField<WorldsRecord, ?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(WORLDS.ID, "id"),
+                DTOField.of(WORLDS.NAME, "name"),
+                DTOField.of(WORLDS.DESCRIPTION, "description"),
+                DTOField.of(WORLDS.LOREBOOK_ID, "lorebook_id")
         );
+    }
 
-        register_field(
-                "name",
-                WORLDS.NAME,
-                FieldInfo.stringField()
+    @Override
+    protected List<FieldInfo<WorldsRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(WORLDS.ID)
+                        .key()
+                        .build(),
+
+                FieldInfo.builder(WORLDS.NAME)
                         .setConstraints(
                                 StringConstraint.builder()
                                         .setMaxLength(255)
-                                        .build()
                         )
-                        .build()
-        );
+                        .build(),
 
-        registerControllerField(WORLDS.DESCRIPTION)
-                .setDtoName("description")
-                .setInfo(FieldInfo.stringField().build());
+                FieldInfo.builder(WORLDS.DESCRIPTION)
+                        .build(),
 
-        register_field(
-                "lorebook_id",
-                WORLDS.LOREBOOK_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-        );
+                FieldInfo.builder(WORLDS.LOREBOOK_ID)
+                        .build(),
 
-        register_field(
-                null,
-                WORLDS.NEXT_LOCATION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .build()
-        );
-        register_field(
-                null,
-                WORLDS.NEXT_REGION_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
+                FieldInfo.builder(WORLDS.NEXT_LOCATION_ID)
+                        .build(),
+
+                FieldInfo.builder(WORLDS.NEXT_REGION_ID)
                         .build()
         );
     }

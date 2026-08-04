@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
@@ -30,8 +31,8 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 public class TemplateService extends EntityService<PromptTemplateRecord, TemplateStore> {
     private final LLMService llmService;
 
-    TemplateService(TemplateStore store, EventBus bus, LLMService llmService) {
-        super(store, bus);
+    TemplateService(TemplateStore store, EventBus bus, LLMService llmService, FieldValidator<PromptTemplateRecord> fieldValidator) {
+        super(store, fieldValidator,bus);
         this.llmService = llmService;
     }
 
@@ -46,37 +47,37 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     @Override
     protected void beforeCreate(EntityDataPayload<PromptTemplateRecord> data, long operationID) {
-        if (data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) || data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET))
+        if (data.assigns(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) || data.assigns(PROMPT_TEMPLATE.LOREBOOKS_BUDGET))
             validateCreationOfBudget(data);
         super.beforeCreate(data, operationID);
     }
 
     private void validateCreationOfBudget(EntityDataPayload<PromptTemplateRecord> data){
         boolean assignedField = false;
-        if (data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) && !data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)){
+        if (data.assigns(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET) && !data.assigns(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)){
             assignedField = true;
-            data.set(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, 1F - data.requireValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET));
+            data.set(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, 1F - data.require(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET));
         }
-        if (data.assignsField(PROMPT_TEMPLATE.LOREBOOKS_BUDGET) && !data.assignsField(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)){
+        if (data.assigns(PROMPT_TEMPLATE.LOREBOOKS_BUDGET) && !data.assigns(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET)){
             assignedField = true;
-            data.set(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, 1F - data.requireValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET));
+            data.set(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, 1F - data.require(PROMPT_TEMPLATE.LOREBOOKS_BUDGET));
         }
 
         validateBudgetAssignation(
                 null,
-                data.requireValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET),
-                data.requireValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
+                data.require(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET),
+                data.require(PROMPT_TEMPLATE.LOREBOOKS_BUDGET)
         );
     }
 
     @Override
     protected void beforeUpdate(@NotNull EntityKey<PromptTemplateRecord> target, @NotNull EntityDataPayload<PromptTemplateRecord> data, long operationID) {
-        if (data.assignsField(PROMPT_TEMPLATE.MAX_TOKENS)) validateMaxTokens(target, data);
-        if (data.assignsField(PROMPT_TEMPLATE.CONNECTION_ID)) updateToMaxTokensConnection(data);
+        if (data.assigns(PROMPT_TEMPLATE.MAX_TOKENS)) validateMaxTokens(target, data);
+        if (data.assigns(PROMPT_TEMPLATE.CONNECTION_ID)) updateToMaxTokensConnection(data);
         validateBudgetAssignation(
                 target,
-                data.getValue(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET).orElse(null),
-                data.getValue(PROMPT_TEMPLATE.LOREBOOKS_BUDGET).orElse(null)
+                data.getAssignment(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET).orElse(null),
+                data.getAssignment(PROMPT_TEMPLATE.LOREBOOKS_BUDGET).orElse(null)
         );
 
         super.beforeUpdate(target, data, operationID);
@@ -85,7 +86,7 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
     private void updateToMaxTokensConnection(@NotNull EntityDataPayload<PromptTemplateRecord> data) {
         data.set(PROMPT_TEMPLATE.MAX_TOKENS,
                 llmService.getValueOf(LLM_CONNECTION.MAX_TOKENS,
-                        llmService.keyOf(data.requireValue(PROMPT_TEMPLATE.CONNECTION_ID))
+                        llmService.keyOf(data.require(PROMPT_TEMPLATE.CONNECTION_ID))
                 ).orElseThrow(() -> new UnexpectedException("Setting new connection ID with no maxTokens", Severity.USER))
         );
     }
@@ -97,7 +98,7 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
                 new NotInitialized("Modifying max tokens of template %s no connection assigned".formatted(target), Severity.USER)
         );
 
-        if (connection.getMaxTokens() < data.requireValue(PROMPT_TEMPLATE.MAX_TOKENS))
+        if (connection.getMaxTokens() < data.require(PROMPT_TEMPLATE.MAX_TOKENS))
             throw new InvalidValue("Tokens of template larger than LLMs connection max tokens");
     }
 
@@ -129,11 +130,11 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
         CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord> event =
                 (CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord>) rawEvent;
 
-        if (!event.updatedData().assignsField(LLM_CONNECTION.MAX_TOKENS)) return;
+        if (!event.updatedData().assigns(LLM_CONNECTION.MAX_TOKENS)) return;
 
         this.store.updateMaxTokens(
-                event.target().requireValue(LLM_CONNECTION.ID),
-                event.updatedData().requireValue(LLM_CONNECTION.MAX_TOKENS)
+                event.target().require(LLM_CONNECTION.ID),
+                event.updatedData().require(LLM_CONNECTION.MAX_TOKENS)
         );
     }
 }

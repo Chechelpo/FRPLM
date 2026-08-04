@@ -37,10 +37,10 @@ final class StartingLocationsStore extends EntityStore<StartingLocationsRecord>
 
     public @NotNull List<LocationsRecord> getStartingLocations(@NotNull EntityKey<CharactersRecord> key){
         log.debug("getStartingLocations() called with key: {}", key);
-        log.debug("key values: {}", key.getValues());
+        log.debug("key values: {}", key.assignments());
         log.debug("key condition: {}", key.getPkCondition());
 
-        Integer characterId = key.getValue(CHARACTERS.ID);
+        Integer characterId = key.require(CHARACTERS.ID);
 
         log.debug("Resolved characterId from key: {}", characterId);
 

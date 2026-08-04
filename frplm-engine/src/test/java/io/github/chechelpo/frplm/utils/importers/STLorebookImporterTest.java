@@ -44,8 +44,8 @@ class STLorebookImporterTest {
         List<EntryRecord> entries = entryTestContext.entryService.getMatching(EntityKey.of(ENTRY.LOREBOOK_ID, lorebook.getId()));
 
         for (NewEntryOrder order : entryOrders){
-            String expectedName = order.entryInfo().requireValue(ENTRY.NAME);
-            String expectedContent = order.entryInfo().requireValue(ENTRY.CONTENT);
+            String expectedName = order.entryInfo().require(ENTRY.NAME);
+            String expectedContent = order.entryInfo().require(ENTRY.CONTENT);
             Set<String> expectedKeywords = order.keywords();
             assertTrue(
                     entries.stream().anyMatch(record -> record.getName().equals(expectedName)),

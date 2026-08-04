@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.core.extras;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryController;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.world.core.WorldController;
@@ -39,7 +40,7 @@ class ImporterController {
             value = "/world",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<EntityController.EntityDTO> importWorld(@RequestBody JsonNode file) {
+    public ResponseEntity<EntityDTO> importWorld(@RequestBody JsonNode file) {
         return ResponseEntity.ok(
                 worldController.wrapEntity(
                         importerService.importWorld(file)
