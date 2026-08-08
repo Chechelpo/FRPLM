@@ -93,7 +93,7 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     @Override
     protected void afterSuccessfulDelete(EntityKey<RegionRecord> id, long operationID, @NonNull RegionRecord record) {
         boolean lorebookDeleted = lorebookService.delete(lorebookService.keyOf(record.getLorebookId()));
-        if (lorebookDeleted)
+        if (!lorebookDeleted)
             log.error("Could not delete associated lorebook when deleting \n {}", record);
 
         super.afterSuccessfulDelete(id, operationID, record);
