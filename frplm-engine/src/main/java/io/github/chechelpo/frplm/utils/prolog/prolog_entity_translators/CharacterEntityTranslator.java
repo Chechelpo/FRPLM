@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.utils.prolog.prolog_entity_translators;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.prolog.arguments.PrologArgumentType;
 import io.github.chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;

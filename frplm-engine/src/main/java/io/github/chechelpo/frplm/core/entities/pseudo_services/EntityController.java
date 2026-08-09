@@ -2,6 +2,8 @@ package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jooq.TableRecord;

@@ -1,6 +1,7 @@
 <script lang="ts">
 const WINDOW_PROMPT_BASE_Z_INDEX = 31_000;
 const WINDOW_PROMPT_LAYER_STEP = 10;
+const WINDOW_PROMPT_SIZE_STORAGE_PREFIX = "window-prompt:size:";
 
 let promptSequence = 0;
 const openPromptStack: number[] = [];
@@ -88,6 +89,11 @@ interface ResizeState {
   startHeight: number;
 }
 
+interface SavedWindowSize {
+  width: number;
+  height: number;
+}
+
 const props = withDefaults(
     defineProps<{
       title?: string;
@@ -163,6 +169,109 @@ const resizeCursor: Record<ResizeDirection, string> = {
   nw: "nwse-resize",
   se: "nwse-resize",
 };
+
+function getSizeStorageKey(): string | null {
+  const title = props.title?.trim();
+
+  return title
+      ? `${WINDOW_PROMPT_SIZE_STORAGE_PREFIX}${title}`
+      : null;
+}
+
+function saveWindowSize(): void {
+  const storageKey = getSizeStorageKey();
+  const dialog = dialogRef.value;
+
+  if (!storageKey || !dialog) {
+    return;
+  }
+
+  const rect = dialog.getBoundingClientRect();
+
+  try {
+    localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          width: rect.width,
+          height: rect.height,
+        } satisfies SavedWindowSize),
+    );
+  } catch {
+    // Storage can be unavailable or full. Resizing should still work.
+  }
+}
+
+function restoreWindowSize(): void {
+  const storageKey = getSizeStorageKey();
+
+  if (!storageKey) {
+    return;
+  }
+
+  try {
+    const savedValue = localStorage.getItem(storageKey);
+
+    if (!savedValue) {
+      return;
+    }
+
+    const savedSize = JSON.parse(savedValue) as Partial<SavedWindowSize>;
+
+    if (
+        typeof savedSize.width !== "number" ||
+        !Number.isFinite(savedSize.width) ||
+        typeof savedSize.height !== "number" ||
+        !Number.isFinite(savedSize.height)
+    ) {
+      return;
+    }
+
+    const {
+      width: viewportWidth,
+      height: viewportHeight,
+      margin,
+    } = getViewportBounds();
+
+    const maximumWidth = viewportWidth - margin * 2;
+    const maximumHeight = viewportHeight - margin * 2;
+
+    const width = clamp(
+        savedSize.width,
+        Math.min(props.minWidth, maximumWidth),
+        maximumWidth,
+    );
+
+    const height = clamp(
+        savedSize.height,
+        Math.min(props.minHeight, maximumHeight),
+        maximumHeight,
+    );
+
+    hasManualSize.value = true;
+    windowStyle.value = {
+      width: `${width}px`,
+      height: `${height}px`,
+      maxWidth: "none",
+      maxHeight: "none",
+    };
+  } catch {
+    // Ignore malformed data or unavailable storage.
+  }
+}
+
+function clearSavedWindowSize(): void {
+  const storageKey = getSizeStorageKey();
+
+  if (!storageKey) {
+    return;
+  }
+
+  try {
+    localStorage.removeItem(storageKey);
+  } catch {
+    // Storage can be unavailable. Reset should still work.
+  }
+}
 
 function close(): void {
   emit("close");
@@ -440,10 +549,13 @@ function stopResize(): void {
       stopResize,
       true,
   );
+
+  saveWindowSize();
 }
 
 function resetWindowSize(): void {
   stopResize();
+  clearSavedWindowSize();
 
   hasManualSize.value = false;
   windowStyle.value = {};
@@ -607,6 +719,7 @@ onMounted(async () => {
 
   registerPrompt(instanceId);
   lockBodyScroll();
+  restoreWindowSize();
 
   window.addEventListener(
       "keydown",

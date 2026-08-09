@@ -1,10 +1,9 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.jooq.generated.tables.Outlet;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import it.unimi.dsi.fastutil.ints.IntSet;

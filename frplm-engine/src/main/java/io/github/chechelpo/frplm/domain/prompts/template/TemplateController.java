@@ -1,8 +1,7 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import io.github.chechelpo.frplm.jooq.generated.tables.PromptTemplate;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -3,6 +3,7 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
+
 import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations;
 
 import org.jooq.Record2;

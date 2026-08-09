@@ -1,12 +1,11 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.context.annotation.Import;

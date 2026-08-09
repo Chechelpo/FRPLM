@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.keywords;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryKeywordsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;

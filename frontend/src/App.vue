@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import {
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
+
+import {
   RouterLink,
   RouterView,
   type RouteLocationRaw,
@@ -45,6 +53,56 @@ const navigationItems: NavigationItem[] = [
     to: "/config",
   },
 ];
+
+const isHeaderExpanded = ref(true);
+
+const headerElement = ref<HTMLElement | null>(null);
+const headerHeight = ref<number | null>(null);
+
+let headerResizeObserver: ResizeObserver | null = null;
+
+function updateHeaderHeight() {
+  if (!headerElement.value) {
+    return;
+  }
+
+  headerHeight.value =
+      headerElement.value.getBoundingClientRect().height;
+}
+
+async function observeHeader() {
+  await nextTick();
+
+  if (!headerElement.value) {
+    return;
+  }
+
+  updateHeaderHeight();
+
+  headerResizeObserver?.disconnect();
+
+  headerResizeObserver = new ResizeObserver(() => {
+    updateHeaderHeight();
+  });
+
+  headerResizeObserver.observe(headerElement.value);
+}
+
+onMounted(() => {
+  void observeHeader();
+});
+
+watch(isHeaderExpanded, (expanded) => {
+  if (expanded) {
+    void observeHeader();
+  } else {
+    headerResizeObserver?.disconnect();
+  }
+});
+
+onBeforeUnmount(() => {
+  headerResizeObserver?.disconnect();
+});
 </script>
 
 <template>
@@ -54,105 +112,160 @@ const navigationItems: NavigationItem[] = [
         aria-hidden="true"
     />
 
-    <header class="app-header">
-      <div class="app-header__inner">
-        <RouterLink
-            to="/"
-            class="app-brand"
-            aria-label="Open sessions"
-        >
-          <span
-              class="app-brand__mark"
-              aria-hidden="true"
+    <div
+        class="app-header-region"
+        :style="{
+        height: isHeaderExpanded
+          ? headerHeight === null
+            ? 'auto'
+            : `${headerHeight}px`
+          : '0px',
+      }"
+    >
+      <div class="app-header-clip">
+        <Transition name="app-header">
+          <header
+              v-if="isHeaderExpanded"
+              id="app-header"
+              ref="headerElement"
+              class="app-header"
+              :inert="!isHeaderExpanded"
+              :aria-hidden="
+              !isHeaderExpanded
+                ? 'true'
+                : undefined
+            "
           >
-            <svg viewBox="0 0 24 24">
-              <path d="M12 3 4 7v10l8 4 8-4V7Z" />
-              <path d="m4 7 8 4 8-4" />
-              <path d="M12 11v10" />
-            </svg>
-          </span>
-
-          <span class="app-brand__text">
-            <span class="app-brand__name">
-              Sessions
-            </span>
-
-            <span class="app-brand__description">
-              Narrative workspace
-            </span>
-          </span>
-        </RouterLink>
-
-        <nav
-            class="app-nav"
-            aria-label="Main navigation"
-        >
-          <RouterLink
-              v-for="item in navigationItems"
-              :key="item.label"
-              :to="item.to"
-              custom
-              v-slot="{
-              href,
-              navigate,
-              isActive,
-              isExactActive,
-            }"
-          >
-            <a
-                :href="href"
-                class="app-nav__link"
-                :class="{
-                'app-nav__link--active':
-                  item.exact
-                    ? isExactActive
-                    : isActive,
-              }"
-                :aria-label="item.label"
-                :aria-current="
-                (
-                  item.exact
-                    ? isExactActive
-                    : isActive
-                )
-                  ? 'page'
-                  : undefined
-              "
-                :title="item.label"
-                @click="navigate"
-            >
-              <span class="app-nav__icon">
-                <img
-                    v-if="item.icon"
-                    :src="item.icon"
-                    alt=""
-                />
-
-                <svg
-                    v-else-if="item.label === 'Settings'"
-                    viewBox="0 0 24 24"
+            <div class="app-header__inner">
+              <RouterLink
+                  to="/"
+                  class="app-brand"
+                  aria-label="Open sessions"
+              >
+                <span
+                    class="app-brand__mark"
                     aria-hidden="true"
                 >
-                  <path
-                      d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
-                  />
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 3 4 7v10l8 4 8-4V7Z" />
+                    <path d="m4 7 8 4 8-4" />
+                    <path d="M12 11v10" />
+                  </svg>
+                </span>
 
-                  <path
-                      d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20H9.74v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 5.08 15a1.7 1.7 0 0 0-1.55-1H3.4v-3h.13a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V4.7h3v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1h.13v3h-.13a1.7 1.7 0 0 0-1.55 1Z"
-                  />
-                </svg>
-              </span>
+                <span class="app-brand__text">
+                  <span class="app-brand__name">
+                    Simulith
+                  </span>
 
-              <span class="app-nav__label">
-                {{ item.label }}
-              </span>
-            </a>
-          </RouterLink>
+                  <span class="app-brand__description">
+                    World simulator
+                  </span>
+                </span>
+              </RouterLink>
 
-          <Support />
-        </nav>
+              <nav
+                  class="app-nav"
+                  aria-label="Main navigation"
+              >
+                <RouterLink
+                    v-for="item in navigationItems"
+                    :key="item.label"
+                    :to="item.to"
+                    custom
+                    v-slot="{
+                    href,
+                    navigate,
+                    isActive,
+                    isExactActive,
+                  }"
+                >
+                  <a
+                      :href="href"
+                      class="app-nav__link"
+                      :class="{
+                      'app-nav__link--active':
+                        item.exact
+                          ? isExactActive
+                          : isActive,
+                    }"
+                      :aria-label="item.label"
+                      :aria-current="
+                      (
+                        item.exact
+                          ? isExactActive
+                          : isActive
+                      )
+                        ? 'page'
+                        : undefined
+                    "
+                      :title="item.label"
+                      @click="navigate"
+                  >
+                    <span class="app-nav__icon">
+                      <img
+                          v-if="item.icon"
+                          :src="item.icon"
+                          alt=""
+                      />
+
+                      <svg
+                          v-else-if="item.label === 'Settings'"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                      >
+                        <path
+                            d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"
+                        />
+
+                        <path
+                            d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20H9.74v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 5.08 15a1.7 1.7 0 0 0-1.55-1H3.4v-3h.13a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V4.7h3v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1h.13v3h-.13a1.7 1.7 0 0 0-1.55 1Z"
+                        />
+                      </svg>
+                    </span>
+
+                    <span class="app-nav__label">
+                      {{ item.label }}
+                    </span>
+                  </a>
+                </RouterLink>
+
+                <Support />
+              </nav>
+            </div>
+          </header>
+        </Transition>
       </div>
-    </header>
+
+      <button
+          type="button"
+          class="app-header-toggle"
+          :class="{
+          'app-header-toggle--collapsed':
+            !isHeaderExpanded,
+        }"
+          :aria-expanded="isHeaderExpanded"
+          aria-controls="app-header"
+          :aria-label="
+          isHeaderExpanded
+            ? 'Collapse navigation'
+            : 'Expand navigation'
+        "
+          :title="
+          isHeaderExpanded
+            ? 'Collapse navigation'
+            : 'Expand navigation'
+        "
+          @click="isHeaderExpanded = !isHeaderExpanded"
+      >
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+        >
+          <path d="m7 14 5-5 5 5" />
+        </svg>
+      </button>
+    </div>
 
     <GlobalError />
 
@@ -174,14 +287,18 @@ const navigationItems: NavigationItem[] = [
 
   width: 100%;
   min-width: 20rem;
-  min-height: 100dvh;
 
   display: flex;
   flex-direction: column;
 
   color: rgb(var(--c-fg));
   font-family: var(--font-primary);
+
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* Background                                                                 */
@@ -208,17 +325,43 @@ const navigationItems: NavigationItem[] = [
   background-blend-mode: soft-light;
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* Header region                                                              */
+/* -------------------------------------------------------------------------- */
+
+.app-header-region {
+  position: relative;
+  z-index: var(--z-popover);
+
+  flex: 0 0 auto;
+
+  width: 100%;
+  min-height: 0;
+
+  transition:
+      height
+      160ms
+      var(--ease-standard);
+}
+
+/*
+ * The region itself cannot use overflow:hidden because the
+ * toggle needs to remain visible outside its bottom boundary.
+ */
+.app-header-clip {
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+}
+
+
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-popover);
-
-  flex: 0 0 auto;
-
   width: 100%;
   box-sizing: border-box;
 
@@ -256,6 +399,162 @@ const navigationItems: NavigationItem[] = [
 
   margin: 0 auto;
 }
+
+
+/* -------------------------------------------------------------------------- */
+/* Header animation                                                           */
+/* -------------------------------------------------------------------------- */
+
+.app-header-enter-active,
+.app-header-leave-active {
+  transition:
+      transform
+      160ms
+      var(--ease-standard),
+      opacity
+      120ms
+      var(--ease-standard);
+}
+
+.app-header-enter-from,
+.app-header-leave-to {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.app-header-leave-active {
+  pointer-events: none;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Header toggle                                                              */
+/* -------------------------------------------------------------------------- */
+
+.app-header-toggle {
+  position: absolute;
+
+  /*
+   * This is the important part:
+   *
+   * 100% means the button is always attached to the bottom
+   * edge of .app-header-region.
+   *
+   * As that region animates from headerHeight -> 0,
+   * the button travels with it automatically.
+   */
+  top: 100%;
+  left: 50%;
+
+  z-index: 2;
+
+  width: 2.25rem;
+  height: 1.4rem;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  color: rgb(var(--c-muted));
+
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-surface-raised) / 0.96),
+          rgb(var(--c-surface-2) / 0.88)
+      );
+
+  border:
+      1px solid
+      rgb(var(--c-border) / 0.42);
+
+  border-top-color:
+      rgb(var(--c-border) / 0.24);
+
+  border-radius:
+      0
+      0
+      var(--radius-md)
+      var(--radius-md);
+
+  box-shadow:
+      0 4px 10px
+      rgb(var(--c-shadow) / 0.12),
+      inset 0 1px 0
+      rgb(255 255 255 / 0.24);
+
+  backdrop-filter: blur(10px);
+
+  cursor: pointer;
+
+  /*
+   * Expanded:
+   * button slightly overlaps the header boundary.
+   */
+  transform:
+      translate(-50%, -1px);
+
+  transition:
+      color
+      var(--duration-fast)
+      var(--ease-standard),
+      background-color
+      var(--duration-fast)
+      var(--ease-standard),
+      transform
+      160ms
+      var(--ease-standard);
+}
+
+.app-header-toggle:hover {
+  color: rgb(var(--c-fg-strong));
+
+  background:
+      linear-gradient(
+          145deg,
+          rgb(var(--c-surface-raised)),
+          rgb(var(--c-surface-2) / 0.96)
+      );
+}
+
+.app-header-toggle:focus-visible {
+  outline:
+      var(--focus-ring-width)
+      solid
+      rgb(var(--focus-ring-color) / 0.3);
+
+  outline-offset: 2px;
+}
+
+.app-header-toggle svg {
+  width: 1rem;
+  height: 1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  transition:
+      transform
+      160ms
+      var(--ease-standard);
+}
+
+.app-header-toggle--collapsed {
+  /*
+   * Header boundary is now y = 0.
+   * The button sits directly beneath that boundary.
+   */
+  transform: translate(-50%, 0);
+}
+
+.app-header-toggle--collapsed svg {
+  transform: rotate(180deg);
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* Brand                                                                      */
@@ -348,6 +647,7 @@ const navigationItems: NavigationItem[] = [
 
   outline-offset: 3px;
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* Navigation                                                                 */
@@ -563,6 +863,7 @@ const navigationItems: NavigationItem[] = [
   white-space: nowrap;
 }
 
+
 /* -------------------------------------------------------------------------- */
 /* Content                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -576,6 +877,7 @@ const navigationItems: NavigationItem[] = [
   width: 100%;
   min-width: 0;
   min-height: 0;
+
   box-sizing: border-box;
 }
 
@@ -583,8 +885,10 @@ const navigationItems: NavigationItem[] = [
   width: 100%;
   min-width: 0;
   min-height: 100%;
+
   box-sizing: border-box;
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* Responsive                                                                 */
@@ -641,7 +945,17 @@ const navigationItems: NavigationItem[] = [
   }
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* Reduced motion                                                             */
+/* -------------------------------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
+  .app-header-region,
+  .app-header-enter-active,
+  .app-header-leave-active,
+  .app-header-toggle,
+  .app-header-toggle svg,
   .app-nav__link {
     transition: none;
   }

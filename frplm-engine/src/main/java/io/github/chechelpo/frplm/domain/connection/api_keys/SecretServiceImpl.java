@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.connection.api_keys;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;

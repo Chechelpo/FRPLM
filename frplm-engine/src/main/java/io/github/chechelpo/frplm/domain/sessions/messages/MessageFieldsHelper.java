@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;

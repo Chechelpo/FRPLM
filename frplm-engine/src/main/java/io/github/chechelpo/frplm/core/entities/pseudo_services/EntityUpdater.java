@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import org.jooq.TableRecord;

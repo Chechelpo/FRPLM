@@ -1,13 +1,13 @@
 package io.github.chechelpo.frplm.domain.connection.llm;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.integrations.ModelResponses;

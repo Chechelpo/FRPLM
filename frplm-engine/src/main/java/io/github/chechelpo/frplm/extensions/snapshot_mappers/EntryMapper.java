@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.extensions.snapshot_mappers;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.extensions.api.standalone.EntrySnapshot;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.EntryImpl;

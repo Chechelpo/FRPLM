@@ -1,84 +1,50 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.ABSControllerAwareHelper;
+import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
+import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.core.entities.fields.CommonFields;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.NumberConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
-import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.fields.kinds.FieldType;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 
 @Component
-final class CharacterFieldsHelper extends ABSControllerAwareHelper<
-        CharactersRecord,
-        CharacterService,
-        CharacterController
-        > {
+final class CharacterFieldsHelper extends EntityControllerFieldValidator<CharactersRecord> {
+    CharacterFieldsHelper() {
+        super(EntityConfigs.Types.CHARACTER);
+    }
 
-    CharacterFieldsHelper(
-            CharacterService service,
-            CharacterController controller
-    ) {
-        super(service, controller);
-        register_field(
-                "id",
-                Characters.CHARACTERS.ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .key()
-                                .readOnly()
-                                .build()
-                        )
-                        .build()
-        );
-        register_field(
-                CommonFields.NAME.getFieldName(),
-                Characters.CHARACTERS.NAME,
-                FieldInfo.stringField()
-                        .setConstraints(
-                                new StringConstraint.StringConstraintsBuilder()
-                                .setMaxLength(255).build()
-                        ).build()
-        );
+    @Contract(" -> new")
+    @Override
+    protected @NonNull @Unmodifiable List<FieldInfo<CharactersRecord, ?>> getCustom() {
+        return List.of(
+                FieldInfo.builder(CHARACTERS.ID)
+                        .key()
+                        .build(),
 
-        register_field(
-                "description",
-                CHARACTERS.DESCRIPTION,
-                FieldInfo.stringField()
+                FieldInfo.builder(Characters.CHARACTERS.LOREBOOK_ID)
+                        .readOnly()
                         .build()
         );
+    }
 
-        register_field(
-                "is_archetype",
-                CHARACTERS.IS_ARCHETYPE,
-                FieldInfo.booleanField()
-                        .build()
-        );
-        register_field(
-                "firstMessage",
-                CHARACTERS.WELCOME_MESSAGE,
-                FieldInfo.stringField()
-                        .build()
-        );
-        register_field(
-                "can_be_user",
-                CHARACTERS.CAN_BE_USER,
-                FieldInfo.booleanField()
-                        .build()
-        );
-
-        register_field(
-                "lorebook_id",
-                Characters.CHARACTERS.LOREBOOK_ID,
-                FieldInfo.numberField(FieldType.INTEGER)
-                        .setConstraints(NumberConstraint.builder(FieldType.INTEGER)
-                                .readOnly()
-                                .build()
-                        ).build()
+    @Contract(" -> new")
+    @Override
+    protected @NonNull @Unmodifiable List<DTOField<CharactersRecord,?>> getDTOStructure() {
+        return List.of(
+                DTOField.of(CHARACTERS.ID, "id"),
+                DTOField.of(CHARACTERS.NAME, "name"),
+                DTOField.of(CHARACTERS.DESCRIPTION, "description"),
+                DTOField.of(CHARACTERS.IS_ARCHETYPE, "is_archetype"),
+                DTOField.of(CHARACTERS.WELCOME_MESSAGE, "welcome_message"),
+                DTOField.of(CHARACTERS.CAN_BE_USER, "can_be_user"),
+                DTOField.of(CHARACTERS.LOREBOOK_ID, "lorebook_id")
         );
     }
 }

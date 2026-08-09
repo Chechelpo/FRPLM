@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
 import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.character.core.CharacterCoreTestContext;
 import io.github.chechelpo.frplm.domain.world.core.WorldTestContext;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;

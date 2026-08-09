@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
@@ -14,7 +14,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 import static org.junit.jupiter.api.Assertions.*;

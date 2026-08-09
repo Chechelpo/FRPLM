@@ -3,6 +3,7 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
+
 import io.github.chechelpo.frplm.jooq.generated.tables.PrologPredicate;
 
 import org.jooq.Record1;

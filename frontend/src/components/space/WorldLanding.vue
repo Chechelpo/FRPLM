@@ -19,7 +19,6 @@ import {
   fetch_all,
 
 } from "@/core/ABSEntity";
-import { API_BASE } from "@/config";
 
 import WorldEdit from "@/components/space/WorldEdit.vue";
 import SearchBar from "@/components/utils/SearchBar.vue";
@@ -304,20 +303,14 @@ async function onImportFileSelected(
   operationError.value = null;
 
   try {
-    const text = await file.text();
-
-    // Validate the selected file before sending it.
-    JSON.parse(text);
-
     const response = await fetchApi(
-        `api/import/world`,
+        "api/import/world",
         {
           method: "POST",
           headers: {
-            "Content-Type":
-                "application/json",
+            "Content-Type": "application/zip",
           },
-          body: text,
+          body: file,
         },
     );
 
@@ -349,13 +342,11 @@ async function onImportFileSelected(
     );
 
     operationError.value =
-        error instanceof SyntaxError
-            ? "The selected file is not valid JSON."
-            : "The world could not be imported.";
+        "The world could not be imported.";
   } finally {
     importing.value = false;
 
-    // Permit selecting the same file again.
+    // Allow the same ZIP to be selected again.
     input.value = "";
   }
 }
@@ -461,160 +452,31 @@ onMounted(() => {
         ref="importInput"
         type="file"
         class="world-manager__file-input"
-        accept=".json,application/json"
+        accept=".zip,application/zip"
         @change="onImportFileSelected"
     />
 
     <!-- World editor -->
     <template v-if="editingWorld">
-      <header
-          class="
-          edit-box
-          edit-box--primary
-          edit-box--compact
-          world-manager__editor-header
-        "
-      >
-        <div class="edit-box__header">
-          <div
-              class="edit-box__header-icon"
-              aria-hidden="true"
-          >
-            <svg viewBox="0 0 24 24">
-              <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-              />
-
-              <path
-                  d="M3 12h18"
-              />
-
-              <path
-                  d="M12 3a15 15 0 0 1 0 18"
-              />
-
-              <path
-                  d="M12 3a15 15 0 0 0 0 18"
-              />
-            </svg>
-          </div>
-
-          <div class="edit-box__header-main">
-            <span class="edit-box__eyebrow">
-              World editor
-            </span>
-
-            <div class="edit-box__title-row">
-              <h1 class="edit-box__title">
-                {{ getWorldName(editingWorld) }}
-              </h1>
-
-              <span
-                  class="
-                  edit-box__badge
-                  edit-box__badge--neutral
-                "
-              >
-                ID {{ getWorldId(editingWorld) }}
-              </span>
-            </div>
-
-            <p class="edit-box__description">
-              Edit regions, locations, lore, and
-              world structure.
-            </p>
-          </div>
-
-          <div class="edit-box__actions">
-            <button
-                type="button"
-                class="edit-box__action"
-                @click="closeWorldEditor"
-            >
-              <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-
-              Worlds
-            </button>
-
-            <button
-                type="button"
-                class="
-                edit-box__action
-                edit-box__action--danger
-              "
-                :disabled="
-                isDeleting(editingWorld)
-              "
-                @click="
-                deleteWorld(editingWorld)
-              "
-            >
-              <span
-                  v-if="
-                  isDeleting(editingWorld)
-                "
-                  class="edit-box__spinner"
-                  aria-hidden="true"
-              />
-
-              <svg
-                  v-else
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-              >
-                <path d="M3 6h18" />
-                <path d="M8 6V4h8v2" />
-                <path
-                    d="m19 6-1 14H6L5 6"
-                />
-                <path d="M10 11v5" />
-                <path d="M14 11v5" />
-              </svg>
-
-              {{
-                isDeleting(editingWorld)
-                    ? "Deleting..."
-                    : "Delete"
-              }}
-            </button>
-          </div>
-        </div>
-      </header>
-
       <div
           v-if="operationError"
-          class="
-          edit-box__state
-          edit-box__state--error
-          world-manager__operation-error
-        "
+          class="world-manager__editor-error"
           role="alert"
       >
-        <div class="edit-box__state-content">
-          <strong class="edit-box__state-title">
-            World operation failed
-          </strong>
+        <span>{{ operationError }}</span>
 
-          <p class="edit-box__state-description">
-            {{ operationError }}
-          </p>
-        </div>
+        <button
+            type="button"
+            @click="operationError = null"
+        >
+          Dismiss
+        </button>
       </div>
 
       <div class="world-manager__editor">
         <WorldEdit
             :model-value="editingWorld"
-            @delete="
-            deleteWorld(editingWorld)
-          "
-            @stop-editing="closeWorldEditor"
+            @back="closeWorldEditor"
         />
       </div>
     </template>
@@ -1602,12 +1464,142 @@ svg {
 /* Editor                                                                     */
 /* -------------------------------------------------------------------------- */
 
-.world-manager__editor {
+.world-manager--editing {
+  position: relative;
+
   width: 100%;
+  max-width: none;
+  height: 100%;
   min-width: 0;
-  box-sizing: border-box;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+  gap: 0;
+
+  overflow: hidden;
 }
 
+.world-manager__editor {
+  position: absolute;
+  inset: 0;
+
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+}
+
+.world-manager__back {
+  position: absolute;
+  z-index: 50;
+  top: var(--space-3);
+  left: var(--space-3);
+
+  display: inline-grid;
+  place-items: center;
+
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+
+  color: rgb(var(--c-fg));
+
+  background:
+      rgb(var(--c-surface-raised) / 0.94);
+
+  border:
+      1px solid
+      rgb(var(--c-border));
+
+  border-radius: var(--radius-sm);
+
+  box-shadow:
+      0 8px 24px
+      rgb(var(--c-shadow) / 0.18);
+
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.world-manager__back:hover {
+  color: rgb(var(--c-primary-strong));
+  background: rgb(var(--c-surface-hover));
+  border-color: rgb(var(--c-primary) / 0.4);
+}
+
+.world-manager__back:focus-visible {
+  outline:
+      var(--focus-ring-width)
+      solid
+      rgb(var(--focus-ring-color) / 0.35);
+
+  outline-offset: 2px;
+}
+
+.world-manager__back svg {
+  width: 1.1rem;
+  height: 1.1rem;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.world-manager__editor-error {
+  position: absolute;
+  z-index: 60;
+  right: var(--space-3);
+  bottom: var(--space-3);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  max-width:
+      min(
+          28rem,
+          calc(100% - var(--space-6))
+      );
+
+  padding: var(--space-3);
+
+  color: rgb(var(--c-danger-strong));
+  background: rgb(var(--c-danger-soft));
+
+  border:
+      1px solid
+      rgb(var(--c-danger) / 0.5);
+
+  border-radius: var(--radius-md);
+
+  box-shadow:
+      0 8px 24px
+      rgb(var(--c-shadow) / 0.18);
+}
+
+.world-manager__editor-error button {
+  flex: 0 0 auto;
+
+  padding:
+      var(--space-1)
+      var(--space-2);
+
+  color: inherit;
+  background: transparent;
+
+  border:
+      1px solid
+      currentColor;
+
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+}
 /* -------------------------------------------------------------------------- */
 /* Responsive                                                                 */
 /* -------------------------------------------------------------------------- */

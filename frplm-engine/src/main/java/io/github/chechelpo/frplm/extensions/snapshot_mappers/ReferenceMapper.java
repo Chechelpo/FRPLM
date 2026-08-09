@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.extensions.snapshot_mappers;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.extensions.api.standalone.Snapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.StableReference;
@@ -12,7 +12,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.TableRecord;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

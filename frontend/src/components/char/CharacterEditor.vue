@@ -11,7 +11,6 @@ import LongTextBox from "@/components/primitive-editors/LongTextBox.vue";
 import LorebookEditor from "@/components/lorebooks/LorebookEditor.vue";
 import FieldEditorWrapper from "@/components/utils/FieldEditorWrapper.vue";
 import Expandable from "@/components/utils/panels/Expandable.vue";
-import StartingLocation from "@/components/char/StartingLocation.vue";
 
 // -----------------------------------------------------------------------------
 // Model and properties
@@ -23,12 +22,16 @@ const model = defineModel<Character>({
 
 const props = withDefaults(
     defineProps<{
-      editStartingLocations?: boolean;
+      showBackButton?: boolean;
     }>(),
     {
-      editStartingLocations: true,
+      showBackButton: false,
     },
 );
+
+const emit = defineEmits<{
+  back: [];
+}>();
 
 // -----------------------------------------------------------------------------
 // Character data
@@ -151,6 +154,16 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
 
 <template>
   <article class="edit-box edit-box--accent character-editor">
+    <button
+        v-if="props.showBackButton"
+        type="button"
+        class="character-editor__back"
+        @click="emit('back')"
+    >
+      <span aria-hidden="true">\u2190</span>
+      Back to location
+    </button>
+
     <!-- Character header -->
     <header class="edit-box__header">
       <div class="edit-box__header-icon">
@@ -191,7 +204,7 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
 
         <p class="edit-box__description">
           Configure the character identity, description, player availability,
-          opening message, embedded lore, and possible starting locations.
+          opening message, and embedded lore.
         </p>
       </div>
     </header>
@@ -342,24 +355,6 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
         </Expandable>
       </section>
 
-      <!-- Starting locations -->
-      <section
-          v-if="props.editStartingLocations"
-          class="edit-box__section character-editor__expandable-section"
-      >
-        <Expandable
-            title="Starting locations"
-            info="Locations where this character may spawn when a session begins"
-            :initially-open="false"
-        >
-          <div class="character-editor__expanded-content">
-            <StartingLocation
-                :key="model.get('id')"
-                v-model:model-value="model"
-            />
-          </div>
-        </Expandable>
-      </section>
     </div>
   </article>
 </template>
@@ -368,6 +363,27 @@ async function handleRemoveTag(tag: Tag): Promise<void> {
 .character-editor {
   width: 100%;
   min-width: 0;
+}
+
+.character-editor__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgb(var(--c-border));
+  border-radius: var(--radius-md);
+  background: rgb(var(--c-surface-raised));
+  color: rgb(var(--c-fg));
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.character-editor__back:hover {
+  border-color: rgb(var(--c-accent));
+  color: rgb(var(--c-fg-strong));
 }
 
 .character-editor__body {

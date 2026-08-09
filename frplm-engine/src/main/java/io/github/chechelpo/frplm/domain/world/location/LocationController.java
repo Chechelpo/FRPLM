@@ -1,8 +1,11 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.*;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
-import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -10,7 +13,6 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;

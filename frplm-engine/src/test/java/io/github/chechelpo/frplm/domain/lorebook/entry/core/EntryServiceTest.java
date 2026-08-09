@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import io.github.chechelpo.frplm.domain.lorebook.entry.ActivationStrategy;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
@@ -13,7 +13,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.test_utils.TestText;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import io.github.chechelpo.frplm.utils.orders.NewEntryOrder;
 import io.github.chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -223,9 +223,9 @@ class EntryServiceTest {
 
         for (NewEntryOrder order : newEntriesOrders) {
             Optional<EntryRecord> thisOrderRecord = createdRecords.stream()
-                    .filter(record -> record.getName().equals(order.entryInfo().require(ENTRY.NAME)))
+                    .filter(record -> record.getName().equals(order.payload().require(ENTRY.NAME)))
                     .findFirst();
-            assertTrue(thisOrderRecord.isPresent(), "Couldn't find imported entry with name " + order.entryInfo().require(ENTRY.NAME));
+            assertTrue(thisOrderRecord.isPresent(), "Couldn't find imported entry with name " + order.payload().require(ENTRY.NAME));
 
             Set<String> keywordsOfThisEntry = Set.of(order.keywords().toArray(String[]::new));
             Set<String> actualKeywordsOfThisEntry = keywords.keywordsOfEntry(thisOrderRecord.get().getLorebookId(), thisOrderRecord.get().getEntryId());

@@ -1,13 +1,13 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;

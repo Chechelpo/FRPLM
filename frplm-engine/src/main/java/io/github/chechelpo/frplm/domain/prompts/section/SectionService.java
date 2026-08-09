@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.prompts.section;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
@@ -8,8 +8,8 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidKey;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptSection;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;

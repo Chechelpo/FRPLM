@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.world.edge;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;

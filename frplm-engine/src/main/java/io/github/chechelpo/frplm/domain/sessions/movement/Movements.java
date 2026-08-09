@@ -1,8 +1,8 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import ch.qos.logback.classic.Logger;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;

@@ -1,14 +1,11 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import io.github.chechelpo.frplm.test_utils.TestText;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;

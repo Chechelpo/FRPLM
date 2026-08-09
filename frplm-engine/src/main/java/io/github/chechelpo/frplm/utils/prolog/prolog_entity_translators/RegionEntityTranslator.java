@@ -1,17 +1,15 @@
 package io.github.chechelpo.frplm.utils.prolog.prolog_entity_translators;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.prolog.arguments.PrologArgumentType;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import jakarta.annotation.PostConstruct;
-import org.jooq.Result;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -39,7 +37,7 @@ public class RegionEntityTranslator implements PrologEntityTranslator {
 
     @Override
     public Optional<String> getIdOfRepresentation(String argumentName) {
-        QualifiedNames.TwoParts parts = QualifiedNames.splitTwo(argumentName);
+        io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.TwoParts parts = io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.splitTwo(argumentName);
         WorldsRecord world = worldService.getOneMatching(
                 EntityDataPayload.of(WORLDS.NAME, parts.first())
         ).resolve();
@@ -61,7 +59,7 @@ public class RegionEntityTranslator implements PrologEntityTranslator {
                 .set(REGION.WORLD_ID, reference.worldId())
                 .set(REGION.ID, reference.regionId())
                 .build()
-        ).map(record -> QualifiedNames.qualify(
+        ).map(record -> io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.qualify(
                         worldService.find(EntityKey.of(WORLDS.ID, record.getWorldId())).orElseThrow(Severity.SYSTEM).getName(),
                         record.getName()
                 )

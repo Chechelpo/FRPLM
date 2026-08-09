@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.core.engine;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookController;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryController;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageController;

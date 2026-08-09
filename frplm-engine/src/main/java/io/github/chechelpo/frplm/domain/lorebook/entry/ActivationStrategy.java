@@ -16,8 +16,8 @@ public enum ActivationStrategy {
     }
 
     @Contract(value = " -> new", pure = true)
-    public static int @NotNull [] stableIDs(){
-        return new int[]{CONSTANT.stable_id, COMMON.stable_id, EMBEDDING.stable_id};
+    public static Short @NotNull [] stableIDs(){
+        return new Short[]{CONSTANT.stable_id, COMMON.stable_id, EMBEDDING.stable_id};
     }
 
     @Contract(pure = true)

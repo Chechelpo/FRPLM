@@ -1,10 +1,10 @@
 package io.github.chechelpo.frplm.utils.importers;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import io.github.chechelpo.frplm.utils.orders.NewEntryOrder;
 import io.github.chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,8 @@ class STLorebookImporterTest {
         List<EntryRecord> entries = entryTestContext.entryService.getMatching(EntityKey.of(ENTRY.LOREBOOK_ID, lorebook.getId()));
 
         for (NewEntryOrder order : entryOrders){
-            String expectedName = order.entryInfo().require(ENTRY.NAME);
-            String expectedContent = order.entryInfo().require(ENTRY.CONTENT);
+            String expectedName = order.payload().require(ENTRY.NAME);
+            String expectedContent = order.payload().require(ENTRY.CONTENT);
             Set<String> expectedKeywords = order.keywords();
             assertTrue(
                     entries.stream().anyMatch(record -> record.getName().equals(expectedName)),

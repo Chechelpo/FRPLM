@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.events.crud;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jooq.TableRecord;
 

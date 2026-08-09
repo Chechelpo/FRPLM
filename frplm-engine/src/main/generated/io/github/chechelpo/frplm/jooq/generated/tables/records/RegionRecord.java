@@ -103,31 +103,143 @@ public class RegionRecord extends UpdatableRecordImpl<RegionRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.REGION.LOCKED</code>.
+     */
+    public void setLocked(Boolean value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.LOCKED</code>.
+     */
+    public Boolean getLocked() {
+        return (Boolean) get(6);
+    }
+
+    /**
      * Setter for <code>PUBLIC.REGION.X</code>.
      */
-    public void setX(Integer value) {
-        set(6, value);
+    public void setX(Double value) {
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.REGION.X</code>.
      */
-    public Integer getX() {
-        return (Integer) get(6);
+    public Double getX() {
+        return (Double) get(7);
     }
 
     /**
      * Setter for <code>PUBLIC.REGION.Y</code>.
      */
-    public void setY(Integer value) {
-        set(7, value);
+    public void setY(Double value) {
+        set(8, value);
     }
 
     /**
      * Getter for <code>PUBLIC.REGION.Y</code>.
      */
-    public Integer getY() {
-        return (Integer) get(7);
+    public Double getY() {
+        return (Double) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.WIDTH</code>.
+     */
+    public void setWidth(Double value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.WIDTH</code>.
+     */
+    public Double getWidth() {
+        return (Double) get(9);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.HEIGHT</code>.
+     */
+    public void setHeight(Double value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.HEIGHT</code>.
+     */
+    public Double getHeight() {
+        return (Double) get(10);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.BACKGROUND_OPACITY</code>.
+     */
+    public void setBackgroundOpacity(Double value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.BACKGROUND_OPACITY</code>.
+     */
+    public Double getBackgroundOpacity() {
+        return (Double) get(11);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.BACKGROUND_VISIBLE</code>.
+     */
+    public void setBackgroundVisible(Boolean value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.BACKGROUND_VISIBLE</code>.
+     */
+    public Boolean getBackgroundVisible() {
+        return (Boolean) get(12);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.BACKGROUND_ASPECT_LOCKED</code>.
+     */
+    public void setBackgroundAspectLocked(Boolean value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.BACKGROUND_ASPECT_LOCKED</code>.
+     */
+    public Boolean getBackgroundAspectLocked() {
+        return (Boolean) get(13);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.BACKGROUND_FIT</code>.
+     */
+    public void setBackgroundFit(String value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.BACKGROUND_FIT</code>.
+     */
+    public String getBackgroundFit() {
+        return (String) get(14);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.REGION.COLLAPSED</code>.
+     */
+    public void setCollapsed(Boolean value) {
+        set(15, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.REGION.COLLAPSED</code>.
+     */
+    public Boolean getCollapsed() {
+        return (Boolean) get(15);
     }
 
     // -------------------------------------------------------------------------
@@ -153,7 +265,7 @@ public class RegionRecord extends UpdatableRecordImpl<RegionRecord> {
     /**
      * Create a detached, initialised RegionRecord
      */
-    public RegionRecord(Integer worldId, Integer id, Integer parentRegionId, String name, String description, Integer lorebookId, Integer x, Integer y) {
+    public RegionRecord(Integer worldId, Integer id, Integer parentRegionId, String name, String description, Integer lorebookId, Boolean locked, Double x, Double y, Double width, Double height, Double backgroundOpacity, Boolean backgroundVisible, Boolean backgroundAspectLocked, String backgroundFit, Boolean collapsed) {
         super(Region.REGION);
 
         setWorldId(worldId);
@@ -162,8 +274,16 @@ public class RegionRecord extends UpdatableRecordImpl<RegionRecord> {
         setName(name);
         setDescription(description);
         setLorebookId(lorebookId);
+        setLocked(locked);
         setX(x);
         setY(y);
+        setWidth(width);
+        setHeight(height);
+        setBackgroundOpacity(backgroundOpacity);
+        setBackgroundVisible(backgroundVisible);
+        setBackgroundAspectLocked(backgroundAspectLocked);
+        setBackgroundFit(backgroundFit);
+        setCollapsed(collapsed);
         resetChangedOnNotNull();
     }
 }

@@ -1,8 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.keywords;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
-import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;

@@ -7,7 +7,6 @@ package io.github.chechelpo.frplm.jooq.generated;
 import java.util.Arrays;
 import java.util.List;
 
-import io.github.chechelpo.frplm.jooq.generated.Public;
 import org.jooq.Constants;
 import org.jooq.Schema;
 import org.jooq.impl.CatalogImpl;
@@ -29,7 +28,7 @@ public class DefaultCatalog extends CatalogImpl {
     /**
      * The schema <code>PUBLIC</code>.
      */
-    public final io.github.chechelpo.frplm.jooq.generated.Public PUBLIC = io.github.chechelpo.frplm.jooq.generated.Public.PUBLIC;
+    public final Public PUBLIC = Public.PUBLIC;
 
     /**
      * No further instances allowed

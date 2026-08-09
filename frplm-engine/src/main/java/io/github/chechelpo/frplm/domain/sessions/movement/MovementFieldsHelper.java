@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.movement;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
 import org.springframework.stereotype.Component;
 

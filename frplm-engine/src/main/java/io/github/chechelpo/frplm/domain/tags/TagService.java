@@ -1,9 +1,9 @@
 package io.github.chechelpo.frplm.domain.tags;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharacterTagsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TagsRecord;

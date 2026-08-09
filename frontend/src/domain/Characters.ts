@@ -156,6 +156,27 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
         this.starting_locations.push(loc)
     }
 
+    public async unmarkStartingAt(loc: Location): Promise<void> {
+        const startingLocations = this.starting_locations ?? await getStartingLocations(this.key);
+        this.starting_locations = startingLocations;
+
+        const deleted = await deleteEntity<StartingLocationKeys>(
+            {
+                worldID: loc.get('worldID'),
+                locationID: loc.get('id'),
+                characterID: this.get('id'),
+            },
+            EntityTypes.STARTING_LOCATIONS,
+        );
+
+        if (!deleted)
+            throw new Error(`Could not remove starting location ${loc} from character ${this}`);
+
+        this.starting_locations = startingLocations.filter(
+            startingLocation => !startingLocation.equals(loc),
+        );
+    }
+
     public async getStartingLocation(loc:Location):Promise<StartingLocation>{
         return await fetchOne<StartingLocationKeys,StartingLocationData,StartingLocation>(
             {

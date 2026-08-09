@@ -4,7 +4,6 @@
 package io.github.chechelpo.frplm.jooq.generated;
 
 
-import io.github.chechelpo.frplm.jooq.generated.DefaultCatalog;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags;

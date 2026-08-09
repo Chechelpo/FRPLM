@@ -5,6 +5,7 @@ package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
 
 import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags;
+
 import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 

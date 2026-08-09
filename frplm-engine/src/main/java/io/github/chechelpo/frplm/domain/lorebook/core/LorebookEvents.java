@@ -2,8 +2,8 @@ package io.github.chechelpo.frplm.domain.lorebook.core;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityUpdater;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;

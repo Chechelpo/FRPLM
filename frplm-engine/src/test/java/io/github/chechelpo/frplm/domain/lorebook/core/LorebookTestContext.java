@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;

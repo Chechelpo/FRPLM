@@ -2,6 +2,10 @@ package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.FieldActionResult;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.events.crud.CRUDDraftEvent;
@@ -24,7 +28,7 @@ import java.util.*;
 public abstract class EntityService<
         R extends TableRecord<R>,
         Store extends EntityStore<R>
-        > implements EntityReader<R>, EntityUpdater<R> {
+        > implements EntityReader<R>, EntityUpdater<R>, EntityCreator<R> {
     private final static EnumSet<EntityConfigs.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final EventBus eventBus;
 
@@ -50,6 +54,7 @@ public abstract class EntityService<
         return this.entityType;
     }
 
+    @Override
     public Table<R> getTable(){
         return fieldValidator.getTable();
     }
@@ -69,6 +74,10 @@ public abstract class EntityService<
         return ValidationResult.success();
     }
 
+    @Override
+    public Set<TableField<R, ?>> ignoreFieldsOnCreationOrder() {
+        return Set.of();
+    }
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // CREATE
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,11 +1,9 @@
 package io.github.chechelpo.frplm.domain.lorebook.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.StandardOutlet;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
-import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import io.github.chechelpo.frplm.core.entities.fields.CommonFields;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.StringConstraint;
 import org.springframework.stereotype.Component;

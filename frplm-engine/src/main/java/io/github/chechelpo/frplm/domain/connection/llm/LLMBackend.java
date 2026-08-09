@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.connection.llm;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.utils.stable_records.StableRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;

@@ -3,6 +3,7 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
+
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
 
 import org.jooq.Record2;
@@ -102,31 +103,59 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.LOCATIONS.LOCKED</code>.
+     */
+    public void setLocked(Boolean value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.LOCATIONS.LOCKED</code>.
+     */
+    public Boolean getLocked() {
+        return (Boolean) get(6);
+    }
+
+    /**
      * Setter for <code>PUBLIC.LOCATIONS.X</code>.
      */
-    public void setX(Integer value) {
-        set(6, value);
+    public void setX(Double value) {
+        set(7, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOCATIONS.X</code>.
      */
-    public Integer getX() {
-        return (Integer) get(6);
+    public Double getX() {
+        return (Double) get(7);
     }
 
     /**
      * Setter for <code>PUBLIC.LOCATIONS.Y</code>.
      */
-    public void setY(Integer value) {
-        set(7, value);
+    public void setY(Double value) {
+        set(8, value);
     }
 
     /**
      * Getter for <code>PUBLIC.LOCATIONS.Y</code>.
      */
-    public Integer getY() {
-        return (Integer) get(7);
+    public Double getY() {
+        return (Double) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.LOCATIONS.RADIUS</code>.
+     */
+    public void setRadius(Double value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.LOCATIONS.RADIUS</code>.
+     */
+    public Double getRadius() {
+        return (Double) get(9);
     }
 
     // -------------------------------------------------------------------------
@@ -152,7 +181,7 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
     /**
      * Create a detached, initialised LocationsRecord
      */
-    public LocationsRecord(Integer id, Integer worldId, Integer regionId, String name, String description, Integer lorebookId, Integer x, Integer y) {
+    public LocationsRecord(Integer id, Integer worldId, Integer regionId, String name, String description, Integer lorebookId, Boolean locked, Double x, Double y, Double radius) {
         super(Locations.LOCATIONS);
 
         setId(id);
@@ -161,8 +190,10 @@ public class LocationsRecord extends UpdatableRecordImpl<LocationsRecord> {
         setName(name);
         setDescription(description);
         setLorebookId(lorebookId);
+        setLocked(locked);
         setX(x);
         setY(y);
+        setRadius(radius);
         resetChangedOnNotNull();
     }
 }

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.world.edge;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;

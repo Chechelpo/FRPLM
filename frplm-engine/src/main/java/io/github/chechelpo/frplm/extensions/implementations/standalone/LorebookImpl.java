@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.extensions.api.standalone.EntrySnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;

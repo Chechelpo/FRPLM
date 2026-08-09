@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.prompts.template;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;

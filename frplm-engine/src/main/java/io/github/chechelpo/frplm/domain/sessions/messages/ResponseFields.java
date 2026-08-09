@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityFieldsValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityFieldsValidator;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponsesRecord;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +40,6 @@ final class ResponseFields
                         .build(),
 
                 FieldInfo.builder(RESPONSES.ADVANCES_TIME_BY)
-                        .requireOnCreate()
                         .setDefaultValue(0)
                         .build(),
 

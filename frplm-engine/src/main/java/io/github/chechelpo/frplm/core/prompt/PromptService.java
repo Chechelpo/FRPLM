@@ -1,21 +1,18 @@
 package io.github.chechelpo.frplm.core.prompt;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.prompt.building.PromptBudgetManager;
 import io.github.chechelpo.frplm.core.prompt.building.PromptOrchestrator;
 import io.github.chechelpo.frplm.core.prompt.building.PromptResult;
 import io.github.chechelpo.frplm.domain.lorebook.LorebookContext;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.extensions.ExtensionService;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionContext;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.utils.tokenizers.TokenizerService;
-import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
-import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.api.session.SessionPrompt;
 import io.github.chechelpo.frplm.extensions.api.standalone.ConnectionSnapshot;
 import org.jspecify.annotations.NonNull;

@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.connection.api_keys;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityStore;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.encryption.EncryptedSecret;

@@ -2,13 +2,11 @@ package io.github.chechelpo.frplm.domain.character.starting_locations;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.IntegerConstraint;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;
-import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jooq.TableField;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 

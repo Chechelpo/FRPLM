@@ -1,10 +1,8 @@
 package io.github.chechelpo.frplm.core.prompt;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.DTOMapper;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDTO;
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.core.prompt.building.PromptResult;
-import io.github.chechelpo.frplm.domain.lorebook.core.LorebookController;
-import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryController;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.LorebookImpl;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;

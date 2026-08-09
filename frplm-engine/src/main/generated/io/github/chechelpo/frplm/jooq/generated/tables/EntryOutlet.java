@@ -3,8 +3,10 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables;
 
+
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
+import io.github.chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryOutletRecord;
 
 import java.util.Arrays;
@@ -140,14 +142,14 @@ public class EntryOutlet extends TableImpl<EntryOutletRecord> {
         return Arrays.asList(Keys.CONSTRAINT_60);
     }
 
-    private transient Entry.EntryPath _entry;
+    private transient EntryPath _entry;
 
     /**
      * Get the implicit join path to the <code>PUBLIC.ENTRY</code> table.
      */
-    public Entry.EntryPath entry() {
+    public EntryPath entry() {
         if (_entry == null)
-            _entry = new Entry.EntryPath(this, io.github.chechelpo.frplm.jooq.generated.Keys.CONSTRAINT_60, null);
+            _entry = new EntryPath(this, Keys.CONSTRAINT_60, null);
 
         return _entry;
     }

@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.entry.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.FieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
@@ -9,14 +9,14 @@ import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.NewEntryOrder;
+import io.github.chechelpo.frplm.utils.orders.NewEntryOrder;
 import io.github.chechelpo.frplm.utils.importers.sillytavern.STLorebookImporter;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -201,17 +201,17 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
         List<EntryRecord> result = new ArrayList<>(order.size());
 
         order.forEach(entry -> {
-            EntityDataPayload<EntryRecord> payload = entry.entryInfo();
+            EntityDataPayload<EntryRecord> payload = entry.payload();
             payload.set(ENTRY.LOREBOOK_ID, toLorebookID);
             try{
-                EntryRecord record = this.createAndGet(entry.entryInfo());
+                EntryRecord record = this.createAndGet(entry.payload());
 
                 entry.keywords().forEach(keyword ->
                         entryKeywordService.associate(toLorebookID, record.getEntryId(), keyword)
                 );
                 result.add(record);
             } catch (RuntimeException e) {
-                log.error("Error importing entry {} with info \n {}", e, entry.entryInfo());
+                log.error("Error importing entry {} with payload \n {}", e, entry.payload());
             }
         });
 

@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.utils.integrations;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMBackend;

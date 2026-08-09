@@ -1,9 +1,8 @@
 package io.github.chechelpo.frplm.utils.tokenizers;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import org.springframework.http.HttpStatus;
@@ -28,7 +27,7 @@ final class TokenizerController {
     /** Tokenizes with timeout. Increment timeout if necessary, but NEVER delete the timeout */
     @PostMapping("/tokenize")
     public WebAsyncTask<ResponseEntity<Integer>> tokenize(
-            @RequestParam int connectionId,
+            @RequestParam Integer connectionId,
             @RequestBody String text
     ) {
         long timeoutMillis = 5_000L;
@@ -38,7 +37,7 @@ final class TokenizerController {
 
                     LlmConnectionRecord connection = lLMService
                             .find(EntityKey.of(LLM_CONNECTION.ID, connectionId))
-                            .orElseThrow("Couldn't tokenize %s ".formatted(text) , Severity.USER);
+                            .orElseThrow("Couldn't tokenize cause there's no connection with that id or it isn't configured" , Severity.EXPECTED);
 
                     String modelId = connection.getModel();
 

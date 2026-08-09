@@ -1,13 +1,15 @@
 package io.github.chechelpo.frplm.utils.json_mappers;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.domain.lorebook.entry.EntryMapper;
+import io.github.chechelpo.frplm.domain.lorebook.core.LorebookMapper;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletServiceTestFactory;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.test_utils.Asserts;
-import io.github.chechelpo.frplm.utils.json_mappers.orders.NewLorebookOrder;
+import io.github.chechelpo.frplm.utils.orders.NewLorebookOrder;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -68,7 +69,7 @@ class LorebookMapperTest {
                 entryMapper
         );
 
-        NewLorebookOrder order = mapper.orderFrom(mapper.jsonFrom(record));
+        NewLorebookOrder order = mapper.internalOrderFrom(mapper.jsonFrom(record));
 
         Asserts.assertRecordEqualsPayloadMinusFields(
                 record, order.entityPayload(),

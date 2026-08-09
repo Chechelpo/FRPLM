@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.utils.prolog.prolog_entity_translators;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
@@ -12,7 +12,6 @@ import io.github.chechelpo.frplm.extensions.api.standalone.LocationSnapshot;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +34,7 @@ final class LocationEntityTranslator implements PrologEntityTranslator {
 
     @Override
     public @NonNull Optional<String> getIdOfRepresentation(String argumentName) {
-        QualifiedNames.ThreeParts parts = QualifiedNames.splitThree(argumentName);
+        io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.ThreeParts parts = io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.splitThree(argumentName);
 
         WorldsRecord world = worldService.getOneMatching(WORLDS.NAME, parts.first())
                 .ifEmptyThrow(empty -> new EntityNotFound(
@@ -84,7 +83,7 @@ final class LocationEntityTranslator implements PrologEntityTranslator {
                         .set(LOCATIONS.WORLD_ID, reference.worldId())
                         .set(LOCATIONS.ID, reference.id())
                         .build()
-        ).map(record -> QualifiedNames.qualify(
+        ).map(record -> io.github.chechelpo.frplm.extensions.api.utils.QualifiedNames.qualify(
                 worldService.find(EntityKey.of(WORLDS.ID, reference.id()))
                         .orElseThrow("Couldn't find world when getting qualified name for \n " + record, Severity.SYSTEM)
                         .getName(),

@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.junit.jupiter.api.Test;

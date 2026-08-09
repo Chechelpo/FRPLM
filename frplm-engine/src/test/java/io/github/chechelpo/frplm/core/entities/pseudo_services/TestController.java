@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 
 class TestController extends EntityController<TestTableRecord, TestService> {

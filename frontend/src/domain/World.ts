@@ -1,10 +1,11 @@
+// src/domain/World.ts
 import {
     ABSEntity,
     createEntity,
     deleteEntity,
     fetchMatching,
     fetchOne,
-    getEntityController
+    getEntityController, StoredAssetDTO
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
@@ -12,17 +13,50 @@ import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {fetchApi} from "@/services/apiClient";
 import {Character} from "@/domain/Characters";
 
+export type BackgroundFit =
+    | "contain"
+    | "cover";
+
+export type Position = {
+    x: number,
+    y: number,
+}
+
+export type RegionGeometry = Position & {
+    width: number,
+    height: number,
+}
+export type BackgroundGeometry = Position & {
+    width: number;
+    height: number;
+};
+
+export type ImageDimensions = {
+    pixelWidth: number;
+    pixelHeight: number;
+};
+
 export type WorldKey = { id: number }
 export type WorldData = {
-    name: string,
-    description: string,
-    lorebook_id: number,
-}
+    name: string;
+    description: string;
+    lorebook_id: number;
+
+    background_x: number | null;
+    background_y: number | null;
+    background_width: number | null;
+    background_height: number | null;
+
+    background_opacity: number;
+    background_visible: boolean;
+    background_transform_locked: boolean;
+    background_aspect_locked: boolean;
+    background_fit: BackgroundFit;
+};
 
 export class World extends ABSEntity<WorldKey, WorldData> {
     private static readonly REFERENCE_KEY_ORDER: readonly (keyof WorldKey & string)[] = ['id'] as const;
 
-    private locations: Location[] | null = null;
     private lorebook: Lorebook | null = null;
 
     getEntityType(): EntityTypes {
@@ -49,45 +83,96 @@ export class World extends ABSEntity<WorldKey, WorldData> {
     }
 
     public async getLocations(): Promise<Location[]> {
-        return fetchMatching<LocationKey, LocationData, Location>(
+        return fetchMatching<
+            LocationKey,
+            LocationData,
+            Location
+        >(
             {
-                worldID: this.get('id')
+                worldID: this.get("id"),
             },
             EntityTypes.LOCATIONS,
-            Location
-        )
-    }
-
-    public async addLocation(name:string): Promise<Location> {
-        if (this.locations == null)
-            this.locations = await this.getLocations();
-
-        const location: Location = await createEntity<LocationKey, LocationData, Location>(
-            {worldID: this.get('id')},
-            {name: name},
-            EntityTypes.LOCATIONS,
-            Location
+            Location,
         );
-        this.locations.push(location);
-
-        return location;
     }
 
-    public async deleteLocation(location_id: number): Promise<boolean> {
-        if (this.locations == null)
-            this.locations = await this.getLocations();
-
-        const success:boolean = await deleteEntity<LocationKey>(
+    public async addLocation(
+        name: string,
+    ): Promise<Location> {
+        return createEntity<
+            LocationKey,
+            LocationData,
+            Location
+        >(
             {
-                worldID: this.get('id'),
-                id:location_id
+                worldID: this.get("id"),
             },
-            EntityTypes.LOCATIONS
-        )
-        if (success)
-            this.locations.filter(loc => loc.get('id') != location_id)
+            {
+                name,
+            },
+            EntityTypes.LOCATIONS,
+            Location,
+        );
+    }
+    public async deleteLocation(
+        location: Location,
+    ): Promise<boolean> {
+        if (
+            location.get("worldID") !==
+            this.get("id")
+        ) {
+            throw new Error(
+                "Cannot delete a location belonging to another world",
+            );
+        }
 
-        return success;
+        return deleteEntity<LocationKey>(
+            location.key,
+            EntityTypes.LOCATIONS,
+        );
+    }
+
+    public async deleteRegion(
+        region: Region,
+    ): Promise<boolean> {
+        if (
+            region.get("world_id") !==
+            this.get("id")
+        ) {
+            throw new Error(
+                "Cannot delete a region belonging to another world",
+            );
+        }
+
+        return deleteEntity<RegionKey>(
+            region.key,
+            EntityTypes.REGIONS,
+        );
+    }
+
+    public async createRootRegion(
+        name: string,
+        geometry: RegionGeometry,
+    ): Promise<Region> {
+        return createEntity<
+            RegionKey,
+            RegionData,
+            Region
+        >(
+            {
+                world_id: this.get("id"),
+            },
+            {
+                parent_region_id: null,
+                name,
+                x: geometry.x,
+                y: geometry.y,
+                width: geometry.width,
+                height: geometry.height,
+            },
+            EntityTypes.REGIONS,
+            Region,
+        );
     }
     /** @return regions with no parents */
     public async getRootRegions() : Promise<Region[]>{
@@ -116,10 +201,39 @@ export class World extends ABSEntity<WorldKey, WorldData> {
             }
         ).then(async response => (await response.json() as DTO[]).map(dto => new Location(dto)))
     }
+
+    public async getAllEdges(): Promise<LocationEdge[]> {
+        return fetchMatching<EdgeKey, EdgeData, LocationEdge>(
+            {
+                world_id: this.get("id"),
+            },
+            EntityTypes.EDGES,
+            LocationEdge,
+        );
+    }
+
 }
 
 export type RegionKey = {world_id: number, id:number}
-export type RegionData = {parent_region_id:number, lorebook_id:number, name:string, description: string}
+export type RegionData = {
+    parent_region_id: number | null;
+    lorebook_id: number;
+    name: string;
+    description: string;
+
+    locked:boolean;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+
+    background_opacity: number;
+    background_visible: boolean;
+    background_aspect_locked: boolean;
+    background_fit: BackgroundFit;
+
+    collapsed: boolean;
+};
 export class Region extends ABSEntity<RegionKey, RegionData>{
     private static readonly REFERENCE_KEY_ORDER: readonly (keyof RegionKey & string)[] = ['world_id' , 'id'] as const;
 
@@ -162,6 +276,107 @@ export class Region extends ABSEntity<RegionKey, RegionData>{
             Lorebook
         )
     }
+
+    public async createLocation(
+        name: string,
+        position: Position,
+    ): Promise<Location> {
+        return createEntity<
+            LocationKey,
+            LocationData,
+            Location
+        >(
+            {
+                worldID: this.get("world_id"),
+            },
+            {
+                name,
+                region_id: this.get("id"),
+                x: position.x,
+                y: position.y,
+            },
+            EntityTypes.LOCATIONS,
+            Location,
+        );
+    }
+    public async createSubRegion(
+        name: string,
+        initialGeometry: RegionGeometry,
+    ): Promise<Region> {
+        return createEntity<RegionKey, RegionData, Region>(
+            {
+                world_id: this.get("world_id"),
+            },
+            {
+                parent_region_id: this.get("id"),
+                name:name,
+                x: initialGeometry.x,
+                y: initialGeometry.y,
+                width: initialGeometry.width,
+                height: initialGeometry.height,
+            },
+            EntityTypes.REGIONS,
+            Region,
+        );
+    }
+    public async updatePosition(
+        position: Position,
+    ): Promise<boolean> {
+        return this.updateMany({
+            x: position.x,
+            y: position.y,
+        });
+    }
+    public async updateGeometry(
+        geometry: RegionGeometry,
+    ): Promise<boolean> {
+        return this.updateMany({
+            x: geometry.x,
+            y: geometry.y,
+            width: geometry.width,
+            height: geometry.height,
+        });
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // BACKGROUND
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * Fetches this region's background image.
+     *
+     * @return the background Blob, or null when no background is stored
+     */
+    public async fetchBackground(): Promise<Blob | null> {
+        return this.getAsset("background");
+    }
+
+    /**
+     * Uploads or replaces this region's background image.
+     *
+     * @param background image data to upload
+     * @param replace when false, saving fails if a background already exists
+     * @return metadata for the stored background
+     */
+    public async saveBackground(
+        background: File | Blob,
+        replace = true,
+    ): Promise<StoredAssetDTO> {
+        return this.postAsset(
+            "background",
+            background,
+            replace,
+        );
+    }
+
+    /**
+     * Deletes this region's background image.
+     *
+     * The underlying operation is idempotent.
+     */
+    public async deleteBackground(): Promise<void> {
+        await this.deleteAsset("background");
+    }
 }
 
 export type LocationKey = { worldID: number, id: number }
@@ -169,7 +384,12 @@ export type LocationData = {
     name: string,
     lorebook_id: number,
     description: string,
-    region_id: number | null
+    region_id: number | null,
+
+    locked:boolean,
+    x:number,
+    y:number,
+    radius:number
 }
 
 export class Location extends ABSEntity<LocationKey, LocationData> {
@@ -208,6 +428,15 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
         return this.lorebook;
     }
 
+    public async updatePosition(
+        position: Position,
+    ): Promise<boolean> {
+        return this.updateMany({
+            x: position.x,
+            y: position.y,
+        });
+    }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // LOCATION EDGES
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -238,7 +467,27 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
         )
     }
 
+    private assertValidEdgeEndpoint(
+        other: Location,
+    ): void {
+        if (
+            this.get("worldID") !==
+            other.get("worldID")
+        ) {
+            throw new Error(
+                "Locations must belong to the same world",
+            );
+        }
+
+        if (this.equals(other)) {
+            throw new Error(
+                "A location cannot connect to itself",
+            );
+        }
+    }
+
     public async connect(other: Location, initial_data:Partial<EdgeData>): Promise<LocationEdge>{
+        this.assertValidEdgeEndpoint(other);
         return await createEntity<EdgeKey, EdgeData, LocationEdge>(
             {
                 world_id: this.get('worldID'),
@@ -252,6 +501,7 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
     }
 
     public async disconnect(other: Location): Promise<boolean> {
+        this.assertValidEdgeEndpoint(other);
         return await deleteEntity<EdgeKey>(
             {
                 world_id: this.get('worldID')!,
@@ -263,6 +513,7 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
     }
 
     public async getEdgeInfo(other:Location):Promise<LocationEdge>{
+        this.assertValidEdgeEndpoint(other);
         return await fetchOne<EdgeKey,EdgeData,LocationEdge>({
             world_id: this.get('worldID'),
             from_id: this.get('id')!,
@@ -279,13 +530,25 @@ export type EdgeData = {
     is_traversable:boolean
 }
 
-export class LocationEdge extends ABSEntity<EdgeKey, EdgeData> {
+export class LocationEdge extends ABSEntity<
+    EdgeKey,
+    EdgeData
+> {
+    private static readonly REFERENCE_KEY_ORDER: readonly (
+        keyof EdgeKey & string
+        )[] = [
+        "world_id",
+        "from_id",
+        "to_id",
+    ] as const;
+
     getEntityType(): EntityTypes {
         return EntityTypes.EDGES;
     }
 
-    protected getReferenceKeyOrder(): (keyof EdgeKey & string)[] {
-        throw new Error("Not yet implemented");
+    protected getReferenceKeyOrder(): readonly (
+        keyof EdgeKey & string
+        )[] {
+        return LocationEdge.REFERENCE_KEY_ORDER;
     }
-
 }

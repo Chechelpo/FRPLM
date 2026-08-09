@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 import org.jetbrains.annotations.NotNull;

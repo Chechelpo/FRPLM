@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;

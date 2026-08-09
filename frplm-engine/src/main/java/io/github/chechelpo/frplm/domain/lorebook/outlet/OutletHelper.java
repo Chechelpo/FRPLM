@@ -1,7 +1,7 @@
 package io.github.chechelpo.frplm.domain.lorebook.outlet;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.springframework.stereotype.Component;
@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
-import static org.jooq.impl.DSL.max;
 
 @Component
 final class OutletHelper extends EntityControllerFieldValidator<OutletRecord> {

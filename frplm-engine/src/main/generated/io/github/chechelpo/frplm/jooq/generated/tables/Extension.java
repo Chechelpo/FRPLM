@@ -3,6 +3,7 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables;
 
+
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;

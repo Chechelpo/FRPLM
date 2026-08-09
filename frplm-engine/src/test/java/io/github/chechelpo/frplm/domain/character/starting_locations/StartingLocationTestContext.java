@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.character.starting_locations;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.StartingLocationsRecord;

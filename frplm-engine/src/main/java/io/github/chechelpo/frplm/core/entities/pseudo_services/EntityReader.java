@@ -1,14 +1,14 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.utils.ValidationResult;
 import org.jetbrains.annotations.Contract;
-import org.jooq.Result;
-import org.jooq.TableField;
-import org.jooq.TableRecord;
+import org.jooq.*;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Objects;
@@ -16,14 +16,14 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.jooq.Condition;
-
 public interface EntityReader<R extends TableRecord<R>> {
     /**
      * Validates fields present in a key, ignoring assigned values.
      * @return an error message if the key is invalid
      */
     ValidationResult validateKeyStructure(EntityKey<R> key);
+
+    Table<R> getTable();
 
     sealed interface RecordFindResult<R extends TableRecord<R>> extends FindResult<
             R,
@@ -153,7 +153,9 @@ public interface EntityReader<R extends TableRecord<R>> {
         }
     }
 
-
+    default R require(EntityKey<R> target){
+        return find(target).orElseThrow();
+    }
     RecordFindResult<R> find(EntityKey<R> target);
 
     Result<R> getAll();

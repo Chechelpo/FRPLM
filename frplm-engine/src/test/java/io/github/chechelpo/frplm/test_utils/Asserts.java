@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.test_utils;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
@@ -41,8 +41,8 @@ public final class Asserts {
                 .map(field -> (TableField<R, Object>) field)
                 .filter(field -> !ignoreFields.contains(field))
                 .forEach(field -> {
-                            assertTrue(dataPayload.assignsField(field), "Field " + field.getName() + " is not assigned by payload");
-                            assertEquals(record.get(field), dataPayload.requireValue(field),
+                            assertTrue(dataPayload.assigns(field), "Field " + field.getName() + " is not assigned by creationPayload");
+                            assertEquals(record.get(field), dataPayload.require(field),
                                     "%s : Mismatch in field %s".formatted(
                                             record.getQualifier(),
                                             field.getName()

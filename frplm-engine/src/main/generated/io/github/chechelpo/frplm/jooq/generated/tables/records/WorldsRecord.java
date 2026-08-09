@@ -3,6 +3,7 @@
  */
 package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
+
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds;
 
 import org.jooq.Record1;
@@ -74,31 +75,157 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_X</code>.
+     */
+    public void setBackgroundX(Double value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_X</code>.
+     */
+    public Double getBackgroundX() {
+        return (Double) get(4);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_Y</code>.
+     */
+    public void setBackgroundY(Double value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_Y</code>.
+     */
+    public Double getBackgroundY() {
+        return (Double) get(5);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_WIDTH</code>.
+     */
+    public void setBackgroundWidth(Double value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_WIDTH</code>.
+     */
+    public Double getBackgroundWidth() {
+        return (Double) get(6);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_HEIGHT</code>.
+     */
+    public void setBackgroundHeight(Double value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_HEIGHT</code>.
+     */
+    public Double getBackgroundHeight() {
+        return (Double) get(7);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_OPACITY</code>.
+     */
+    public void setBackgroundOpacity(Double value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_OPACITY</code>.
+     */
+    public Double getBackgroundOpacity() {
+        return (Double) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_VISIBLE</code>.
+     */
+    public void setBackgroundVisible(Boolean value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_VISIBLE</code>.
+     */
+    public Boolean getBackgroundVisible() {
+        return (Boolean) get(9);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_TRANSFORM_LOCKED</code>.
+     */
+    public void setBackgroundTransformLocked(Boolean value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_TRANSFORM_LOCKED</code>.
+     */
+    public Boolean getBackgroundTransformLocked() {
+        return (Boolean) get(10);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_ASPECT_LOCKED</code>.
+     */
+    public void setBackgroundAspectLocked(Boolean value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_ASPECT_LOCKED</code>.
+     */
+    public Boolean getBackgroundAspectLocked() {
+        return (Boolean) get(11);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.WORLDS.BACKGROUND_FIT</code>.
+     */
+    public void setBackgroundFit(String value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.BACKGROUND_FIT</code>.
+     */
+    public String getBackgroundFit() {
+        return (String) get(12);
+    }
+
+    /**
      * Setter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
      */
     public void setNextLocationId(Integer value) {
-        set(4, value);
+        set(13, value);
     }
 
     /**
      * Getter for <code>PUBLIC.WORLDS.NEXT_LOCATION_ID</code>.
      */
     public Integer getNextLocationId() {
-        return (Integer) get(4);
+        return (Integer) get(13);
     }
 
     /**
      * Setter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
      */
     public void setNextRegionId(Integer value) {
-        set(5, value);
+        set(14, value);
     }
 
     /**
      * Getter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
      */
     public Integer getNextRegionId() {
-        return (Integer) get(5);
+        return (Integer) get(14);
     }
 
     // -------------------------------------------------------------------------
@@ -124,13 +251,22 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     /**
      * Create a detached, initialised WorldsRecord
      */
-    public WorldsRecord(Integer id, String name, String description, Integer lorebookId, Integer nextLocationId, Integer nextRegionId) {
+    public WorldsRecord(Integer id, String name, String description, Integer lorebookId, Double backgroundX, Double backgroundY, Double backgroundWidth, Double backgroundHeight, Double backgroundOpacity, Boolean backgroundVisible, Boolean backgroundTransformLocked, Boolean backgroundAspectLocked, String backgroundFit, Integer nextLocationId, Integer nextRegionId) {
         super(Worlds.WORLDS);
 
         setId(id);
         setName(name);
         setDescription(description);
         setLorebookId(lorebookId);
+        setBackgroundX(backgroundX);
+        setBackgroundY(backgroundY);
+        setBackgroundWidth(backgroundWidth);
+        setBackgroundHeight(backgroundHeight);
+        setBackgroundOpacity(backgroundOpacity);
+        setBackgroundVisible(backgroundVisible);
+        setBackgroundTransformLocked(backgroundTransformLocked);
+        setBackgroundAspectLocked(backgroundAspectLocked);
+        setBackgroundFit(backgroundFit);
         setNextLocationId(nextLocationId);
         setNextRegionId(nextRegionId);
         resetChangedOnNotNull();

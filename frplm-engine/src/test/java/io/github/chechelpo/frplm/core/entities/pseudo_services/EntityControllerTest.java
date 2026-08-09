@@ -1,5 +1,9 @@
 package io.github.chechelpo.frplm.core.entities.pseudo_services;
 
+import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
@@ -345,7 +349,7 @@ class EntityControllerTest {
                 Map.of("unknown", "value");
 
         RuntimeException failure =
-                new RuntimeException("Invalid payload");
+                new RuntimeException("Invalid creationPayload");
 
         when(mapper.getKeyFromDTO(keyParameters, true))
                 .thenReturn(EntityKey.of(TEST_TABLE.FIRST_ID, 1));
@@ -516,7 +520,7 @@ class EntityControllerTest {
                 Map.of("unknown", "value");
 
         RuntimeException failure =
-                new RuntimeException("Invalid creation payload");
+                new RuntimeException("Invalid creation creationPayload");
 
         when(mapper.getDataFrom(any(), eq(true)))
                 .thenThrow(failure);

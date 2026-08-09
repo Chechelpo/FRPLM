@@ -14,3 +14,7 @@ Early access 0.1.0
    - Edge visibility
    - Traversability
    - As entry activation step (post-keywords)
+
+Bugs: 
+ - Colapsar una region no cambia los bounds para reparentar entonces se puede reparentar una locacion o region a una regio colapsada.
+ - El visor de editor de mundo tapa los errores y no cambia tamanio de forma natural cuando se expande el editor

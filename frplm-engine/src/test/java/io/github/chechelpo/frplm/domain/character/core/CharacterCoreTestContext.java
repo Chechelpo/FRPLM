@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryTestContext;
 import io.github.chechelpo.frplm.interfaces.DBReload;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;

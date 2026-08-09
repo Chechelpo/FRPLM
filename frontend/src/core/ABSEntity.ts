@@ -1,3 +1,4 @@
+//src/domain/ABSEntity.ts
 import {FieldInfo} from "@/core/FieldMetadata";
 import {CommonFields} from "@/utils/CommonFields";
 import {ValueComparable} from "@/types/Equatable";
@@ -103,6 +104,33 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
             return false;
         }
     }
+    public async updateMany(
+        values: Partial<Data>,
+    ): Promise<boolean> {
+        try {
+            const updated = await UpdateEntityFields(
+                this.key,
+                values,
+                this.getEntityType(),
+            );
+
+            if (updated) {
+                Object.assign(
+                    this.dataMap,
+                    values,
+                );
+            }
+
+            return updated;
+        } catch (error) {
+            console.error(
+                `Failed to update fields of ${this.getEntityType()}`,
+                error,
+            );
+
+            return false;
+        }
+    }
 
     protected throw_if_collision(keys: Key, data: Data): void {
         for (const k of Object.keys(keys)) {
@@ -170,6 +198,103 @@ export abstract class ABSEntity<Key extends KeyRecord, Data extends DataRecord> 
                 throw new Error(`Unsupported primitive type: ${String(value)}`);
         }
     }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ASSETS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * Builds the content endpoint for one asset belonging to this entity.
+     */
+    public getAssetEndpoint(
+        assetType: EntityAssetType,
+    ): URL {
+        return getEntityAssetPath(
+            this.getEntityType(),
+            this.key,
+            assetType,
+        );
+    }
+
+    /**
+     * Builds the metadata endpoint for one asset belonging to this entity.
+     */
+    public getAssetMetadataEndpoint(
+        assetType: EntityAssetType,
+    ): URL {
+        return getEntityAssetMetadataPath(
+            this.getEntityType(),
+            this.key,
+            assetType,
+        );
+    }
+
+    /**
+     * Retrieves an asset from the backend.
+     *
+     * @return the asset Blob, or null when the asset does not exist
+     */
+    public async getAsset(
+        assetType: EntityAssetType,
+    ): Promise<Blob | null> {
+        return fetchEntityAsset(
+            this.key,
+            this.getEntityType(),
+            assetType,
+        );
+    }
+
+    /**
+     * Retrieves metadata for an asset.
+     *
+     * @return metadata, or null when the asset does not exist
+     */
+    public async getAssetMetadata(
+        assetType: EntityAssetType,
+    ): Promise<StoredAssetDTO | null> {
+        return fetchEntityAssetMetadata(
+            this.key,
+            this.getEntityType(),
+            assetType,
+        );
+    }
+
+    /**
+     * Uploads or replaces an asset.
+     *
+     * @param assetType asset wire value accepted by the backend
+     * @param file uploaded file or blob
+     * @param replace when false, the backend returns HTTP 409 if the asset
+     * already exists
+     */
+    public async postAsset(
+        assetType: EntityAssetType,
+        file: File | Blob,
+        replace = true,
+    ): Promise<StoredAssetDTO> {
+        return postEntityAsset(
+            this.key,
+            this.getEntityType(),
+            assetType,
+            file,
+            replace,
+        );
+    }
+
+    /**
+     * Deletes an asset.
+     *
+     * The backend operation is idempotent and returns HTTP 204 whether or not
+     * the asset previously existed.
+     */
+    public async deleteAsset(
+        assetType: EntityAssetType,
+    ): Promise<void> {
+        await deleteEntityAsset(
+            this.key,
+            this.getEntityType(),
+            assetType,
+        );
+    }
 }
 
 const ENTITY_SUFFIX = "entity";
@@ -213,7 +338,7 @@ function getPathWithIDParams<Key extends KeyRecord>(
  * @param url mutates, will append params
  * @param key to append
  */
-export function appendIDParams<Key extends KeyRecord>(url:URL, key: Partial<Key>): void {
+export function appendIDParams<Key extends KeyRecord>(url:URL, key: Readonly<Partial<Key>>): void {
     // identityParams come from query string
     for (const [k, v] of Object.entries(key)) {
         if (v === undefined) continue;
@@ -325,7 +450,7 @@ export async function deleteEntity<
             method:"DELETE"
         }
     )
-    return response.status === 200;
+    return response.ok;
 }
 export async function createEntity<
     Key extends KeyRecord,
@@ -348,7 +473,30 @@ export async function createEntity<
 
     return new ctor(await response.json() as DTO, object_type);
 }
+export async function UpdateEntityFields<
+    Data extends DataRecord,
+    Key extends KeyRecord,
+>(
+    key: Key,
+    values: Partial<Data>,
+    objectType: EntityTypes,
+): Promise<boolean> {
+    const response = await fetchApi(
+        getPathWithIDParams(
+            objectType,
+            key,
+        ).toString(),
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+        },
+    );
 
+    return response.ok;
+}
 export async function UpdateEntityField<
     Data extends DataRecord,
     Key extends KeyRecord,
@@ -368,7 +516,299 @@ export async function UpdateEntityField<
             body: JSON.stringify({ [field]: value }),
         });
 
-    return response.status === 200;
+    return response.ok;
 }
 
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ASSETS
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+const ASSET_ROUTE = "asset";
+const ASSET_METADATA_ROUTE = "asset-metadata";
+
+export type EntityAssetType =
+    | "avatar"
+    | "background";
+
+export type StoredAssetDTO = Readonly<{
+    type: string;
+    size: number;
+    lastModified: string;
+}>;
+
+export class EntityAssetRequestError extends Error {
+    public constructor(
+        public readonly status: number,
+        message: string,
+    ) {
+        super(message);
+        this.name = "EntityAssetRequestError";
+    }
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ASSET ENDPOINTS
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function getEntityAssetPath<Key extends KeyRecord>(
+    objectType: EntityTypes,
+    key: Readonly<Partial<Key>>,
+    assetType: EntityAssetType,
+): URL {
+    return getEntityAssetEndpoint(
+        objectType,
+        key,
+        ASSET_ROUTE,
+        assetType,
+    );
+}
+
+function getEntityAssetMetadataPath<Key extends KeyRecord>(
+    objectType: EntityTypes,
+    key: Readonly<Partial<Key>>,
+    assetType: EntityAssetType,
+): URL {
+    return getEntityAssetEndpoint(
+        objectType,
+        key,
+        ASSET_METADATA_ROUTE,
+        assetType,
+    );
+}
+
+function getEntityAssetEndpoint<Key extends KeyRecord>(
+    objectType: EntityTypes,
+    key: Readonly<Partial<Key>>,
+    route: typeof ASSET_ROUTE | typeof ASSET_METADATA_ROUTE,
+    assetType: EntityAssetType,
+): URL {
+    const url = new URL(
+        `${objectType}/${route}/${encodeURIComponent(assetType)}`,
+        API_BASE,
+    );
+
+    appendIDParams(
+        url,
+        key,
+    );
+
+    return url;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GET ASSET
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/**
+ * Maps to:
+ *
+ * GET /{entityType}/asset/{assetType}
+ */
+export async function fetchEntityAsset<
+    Key extends KeyRecord,
+>(
+    key: Readonly<Key>,
+    objectType: EntityTypes,
+    assetType: EntityAssetType,
+): Promise<Blob | null> {
+    const response = await fetchApi(
+        getEntityAssetPath(
+            objectType,
+            key,
+            assetType,
+        ).toString(),
+        {
+            method: "GET",
+            headers: {
+                Accept: "image/webp,image/*;q=0.9,*/*;q=0.1",
+            },
+        },
+    );
+
+    if (response.status === 404) {
+        return null;
+    }
+
+    requireSuccessfulAssetResponse(
+        response,
+        `Could not retrieve ${assetType} asset`,
+    );
+
+    return response.blob();
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// GET METADATA
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/**
+ * Maps to:
+ *
+ * GET /{entityType}/asset-metadata/{assetType}
+ */
+export async function fetchEntityAssetMetadata<
+    Key extends KeyRecord,
+>(
+    key: Readonly<Key>,
+    objectType: EntityTypes,
+    assetType: EntityAssetType,
+): Promise<StoredAssetDTO | null> {
+    const response = await fetchApi(
+        getEntityAssetMetadataPath(
+            objectType,
+            key,
+            assetType,
+        ).toString(),
+        {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+            },
+        },
+    );
+
+    if (response.status === 404) {
+        return null;
+    }
+
+    requireSuccessfulAssetResponse(
+        response,
+        `Could not retrieve ${assetType} asset metadata`,
+    );
+
+    return response.json() as Promise<StoredAssetDTO>;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// POST ASSET
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/**
+ * Maps to:
+ *
+ * POST /{entityType}/asset/{assetType}?replace={boolean}
+ *
+ * Content-Type must not be assigned manually because the browser must generate
+ * the multipart boundary.
+ */
+export async function postEntityAsset<
+    Key extends KeyRecord,
+>(
+    key: Readonly<Key>,
+    objectType: EntityTypes,
+    assetType: EntityAssetType,
+    file: File | Blob,
+    replace = true,
+): Promise<StoredAssetDTO> {
+    const url = getEntityAssetPath(
+        objectType,
+        key,
+        assetType,
+    );
+
+    url.searchParams.set(
+        "replace",
+        String(replace),
+    );
+
+    const formData = new FormData();
+
+    formData.append(
+        "file",
+        file,
+        getAssetUploadName(
+            assetType,
+            file,
+        ),
+    );
+    console.log(
+        `[AssetUpdate] ${objectType} ${assetType} ${key}`
+    )
+    const response = await fetchApi(
+        url.toString(),
+        {
+            method: "POST",
+            body: formData,
+        },
+    );
+
+    if (response.status === 409) {
+        throw new EntityAssetRequestError(
+            response.status,
+            `${assetType} asset already exists`,
+        );
+    }
+
+    requireSuccessfulAssetResponse(
+        response,
+        `Could not upload ${assetType} asset`,
+    );
+
+    return response.json() as Promise<StoredAssetDTO>;
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// DELETE ASSET
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+/**
+ * Maps to:
+ *
+ * DELETE /{entityType}/asset/{assetType}
+ */
+export async function deleteEntityAsset<
+    Key extends KeyRecord,
+>(
+    key: Readonly<Key>,
+    objectType: EntityTypes,
+    assetType: EntityAssetType,
+): Promise<void> {
+    const response = await fetchApi(
+        getEntityAssetPath(
+            objectType,
+            key,
+            assetType,
+        ).toString(),
+        {
+            method: "DELETE",
+        },
+    );
+
+    requireSuccessfulAssetResponse(
+        response,
+        `Could not delete ${assetType} asset`,
+    );
+}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ASSET UTILS
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+function requireSuccessfulAssetResponse(
+    response: Response,
+    message: string,
+): void {
+    if (response.ok) {
+        return;
+    }
+
+    throw new EntityAssetRequestError(
+        response.status,
+        message,
+    );
+}
+
+function getAssetUploadName(
+    assetType: EntityAssetType,
+    file: File | Blob,
+): string {
+    if (
+        file instanceof File
+        && file.name.trim().length > 0
+    ) {
+        return file.name;
+    }
+
+    return `${assetType}.webp`;
+}

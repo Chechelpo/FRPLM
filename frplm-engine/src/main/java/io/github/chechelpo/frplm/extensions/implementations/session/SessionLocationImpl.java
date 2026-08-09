@@ -1,6 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
-import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityKey;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.extensions.api.session.SessionCharacter;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;

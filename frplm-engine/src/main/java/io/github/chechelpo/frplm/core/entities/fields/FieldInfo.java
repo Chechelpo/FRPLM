@@ -2,14 +2,12 @@ package io.github.chechelpo.frplm.core.entities.fields;
 
 import io.github.chechelpo.frplm.core.entities.fields.coercers.*;
 import io.github.chechelpo.frplm.core.entities.fields.constraints.*;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.Constraint;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.*;
 import io.github.chechelpo.frplm.utils.format.Either;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jooq.Table;
-import org.jooq.TableField;
-import org.jooq.TableRecord;
-import org.jooq.UniqueKey;
+import org.jooq.*;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -25,11 +23,18 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
 
     private final Set<T> allowedValues;
     private final List<Function<T, Optional<String>>> customConstraints;
+    /** User assigned default value */
     private final T defaultValue;
-
+    /** If user has assigned a custom default value for this field payload */
     private final boolean assignedDefaultValue;
     /**
-     * Whether this field must be provided by payload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
+     * Whether the column declares a SQL DEFAULT expression.
+     */
+    public final boolean hasDatabaseDefault;
+
+
+    /**
+     * Whether this field must be provided by creationPayload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
      */
     public final boolean isRequired;
     /**
@@ -54,31 +59,63 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         this.customConstraints = builder.customConstraints;
 
         this.allowedValues = builder.allowedValues == null ? null : Set.copyOf(builder.allowedValues);
-        this.defaultValue = builder.defaultValue;
 
-        this.isRequired = builder.require;
+        this.defaultValue = builder.defaultValue;
+        this.hasDatabaseDefault = builder.hasDatabaseDefault;
+        this.assignedDefaultValue = builder.assignedDefaultValue;
+
         this.isReadOnly = builder.key || builder.readOnly;
         this.isNullable = builder.isNullable;
         this.isKey = builder.key;
-        this.assignedDefaultValue = builder.assignedDefaultValue;
+
+        /*
+         * Explicit requireOnCreate() overrides inference.
+         *
+         * Otherwise, a field is required when:
+         * - it cannot be null;
+         * - Java will not assign a default;
+         * - the database has no DEFAULT;
+         * - the database does not generate an identity.
+         */
+        this.isRequired =
+                builder.require
+                        || (
+                        !builder.isNullable
+                                && !builder.assignedDefaultValue
+                                && !builder.hasDatabaseDefault
+                                && !builder.isIdentity
+                );
 
         validateFieldInfo();
     }
 
     private void validateFieldInfo() {
-        if (this.isKey && this.isNullable)
-            throw new IllegalStateException("Nullable key detected in field " + field.getName());
+        if (isKey && isNullable) {
+            throw new IllegalStateException(
+                    "Nullable key detected in field " + field.getName()
+            );
+        }
 
-        if (assignedDefaultValue){
-            Optional<String> defaultValueError = this.validate(defaultValue, false);
-            if (defaultValueError.isPresent())
+        if (isRequired && assignedDefaultValue) {
+            throw new IllegalStateException(
+                    "Field %s cannot be both required on creation and assigned an application default"
+                            .formatted(field.getName())
+            );
+        }
+
+        if (assignedDefaultValue) {
+            Optional<String> defaultValueError = validate(defaultValue, false);
+
+            if (defaultValueError.isPresent()) {
                 throw new IllegalStateException(
-                        "Default value " + defaultValueError.get() + " doesn't pass validations on-create for field " + field.getName()
+                        "Default value for field %s does not pass creation validation: %s"
+                                .formatted(field.getName(), defaultValueError.get())
                 );
+            }
         }
     }
 
-    public DataPayload.Assignment<R, T> getDefaultValue() {
+    public DataPayload.Assignment<R, T> getApplicationDefaultValue() {
         if (!this.assignedDefaultValue) return DataPayload.Assignment.ofUnassigned(field);
         return DataPayload.Assignment.ofAssigned(field, defaultValue);
     }
@@ -135,19 +172,26 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         private Set<T> allowedValues = null;
 
         private boolean assignedDefaultValue = false;
+
         private T defaultValue = null;
+        private final boolean hasDatabaseDefault;
+        private final boolean isIdentity;
 
         private boolean require = false;
         private boolean readOnly = false;
-        private boolean key = false;
-        private boolean isNullable = false;
+        private boolean key;
+        private boolean isNullable;
 
         private Builder(TableField<R, T> field) {
             this.field = field;
+            var dataType = field.getDataType();
 
             this.key = isPrimaryKeyField(field);
             this.coercer = CoercerCreator.getCoercerForClass(field.getType());
-            this.isNullable = field.getDataType().nullable();
+            this.isNullable = dataType.nullable();
+
+            this.hasDatabaseDefault = dataType.defaulted();
+            this.isIdentity = dataType.identity();
         }
 
         public TableField<R, T> field() {
@@ -217,7 +261,7 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         }
 
         /**
-         * Whether this field must be provided by payload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
+         * Whether this field must be provided by creationPayload when creating an entity via {@link EntityCreator#createAndGet(EntityDataPayload)}
          */
         public Builder<R, T> requireOnCreate() {
             this.require = true;

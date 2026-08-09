@@ -47,7 +47,7 @@ class LLMBackendTest {
                     ),
                     () -> assertFalse(
                             backend.toPayload().isPresent(),
-                            "Dynamic backend unexpectedly has entity payload: " + backend
+                            "Dynamic backend unexpectedly has entity creationPayload: " + backend
                     )
             );
         }
