@@ -6,7 +6,6 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
@@ -18,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -36,6 +36,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -175,31 +176,7 @@ public class Responses extends TableImpl<ResponsesRecord> {
 
     @Override
     public List<ForeignKey<ResponsesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_31, Keys.CONSTRAINT_314, Keys.FK_RESPONSES_LOCATIONS, Keys.FK_RESPONSES_MESSAGES);
-    }
-
-    private transient SessionsPath _sessions;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
-     */
-    public SessionsPath sessions() {
-        if (_sessions == null)
-            _sessions = new SessionsPath(this, Keys.CONSTRAINT_31, null);
-
-        return _sessions;
-    }
-
-    private transient WorldsPath _worlds;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
-     */
-    public WorldsPath worlds() {
-        if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_314, null);
-
-        return _worlds;
+        return Arrays.asList(Keys.FK_RESPONSES_LOCATIONS, Keys.FK_RESPONSES_MESSAGES, Keys.FK_RESPONSES_TO_WORLD, Keys.FK_TO_SESSION);
     }
 
     private transient LocationsPath _locations;
@@ -226,6 +203,30 @@ public class Responses extends TableImpl<ResponsesRecord> {
         return _messages;
     }
 
+    private transient WorldsPath _worlds;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
+     */
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.FK_RESPONSES_TO_WORLD, null);
+
+        return _worlds;
+    }
+
+    private transient SessionsPath _sessions;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
+     */
+    public SessionsPath sessions() {
+        if (_sessions == null)
+            _sessions = new SessionsPath(this, Keys.FK_TO_SESSION, null);
+
+        return _sessions;
+    }
+
     private transient ResponseLocationChangesPath _responseLocationChanges;
 
     /**
@@ -239,12 +240,12 @@ public class Responses extends TableImpl<ResponsesRecord> {
         return _responseLocationChanges;
     }
 
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.CHARACTERS</code> table
-     */
-    public CharactersPath characters() {
-        return responseLocationChanges().characters();
+    @Override
+    public List<Check<ResponsesRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("CHCK_RESPONSE_NUM_VALID"), "\"RESPONSE_NUM\" >= 0", true),
+            Internal.createCheck(this, DSL.name("CHK_TICK_NUM_VALID"), "\"TICK_NUM\" >= 0", true)
+        );
     }
 
     @Override

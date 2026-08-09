@@ -16,10 +16,7 @@ final class Readers {
             @NotNull EntityReader<ApiHostsRecord> hosts,
             @NotNull EntityReader<ApiKeysRecord> secrets,
 
-            @NotNull EntityReader<TagsRecord> tags,
-
             @NotNull EntityReader<CharactersRecord> characters,
-            @NotNull EntityReader<CharacterTagsRecord> characterTags,
             @NotNull EntityReader<StartingLocationsRecord> startingLocations,
 
             @NotNull EntityReader<WorldsRecord> worlds,
@@ -45,10 +42,7 @@ final class Readers {
                     hosts,
                     secrets,
 
-                    tags,
-
                     characters,
-                    characterTags,
                     startingLocations,
 
                     worlds,

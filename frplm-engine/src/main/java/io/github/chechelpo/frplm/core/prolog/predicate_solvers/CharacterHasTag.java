@@ -1,18 +1,11 @@
 package io.github.chechelpo.frplm.core.prolog.predicate_solvers;
 
-import io.github.chechelpo.frplm.core.prolog.ReservedPredicates;
-import io.github.chechelpo.frplm.domain.character.tags.CharacterTagsService;
-import io.github.chechelpo.frplm.extensions.api.standalone.CharacterSnapshot;
-import io.github.chechelpo.frplm.extensions.api.standalone.TagSnapshot;
-import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
-import it.unibo.tuprolog.core.Atom;
-import it.unibo.tuprolog.core.Term;
-import it.unibo.tuprolog.solve.primitive.Primitive;
-import kotlin.sequences.SequencesKt;
+
 
 import java.util.List;
 
-public class CharacterHasTag implements PredicateSolver {
+public class CharacterHasTag  {
+    /*
     private CharacterTagsService characterTags;
 
     public CharacterHasTag(ExtensionContext context) {
@@ -59,5 +52,5 @@ public class CharacterHasTag implements PredicateSolver {
                 getType().asSignature(),
                 primitive
         );
-    }
+    }*/
 }

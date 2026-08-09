@@ -12,6 +12,18 @@ public interface DTOMapper<R extends TableRecord<R>> extends FieldValidator<R> {
                 .toArray(EntityDTO[]::new);
     }
     EntityDTO wrapRecord(R record);
-    EntityDataPayload<R> getDataFrom(Map<String, Object> params, boolean expectKeys);
-    EntityKey<R> getKeyFromDTO(Map<String, Object> params, boolean expectFullKey);
+
+
+    enum DATA_CONSTRUCTION_MODE {
+        QUERY,
+        CREATE,
+        UPDATE
+    }
+    EntityDataPayload<R> getDataFrom(Map<String, Object> params, DATA_CONSTRUCTION_MODE mode);
+
+    enum KEY_CONSTRUCTION_MODE{
+        FULL_KEY,
+        PARTIAL_KEY
+    }
+    EntityKey<R> getKeyFromDTO(Map<String, Object> params, KEY_CONSTRUCTION_MODE mode);
 }

@@ -28,6 +28,11 @@ final class CharacterFieldsHelper extends EntityControllerFieldValidator<Charact
                         .key()
                         .build(),
 
+                FieldInfo.builder(CHARACTERS.WORLD_ID)
+                        .key()
+                        .requireOnCreate()
+                        .build(),
+
                 FieldInfo.builder(Characters.CHARACTERS.LOREBOOK_ID)
                         .readOnly()
                         .build()
@@ -41,7 +46,6 @@ final class CharacterFieldsHelper extends EntityControllerFieldValidator<Charact
                 DTOField.of(CHARACTERS.ID, "id"),
                 DTOField.of(CHARACTERS.NAME, "name"),
                 DTOField.of(CHARACTERS.DESCRIPTION, "description"),
-                DTOField.of(CHARACTERS.IS_ARCHETYPE, "is_archetype"),
                 DTOField.of(CHARACTERS.WELCOME_MESSAGE, "welcome_message"),
                 DTOField.of(CHARACTERS.CAN_BE_USER, "can_be_user"),
                 DTOField.of(CHARACTERS.LOREBOOK_ID, "lorebook_id")

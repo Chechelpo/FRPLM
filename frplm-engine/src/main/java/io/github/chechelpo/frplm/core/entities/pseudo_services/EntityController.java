@@ -72,7 +72,7 @@ public abstract class EntityController<
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
-     * @param query a map containing key field -> value
+     * @param query a map containing (field == value)
      * @return all records if no query, otherwise the records with the matching key.
      */
     @GetMapping(
@@ -87,7 +87,7 @@ public abstract class EntityController<
             );
         else return ResponseEntity.ok(
                 mapper.wrapRecords(
-                        service.getMatching(mapper.getKeyFromDTO(query, false))
+                        service.getMatching(mapper.getDataFrom(query, DTOMapper.DATA_CONSTRUCTION_MODE.QUERY))
                 )
         );
     }
@@ -104,7 +104,7 @@ public abstract class EntityController<
         return ResponseEntity.ok(
                 mapper.wrapRecord(
                         service.find(
-                                mapper.getKeyFromDTO(keyParams, true)
+                                mapper.getKeyFromDTO(keyParams, DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY)
                         ).orElseThrow(Severity.USER)
                 )
         );
@@ -116,8 +116,8 @@ public abstract class EntityController<
     )
     protected ResponseEntity<Boolean> patch(@RequestParam Map<String, Object> keyParams, @RequestBody Map<String, Object> patch) {
         service.update(
-                mapper.getKeyFromDTO(keyParams, true),
-                mapper.getDataFrom(patch, false)
+                mapper.getKeyFromDTO(keyParams, DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY),
+                mapper.getDataFrom(patch, DTOMapper.DATA_CONSTRUCTION_MODE.QUERY)
         ).orElseThrow();
 
         return ResponseEntity.ok(true);
@@ -141,7 +141,7 @@ public abstract class EntityController<
         if (initialData != null) allParams.putAll(initialData);
         log.debug("Creating new entity with params: \n {}", allParams);
 
-        R record = service.createAndGet(mapper.getDataFrom(allParams, true));
+        R record = service.createAndGet(mapper.getDataFrom(allParams, DTOMapper.DATA_CONSTRUCTION_MODE.CREATE));
         EntityDTO dto = mapper.wrapRecord(record);
         try {
             return ResponseEntity.created(locationOf(dto)).body(dto);
@@ -155,7 +155,7 @@ public abstract class EntityController<
     @DeleteMapping(value = ENTITY_PATH)
     protected ResponseEntity<Boolean> delete(@RequestParam Map<String, Object> keyParams) {
         return ResponseEntity.ok(
-                service.delete(mapper.getKeyFromDTO(keyParams, true))
+                service.delete(mapper.getKeyFromDTO(keyParams, DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY))
         );
     }
 }

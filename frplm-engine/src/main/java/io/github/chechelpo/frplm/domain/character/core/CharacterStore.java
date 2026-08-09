@@ -22,12 +22,6 @@ final class CharacterStore extends EntityStore<CharactersRecord> {
         super(dsl, CHARACTERS, EntityConfigs.Types.CHARACTER);
     }
 
-    @Override
-    public CharactersRecord createAndGet(@NotNull EntityDataPayload<CharactersRecord> data) {
-        data.set(CHARACTERS.CREATED, LocalDateTime.now());
-        return super.createAndGet(data);
-    }
-
     public @NotNull List<CharactersRecord> getStartingAtWorld(int worldID){
         return ctx.select()
                 .from(main_table)

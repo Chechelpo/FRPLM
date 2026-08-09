@@ -2,7 +2,6 @@ package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
-import io.github.chechelpo.frplm.domain.character.tags.CharacterTagsService;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
@@ -13,7 +12,6 @@ import io.github.chechelpo.frplm.domain.lorebook.keywords.KeywordService;
 import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletService;
 import io.github.chechelpo.frplm.domain.prompts.section.SectionService;
 import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
-import io.github.chechelpo.frplm.domain.tags.TagService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
@@ -27,10 +25,8 @@ public record ExtensionContext(
         @NotNull HostService hosts,
         @NotNull SecretService secrets,
 
-        @NotNull TagService tags,
 
         @NotNull CharacterService characters,
-        @NotNull CharacterTagsService characterTags,
         @NotNull StartingLocationsService startingLocations,
 
         @NotNull WorldService worlds,

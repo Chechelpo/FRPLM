@@ -15,10 +15,8 @@ class ReadersConfiguration {
             EntityReader<ApiHostsRecord> hosts,
             EntityReader<ApiKeysRecord> secrets,
 
-            EntityReader<TagsRecord> tags,
 
             EntityReader<CharactersRecord> characters,
-            EntityReader<CharacterTagsRecord> characterTags,
             EntityReader<StartingLocationsRecord> startingLocations,
 
             EntityReader<WorldsRecord> worlds,
@@ -43,10 +41,7 @@ class ReadersConfiguration {
                 hosts,
                 secrets,
 
-                tags,
-
                 characters,
-                characterTags,
                 startingLocations,
 
                 worlds,

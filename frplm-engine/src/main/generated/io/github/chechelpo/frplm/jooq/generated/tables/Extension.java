@@ -6,22 +6,16 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ExtensionRecord;
 
 import java.util.Collection;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
-import org.jooq.InverseForeignKey;
 import org.jooq.JSON;
 import org.jooq.Name;
-import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
-import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -100,39 +94,6 @@ public class Extension extends TableImpl<ExtensionRecord> {
         this(DSL.name("EXTENSION"), null);
     }
 
-    public <O extends Record> Extension(Table<O> path, ForeignKey<O, ExtensionRecord> childPath, InverseForeignKey<O, ExtensionRecord> parentPath) {
-        super(path, childPath, parentPath, EXTENSION);
-    }
-
-    /**
-     * A subtype implementing {@link Path} for simplified path-based joins.
-     */
-    public static class ExtensionPath extends Extension implements Path<ExtensionRecord> {
-
-        private static final long serialVersionUID = 1L;
-        public <O extends Record> ExtensionPath(Table<O> path, ForeignKey<O, ExtensionRecord> childPath, InverseForeignKey<O, ExtensionRecord> parentPath) {
-            super(path, childPath, parentPath);
-        }
-        private ExtensionPath(Name alias, Table<ExtensionRecord> aliased) {
-            super(alias, aliased);
-        }
-
-        @Override
-        public ExtensionPath as(String alias) {
-            return new ExtensionPath(DSL.name(alias), this);
-        }
-
-        @Override
-        public ExtensionPath as(Name alias) {
-            return new ExtensionPath(alias, this);
-        }
-
-        @Override
-        public ExtensionPath as(Table<?> alias) {
-            return new ExtensionPath(alias.getQualifiedName(), this);
-        }
-    }
-
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -141,27 +102,6 @@ public class Extension extends TableImpl<ExtensionRecord> {
     @Override
     public UniqueKey<ExtensionRecord> getPrimaryKey() {
         return Keys.CONSTRAINT_81;
-    }
-
-    private transient ExtrasPath _extras;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
-     * table
-     */
-    public ExtrasPath extras() {
-        if (_extras == null)
-            _extras = new ExtrasPath(this, null, Keys.CONSTRAINT_7AB.getInverseKey());
-
-        return _extras;
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.MESSAGES</code> table
-     */
-    public MessagesPath messages() {
-        return extras().messages();
     }
 
     @Override

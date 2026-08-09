@@ -13,13 +13,17 @@ final class CharacterMapper extends ReferenceMapper<CharactersRecord, CharacterS
                 CharacterSnapshot.class,
                 CharacterSnapshot.Reference::fromString,
                 CharacterImpl::new,
-                reference -> EntityKey.of(CHARACTERS.ID, reference.id()),
+                reference -> EntityKey.<CharactersRecord>builder()
+                        .set(CHARACTERS.ID, reference.id())
+                        .set(CHARACTERS.WORLD_ID, reference.worldId())
+                        .build()
+                ,
                 reader
         );
     }
 
     @Override
     CharacterSnapshot.Reference getExampleReference() {
-        return new CharacterSnapshot.Reference(1);
+        return new CharacterSnapshot.Reference(1, 1);
     }
 }

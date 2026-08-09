@@ -8,7 +8,6 @@ import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges.LocationEdgesPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
@@ -16,7 +15,6 @@ import io.github.chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 
@@ -235,19 +233,6 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _worlds;
     }
 
-    private transient LocationTagsPath _locationTags;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.LOCATION_TAGS</code> table
-     */
-    public LocationTagsPath locationTags() {
-        if (_locationTags == null)
-            _locationTags = new LocationTagsPath(this, null, Keys.CONSTRAINT_506A.getInverseKey());
-
-        return _locationTags;
-    }
-
     private transient StartingLocationsPath _startingLocations;
 
     /**
@@ -352,14 +337,6 @@ public class Locations extends TableImpl<LocationsRecord> {
             _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_LOCATIONS.getInverseKey());
 
         return _responses;
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the <code>PUBLIC.TAGS</code>
-     * table
-     */
-    public TagsPath tags() {
-        return locationTags().tags();
     }
 
     @Override

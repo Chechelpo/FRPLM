@@ -20,9 +20,13 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import static io.github.chechelpo.frplm.core.entities.fields.DTOMapper.DATA_CONSTRUCTION_MODE.*;
+import static io.github.chechelpo.frplm.core.entities.fields.DTOMapper.KEY_CONSTRUCTION_MODE.*;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class EntityControllerTest {
@@ -169,7 +173,7 @@ class EntityControllerTest {
 
         verifyNoInteractions(mapper);
         verify(service, never()).getAll();
-        verify(service, never()).getMatching(any(EntityKey.class));
+        verify(service, never()).getMatching(any(EntityDataPayload.class));
     }
 
     @Test
@@ -192,36 +196,48 @@ class EntityControllerTest {
 
         verify(service).getAll();
         verify(mapper).wrapRecords(records);
-        verify(mapper, never()).getKeyFromDTO(any(), anyBoolean());
-        verify(service, never()).getMatching(any(EntityKey.class));
+
+        verify(mapper, never()).getDataFrom(any(), any());
+        verify(service, never()).getMatching(any(EntityDataPayload.class));
     }
 
     @Test
-    void queryWithParametersUsesPartialKey() {
-        Map<String, Object> query = Map.of("first_id", "10");
+    void queryWithParametersUsesQueryModeAndReturnsMatchingRecords() {
+        Map<String, Object> queryParameters = Map.of(
+                "first_id", "1",
+                "name", "matching"
+        );
 
-        EntityKey<TestTableRecord> key =
-                EntityKey.of(TEST_TABLE.FIRST_ID, 10);
+        EntityDataPayload<TestTableRecord> queryPayload =
+                EntityDataPayload.<TestTableRecord>builder()
+                        .set(TEST_TABLE.FIRST_ID, 1)
+                        .set(TEST_TABLE.NAME, "matching")
+                        .build();
 
         @SuppressWarnings("unchecked")
         Result<TestTableRecord> records = mock(Result.class);
 
         EntityDTO[] expected = {
-                dto(10, 20, "matching", 0, "description")
+                dto(1, 2, "matching", 0, "description")
         };
 
-        when(mapper.getKeyFromDTO(query, false)).thenReturn(key);
-        when(service.getMatching(key)).thenReturn(records);
-        when(mapper.wrapRecords(records)).thenReturn(expected);
+        when(mapper.getDataFrom(queryParameters, QUERY))
+                .thenReturn(queryPayload);
+
+        when(service.getMatching(queryPayload))
+                .thenReturn(records);
+
+        when(mapper.wrapRecords(records))
+                .thenReturn(expected);
 
         ResponseEntity<EntityDTO[]> response =
-                controller.query(query);
+                controller.query(queryParameters);
 
         assertEquals(200, response.getStatusCode().value());
         assertSame(expected, response.getBody());
 
-        verify(mapper).getKeyFromDTO(query, false);
-        verify(service).getMatching(key);
+        verify(mapper).getDataFrom(queryParameters, QUERY);
+        verify(service).getMatching(queryPayload);
         verify(mapper).wrapRecords(records);
         verify(service, never()).getAll();
     }
@@ -245,7 +261,7 @@ class EntityControllerTest {
         EntityDTO expected =
                 dto(1, 2, "found", 0, "description");
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
+        when(mapper.getKeyFromDTO(keyParameters, FULL_KEY))
                 .thenReturn(key);
 
         when(service.find(key)).thenReturn(
@@ -260,7 +276,7 @@ class EntityControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertSame(expected, response.getBody());
 
-        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(mapper).getKeyFromDTO(keyParameters, FULL_KEY);
         verify(service).find(key);
         verify(mapper).wrapRecord(found);
     }
@@ -278,7 +294,7 @@ class EntityControllerTest {
                         .set(TEST_TABLE.SECOND_ID, 2)
                         .build();
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
+        when(mapper.getKeyFromDTO(keyParameters, FULL_KEY))
                 .thenReturn(key);
 
         when(service.find(key)).thenReturn(
@@ -290,7 +306,7 @@ class EntityControllerTest {
                 () -> controller.get(keyParameters)
         );
 
-        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(mapper).getKeyFromDTO(keyParameters, FULL_KEY);
         verify(service).find(key);
         verify(mapper, never()).wrapRecord(any());
     }
@@ -319,24 +335,39 @@ class EntityControllerTest {
                 );
 
         EntityUpdater.UpdateResult.Success<TestTableRecord> success =
-                new EntityUpdater.UpdateResult.Success<>(key, payload);
+                new EntityUpdater.UpdateResult.Success<>(
+                        key,
+                        payload
+                );
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
+        when(mapper.getKeyFromDTO(keyParameters, FULL_KEY))
                 .thenReturn(key);
 
-        when(mapper.getDataFrom(patchParameters, false))
+        when(mapper.getDataFrom(patchParameters, UPDATE))
                 .thenReturn(payload);
 
-        when(service.update(key, payload)).thenReturn(success);
+        when(service.update(key, payload))
+                .thenReturn(success);
 
         ResponseEntity<Boolean> response =
-                controller.patch(keyParameters, patchParameters);
+                controller.patch(
+                        keyParameters,
+                        patchParameters
+                );
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals(Boolean.TRUE, response.getBody());
 
-        verify(mapper).getKeyFromDTO(keyParameters, true);
-        verify(mapper).getDataFrom(patchParameters, false);
+        verify(mapper).getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        );
+
+        verify(mapper).getDataFrom(
+                patchParameters,
+                UPDATE
+        );
+
         verify(service).update(key, payload);
     }
 
@@ -349,13 +380,22 @@ class EntityControllerTest {
                 Map.of("unknown", "value");
 
         RuntimeException failure =
-                new RuntimeException("Invalid creationPayload");
+                new RuntimeException("Invalid payload");
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
-                .thenReturn(EntityKey.of(TEST_TABLE.FIRST_ID, 1));
+        when(mapper.getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        )).thenReturn(
+                EntityKey.of(
+                        TEST_TABLE.FIRST_ID,
+                        1
+                )
+        );
 
-        when(mapper.getDataFrom(patchParameters, false))
-                .thenThrow(failure);
+        when(mapper.getDataFrom(
+                patchParameters,
+                UPDATE
+        )).thenThrow(failure);
 
         RuntimeException thrown = assertThrows(
                 RuntimeException.class,
@@ -366,7 +406,9 @@ class EntityControllerTest {
         );
 
         assertSame(failure, thrown);
-        verify(service, never()).update(any(), any());
+
+        verify(service, never())
+                .update(any(), any());
     }
 
     @Test
@@ -413,29 +455,43 @@ class EntityControllerTest {
         when(mapper.getDataFrom(
                 argThat(parameters ->
                         parameters.size() == 4
-                                && parameters.get("first_id").equals("1")
-                                && parameters.get("second_id").equals("2")
-                                && parameters.get("name").equals("created")
+                                && parameters.get("first_id")
+                                .equals("1")
+                                && parameters.get("second_id")
+                                .equals("2")
+                                && parameters.get("name")
+                                .equals("created")
                                 && parameters.get("description")
                                 .equals("created description")
                 ),
-                eq(true)
+                eq(CREATE)
         )).thenReturn(payload);
 
-        when(service.createAndGet(payload)).thenReturn(created);
-        when(mapper.wrapRecord(created)).thenReturn(expected);
+        when(service.createAndGet(payload))
+                .thenReturn(created);
+
+        when(mapper.wrapRecord(created))
+                .thenReturn(expected);
 
         ResponseEntity<EntityDTO> response =
-                controller.create(initialKey, initialData);
+                controller.create(
+                        initialKey,
+                        initialData
+                );
 
         assertEquals(201, response.getStatusCode().value());
         assertSame(expected, response.getBody());
 
-        URI location = response.getHeaders().getLocation();
+        URI location =
+                response.getHeaders().getLocation();
 
         assertNotNull(location);
-        assertTrue(location.toString().contains("first_id=1"));
-        assertTrue(location.toString().contains("second_id=2"));
+        assertTrue(
+                location.toString().contains("first_id=1")
+        );
+        assertTrue(
+                location.toString().contains("second_id=2")
+        );
 
         verify(service).createAndGet(payload);
         verify(mapper).wrapRecord(created);
@@ -457,58 +513,111 @@ class EntityControllerTest {
                         .build();
 
         TestTableRecord created =
-                record(1, 2, "generated", 0, "generated description");
+                record(
+                        1,
+                        2,
+                        "generated",
+                        0,
+                        "generated description"
+                );
 
         EntityDTO expected =
-                dto(1, 2, "generated", 0, "generated description");
+                dto(
+                        1,
+                        2,
+                        "generated",
+                        0,
+                        "generated description"
+                );
 
-        when(mapper.getDataFrom(initialKey, true))
-                .thenReturn(payload);
+        when(mapper.getDataFrom(
+                initialKey,
+                CREATE
+        )).thenReturn(payload);
 
-        when(service.createAndGet(payload)).thenReturn(created);
-        when(mapper.wrapRecord(created)).thenReturn(expected);
+        when(service.createAndGet(payload))
+                .thenReturn(created);
+
+        when(mapper.wrapRecord(created))
+                .thenReturn(expected);
 
         ResponseEntity<EntityDTO> response =
-                controller.create(initialKey, null);
+                controller.create(
+                        initialKey,
+                        null
+                );
 
         assertEquals(201, response.getStatusCode().value());
         assertSame(expected, response.getBody());
 
-        verify(mapper).getDataFrom(initialKey, true);
+        verify(mapper).getDataFrom(
+                initialKey,
+                CREATE
+        );
+
         verify(service).createAndGet(payload);
     }
 
     @Test
-    void createReturnsOkWhenLocationGenerationFails() throws Exception {
+    void createReturnsOkWhenLocationGenerationFails()
+            throws Exception {
+
         /*
-         * No request context is installed. ServletUriComponentsBuilder throws,
-         * and the controller intentionally falls back to HTTP 200 with the DTO.
+         * No request context is installed.
+         * ServletUriComponentsBuilder throws,
+         * and the controller intentionally falls back
+         * to HTTP 200 with the DTO.
          */
 
         Map<String, Object> initialKey =
                 Map.of("first_id", "1");
 
         EntityDataPayload<TestTableRecord> payload =
-                EntityDataPayload.of(TEST_TABLE.FIRST_ID, 1);
+                EntityDataPayload.of(
+                        TEST_TABLE.FIRST_ID,
+                        1
+                );
 
         TestTableRecord created =
-                record(1, 2, "created", 0, "description");
+                record(
+                        1,
+                        2,
+                        "created",
+                        0,
+                        "description"
+                );
 
         EntityDTO expected =
-                dto(1, 2, "created", 0, "description");
+                dto(
+                        1,
+                        2,
+                        "created",
+                        0,
+                        "description"
+                );
 
-        when(mapper.getDataFrom(initialKey, true))
-                .thenReturn(payload);
+        when(mapper.getDataFrom(
+                initialKey,
+                CREATE
+        )).thenReturn(payload);
 
-        when(service.createAndGet(payload)).thenReturn(created);
-        when(mapper.wrapRecord(created)).thenReturn(expected);
+        when(service.createAndGet(payload))
+                .thenReturn(created);
+
+        when(mapper.wrapRecord(created))
+                .thenReturn(expected);
 
         ResponseEntity<EntityDTO> response =
-                controller.create(initialKey, null);
+                controller.create(
+                        initialKey,
+                        null
+                );
 
         assertEquals(200, response.getStatusCode().value());
         assertSame(expected, response.getBody());
-        assertNull(response.getHeaders().getLocation());
+        assertNull(
+                response.getHeaders().getLocation()
+        );
     }
 
     @Test
@@ -520,18 +629,27 @@ class EntityControllerTest {
                 Map.of("unknown", "value");
 
         RuntimeException failure =
-                new RuntimeException("Invalid creation creationPayload");
+                new RuntimeException(
+                        "Invalid creation payload"
+                );
 
-        when(mapper.getDataFrom(any(), eq(true)))
-                .thenThrow(failure);
+        when(mapper.getDataFrom(
+                any(),
+                eq(CREATE)
+        )).thenThrow(failure);
 
         RuntimeException thrown = assertThrows(
                 RuntimeException.class,
-                () -> controller.create(initialKey, initialData)
+                () -> controller.create(
+                        initialKey,
+                        initialData
+                )
         );
 
         assertSame(failure, thrown);
-        verify(service, never()).createAndGet(any());
+
+        verify(service, never())
+                .createAndGet(any());
     }
 
     @Test
@@ -547,10 +665,13 @@ class EntityControllerTest {
                         .set(TEST_TABLE.SECOND_ID, 2)
                         .build();
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
-                .thenReturn(key);
+        when(mapper.getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        )).thenReturn(key);
 
-        when(service.delete(key)).thenReturn(true);
+        when(service.delete(key))
+                .thenReturn(true);
 
         ResponseEntity<Boolean> response =
                 controller.delete(keyParameters);
@@ -558,7 +679,11 @@ class EntityControllerTest {
         assertEquals(200, response.getStatusCode().value());
         assertEquals(Boolean.TRUE, response.getBody());
 
-        verify(mapper).getKeyFromDTO(keyParameters, true);
+        verify(mapper).getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        );
+
         verify(service).delete(key);
     }
 
@@ -568,21 +693,36 @@ class EntityControllerTest {
                 Map.of("first_id", "99");
 
         EntityKey<TestTableRecord> key =
-                EntityKey.of(TEST_TABLE.FIRST_ID, 99);
+                EntityKey.of(
+                        TEST_TABLE.FIRST_ID,
+                        99
+                );
 
-        when(mapper.getKeyFromDTO(keyParameters, true))
-                .thenReturn(key);
+        when(mapper.getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        )).thenReturn(key);
 
-        when(service.delete(key)).thenReturn(false);
+        when(service.delete(key))
+                .thenReturn(false);
 
         ResponseEntity<Boolean> response =
                 controller.delete(keyParameters);
 
         assertEquals(200, response.getStatusCode().value());
         assertEquals(Boolean.FALSE, response.getBody());
+
+        verify(mapper).getKeyFromDTO(
+                keyParameters,
+                FULL_KEY
+        );
+
+        verify(service).delete(key);
     }
 
-    private static void installRequestContext(String requestUri) {
+    private static void installRequestContext(
+            String requestUri
+    ) {
         MockHttpServletRequest request =
                 new MockHttpServletRequest();
 
@@ -600,8 +740,11 @@ class EntityControllerTest {
     ) implements EntityDTO {
     }
 
-    private static final class TestController extends
-            EntityController<TestTableRecord, TestService> {
+    private static final class TestController
+            extends EntityController<
+            TestTableRecord,
+            TestService
+            > {
 
         private TestController(
                 TestService service,

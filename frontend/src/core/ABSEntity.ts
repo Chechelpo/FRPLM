@@ -328,7 +328,7 @@ function getPathWithIDParams<Key extends KeyRecord>(
     );
 
     if (key !== null) {
-        appendIDParams(url, key);
+        appendQueryParams(url, key);
     }
 
     return url;
@@ -338,7 +338,7 @@ function getPathWithIDParams<Key extends KeyRecord>(
  * @param url mutates, will append params
  * @param key to append
  */
-export function appendIDParams<Key extends KeyRecord>(url:URL, key: Readonly<Partial<Key>>): void {
+export function appendQueryParams<Key extends KeyRecord>(url:URL, key: Readonly<Partial<Key>>): void {
     // identityParams come from query string
     for (const [k, v] of Object.entries(key)) {
         if (v === undefined) continue;
@@ -396,26 +396,38 @@ export async function fetch_all<
 
     return result.map(dto => new ctor(dto,object_type));
 }
+
+export type EntityQuery<
+    Key extends KeyRecord,
+    Data extends DataRecord,
+> = Partial<Key & Data>;
 export async function fetchMatching<
     Key extends KeyRecord,
     Data extends DataRecord,
     T extends ABSEntity<Key, Data>
 >(
-    key:Partial<Key>,
-    object_type:EntityTypes,
-    ctor: new (dto: DTO, object_type:EntityTypes) => T
-): Promise<T[]>{
-    let path = new URL(`${getEntityController(object_type).toString()}/query`);
-    appendIDParams<Key>(path, key);
+    query: EntityQuery<Key, Data>,
+    objectType: EntityTypes,
+    ctor: new (dto: DTO, objectType: EntityTypes) => T,
+): Promise<T[]> {
+
+    const path = getQueryPath(objectType);
+
+    appendQueryParams(path, query);
+
     const response = await fetchApi(
         path.toString(),
         {
-            method:"GET",
-            headers: new Headers({accept:"application/json"})
-        }
+            method: "GET",
+            headers: new Headers({
+                accept: "application/json",
+            }),
+        },
     );
 
-    return (await response.json() as DTO[]).map(dto => new ctor(dto,object_type));
+    const dtos = await response.json() as DTO[];
+
+    return dtos.map(dto => new ctor(dto, objectType));
 }
 
 export async function fetchOne<
@@ -527,9 +539,10 @@ export async function UpdateEntityField<
 const ASSET_ROUTE = "asset";
 const ASSET_METADATA_ROUTE = "asset-metadata";
 
-export type EntityAssetType =
-    | "avatar"
-    | "background";
+export enum EntityAssetType{
+    AVATAR="avatar",
+    BACKGROUND = "background"
+}
 
 export type StoredAssetDTO = Readonly<{
     type: string;
@@ -588,7 +601,7 @@ function getEntityAssetEndpoint<Key extends KeyRecord>(
         API_BASE,
     );
 
-    appendIDParams(
+    appendQueryParams(
         url,
         key,
     );

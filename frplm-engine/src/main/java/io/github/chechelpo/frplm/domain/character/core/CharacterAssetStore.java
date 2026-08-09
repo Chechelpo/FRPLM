@@ -18,6 +18,6 @@ public final class CharacterAssetStore extends EntityAssetStore<CharactersRecord
 
     @Override
     protected CharacterSnapshot.Reference getStableReference(CharactersRecord record) {
-        return new CharacterSnapshot.Reference(record.getId());
+        return new CharacterSnapshot.Reference(record.getWorldId(), record.getId());
     }
 }

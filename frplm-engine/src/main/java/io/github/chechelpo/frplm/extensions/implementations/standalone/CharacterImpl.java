@@ -16,7 +16,7 @@ public class CharacterImpl extends StandaloneEntity<CharactersRecord> implements
     }
 
     public static Reference asReference(CharactersRecord record) {
-        return new CharacterSnapshot.Reference(record.getId());
+        return new CharacterSnapshot.Reference(record.getWorldId(), record.getId());
     }
     @Override
     public LorebookSnapshot lorebook() {

@@ -164,19 +164,7 @@ public class ResponseLocationChanges extends TableImpl<ResponseLocationChangesRe
 
     @Override
     public List<ForeignKey<ResponseLocationChangesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_37, Keys.FK_RESPONSE_LOCATION_CHANGES_LOCATION, Keys.FK_RESPONSE_LOCATION_CHANGES_RESPONSE);
-    }
-
-    private transient CharactersPath _characters;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
-     */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, Keys.CONSTRAINT_37, null);
-
-        return _characters;
+        return Arrays.asList(Keys.FK_RESPONSE_LOCATION_CHANGES_LOCATION, Keys.FK_RESPONSE_LOCATION_CHANGES_RESPONSE, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER);
     }
 
     private transient LocationsPath _locations;
@@ -201,6 +189,18 @@ public class ResponseLocationChanges extends TableImpl<ResponseLocationChangesRe
             _responses = new ResponsesPath(this, Keys.FK_RESPONSE_LOCATION_CHANGES_RESPONSE, null);
 
         return _responses;
+    }
+
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
+     */
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER, null);
+
+        return _characters;
     }
 
     @Override

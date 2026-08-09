@@ -13,7 +13,6 @@ import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
 import {DTO, PromptDTO} from "@/types/DTOs";
 import {PromptTemplate, PromptTemplateData, PromptTemplateKey} from "@/domain/Prompts";
 import {ChatCompletionRequest, ChatCompletionRole} from "@/types/ChatCompletions";
-import {API_BASE} from "@/config";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
 import {fetchApi} from "@/services/apiClient";
 
@@ -52,8 +51,13 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
         )
     }
     public async getUserCharacter() : Promise<Character> {
-        return await fetchOne<CharacterKey, CharacterData, Character>({id:this.get('user_id')}, EntityTypes.CHARACTERS, Character)
+        return await fetchOne<CharacterKey, CharacterData, Character>(
+            {id:this.get('user_id'), world_id:this.get('world_id')},
+            EntityTypes.CHARACTERS,
+            Character
+        )
     }
+
     public async getMessages() : Promise<Message[]>{
         return fetchMatching<MessagesKey, MessageData, Message>(
             {
@@ -63,6 +67,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
             Message
         );
     }
+
     public async getTemplate() : Promise<PromptTemplate | null>{
         if (this.get('template_id') == null) return null;
         return await fetchOne<PromptTemplateKey, PromptTemplateData, PromptTemplate>(
@@ -138,7 +143,7 @@ export class Session extends ABSEntity<SessionKey,SessionData>{
     }
 
     public static async newSession(name:string, world:World, user:Character): Promise<Session>{
-        return await createEntity<SessionKey,SessionData,Session>(
+        return await createEntity<SessionKey,SessionData,Session> (
             null,
             {
                 name:name,

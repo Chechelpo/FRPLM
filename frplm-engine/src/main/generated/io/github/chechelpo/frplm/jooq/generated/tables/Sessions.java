@@ -8,7 +8,6 @@ import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptTemplate.PromptTemplatePath;
@@ -80,9 +79,9 @@ public class Sessions extends TableImpl<SessionsRecord> {
     public final TableField<SessionsRecord, Integer> WORLD_ID = createField(DSL.name("WORLD_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.SESSIONS.MAIN_PROMPT</code>.
+     * The column <code>PUBLIC.SESSIONS.PROMPT_ID</code>.
      */
-    public final TableField<SessionsRecord, Integer> MAIN_PROMPT = createField(DSL.name("MAIN_PROMPT"), SQLDataType.INTEGER, this, "");
+    public final TableField<SessionsRecord, Integer> PROMPT_ID = createField(DSL.name("PROMPT_ID"), SQLDataType.INTEGER, this, "");
 
     /**
      * The column <code>PUBLIC.SESSIONS.USER_PERSONA_ID</code>.
@@ -173,19 +172,7 @@ public class Sessions extends TableImpl<SessionsRecord> {
 
     @Override
     public List<ForeignKey<SessionsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_826, Keys.CONSTRAINT_8265, Keys.CONSTRAINT_8265C);
-    }
-
-    private transient WorldsPath _worlds;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
-     */
-    public WorldsPath worlds() {
-        if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_826, null);
-
-        return _worlds;
+        return Arrays.asList(Keys.FK_SESSIONS_TO_TEMPLATE, Keys.FK_SESSIONS_TO_USER_CHARACTER, Keys.FK_SESSIONS_TO_WORLD);
     }
 
     private transient PromptTemplatePath _promptTemplate;
@@ -196,7 +183,7 @@ public class Sessions extends TableImpl<SessionsRecord> {
      */
     public PromptTemplatePath promptTemplate() {
         if (_promptTemplate == null)
-            _promptTemplate = new PromptTemplatePath(this, Keys.CONSTRAINT_8265, null);
+            _promptTemplate = new PromptTemplatePath(this, Keys.FK_SESSIONS_TO_TEMPLATE, null);
 
         return _promptTemplate;
     }
@@ -208,48 +195,21 @@ public class Sessions extends TableImpl<SessionsRecord> {
      */
     public CharactersPath characters() {
         if (_characters == null)
-            _characters = new CharactersPath(this, Keys.CONSTRAINT_8265C, null);
+            _characters = new CharactersPath(this, Keys.FK_SESSIONS_TO_USER_CHARACTER, null);
 
         return _characters;
     }
 
-    private transient MessagesPath _messages;
+    private transient WorldsPath _worlds;
 
     /**
-     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
-     * table
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
      */
-    public MessagesPath messages() {
-        if (_messages == null)
-            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_1.getInverseKey());
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.FK_SESSIONS_TO_WORLD, null);
 
-        return _messages;
-    }
-
-    private transient ResponsesPath _responses;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
-     * table
-     */
-    public ResponsesPath responses() {
-        if (_responses == null)
-            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_31.getInverseKey());
-
-        return _responses;
-    }
-
-    private transient ExtrasPath _extras;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
-     * table
-     */
-    public ExtrasPath extras() {
-        if (_extras == null)
-            _extras = new ExtrasPath(this, null, Keys.CONSTRAINT_7A.getInverseKey());
-
-        return _extras;
+        return _worlds;
     }
 
     private transient CurrentLocationsPath _currentLocations;
@@ -276,6 +236,32 @@ public class Sessions extends TableImpl<SessionsRecord> {
             _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E6.getInverseKey());
 
         return _movements;
+    }
+
+    private transient MessagesPath _messages;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
+     * table
+     */
+    public MessagesPath messages() {
+        if (_messages == null)
+            _messages = new MessagesPath(this, null, Keys.FK_MESSAGE_TO_SESSION.getInverseKey());
+
+        return _messages;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.FK_TO_SESSION.getInverseKey());
+
+        return _responses;
     }
 
     @Override

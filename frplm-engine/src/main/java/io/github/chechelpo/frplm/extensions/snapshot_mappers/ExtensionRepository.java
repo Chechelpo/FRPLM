@@ -27,8 +27,7 @@ public final class ExtensionRepository implements EngineRepository, SmartInitial
                 register(new RegionMapper(context.regions())),
                 register(new LocationMapper(context.locations())),
                 register(new EntryMapper(context.entries())),
-                register(new SectionMapper(context.sections())),
-                register(new TagMapper(context.tags()))
+                register(new SectionMapper(context.sections()))
         );
     }
 

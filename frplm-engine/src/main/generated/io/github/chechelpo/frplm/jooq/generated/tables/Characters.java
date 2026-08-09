@@ -6,20 +6,15 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags.CharacterTagsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Tags.TagsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +22,6 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
-import org.jooq.Identity;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -69,14 +63,14 @@ public class Characters extends TableImpl<CharactersRecord> {
     }
 
     /**
-     * The column <code>PUBLIC.CHARACTERS.ID</code>.
+     * The column <code>PUBLIC.CHARACTERS.WORLD_ID</code>.
      */
-    public final TableField<CharactersRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false).identity(true), this, "");
+    public final TableField<CharactersRecord, Integer> WORLD_ID = createField(DSL.name("WORLD_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.CHARACTERS.CREATED</code>.
+     * The column <code>PUBLIC.CHARACTERS.ID</code>.
      */
-    public final TableField<CharactersRecord, LocalDateTime> CREATED = createField(DSL.name("CREATED"), SQLDataType.LOCALDATETIME(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.LOCALDATETIME)), this, "");
+    public final TableField<CharactersRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.CHARACTERS.NAME</code>.
@@ -87,11 +81,6 @@ public class Characters extends TableImpl<CharactersRecord> {
      * The column <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
      */
     public final TableField<CharactersRecord, String> DESCRIPTION = createField(DSL.name("DESCRIPTION"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("''"), SQLDataType.VARCHAR)), this, "");
-
-    /**
-     * The column <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
-     */
-    public final TableField<CharactersRecord, Boolean> IS_ARCHETYPE = createField(DSL.name("IS_ARCHETYPE"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
 
     /**
      * The column <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
@@ -176,23 +165,18 @@ public class Characters extends TableImpl<CharactersRecord> {
     }
 
     @Override
-    public Identity<CharactersRecord, Integer> getIdentity() {
-        return (Identity<CharactersRecord, Integer>) super.getIdentity();
-    }
-
-    @Override
     public UniqueKey<CharactersRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_67;
+        return Keys.PK_CHARACTER;
     }
 
     @Override
     public List<UniqueKey<CharactersRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.CONSTRAINT_672);
+        return Arrays.asList(Keys.CONSTRAINT_67, Keys.UK_CHARACTER_NAME_PER_WORLD);
     }
 
     @Override
     public List<ForeignKey<CharactersRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_6725);
+        return Arrays.asList(Keys.CONSTRAINT_672, Keys.FK_TO_WORLD);
     }
 
     private transient LorebooksPath _lorebooks;
@@ -202,61 +186,21 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public LorebooksPath lorebooks() {
         if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_6725, null);
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_672, null);
 
         return _lorebooks;
     }
 
-    private transient ResponseLocationChangesPath _responseLocationChanges;
+    private transient WorldsPath _worlds;
 
     /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
      */
-    public ResponseLocationChangesPath responseLocationChanges() {
-        if (_responseLocationChanges == null)
-            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.CONSTRAINT_37.getInverseKey());
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.FK_TO_WORLD, null);
 
-        return _responseLocationChanges;
-    }
-
-    private transient SessionsPath _sessions;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.SESSIONS</code>
-     * table
-     */
-    public SessionsPath sessions() {
-        if (_sessions == null)
-            _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_8265C.getInverseKey());
-
-        return _sessions;
-    }
-
-    private transient CharacterTagsPath _characterTags;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CHARACTER_TAGS</code> table
-     */
-    public CharacterTagsPath characterTags() {
-        if (_characterTags == null)
-            _characterTags = new CharacterTagsPath(this, null, Keys.CONSTRAINT_9510.getInverseKey());
-
-        return _characterTags;
-    }
-
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5.getInverseKey());
-
-        return _currentLocations;
+        return _worlds;
     }
 
     private transient StartingLocationsPath _startingLocations;
@@ -272,6 +216,19 @@ public class Characters extends TableImpl<CharactersRecord> {
         return _startingLocations;
     }
 
+    private transient CurrentLocationsPath _currentLocations;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
+     */
+    public CurrentLocationsPath currentLocations() {
+        if (_currentLocations == null)
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_TO_CHARACTER.getInverseKey());
+
+        return _currentLocations;
+    }
+
     private transient MovementsPath _movements;
 
     /**
@@ -280,41 +237,35 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public MovementsPath movements() {
         if (_movements == null)
-            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68.getInverseKey());
+            _movements = new MovementsPath(this, null, Keys.FK_MOVEMENTS_TO_CHARACTERS.getInverseKey());
 
         return _movements;
     }
 
+    private transient ResponseLocationChangesPath _responseLocationChanges;
+
     /**
-     * Get the implicit many-to-many join path to the <code>PUBLIC.TAGS</code>
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
+     */
+    public ResponseLocationChangesPath responseLocationChanges() {
+        if (_responseLocationChanges == null)
+            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER.getInverseKey());
+
+        return _responseLocationChanges;
+    }
+
+    private transient SessionsPath _sessions;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.SESSIONS</code>
      * table
      */
-    public TagsPath tags() {
-        return characterTags().tags();
-    }
+    public SessionsPath sessions() {
+        if (_sessions == null)
+            _sessions = new SessionsPath(this, null, Keys.FK_SESSIONS_TO_USER_CHARACTER.getInverseKey());
 
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.MESSAGES</code> table
-     */
-    public MessagesPath messages() {
-        return movements().messages();
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.RESPONSES</code> table
-     */
-    public ResponsesPath responses() {
-        return responseLocationChanges().responses();
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the <code>PUBLIC.WORLDS</code>
-     * table
-     */
-    public WorldsPath worlds() {
-        return startingLocations().worlds();
+        return _sessions;
     }
 
     @Override

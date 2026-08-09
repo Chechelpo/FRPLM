@@ -6,10 +6,7 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extension.ExtensionPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extras.ExtrasPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
@@ -200,31 +197,7 @@ public class Messages extends TableImpl<MessagesRecord> {
 
     @Override
     public List<ForeignKey<MessagesRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_1, Keys.CONSTRAINT_131, Keys.FK_MESSAGE_TO_LOCATION);
-    }
-
-    private transient SessionsPath _sessions;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
-     */
-    public SessionsPath sessions() {
-        if (_sessions == null)
-            _sessions = new SessionsPath(this, Keys.CONSTRAINT_1, null);
-
-        return _sessions;
-    }
-
-    private transient WorldsPath _worlds;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
-     */
-    public WorldsPath worlds() {
-        if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_131, null);
-
-        return _worlds;
+        return Arrays.asList(Keys.FK_MESSAGE_TO_LOCATION, Keys.FK_MESSAGE_TO_SESSION, Keys.FK_MESSAGE_TO_WORLD);
     }
 
     private transient LocationsPath _locations;
@@ -239,6 +212,30 @@ public class Messages extends TableImpl<MessagesRecord> {
         return _locations;
     }
 
+    private transient SessionsPath _sessions;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.SESSIONS</code> table.
+     */
+    public SessionsPath sessions() {
+        if (_sessions == null)
+            _sessions = new SessionsPath(this, Keys.FK_MESSAGE_TO_SESSION, null);
+
+        return _sessions;
+    }
+
+    private transient WorldsPath _worlds;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.WORLDS</code> table.
+     */
+    public WorldsPath worlds() {
+        if (_worlds == null)
+            _worlds = new WorldsPath(this, Keys.FK_MESSAGE_TO_WORLD, null);
+
+        return _worlds;
+    }
+
     private transient CurrentLocationsPath _currentLocations;
 
     /**
@@ -250,19 +247,6 @@ public class Messages extends TableImpl<MessagesRecord> {
             _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_MESSAGE.getInverseKey());
 
         return _currentLocations;
-    }
-
-    private transient ExtrasPath _extras;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.EXTRAS</code>
-     * table
-     */
-    public ExtrasPath extras() {
-        if (_extras == null)
-            _extras = new ExtrasPath(this, null, Keys.FK_EXTRAS_MESSAGE.getInverseKey());
-
-        return _extras;
     }
 
     private transient MovementsPath _movements;
@@ -291,26 +275,12 @@ public class Messages extends TableImpl<MessagesRecord> {
         return _responses;
     }
 
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.EXTENSION</code> table
-     */
-    public ExtensionPath extension() {
-        return extras().extension();
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.CHARACTERS</code> table
-     */
-    public CharactersPath characters() {
-        return movements().characters();
-    }
-
     @Override
     public List<Check<MessagesRecord>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("CONSTRAINT_13"), "\"ROLE\" IN('user', 'assistant')", true),
+            Internal.createCheck(this, DSL.name("CHK_ACTIVE_RESPONSE_NON_NEGATIVE"), "\"ACTIVE_RESPONSE\" >= 0", true),
+            Internal.createCheck(this, DSL.name("CHK_RESPONSE_NUM_NON_NEGATIVE"), "\"RESPONSE_NUM\" >= 0", true),
+            Internal.createCheck(this, DSL.name("CHK_ROLE_IS_ALLOWED_VALUE"), "\"ROLE\" IN('user', 'assistant')", true),
             Internal.createCheck(this, DSL.name("REASONING_ONLY_FOR_GENERATED_MESSAGES"), "(\"REASONING\" IS NULL)\n    OR (\"ROLE\" = 'assistant')", true),
             Internal.createCheck(this, DSL.name("REQUEST_JSON_ONLY_FOR_GENERATED_MESSAGES"), "(\"REQUEST_JSON\" IS NULL)\n    OR (\"ROLE\" = 'assistant')", true)
         );

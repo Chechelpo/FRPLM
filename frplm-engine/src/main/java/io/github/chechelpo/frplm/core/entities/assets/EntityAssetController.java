@@ -215,7 +215,7 @@ public abstract class EntityAssetController<R extends TableRecord<R>> {
 
         EntityKey<R> key = mapper.getKeyFromDTO(
                 keyParams,
-                false
+                DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY
         );
 
         return entityReader.find(key).orElseThrow();

@@ -24,7 +24,7 @@ final class SessionFieldsHelper extends EntityControllerFieldValidator<SessionsR
                 DTOField.of(SESSIONS.NAME, "name"),
                 DTOField.of(SESSIONS.USER_PERSONA_ID, "user_id"),
                 DTOField.of(SESSIONS.WORLD_ID, "world_id"),
-                DTOField.of(SESSIONS.MAIN_PROMPT, "template_id")
+                DTOField.of(SESSIONS.PROMPT_ID, "template_id")
         );
     }
 
@@ -51,7 +51,7 @@ final class SessionFieldsHelper extends EntityControllerFieldValidator<SessionsR
                         .requireOnCreate()
                         .build(),
 
-                FieldInfo.builder(SESSIONS.MAIN_PROMPT)
+                FieldInfo.builder(SESSIONS.PROMPT_ID)
                         .nullable()
                         .build()
         );

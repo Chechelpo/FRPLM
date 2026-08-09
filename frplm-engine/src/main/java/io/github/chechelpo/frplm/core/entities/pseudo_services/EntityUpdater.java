@@ -4,11 +4,13 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
+import org.jooq.TableField;
 import org.jooq.TableRecord;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface EntityUpdater<R extends TableRecord<R>> {
@@ -188,164 +190,162 @@ public interface EntityUpdater<R extends TableRecord<R>> {
             }
         }
     }
-/*
-    <T extends Number> IncrementResult<R, T> incrementAndGet(
-            TableField<R, T> field,
-            EntityKey<R> key
-    );
-
-    sealed interface IncrementResult<
-            R extends TableRecord<R>,
-            T extends Number
-            >
-            permits IncrementResult.Success,
-                    IncrementResult.NoSuchEntity,
-                    IncrementResult.Failure {
-
-        <V> V fold(
-                Function<? super Success<R, T>, ? extends V> onSuccess,
-                Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
-                Function<? super Failure<R, T>, ? extends V> onFailure
-        );
-
-        default boolean success() {
-            return fold(
-                    ignored -> true,
-                    ignored -> false,
-                    ignored -> false
-            );
-        }
-
-        default IncrementResult<R, T> ifSuccess(
-                Consumer<? super Success<R, T>> action
-        ) {
-            Objects.requireNonNull(action, "action");
-
-            return fold(
-                    success -> {
-                        action.accept(success);
-                        return this;
-                    },
-                    ignored -> this,
-                    ignored -> this
-            );
-        }
-
-        default IncrementResult<R, T> ifNoSuchEntity(
-                Consumer<? super NoSuchEntity<R, T>> action
-        ) {
-            Objects.requireNonNull(action, "action");
-
-            return fold(
-                    ignored -> this,
-                    missing -> {
-                        action.accept(missing);
-                        return this;
-                    },
-                    ignored -> this
-            );
-        }
-
-        default IncrementResult<R, T> ifFailure(
-                Consumer<? super Failure<R, T>> action
-        ) {
-            Objects.requireNonNull(action, "action");
-
-            return fold(
-                    ignored -> this,
-                    ignored -> this,
-                    failure -> {
-                        action.accept(failure);
-                        return this;
-                    }
-            );
-        }
-
-        record Success<
-                R extends TableRecord<R>,
-                T extends Number
-                >(
-                EntityKey<R> key,
-                TableField<R, T> field,
-                T value
-        ) implements IncrementResult<R, T> {
-
-            public Success {
-                Objects.requireNonNull(key, "key");
-                Objects.requireNonNull(field, "field");
-                Objects.requireNonNull(value, "value");
-            }
-
-            @Override
-            public <V> V fold(
-                    Function<? super Success<R, T>, ? extends V> onSuccess,
-                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
-                    Function<? super Failure<R, T>, ? extends V> onFailure
-            ) {
-                Objects.requireNonNull(onSuccess, "onSuccess");
-                Objects.requireNonNull(onMissing, "onMissing");
-                Objects.requireNonNull(onFailure, "onFailure");
-
-                return onSuccess.apply(this);
-            }
-        }
-
-        record NoSuchEntity<
-                R extends TableRecord<R>,
-                T extends Number
-                >(
-                EntityKey<R> key,
-                TableField<R, T> field
-        ) implements IncrementResult<R, T> {
-
-            public NoSuchEntity {
-                Objects.requireNonNull(key, "key");
-                Objects.requireNonNull(field, "field");
-            }
-
-            @Override
-            public <V> V fold(
-                    Function<? super Success<R, T>, ? extends V> onSuccess,
-                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
-                    Function<? super Failure<R, T>, ? extends V> onFailure
-            ) {
-                Objects.requireNonNull(onSuccess, "onSuccess");
-                Objects.requireNonNull(onMissing, "onMissing");
-                Objects.requireNonNull(onFailure, "onFailure");
-
-                return onMissing.apply(this);
-            }
-        }
-
-        record Failure<
-                R extends TableRecord<R>,
-                T extends Number
-                >(
-                EntityKey<R> key,
-                TableField<R, T> field,
-                String message,
-                Exception exception
-        ) implements IncrementResult<R, T> {
-
-            public Failure {
-                Objects.requireNonNull(key, "key");
-                Objects.requireNonNull(field, "field");
-                Objects.requireNonNull(message, "message");
-                Objects.requireNonNull(exception, "exception");
-            }
-
-            @Override
-            public <V> V fold(
-                    Function<? super Success<R, T>, ? extends V> onSuccess,
-                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
-                    Function<? super Failure<R, T>, ? extends V> onFailure
-            ) {
-                Objects.requireNonNull(onSuccess, "onSuccess");
-                Objects.requireNonNull(onMissing, "onMissing");
-                Objects.requireNonNull(onFailure, "onFailure");
-
-                return onFailure.apply(this);
-            }
-        }
-    }*/
+//
+//    <T extends Number> IncrementResult<R, T> incrementAndGet(
+//            TableField<R, T> field,
+//            EntityKey<R> key
+//    );
+//
+//    sealed interface IncrementResult<R extends TableRecord<R>, T extends Number>
+//            permits IncrementResult.Success,
+//                    IncrementResult.NoSuchEntity,
+//                    IncrementResult.Failure
+//    {
+//
+//        <V> V fold(
+//                Function<? super Success<R, T>, ? extends V> onSuccess,
+//                Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
+//                Function<? super Failure<R, T>, ? extends V> onFailure
+//        );
+//
+//        default boolean success() {
+//            return fold(
+//                    ignored -> true,
+//                    ignored -> false,
+//                    ignored -> false
+//            );
+//        }
+//
+//        default IncrementResult<R, T> ifSuccess(
+//                Consumer<? super Success<R, T>> action
+//        ) {
+//            Objects.requireNonNull(action, "action");
+//
+//            return fold(
+//                    success -> {
+//                        action.accept(success);
+//                        return this;
+//                    },
+//                    ignored -> this,
+//                    ignored -> this
+//            );
+//        }
+//
+//        default IncrementResult<R, T> ifNoSuchEntity(
+//                Consumer<? super NoSuchEntity<R, T>> action
+//        ) {
+//            Objects.requireNonNull(action, "action");
+//
+//            return fold(
+//                    ignored -> this,
+//                    missing -> {
+//                        action.accept(missing);
+//                        return this;
+//                    },
+//                    ignored -> this
+//            );
+//        }
+//
+//        default IncrementResult<R, T> ifFailure(
+//                Consumer<? super Failure<R, T>> action
+//        ) {
+//            Objects.requireNonNull(action, "action");
+//
+//            return fold(
+//                    ignored -> this,
+//                    ignored -> this,
+//                    failure -> {
+//                        action.accept(failure);
+//                        return this;
+//                    }
+//            );
+//        }
+//
+//        record Success<
+//                R extends TableRecord<R>,
+//                T extends Number
+//                >(
+//                EntityKey<R> key,
+//                TableField<R, T> field,
+//                T value
+//        ) implements IncrementResult<R, T> {
+//
+//            public Success {
+//                Objects.requireNonNull(key, "key");
+//                Objects.requireNonNull(field, "field");
+//                Objects.requireNonNull(value, "value");
+//            }
+//
+//            @Override
+//            public <V> V fold(
+//                    Function<? super Success<R, T>, ? extends V> onSuccess,
+//                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
+//                    Function<? super Failure<R, T>, ? extends V> onFailure
+//            ) {
+//                Objects.requireNonNull(onSuccess, "onSuccess");
+//                Objects.requireNonNull(onMissing, "onMissing");
+//                Objects.requireNonNull(onFailure, "onFailure");
+//
+//                return onSuccess.apply(this);
+//            }
+//        }
+//
+//        record NoSuchEntity<
+//                R extends TableRecord<R>,
+//                T extends Number
+//                >(
+//                EntityKey<R> key,
+//                TableField<R, T> field
+//        ) implements IncrementResult<R, T> {
+//
+//            public NoSuchEntity {
+//                Objects.requireNonNull(key, "key");
+//                Objects.requireNonNull(field, "field");
+//            }
+//
+//            @Override
+//            public <V> V fold(
+//                    Function<? super Success<R, T>, ? extends V> onSuccess,
+//                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
+//                    Function<? super Failure<R, T>, ? extends V> onFailure
+//            ) {
+//                Objects.requireNonNull(onSuccess, "onSuccess");
+//                Objects.requireNonNull(onMissing, "onMissing");
+//                Objects.requireNonNull(onFailure, "onFailure");
+//
+//                return onMissing.apply(this);
+//            }
+//        }
+//
+//        record Failure<
+//                R extends TableRecord<R>,
+//                T extends Number
+//                >(
+//                EntityKey<R> key,
+//                TableField<R, T> field,
+//                String message,
+//                Exception exception
+//        ) implements IncrementResult<R, T> {
+//
+//            public Failure {
+//                Objects.requireNonNull(key, "key");
+//                Objects.requireNonNull(field, "field");
+//                Objects.requireNonNull(message, "message");
+//                Objects.requireNonNull(exception, "exception");
+//            }
+//
+//            @Override
+//            public <V> V fold(
+//                    Function<? super Success<R, T>, ? extends V> onSuccess,
+//                    Function<? super NoSuchEntity<R, T>, ? extends V> onMissing,
+//                    Function<? super Failure<R, T>, ? extends V> onFailure
+//            ) {
+//                Objects.requireNonNull(onSuccess, "onSuccess");
+//                Objects.requireNonNull(onMissing, "onMissing");
+//                Objects.requireNonNull(onFailure, "onFailure");
+//
+//                return onFailure.apply(this);
+//            }
+//        }
+//    }
 }

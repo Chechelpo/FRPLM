@@ -177,7 +177,7 @@ final class ImporterService {
 
             if (locationOrder.charactersStartingHere() == null) continue;
             for (NewCharacterOrder newCharacterOrder : locationOrder.charactersStartingHere()) {
-                CharactersRecord characterRecord = executeCharacter(newCharacterOrder);
+                CharactersRecord characterRecord = executeCharacter(newCharacterOrder, worldId);
                 startingLocationsService.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
                         .set(STARTING_LOCATIONS.WORLD_ID, worldId)
                         .set(STARTING_LOCATIONS.LOCATION_ID, newLocation.getId())
@@ -189,10 +189,11 @@ final class ImporterService {
 
     }
 
-    @NonNull CharactersRecord executeCharacter(NewCharacterOrder newCharacterOrder) {
+    @NonNull CharactersRecord executeCharacter(NewCharacterOrder newCharacterOrder, int worldId) {
         LorebooksRecord characterLorebook = executeLorebook(newCharacterOrder.lorebook());
+        newCharacterOrder.payload().set(CHARACTERS.WORLD_ID, worldId);
         newCharacterOrder.payload().set(CHARACTERS.LOREBOOK_ID, characterLorebook.getId());
-        return characterService.createAndGet(newCharacterOrder.payload());
+        return characterService.consume(newCharacterOrder);
     }
 
     void executeEdges(@NonNull List<NewEdgeOrder> locationEdges, int worldId) {

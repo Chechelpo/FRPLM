@@ -3,15 +3,17 @@ import {
     ABSEntity,
     createEntity,
     deleteEntity,
+    EntityAssetType,
     fetchMatching,
     fetchOne,
-    getEntityController, StoredAssetDTO
+    getEntityController,
+    StoredAssetDTO
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
 import {DTO} from "@/types/DTOs";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
 import {fetchApi} from "@/services/apiClient";
-import {Character} from "@/domain/Characters";
+import {Character, CharacterData, CharacterKey} from "@/domain/Characters";
 
 export type BackgroundFit =
     | "contain"
@@ -80,6 +82,18 @@ export class World extends ABSEntity<WorldKey, WorldData> {
         }
 
         return this.lorebook;
+    }
+
+    public async getCharacters() : Promise<Character[]> {
+        return fetchMatching<
+            CharacterKey,
+            CharacterData,
+            Character
+        > (
+            {world_id:this.get('id')},
+            EntityTypes.WORLDS,
+            Character
+        )
     }
 
     public async getLocations(): Promise<Location[]> {
@@ -348,7 +362,7 @@ export class Region extends ABSEntity<RegionKey, RegionData>{
      * @return the background Blob, or null when no background is stored
      */
     public async fetchBackground(): Promise<Blob | null> {
-        return this.getAsset("background");
+        return this.getAsset(EntityAssetType.BACKGROUND);
     }
 
     /**
@@ -363,7 +377,7 @@ export class Region extends ABSEntity<RegionKey, RegionData>{
         replace = true,
     ): Promise<StoredAssetDTO> {
         return this.postAsset(
-            "background",
+            EntityAssetType.BACKGROUND,
             background,
             replace,
         );
@@ -375,7 +389,7 @@ export class Region extends ABSEntity<RegionKey, RegionData>{
      * The underlying operation is idempotent.
      */
     public async deleteBackground(): Promise<void> {
-        await this.deleteAsset("background");
+        await this.deleteAsset(EntityAssetType.BACKGROUND);
     }
 }
 
@@ -404,16 +418,6 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
         return Location.REFERENCE_KEY_ORDER;
     }
 
-    public async getStartingHere(): Promise<Character[]>{
-        return await fetchApi(
-            `api/${EntityTypes.CHARACTERS}/startingAt` +
-            `?worldId=${this.get("worldID")}` +
-            `&locationId=${this.get("id")}`,
-            {
-                method: "GET",
-            },
-        ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto)))
-    }
 
     public async getLorebook(): Promise<Lorebook> {
         if (this.lorebook == null)
@@ -435,6 +439,73 @@ export class Location extends ABSEntity<LocationKey, LocationData> {
             x: position.x,
             y: position.y,
         });
+    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Characters here
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    public async getStartingHere(): Promise<Character[]>{
+        return await fetchApi(
+            `api/${EntityTypes.CHARACTERS}/startingAt` +
+            `?worldId=${this.get("worldID")}` +
+            `&locationId=${this.get("id")}`,
+            {
+                method: "GET",
+                headers: {
+                    accept: "content-type/application-json"
+                }
+            },
+        ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto)))
+    }
+
+    public async createCharacterStartingHere(name:string): Promise<Character>{
+        return await createEntity<CharacterKey,CharacterData,Character>(
+            {world_id:this.get('worldID')},
+            {name:name},
+            EntityTypes.CHARACTERS,
+            Character
+        ).then(async response => {
+            await response.markStartingAt(this);
+            return response;
+        })
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // LOCATION ASSETS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Fetches this location's background image.
+     *
+     * @return the background Blob, or null when no background is stored
+     */
+    public async fetchBackground(): Promise<Blob | null> {
+        return this.getAsset(EntityAssetType.BACKGROUND);
+    }
+
+    /**
+     * Uploads or replaces this location's background image.
+     *
+     * @param background image data to upload
+     * @param replace when false, saving fails if a background already exists
+     * @return metadata for the stored background
+     */
+    public async saveBackground(
+        background: File | Blob,
+        replace = true,
+    ): Promise<StoredAssetDTO> {
+        return this.postAsset(
+            EntityAssetType.BACKGROUND,
+            background,
+            replace,
+        );
+    }
+
+    /**
+     * Deletes this location's background image.
+     *
+     * The underlying operation is idempotent.
+     */
+    public async deleteBackground(): Promise<void> {
+        await this.deleteAsset(EntityAssetType.BACKGROUND);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

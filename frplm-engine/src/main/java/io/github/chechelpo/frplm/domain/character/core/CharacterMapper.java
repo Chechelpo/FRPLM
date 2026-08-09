@@ -47,7 +47,6 @@ public final class CharacterMapper extends ABSWireMapper<CharactersRecord, Chara
                 record.getName(),
                 record.getDescription(),
                 record.getCanBeUser(),
-                record.getIsArchetype(),
                 record.getWelcomeMessage(),
                 lorebookMapper.jsonRecordFrom(
                         readers.lorebooks().require(EntityKey.of(LOREBOOKS.ID,record.getLorebookId())),
@@ -64,7 +63,6 @@ public final class CharacterMapper extends ABSWireMapper<CharactersRecord, Chara
                         .set(CHARACTERS.NAME, json.name())
                         .set(CHARACTERS.DESCRIPTION, json.description())
                         .set(CHARACTERS.CAN_BE_USER, json.can_be_user())
-                        .set(CHARACTERS.IS_ARCHETYPE, json.is_archetype())
                         .set(CHARACTERS.WELCOME_MESSAGE, json.welcome_message())
                         .build()
                 ,

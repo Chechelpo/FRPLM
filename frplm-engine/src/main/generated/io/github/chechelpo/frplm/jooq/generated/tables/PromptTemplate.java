@@ -262,7 +262,7 @@ public class PromptTemplate extends TableImpl<PromptTemplateRecord> {
      */
     public SessionsPath sessions() {
         if (_sessions == null)
-            _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_8265.getInverseKey());
+            _sessions = new SessionsPath(this, null, Keys.FK_SESSIONS_TO_TEMPLATE.getInverseKey());
 
         return _sessions;
     }

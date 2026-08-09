@@ -21,12 +21,6 @@ public final class CharacterController extends EntityController<
         super(service, validator);
     }
 
-    @GetMapping( "/{worldID}")
-    ResponseEntity<EntityDTO[]> getStartingAt(@PathVariable int worldID) {
-        return ResponseEntity.ok(wrapEntities(
-                service.getStartingAt(worldID)
-        ));
-    }
 
     @GetMapping("/startingAt")
     ResponseEntity<EntityDTO[]> getStartingAt(@RequestParam int worldId, @RequestParam int locationId) {

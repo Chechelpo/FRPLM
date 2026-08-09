@@ -1,6 +1,6 @@
 import type {Location} from "@/domain/World";
 import {
-    appendIDParams,
+    appendQueryParams,
     getEntityController,
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
@@ -13,7 +13,7 @@ import {
 export function buildLocationRadiusEndpoint(location: Location): URL {
     const url = getEntityController(EntityTypes.LOCATIONS);
     url.pathname = `${url.pathname.replace(/\/$/, "")}/entity`;
-    appendIDParams(url, {
+    appendQueryParams(url, {
         worldID: location.get("worldID"),
         id: location.get("id"),
     });

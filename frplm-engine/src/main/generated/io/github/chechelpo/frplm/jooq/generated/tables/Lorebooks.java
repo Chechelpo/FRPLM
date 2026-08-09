@@ -217,7 +217,7 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      */
     public CharactersPath characters() {
         if (_characters == null)
-            _characters = new CharactersPath(this, null, Keys.CONSTRAINT_6725.getInverseKey());
+            _characters = new CharactersPath(this, null, Keys.CONSTRAINT_672.getInverseKey());
 
         return _characters;
     }

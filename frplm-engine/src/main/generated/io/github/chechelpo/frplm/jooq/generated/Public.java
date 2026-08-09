@@ -6,7 +6,6 @@ package io.github.chechelpo.frplm.jooq.generated;
 
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiKeys;
-import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
@@ -14,11 +13,9 @@ import io.github.chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryPrologCondition;
 import io.github.chechelpo.frplm.jooq.generated.tables.Extension;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extras;
 import io.github.chechelpo.frplm.jooq.generated.tables.Keyword;
 import io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges;
-import io.github.chechelpo.frplm.jooq.generated.tables.LocationTags;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages;
@@ -70,11 +67,6 @@ public class Public extends SchemaImpl {
     public final ApiKeys API_KEYS = ApiKeys.API_KEYS;
 
     /**
-     * The table <code>PUBLIC.CHARACTER_TAGS</code>.
-     */
-    public final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
-
-    /**
      * The table <code>PUBLIC.CHARACTERS</code>.
      */
     public final Characters CHARACTERS = Characters.CHARACTERS;
@@ -110,11 +102,6 @@ public class Public extends SchemaImpl {
     public final Extension EXTENSION = Extension.EXTENSION;
 
     /**
-     * The table <code>PUBLIC.EXTRAS</code>.
-     */
-    public final Extras EXTRAS = Extras.EXTRAS;
-
-    /**
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public final Keyword KEYWORD = Keyword.KEYWORD;
@@ -128,11 +115,6 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.LOCATION_EDGES</code>.
      */
     public final LocationEdges LOCATION_EDGES = LocationEdges.LOCATION_EDGES;
-
-    /**
-     * The table <code>PUBLIC.LOCATION_TAGS</code>.
-     */
-    public final LocationTags LOCATION_TAGS = LocationTags.LOCATION_TAGS;
 
     /**
      * The table <code>PUBLIC.LOCATIONS</code>.
@@ -242,7 +224,6 @@ public class Public extends SchemaImpl {
         return Arrays.asList(
             ApiHosts.API_HOSTS,
             ApiKeys.API_KEYS,
-            CharacterTags.CHARACTER_TAGS,
             Characters.CHARACTERS,
             CurrentLocations.CURRENT_LOCATIONS,
             Entry.ENTRY,
@@ -250,11 +231,9 @@ public class Public extends SchemaImpl {
             EntryOutlet.ENTRY_OUTLET,
             EntryPrologCondition.ENTRY_PROLOG_CONDITION,
             Extension.EXTENSION,
-            Extras.EXTRAS,
             Keyword.KEYWORD,
             LlmConnection.LLM_CONNECTION,
             LocationEdges.LOCATION_EDGES,
-            LocationTags.LOCATION_TAGS,
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
             Messages.MESSAGES,

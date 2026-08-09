@@ -2,40 +2,41 @@ import {
     ABSEntity,
     createEntity,
     deleteEntity,
-    EntityField,
+    EntityAssetType,
     fetch_all,
     fetchFromReference,
-    fetchOne, getEntityController
+    fetchOne,
+    StoredAssetDTO
 } from "@/core/ABSEntity";
 import {EntityTypes} from "@/domain/EntityTypes";
-import {CommonFields} from "@/utils/CommonFields";
 import {Tag} from "@/domain/Tag";
 import {Lorebook, LorebookData, LorebookKey} from "@/domain/Lorebook";
-import {Location, World} from "@/domain/World";
+import {Location} from "@/domain/World";
 import {DTO} from "@/types/DTOs";
 import {parseNumberKey} from "@/utils/ReferenceCodec";
 import {fetchApi} from "@/services/apiClient";
 
-export type CharacterKey = { id: number };
+export type CharacterKey = {
+    id: number,
+    world_id: number
+};
 export type CharacterData = {
     name: string,
-    is_archetype: boolean,
     can_be_user: boolean,
     firstMessage: string,
-    lorebook_id?: number
+    lorebook_id: number
 };
-export type CharacterCreationData = Pick<CharacterData, 'name'>
 
 export class Character extends ABSEntity<CharacterKey, CharacterData> {
     private tags: Tag[] | null = null;
     private lorebook: Lorebook | null = null;
     private starting_locations: Location[] | null = null
-    private static readonly REFERENCE_KEY_ORDER = ["id"] as const;
+    private static readonly REFERENCE_KEY_ORDER = ["world_id","id"] as const;
 
     getEntityType(): EntityTypes {
         return EntityTypes.CHARACTERS;
     }
-    protected getReferenceKeyOrder(): readonly "id"[] {
+    protected getReferenceKeyOrder(): readonly ["world_id", "id"] {
         return Character.REFERENCE_KEY_ORDER;
     }
 
@@ -44,33 +45,25 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             EntityTypes.CHARACTERS, Character
         );
     }
-    public static async getWithID(id: number): Promise<Character> {
-        return await fetchOne<CharacterKey, CharacterData, Character>({id:id}, EntityTypes.CHARACTERS, this)
+
+    public static async getWithID(id: number, world_id:number): Promise<Character> {
+        return await fetchOne<CharacterKey, CharacterData, Character>({id:id, world_id:world_id}, EntityTypes.CHARACTERS, this)
     }
-    public static async createNew(initialData:CharacterCreationData): Promise<Character> {
-        if (initialData.name === undefined || initialData.name === null)
-            throw new Error("Name is required for character instantiation");
-        return await createEntity(null, initialData, EntityTypes.CHARACTERS, this)
-    }
-    public static async getStartingAt(world:World):Promise<Character[]>{
-        const response = await fetchApi(
-            `${getEntityController(EntityTypes.CHARACTERS)}/${world.get('id')}`,
-            {
-                method:'GET'
-            }
-        )
-        return (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS))
-    }
-    public static async fromReference(reference:string): Promise<Character> {
+
+    public static async fetchFromReference(reference:string): Promise<Character> {
         return await fetchFromReference<CharacterKey, CharacterData, Character>(
             reference,
             EntityTypes.CHARACTERS,
             Character.REFERENCE_KEY_ORDER,
             {
-                id:parseNumberKey
+                id:parseNumberKey,
+                world_id:parseNumberKey
             },
             Character
         )
+    }
+    public static async delete(character:Character) : Promise<boolean> {
+        return await deleteEntity<CharacterKey>(character.key, EntityTypes.CHARACTERS);
     }
 
     public asReference() : string {
@@ -88,6 +81,47 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
             )
         return this.lorebook;
     }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Assets:
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    /**
+     * Fetches this character's avatar.
+     *
+     * @return the avatar Blob, or null when no avatar is stored
+     */
+    public async fetchAvatar(): Promise<Blob | null> {
+        return this.getAsset(EntityAssetType.AVATAR);
+    }
+
+    /**
+     * Uploads or replaces this character's avatar.
+     *
+     * @param avatar image data to upload
+     * @param replace when false, saving fails if a background already exists
+     * @return metadata for the stored avatar
+     */
+    public async saveAvatar(avatar: Blob, replace:boolean = true): Promise<StoredAssetDTO> {
+        return this.postAsset(
+            EntityAssetType.AVATAR,
+            avatar,
+            replace,
+        );
+    }
+
+    /**
+     * Deletes this character's avatar.
+     *
+     * The underlying operation is idempotent.
+     */
+    public async deleteAvatar() : Promise<void> {
+        await this.deleteAsset(EntityAssetType.AVATAR);
+    }
+
+/*
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // TAGS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Tags are ignored for now, as they serve no direct purpose for the engine.
 
     public async getTags(): Promise<Tag[]> {
         if (this.tags == null)
@@ -125,7 +159,7 @@ export class Character extends ABSEntity<CharacterKey, CharacterData> {
         if (this.tags != null)
             this.tags.push(tag)
     }
-
+*/
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // STARTING LOCATIONS:
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -6,7 +6,6 @@ package io.github.chechelpo.frplm.jooq.generated;
 
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiKeys;
-import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
 import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
@@ -14,11 +13,9 @@ import io.github.chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryPrologCondition;
 import io.github.chechelpo.frplm.jooq.generated.tables.Extension;
-import io.github.chechelpo.frplm.jooq.generated.tables.Extras;
 import io.github.chechelpo.frplm.jooq.generated.tables.Keyword;
 import io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges;
-import io.github.chechelpo.frplm.jooq.generated.tables.LocationTags;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages;
@@ -56,11 +53,6 @@ public class Tables {
     public static final ApiKeys API_KEYS = ApiKeys.API_KEYS;
 
     /**
-     * The table <code>PUBLIC.CHARACTER_TAGS</code>.
-     */
-    public static final CharacterTags CHARACTER_TAGS = CharacterTags.CHARACTER_TAGS;
-
-    /**
      * The table <code>PUBLIC.CHARACTERS</code>.
      */
     public static final Characters CHARACTERS = Characters.CHARACTERS;
@@ -96,11 +88,6 @@ public class Tables {
     public static final Extension EXTENSION = Extension.EXTENSION;
 
     /**
-     * The table <code>PUBLIC.EXTRAS</code>.
-     */
-    public static final Extras EXTRAS = Extras.EXTRAS;
-
-    /**
      * The table <code>PUBLIC.KEYWORD</code>.
      */
     public static final Keyword KEYWORD = Keyword.KEYWORD;
@@ -114,11 +101,6 @@ public class Tables {
      * The table <code>PUBLIC.LOCATION_EDGES</code>.
      */
     public static final LocationEdges LOCATION_EDGES = LocationEdges.LOCATION_EDGES;
-
-    /**
-     * The table <code>PUBLIC.LOCATION_TAGS</code>.
-     */
-    public static final LocationTags LOCATION_TAGS = LocationTags.LOCATION_TAGS;
 
     /**
      * The table <code>PUBLIC.LOCATIONS</code>.

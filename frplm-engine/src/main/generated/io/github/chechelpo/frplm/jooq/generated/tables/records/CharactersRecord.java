@@ -6,9 +6,7 @@ package io.github.chechelpo.frplm.jooq.generated.tables.records;
 
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
 
-import java.time.LocalDateTime;
-
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -21,31 +19,31 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Setter for <code>PUBLIC.CHARACTERS.WORLD_ID</code>.
+     */
+    public void setWorldId(Integer value) {
+        set(0, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.WORLD_ID</code>.
+     */
+    public Integer getWorldId() {
+        return (Integer) get(0);
+    }
+
+    /**
      * Setter for <code>PUBLIC.CHARACTERS.ID</code>.
      */
     public void setId(Integer value) {
-        set(0, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.ID</code>.
      */
     public Integer getId() {
-        return (Integer) get(0);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.CHARACTERS.CREATED</code>.
-     */
-    public void setCreated(LocalDateTime value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.CREATED</code>.
-     */
-    public LocalDateTime getCreated() {
-        return (LocalDateTime) get(1);
+        return (Integer) get(1);
     }
 
     /**
@@ -77,59 +75,45 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
-     */
-    public void setIsArchetype(Boolean value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.IS_ARCHETYPE</code>.
-     */
-    public Boolean getIsArchetype() {
-        return (Boolean) get(4);
-    }
-
-    /**
      * Setter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
      */
     public void setCanBeUser(Boolean value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
      */
     public Boolean getCanBeUser() {
-        return (Boolean) get(5);
+        return (Boolean) get(4);
     }
 
     /**
      * Setter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
      */
     public void setWelcomeMessage(String value) {
-        set(6, value);
+        set(5, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
      */
     public String getWelcomeMessage() {
-        return (String) get(6);
+        return (String) get(5);
     }
 
     /**
      * Setter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public void setLorebookId(Integer value) {
-        set(7, value);
+        set(6, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public Integer getLorebookId() {
-        return (Integer) get(7);
+        return (Integer) get(6);
     }
 
     // -------------------------------------------------------------------------
@@ -137,8 +121,8 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<Integer> key() {
-        return (Record1) super.key();
+    public Record2<Integer, Integer> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -155,14 +139,13 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     /**
      * Create a detached, initialised CharactersRecord
      */
-    public CharactersRecord(Integer id, LocalDateTime created, String name, String description, Boolean isArchetype, Boolean canBeUser, String welcomeMessage, Integer lorebookId) {
+    public CharactersRecord(Integer worldId, Integer id, String name, String description, Boolean canBeUser, String welcomeMessage, Integer lorebookId) {
         super(Characters.CHARACTERS);
 
+        setWorldId(worldId);
         setId(id);
-        setCreated(created);
         setName(name);
         setDescription(description);
-        setIsArchetype(isArchetype);
         setCanBeUser(canBeUser);
         setWelcomeMessage(welcomeMessage);
         setLorebookId(lorebookId);

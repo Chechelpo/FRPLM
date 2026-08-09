@@ -159,7 +159,7 @@ public class Movements extends TableImpl<MovementsRecord> {
 
     @Override
     public List<ForeignKey<MovementsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_E6, Keys.CONSTRAINT_E68, Keys.CONSTRAINT_E686, Keys.FK_MOVEMENTS_LOCATIONS, Keys.FK_MOVEMENTS_MESSAGES);
+        return Arrays.asList(Keys.CONSTRAINT_E6, Keys.CONSTRAINT_E68, Keys.FK_MOVEMENTS_LOCATIONS, Keys.FK_MOVEMENTS_MESSAGES, Keys.FK_MOVEMENTS_TO_CHARACTERS);
     }
 
     private transient SessionsPath _sessions;
@@ -174,18 +174,6 @@ public class Movements extends TableImpl<MovementsRecord> {
         return _sessions;
     }
 
-    private transient CharactersPath _characters;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
-     */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, Keys.CONSTRAINT_E68, null);
-
-        return _characters;
-    }
-
     private transient WorldsPath _worlds;
 
     /**
@@ -193,7 +181,7 @@ public class Movements extends TableImpl<MovementsRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_E686, null);
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_E68, null);
 
         return _worlds;
     }
@@ -220,6 +208,18 @@ public class Movements extends TableImpl<MovementsRecord> {
             _messages = new MessagesPath(this, Keys.FK_MOVEMENTS_MESSAGES, null);
 
         return _messages;
+    }
+
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
+     */
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, Keys.FK_MOVEMENTS_TO_CHARACTERS, null);
+
+        return _characters;
     }
 
     @Override

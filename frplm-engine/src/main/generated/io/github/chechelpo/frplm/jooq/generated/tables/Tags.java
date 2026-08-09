@@ -6,10 +6,6 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.CharacterTags.CharacterTagsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.LocationTags.LocationTagsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.TagsRecord;
 
 import java.util.Arrays;
@@ -18,14 +14,10 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Identity;
-import org.jooq.InverseForeignKey;
 import org.jooq.Name;
-import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
-import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -104,39 +96,6 @@ public class Tags extends TableImpl<TagsRecord> {
         this(DSL.name("TAGS"), null);
     }
 
-    public <O extends Record> Tags(Table<O> path, ForeignKey<O, TagsRecord> childPath, InverseForeignKey<O, TagsRecord> parentPath) {
-        super(path, childPath, parentPath, TAGS);
-    }
-
-    /**
-     * A subtype implementing {@link Path} for simplified path-based joins.
-     */
-    public static class TagsPath extends Tags implements Path<TagsRecord> {
-
-        private static final long serialVersionUID = 1L;
-        public <O extends Record> TagsPath(Table<O> path, ForeignKey<O, TagsRecord> childPath, InverseForeignKey<O, TagsRecord> parentPath) {
-            super(path, childPath, parentPath);
-        }
-        private TagsPath(Name alias, Table<TagsRecord> aliased) {
-            super(alias, aliased);
-        }
-
-        @Override
-        public TagsPath as(String alias) {
-            return new TagsPath(DSL.name(alias), this);
-        }
-
-        @Override
-        public TagsPath as(Name alias) {
-            return new TagsPath(alias, this);
-        }
-
-        @Override
-        public TagsPath as(Table<?> alias) {
-            return new TagsPath(alias.getQualifiedName(), this);
-        }
-    }
-
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -155,48 +114,6 @@ public class Tags extends TableImpl<TagsRecord> {
     @Override
     public List<UniqueKey<TagsRecord>> getUniqueKeys() {
         return Arrays.asList(Keys.CONSTRAINT_27);
-    }
-
-    private transient LocationTagsPath _locationTags;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.LOCATION_TAGS</code> table
-     */
-    public LocationTagsPath locationTags() {
-        if (_locationTags == null)
-            _locationTags = new LocationTagsPath(this, null, Keys.CONSTRAINT_506AD.getInverseKey());
-
-        return _locationTags;
-    }
-
-    private transient CharacterTagsPath _characterTags;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CHARACTER_TAGS</code> table
-     */
-    public CharacterTagsPath characterTags() {
-        if (_characterTags == null)
-            _characterTags = new CharacterTagsPath(this, null, Keys.CONSTRAINT_951.getInverseKey());
-
-        return _characterTags;
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.CHARACTERS</code> table
-     */
-    public CharactersPath characters() {
-        return characterTags().characters();
-    }
-
-    /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.LOCATIONS</code> table
-     */
-    public LocationsPath locations() {
-        return locationTags().locations();
     }
 
     @Override

@@ -1,6 +1,6 @@
 import {
     ABSEntity,
-    appendIDParams,
+    appendQueryParams,
     fetch_all,
     fetchFromReference,
     fetchOne,

@@ -215,17 +215,31 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     }
 
     /**
+     * Setter for <code>PUBLIC.WORLDS.NEXT_CHARACTER_ID</code>.
+     */
+    public void setNextCharacterId(Integer value) {
+        set(14, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.WORLDS.NEXT_CHARACTER_ID</code>.
+     */
+    public Integer getNextCharacterId() {
+        return (Integer) get(14);
+    }
+
+    /**
      * Setter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
      */
     public void setNextRegionId(Integer value) {
-        set(14, value);
+        set(15, value);
     }
 
     /**
      * Getter for <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
      */
     public Integer getNextRegionId() {
-        return (Integer) get(14);
+        return (Integer) get(15);
     }
 
     // -------------------------------------------------------------------------
@@ -251,7 +265,7 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
     /**
      * Create a detached, initialised WorldsRecord
      */
-    public WorldsRecord(Integer id, String name, String description, Integer lorebookId, Double backgroundX, Double backgroundY, Double backgroundWidth, Double backgroundHeight, Double backgroundOpacity, Boolean backgroundVisible, Boolean backgroundTransformLocked, Boolean backgroundAspectLocked, String backgroundFit, Integer nextLocationId, Integer nextRegionId) {
+    public WorldsRecord(Integer id, String name, String description, Integer lorebookId, Double backgroundX, Double backgroundY, Double backgroundWidth, Double backgroundHeight, Double backgroundOpacity, Boolean backgroundVisible, Boolean backgroundTransformLocked, Boolean backgroundAspectLocked, String backgroundFit, Integer nextLocationId, Integer nextCharacterId, Integer nextRegionId) {
         super(Worlds.WORLDS);
 
         setId(id);
@@ -268,6 +282,7 @@ public class WorldsRecord extends UpdatableRecordImpl<WorldsRecord> {
         setBackgroundAspectLocked(backgroundAspectLocked);
         setBackgroundFit(backgroundFit);
         setNextLocationId(nextLocationId);
+        setNextCharacterId(nextCharacterId);
         setNextRegionId(nextRegionId);
         resetChangedOnNotNull();
     }

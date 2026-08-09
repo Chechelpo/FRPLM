@@ -7,6 +7,9 @@ import org.jooq.TableRecord;
 
 import java.util.*;
 
+import static io.github.chechelpo.frplm.core.entities.fields.DTOMapper.DATA_CONSTRUCTION_MODE.UPDATE;
+
+
 /**
  * Class used for centralizing initialization of entities.
  */
@@ -97,8 +100,8 @@ public abstract class EntityControllerFieldValidator<R extends TableRecord<R>> e
         return builder.build();
     }
 
-
-    public EntityKey<R> getKeyFromDTO(Map<String, Object> params, boolean expectFullKey) {
+    @Override
+    public EntityKey<R> getKeyFromDTO(Map<String, Object> params, KEY_CONSTRUCTION_MODE mode) {
         EntityKey.Builder<R> builder = EntityKey.builder();
 
         dtoNames.forEach(field -> {
@@ -110,21 +113,22 @@ public abstract class EntityControllerFieldValidator<R extends TableRecord<R>> e
                                     .coerce(params.get(field.name()))
                                     .rightOrThrow()
                     );
-                else if (expectFullKey)
-                    throw new InvalidDTO("Expected full key. Key is missing " + field.name());
+                else if (mode.equals(KEY_CONSTRUCTION_MODE.FULL_KEY))
+                    throw new InvalidDTO("Expected full key but key is missing " + field.name());
         });
 
         return builder.build();
     }
 
-    public EntityDataPayload<R> getDataFrom(Map<String, Object> params, boolean expectKeys) {
+    @Override
+    public EntityDataPayload<R> getDataFrom(Map<String, Object> params, DATA_CONSTRUCTION_MODE mode) {
         EntityDataPayload.Builder<R> builder = EntityDataPayload.builder();
 
         this.dtoNames.forEach(
                 dtoField -> {
                     if (params.containsKey(dtoField.name())) {
-                        if (!expectKeys && keys.contains(dtoField.field()))
-                            throw new InvalidDTO("DTO includes key field " + dtoField.field() + " in creationPayload");
+                        if (mode.equals(UPDATE) && keys.contains(dtoField.field()))
+                            throw new InvalidDTO("Update DTO includes key field " + dtoField.field() + " in creationPayload");
 
                         builder.unsafeSet(
                                 dtoField.field(),

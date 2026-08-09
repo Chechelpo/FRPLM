@@ -171,7 +171,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         throwIfAssignsPromptButIsUserMessage(data);
         throwIfAssignsReasoningButIsUserMessage(data);
 
-        data.set(MESSAGES.TICK_NUM,
+        data.set(
+                MESSAGES.TICK_NUM,
                 sessionService.incrementAndGet(
                                 SESSIONS.CURRENT_TICK,
                                 sessionService.keyOf(data.require(MESSAGES.SESSION_ID))

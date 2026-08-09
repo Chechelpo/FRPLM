@@ -62,18 +62,12 @@ public final class EntityReaders {
     public @NonNull EntityReader<ApiKeysRecord> secrets() {
         return record.secrets();
     }
-
-    public @NonNull EntityReader<TagsRecord> tags() {
-        return record.tags();
-    }
+    
 
     public @NonNull EntityReader<CharactersRecord> characters() {
         return record.characters();
     }
 
-    public @NonNull EntityReader<CharacterTagsRecord> characterTags() {
-        return record.characterTags();
-    }
 
     public @NonNull EntityReader<StartingLocationsRecord> startingLocations() {
         return record.startingLocations();

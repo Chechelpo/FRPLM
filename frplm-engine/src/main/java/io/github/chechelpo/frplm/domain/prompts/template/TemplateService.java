@@ -39,10 +39,10 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
     @Transactional(readOnly = true)
     @CheckReturnValue
     public RecordFindResult<PromptTemplateRecord> getOf(@NotNull SessionsRecord record) throws EntityNotFound {
-        if (record.getMainPrompt() == null) return RecordFindResult.notFound(
+        if (record.getPromptId() == null) return RecordFindResult.notFound(
                 EntityKey.of(PROMPT_TEMPLATE.ID, null)
         );
-        return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getMainPrompt().shortValue()));
+        return this.find(EntityKey.of(PROMPT_TEMPLATE.ID, record.getPromptId().shortValue()));
     }
 
     @Override

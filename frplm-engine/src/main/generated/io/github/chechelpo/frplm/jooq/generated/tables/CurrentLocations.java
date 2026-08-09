@@ -159,7 +159,7 @@ public class CurrentLocations extends TableImpl<CurrentLocationsRecord> {
 
     @Override
     public List<ForeignKey<CurrentLocationsRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_A, Keys.CONSTRAINT_A5, Keys.CONSTRAINT_A5A, Keys.FK_CURRENT_LOCATIONS_LOCATION, Keys.FK_CURRENT_LOCATIONS_MESSAGE);
+        return Arrays.asList(Keys.CONSTRAINT_A, Keys.CONSTRAINT_A5, Keys.FK_CURRENT_LOCATIONS_LOCATION, Keys.FK_CURRENT_LOCATIONS_MESSAGE, Keys.FK_CURRENT_LOCATIONS_TO_CHARACTER);
     }
 
     private transient SessionsPath _sessions;
@@ -174,18 +174,6 @@ public class CurrentLocations extends TableImpl<CurrentLocationsRecord> {
         return _sessions;
     }
 
-    private transient CharactersPath _characters;
-
-    /**
-     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
-     */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, Keys.CONSTRAINT_A5, null);
-
-        return _characters;
-    }
-
     private transient WorldsPath _worlds;
 
     /**
@@ -193,7 +181,7 @@ public class CurrentLocations extends TableImpl<CurrentLocationsRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_A5A, null);
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_A5, null);
 
         return _worlds;
     }
@@ -220,6 +208,18 @@ public class CurrentLocations extends TableImpl<CurrentLocationsRecord> {
             _messages = new MessagesPath(this, Keys.FK_CURRENT_LOCATIONS_MESSAGE, null);
 
         return _messages;
+    }
+
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
+     */
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, Keys.FK_CURRENT_LOCATIONS_TO_CHARACTER, null);
+
+        return _characters;
     }
 
     @Override

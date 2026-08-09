@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+import static io.github.chechelpo.frplm.core.entities.fields.DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LLM_CONNECTION;
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LLM_CONNECTION_URL;
@@ -45,7 +46,10 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
     record TestResponse(boolean status, String message){}
     @GetMapping("/test")
     public ResponseEntity<TestResponse> test(@RequestParam Map<String, Object> params) throws EntityNotFound {
-        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(params, true);
+        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(
+                params,
+                DTOMapper.KEY_CONSTRUCTION_MODE.FULL_KEY
+        );
 
         LlmConnectionRecord connection = service.find(key)
                 .orElseThrow("Could not find connection to test", Severity.USER);
@@ -63,7 +67,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
 
     @GetMapping("/models")
     public ResponseEntity<ModelResponses> models(@RequestParam Map<String, Object> params) throws EntityNotFound {
-        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(params, true);
+        EntityKey<LlmConnectionRecord> key = mapper.getKeyFromDTO(params, FULL_KEY);
         LlmConnectionRecord llm = service.find(key)
                     .orElseThrow("Could not find connection to fetch models from", Severity.USER);
 

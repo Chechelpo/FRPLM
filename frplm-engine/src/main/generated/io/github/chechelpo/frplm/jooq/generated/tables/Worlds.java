@@ -140,6 +140,11 @@ public class Worlds extends TableImpl<WorldsRecord> {
     public final TableField<WorldsRecord, Integer> NEXT_LOCATION_ID = createField(DSL.name("NEXT_LOCATION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     /**
+     * The column <code>PUBLIC.WORLDS.NEXT_CHARACTER_ID</code>.
+     */
+    public final TableField<WorldsRecord, Integer> NEXT_CHARACTER_ID = createField(DSL.name("NEXT_CHARACTER_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
      * The column <code>PUBLIC.WORLDS.NEXT_REGION_ID</code>.
      */
     public final TableField<WorldsRecord, Integer> NEXT_REGION_ID = createField(DSL.name("NEXT_REGION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
@@ -243,45 +248,6 @@ public class Worlds extends TableImpl<WorldsRecord> {
         return _lorebooks;
     }
 
-    private transient MessagesPath _messages;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
-     * table
-     */
-    public MessagesPath messages() {
-        if (_messages == null)
-            _messages = new MessagesPath(this, null, Keys.CONSTRAINT_131.getInverseKey());
-
-        return _messages;
-    }
-
-    private transient ResponsesPath _responses;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
-     * table
-     */
-    public ResponsesPath responses() {
-        if (_responses == null)
-            _responses = new ResponsesPath(this, null, Keys.CONSTRAINT_314.getInverseKey());
-
-        return _responses;
-    }
-
-    private transient SessionsPath _sessions;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.SESSIONS</code>
-     * table
-     */
-    public SessionsPath sessions() {
-        if (_sessions == null)
-            _sessions = new SessionsPath(this, null, Keys.CONSTRAINT_826.getInverseKey());
-
-        return _sessions;
-    }
-
     private transient RegionPath _region;
 
     /**
@@ -303,7 +269,7 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public CurrentLocationsPath currentLocations() {
         if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5A.getInverseKey());
+            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5.getInverseKey());
 
         return _currentLocations;
     }
@@ -329,7 +295,7 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public MovementsPath movements() {
         if (_movements == null)
-            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E686.getInverseKey());
+            _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68.getInverseKey());
 
         return _movements;
     }
@@ -360,12 +326,56 @@ public class Worlds extends TableImpl<WorldsRecord> {
         return _locations;
     }
 
+    private transient MessagesPath _messages;
+
     /**
-     * Get the implicit many-to-many join path to the
-     * <code>PUBLIC.CHARACTERS</code> table
+     * Get the implicit to-many join path to the <code>PUBLIC.MESSAGES</code>
+     * table
+     */
+    public MessagesPath messages() {
+        if (_messages == null)
+            _messages = new MessagesPath(this, null, Keys.FK_MESSAGE_TO_WORLD.getInverseKey());
+
+        return _messages;
+    }
+
+    private transient ResponsesPath _responses;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.RESPONSES</code>
+     * table
+     */
+    public ResponsesPath responses() {
+        if (_responses == null)
+            _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_TO_WORLD.getInverseKey());
+
+        return _responses;
+    }
+
+    private transient SessionsPath _sessions;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.SESSIONS</code>
+     * table
+     */
+    public SessionsPath sessions() {
+        if (_sessions == null)
+            _sessions = new SessionsPath(this, null, Keys.FK_SESSIONS_TO_WORLD.getInverseKey());
+
+        return _sessions;
+    }
+
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
+     * table
      */
     public CharactersPath characters() {
-        return startingLocations().characters();
+        if (_characters == null)
+            _characters = new CharactersPath(this, null, Keys.FK_TO_WORLD.getInverseKey());
+
+        return _characters;
     }
 
     @Override
