@@ -8,6 +8,7 @@ import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.exceptions.runtime.NotInitialized;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiHostsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LlmConnectionRecord;
 import io.github.chechelpo.frplm.utils.integrations.ModelResponses;
@@ -38,7 +39,7 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
             SecretService secretService,
             HostService hostService
     ) {
-        super(service, validator);
+        super(EntityConfigs.Types.LLM_CONNECTION, service, validator);
         textToTextClient = new T2TClient(secretService, hostService);
         this.hosts = hostService;
     }

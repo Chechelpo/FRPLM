@@ -32,6 +32,7 @@ final class MessageEvents {
     void createFirstMessage(CRUDCommittedEvent.@NotNull CreatedEntity<?> rawEvent) {
         if (rawEvent.isNotEventOf(SESSIONS)) return;
 
+        //noinspection unchecked
         CRUDCommittedEvent.CreatedEntity<SessionsRecord> event =
                 (CRUDCommittedEvent.CreatedEntity<SessionsRecord>) rawEvent;
         SessionsRecord session = event.record();

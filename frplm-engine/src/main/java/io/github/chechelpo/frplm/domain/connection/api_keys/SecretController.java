@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ApiKeysRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_K
 @RequestMapping(API_KEYS_URL)
 final class SecretController extends EntityController<ApiKeysRecord, SecretServiceImpl> {
     SecretController(SecretServiceImpl service, DTOMapper<ApiKeysRecord> record) {
-        super(service, record);
+        super(EntityConfigs.Types.API_KEYS, service, record);
     }
 
     private record NewApiKeyRequest(String key) {}

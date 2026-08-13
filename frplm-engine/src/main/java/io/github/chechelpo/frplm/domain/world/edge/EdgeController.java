@@ -23,7 +23,7 @@ final class EdgeController extends EntityController<LocationEdgesRecord, EdgeSer
     private final DTOMapper<LocationsRecord> locationMapper;
 
     EdgeController(EdgeService service, DTOMapper<LocationEdgesRecord> mapper, DTOMapper<LocationsRecord> locationMapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.EDGES, service, mapper);
         this.locationMapper = locationMapper;
     }
 

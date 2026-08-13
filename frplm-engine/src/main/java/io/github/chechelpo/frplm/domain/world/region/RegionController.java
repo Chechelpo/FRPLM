@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.REGIO
 final class RegionController extends EntityController<RegionRecord, RegionService> {
 
     RegionController(RegionService service, DTOMapper<RegionRecord> dTOMapper) {
-        super(service, dTOMapper);
+        super(EntityConfigs.Types.REGIONS, service, dTOMapper);
     }
 
 

@@ -41,9 +41,6 @@ class EntityControllerTest {
         service = mock(TestService.class);
         mapper = mock(DTOMapper.class);
 
-        when(service.getType())
-                .thenReturn(EntityConfigs.Types.TEST_ENTITY);
-
         controller = new TestController(service, mapper);
     }
 
@@ -750,7 +747,7 @@ class EntityControllerTest {
                 TestService service,
                 DTOMapper<TestTableRecord> mapper
         ) {
-            super(service, mapper);
+            super(EntityConfigs.Types.TEST_ENTITY, service, mapper);
         }
 
         private EntityDTO[] wrapList(

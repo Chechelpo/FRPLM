@@ -29,32 +29,23 @@ public abstract class EntityService<
         R extends TableRecord<R>,
         Store extends EntityStore<R>
         > implements EntityReader<R>, EntityUpdater<R>, EntityCreator<R> {
-    private final static EnumSet<EntityConfigs.Types> REGISTERED_TYPES = EnumSet.noneOf(EntityConfigs.Types.class);
     protected final EventBus eventBus;
 
     protected final Store store;
     protected final Logger log;
     protected final FieldValidator<R> fieldValidator;
 
-    private final EntityConfigs.Types entityType;
     private final Table<R> mainTable;
 
     public EntityService(@NotNull Store store, FieldValidator<R> validator, @NotNull EventBus eventBus) {
-        EntityConfigs.Types types = store.getType();
         this.mainTable = store.getMainTable();
 
-        REGISTERED_TYPES.add(types);
-        this.entityType = types;
         this.eventBus = eventBus;
         this.store = store;
         this.fieldValidator = validator;
 
-        log = (Logger) LoggerFactory.getLogger(types + "_Service");
-        log.setLevel(Level.convertAnSLF4JLevel(types.getLoggerLevel()));
-    }
-
-    public EntityConfigs.Types getType() {
-        return this.entityType;
+        log = (Logger) LoggerFactory.getLogger(mainTable.getUnqualifiedName() + "_Service");
+        log.setLevel(Level.convertAnSLF4JLevel(org.slf4j.event.Level.INFO));
     }
 
     @Override
@@ -184,7 +175,7 @@ public abstract class EntityService<
     @Transactional(readOnly = true)
     public Result<R> getMatching(EntityKey<R> key) {
         Objects.requireNonNull(key);
-        fieldValidator.validateKey(key).orElseThrow("Error when fetching matching of " + this.getType().getEntityType());
+        fieldValidator.validateKey(key).orElseThrow("Error when fetching matching entity");
 
         Result<R> records = store.getAllMatching(key);
         afterRetrieve(records, 0);
@@ -340,8 +331,7 @@ public abstract class EntityService<
 
         if (currentValueResult.isEmpty()) {
             log.debug(
-                    "{} with key {} was not found",
-                    getType().getEntityType(),
+                    "Entity with key {} was not found",
                     entityKey
             );
 

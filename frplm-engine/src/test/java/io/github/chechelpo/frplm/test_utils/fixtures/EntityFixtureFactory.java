@@ -30,30 +30,35 @@ public class EntityFixtureFactory {
     public LorebookFixtures lorebook(String seed){
         return new LorebookFixtures(
                 lorebookService,
+                this,
                 seed
         );
     }
     public WorldFixtures worlds(String seed){
         return new WorldFixtures(
                 worldService,
+                this,
                 seed
         );
     }
     public LocationFixtures locations(String seed){
         return new LocationFixtures(
                 locationsService,
+                this,
                 seed
         );
     }
     public RegionFixtures regions(String seed){
         return new RegionFixtures(
                 regionService,
+                this,
                 seed
         );
     }
     public CharacterFixtures characters(String seed){
         return new CharacterFixtures(
                 characterService,
+                this,
                 seed
         );
     }
@@ -61,6 +66,7 @@ public class EntityFixtureFactory {
     public EdgesFixtures edges(String seed){
         return new EdgesFixtures(
                 edgeService,
+                this,
                 seed
         );
     }

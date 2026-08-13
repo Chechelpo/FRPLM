@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.KeywordRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ final class KeywordController extends EntityController<KeywordRecord, KeywordSer
             KeywordServiceImpl service,
             DTOMapper<KeywordRecord> mapper
     ) {
-        super(service, mapper);
+        super(EntityConfigs.Types.KEYWORDS, service, mapper);
     }
 
     @GetMapping

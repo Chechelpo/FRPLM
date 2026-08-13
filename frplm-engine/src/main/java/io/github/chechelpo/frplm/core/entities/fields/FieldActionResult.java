@@ -2,10 +2,7 @@ package io.github.chechelpo.frplm.core.entities.fields;
 
 import io.github.chechelpo.frplm.exceptions.RuntimeDomainException;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.ExpectedField;
-import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import io.github.chechelpo.frplm.exceptions.runtime.UnknownFieldException;
-import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
+import io.github.chechelpo.frplm.exceptions.runtime.*;
 import jakarta.annotation.Nullable;
 import org.jetbrains.annotations.Contract;
 import org.jooq.TableField;
@@ -38,19 +35,22 @@ public sealed interface FieldActionResult<R extends TableRecord<R>, D extends Da
         return (Success<R, D>) this
                 .ifMissingFieldThrow(message, severity)
                 .ifUnknownFieldThrow(message, severity)
-                .ifWrongValueThrow(message, severity);
+                .ifWrongValueThrow(message, severity)
+                .ifReadOnlyFieldThrow();
     }
     default Success<R, D> orElseThrow(String message){
         return (Success<R, D>) this
                 .ifMissingFieldThrow(message)
                 .ifUnknownFieldThrow(message)
-                .ifWrongValueThrow(message);
+                .ifWrongValueThrow(message)
+                .ifReadOnlyFieldThrow();
     }
     default Success<R, D> orElseThrow(){
         return (Success<R, D>) this
                 .ifMissingFieldThrow()
                 .ifUnknownFieldThrow()
-                .ifWrongValueThrow();
+                .ifWrongValueThrow()
+                .ifReadOnlyFieldThrow();
     }
     default Success<R, D> get(){
         if (this instanceof Success<R, D> success) return success;
@@ -187,6 +187,39 @@ public sealed interface FieldActionResult<R extends TableRecord<R>, D extends Da
         @Override
         public String debugString() {
             return "Invalid value " + wrongValue + " found in field " + field.getName();
+        }
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Wrong value
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    default FieldActionResult<R,D> ifReadOnlyFieldThrow(){
+        if (this instanceof FieldActionResult.ReadOnlyField<R,D> readOnlyField)
+            throw readOnlyField.getDefaultExceptionConstructor().apply(debugString(), Severity.USER);
+
+        return this;
+    }
+
+    static <R extends TableRecord<R>, D extends DataPayload<R>> ReadOnlyField<R,D> readOnlyField(
+            TableField<R,?> field,
+            D payload
+    ){
+        return new ReadOnlyField<>(" ", field, payload);
+    }
+    record ReadOnlyField<R extends TableRecord<R>, D extends DataPayload<R>> (
+            String validatorMessage,
+            TableField<R,?> field,
+            D payload
+    ) implements FieldActionResult<R,D> {
+        @Override
+        public BiFunction<String, Severity, RuntimeDomainException> getDefaultExceptionConstructor() {
+            return UneditableField::new;
+        }
+
+        @Override
+        public String debugString() {
+            return "Field " + field.getName() + " is read only";
         }
     }
 }

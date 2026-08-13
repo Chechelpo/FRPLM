@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.prompts.template;
 
 import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptTemplateRecord;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,6 +13,6 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.PROMP
 @RequestMapping(PROMPT_TEMPLATES_URL)
 final class TemplateController extends EntityController<PromptTemplateRecord, TemplateService> {
     TemplateController(TemplateService service, DTOMapper<PromptTemplateRecord> mapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.PROMPT_TEMPLATES, service, mapper);
     }
 }

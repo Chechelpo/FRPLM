@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.OUTLE
 @RequestMapping(OUTLET_URL)
 final class OutletController extends EntityController<OutletRecord, OutletServiceImpl> {
     OutletController(OutletServiceImpl service, DTOMapper<OutletRecord> mapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.OUTLET, service, mapper);
     }
 
     @Override

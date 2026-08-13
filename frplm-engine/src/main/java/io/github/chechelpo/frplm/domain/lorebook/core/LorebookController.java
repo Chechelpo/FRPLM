@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.lorebook.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,6 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.LOREB
 @RequestMapping(LOREBOOKS_URL)
 public final class LorebookController extends EntityController<LorebooksRecord, LorebookService> {
     LorebookController(LorebookService service, DTOMapper<LorebooksRecord> dTOMapper) {
-        super(service, dTOMapper);
+        super(EntityConfigs.Types.LOREBOOKS, service, dTOMapper);
     }
 }

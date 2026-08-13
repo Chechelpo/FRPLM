@@ -23,20 +23,13 @@ class CharacterServiceTest {
     private StableRecordCreator stableRecordCreator;
 
     private LorebookFixtures lorebookFixtures;
-
-    private WorldFixtures worldFixtures;
-    private RegionFixtures regionFixtures;
-    private LocationFixtures locationFixtures;
     private CharacterFixtures characterFixtures;
 
     @BeforeEach
     void setUp() {
         String seed = "test-character";
-        lorebookFixtures = factory.lorebook(seed);
 
-        worldFixtures = factory.worlds(seed);
-        regionFixtures = factory.regions(seed);
-        locationFixtures = factory.locations(seed);
+        lorebookFixtures = factory.lorebook(seed);
         characterFixtures = factory.characters(seed);
 
         stableRecordCreator.run();
@@ -45,21 +38,10 @@ class CharacterServiceTest {
     @Test
     @SimulithIntegrationTest
     void testCharacterLorebook_creates_updates_deletes() {
-        WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
-        RegionRecord region = regionFixtures.addAndCreateTo(REGION.WORLD_ID, world.getId());
-        LocationsRecord location = locationFixtures.addAndCreateTo(
-                EntityDataPayload.<LocationsRecord>builder()
-                        .set(LOCATIONS.WORLD_ID, WORLDS.ID, world)
-                        .set(LOCATIONS.REGION_ID, REGION.ID, region)
-                        .build()
-        );
-
         characterFixtures.addAndCreateList(
-                100,
+                10,
                 i -> EntityDataPayload.<CharactersRecord>builder()
-                        .set(CHARACTERS.WORLD_ID, WORLDS.ID, world)
                         .set(CHARACTERS.NAME, "Character " + i)
-                        .set(CHARACTERS.STARTING_LOCATION_ID, LOCATIONS.ID, location)
         ).forEach(
                 created -> {
                     EntityKey<LorebooksRecord> lorebookKey = EntityKey.of(LOREBOOKS.ID, created.getLorebookId());

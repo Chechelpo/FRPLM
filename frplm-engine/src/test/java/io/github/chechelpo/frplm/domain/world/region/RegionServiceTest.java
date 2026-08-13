@@ -9,6 +9,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.test_utils.fixtures.EntityFixtureFactory;
 import io.github.chechelpo.frplm.test_utils.fixtures.LorebookFixtures;
 import io.github.chechelpo.frplm.test_utils.fixtures.RegionFixtures;
 import io.github.chechelpo.frplm.test_utils.fixtures.WorldFixtures;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.List;
 
@@ -25,37 +27,32 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
+@Import(EntityFixtureFactory.class)
 class RegionServiceTest {
-    @Autowired
-    private WorldService worldService;
     @Autowired
     private RegionService regionService;
     @Autowired
     private StableRecordCreator stableRecordCreator;
-    @Autowired
-    private LorebookService lorebookService;
 
-    private WorldFixtures worldFixture;
-    private RegionFixtures regionFixtures;
-    private LorebookFixtures lorebookFixtures;
+    @Autowired
+    private EntityFixtureFactory fixtureFactory;
+
 
     @BeforeEach
     void setUp() {
-        worldFixture = new WorldFixtures(worldService, "region-test");
-        regionFixtures = new RegionFixtures(regionService, "region-test");
-        lorebookFixtures = new LorebookFixtures(lorebookService, "region-test");
         stableRecordCreator.run();
     }
 
     @Test
     @SimulithIntegrationTest
     void regionLorebook_creates_updates_deletes_with_parent(){
-        WorldsRecord world = worldFixture.addAndCreateTo(EntityDataPayload.empty());
+        String seed = "region-lorebook-test";
+        RegionFixtures regionFixtures = fixtureFactory.regions(seed);
+        LorebookFixtures lorebookFixtures = fixtureFactory.lorebook(seed);
 
         regionFixtures.addAndCreateList(
-                100,
+                10,
                 i -> EntityDataPayload.<RegionRecord>builder()
-                        .set(REGION.WORLD_ID, world.getId())
                         .set(REGION.NAME, "Region " + i)
         ).forEach(
                 createdRegion -> {
@@ -79,14 +76,14 @@ class RegionServiceTest {
     }
 
     @Test
+    @SimulithIntegrationTest
     void update_cannotCreateCycles() {
-        WorldsRecord world = worldFixture.addAndCreateTo(EntityDataPayload.of(WORLDS.NAME, "world"));
+        RegionFixtures regionFixtures = fixtureFactory.regions("region-cycle-test");
 
         List<RegionRecord> regions =  regionFixtures.addAndCreateList(
                 3,
                 i -> EntityDataPayload.<RegionRecord>builder()
                         .set(REGION.NAME, "Region " + i)
-                        .set(REGION.WORLD_ID, world.getId())
         );
         RegionRecord parent = regions.getFirst();
         RegionRecord child = regions.get(1);

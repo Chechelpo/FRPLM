@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.MESSA
 @RequestMapping(MESSAGES_URL)
 public final class MessageController extends EntityController<MessagesRecord, MessageService> {
     MessageController(MessageService service) {
-        super(service, null);
+        super(EntityConfigs.Types.MESSAGES, service, null);
     }
 
     record ResponseDTO(int activeResponse, int withinResponse, int responseCount){}

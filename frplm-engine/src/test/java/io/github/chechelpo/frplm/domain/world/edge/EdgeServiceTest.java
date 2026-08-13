@@ -129,11 +129,11 @@ class EdgeServiceTest {
 
         assertDoesNotThrow(
                 () -> edges.link(worldId, first.getId(), parent.getId()),
-                "Could link duplicate"
+                "Could not link inverse"
         );
         assertDoesNotThrow(
                 () -> edges.link(worldId, parent.getId(), second.getId()),
-                "Could link duplicate"
+                "Could not link inverse"
         );
 
         List<LocationsRecord> actualNeighbours = edges.service.neighboursOf(parent);

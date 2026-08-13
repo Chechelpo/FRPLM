@@ -6,10 +6,7 @@ import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import io.github.chechelpo.frplm.test_utils.fixtures.LocationFixtures;
-import io.github.chechelpo.frplm.test_utils.fixtures.LorebookFixtures;
-import io.github.chechelpo.frplm.test_utils.fixtures.RegionFixtures;
-import io.github.chechelpo.frplm.test_utils.fixtures.WorldFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.*;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
@@ -25,53 +22,27 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 @SpringBootTest
 class LocationsServiceTest {
     @Autowired
-    private WorldService worldService;
-    @Autowired
     private LocationsService locationsService;
-    @Autowired
-    private LorebookService lorebookService;
-    @Autowired
-    private RegionService regionService;
-
     @Autowired
     private StableRecordCreator stableRecordCreator;
 
-    private LocationFixtures locationFixtures;
-    private WorldFixtures worldFixtures;
-    private RegionFixtures regionFixtures;
-    private LorebookFixtures lorebookFixtures;
+    @Autowired
+    EntityFixtureFactory fixtureFactory;
 
     @BeforeEach
     void setUp() {
-        worldFixtures = new WorldFixtures(worldService, "location-test");
-        locationFixtures = new LocationFixtures(
-                locationsService,
-                "location-test"
-        );
-        regionFixtures = new RegionFixtures(
-                regionService,
-                "location-test"
-        );
-        lorebookFixtures = new LorebookFixtures(
-                lorebookService,
-                "location-test"
-        );
-
         stableRecordCreator.run();
     }
 
     @Test
     @SimulithIntegrationTest
     void testLocationLorebook_born_Updated_Killed_WithParent() {
-        WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
-        RegionRecord region = regionFixtures.addAndCreateTo(EntityDataPayload.of(REGION.WORLD_ID, world.getId()));
-
-        locationFixtures.addAndCreateList(
+        String seed = "location-lorebook-test";
+        LorebookFixtures lorebookFixtures = fixtureFactory.lorebook(seed);
+        fixtureFactory.locations(seed).addAndCreateList(
                 100,
                 i ->
                         EntityDataPayload.<LocationsRecord>builder()
-                                .set(LOCATIONS.WORLD_ID, world.getId())
-                                .set(LOCATIONS.REGION_ID, region.getId())
                                 .set(LOCATIONS.NAME, "location " + i)
         ).forEach(
                 created -> {
@@ -89,7 +60,5 @@ class LocationsServiceTest {
                     lorebookFixtures.assertDoesNotExist(lorebookKey);
                 }
         );
-
-
     }
 }

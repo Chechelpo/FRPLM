@@ -35,11 +35,11 @@ public interface EntityReader<R extends TableRecord<R>> {
         EntityKey<R> target();
 
         @Contract("_ -> new")
-        static <Rec extends TableRecord<Rec>> RecordFindResult.@NonNull NotFound<Rec> notFound(EntityKey<Rec> target){
+        public static <Rec extends TableRecord<Rec>> RecordFindResult.@NonNull NotFound<Rec> notFound(EntityKey<Rec> target){
             return new RecordFindResult.NotFound<>(target);
         }
         @Contract("_, _ -> new")
-        static <Rec extends TableRecord<Rec>> RecordFindResult.@NonNull Found<Rec> found(EntityKey<Rec> target, Rec result){
+        public static <Rec extends TableRecord<Rec>> RecordFindResult.@NonNull Found<Rec> found(EntityKey<Rec> target, Rec result){
             return new RecordFindResult.Found<>(target, result);
         }
 

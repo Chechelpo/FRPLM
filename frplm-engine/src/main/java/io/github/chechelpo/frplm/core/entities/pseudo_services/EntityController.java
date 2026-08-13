@@ -34,8 +34,8 @@ public abstract class EntityController<
     protected final DTOMapper<R> mapper;
     private final EntityConfigs.Types type;
 
-    protected EntityController(S service, DTOMapper<R> mapper) {
-        this.type = service.getType();
+    protected EntityController(EntityConfigs.Types type,S service, DTOMapper<R> mapper) {
+        this.type = type;
         this.mapper = mapper;
         this.log = (Logger) LoggerFactory.getLogger(type + "_Controller");
         log.setLevel(Level.convertAnSLF4JLevel(type.getLoggerLevel()));

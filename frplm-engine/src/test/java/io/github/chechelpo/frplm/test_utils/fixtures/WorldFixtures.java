@@ -1,16 +1,24 @@
 package io.github.chechelpo.frplm.test_utils.fixtures;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 import org.jooq.TableField;
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 
 public class WorldFixtures extends EntityFixtures<WorldsRecord, WorldService> {
-    public WorldFixtures(WorldService service, String seed) {
-        super(service, seed);
+    public WorldFixtures(WorldService service, EntityFixtureFactory fixtureFactory, String seed) {
+        super(service, fixtureFactory, seed);
+    }
+
+    @Override
+    protected List<Consumer<EntityDataPayload<WorldsRecord>>> getFunctionsToAssignForeignFields(EntityDataPayload<WorldsRecord> sample) {
+        return List.of();
     }
 
     @Override

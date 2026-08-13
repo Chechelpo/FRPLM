@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(EntityConfigs.LOCATIONS_URL)
 public final class LocationController extends EntityController<LocationsRecord, LocationsService> {
     LocationController(LocationsService service, DTOMapper<LocationsRecord> mapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.LOCATIONS,service, mapper);
     }
 }

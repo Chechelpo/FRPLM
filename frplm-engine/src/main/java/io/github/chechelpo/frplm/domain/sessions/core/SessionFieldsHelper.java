@@ -44,6 +44,7 @@ final class SessionFieldsHelper extends EntityControllerFieldValidator<SessionsR
 
                 FieldInfo.builder(SESSIONS.USER_PERSONA_ID)
                         .requireOnCreate()
+                        .readOnly()
                         .build(),
 
                 FieldInfo.builder(SESSIONS.WORLD_ID)

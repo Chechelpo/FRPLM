@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.DTOMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SESSI
 @RequestMapping(SESSIONS_URL)
 final class SessionController extends EntityController<SessionsRecord, SessionService> {
     SessionController(SessionService store, DTOMapper<SessionsRecord> mapper) {
-        super(store, mapper);
+        super(EntityConfigs.Types.SESSIONS, store, mapper);
     }
     private record stats(int messageNumber){}
     @GetMapping(ENTITY_PATH + "/stats/{id}")

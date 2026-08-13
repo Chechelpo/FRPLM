@@ -22,7 +22,7 @@ public final class SessionCharacterFields extends EntityControllerFieldValidator
                 FieldInfo.builder(SESSION_CHARACTERS.SESSION_ID)
                         .requireOnCreate()
                         .build()
-        );
+                );
     }
 
     @Override

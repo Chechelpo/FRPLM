@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.ENTRI
 @RequestMapping(ENTRIES_URL)
 public final class EntryController extends EntityController<EntryRecord, EntryService> {
     EntryController(EntryService service, DTOMapper<EntryRecord> mapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.ENTRIES, service, mapper);
     }
 
     @PatchMapping(ENTITY_PATH + "/{lorebook_id}/{entryID}")

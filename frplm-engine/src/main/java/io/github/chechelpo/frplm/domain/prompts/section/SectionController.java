@@ -5,6 +5,7 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDTO;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityController;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.PromptSectionRecord;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.SECTI
 @RequestMapping(SECTIONS_URL)
 final class SectionController extends EntityController<PromptSectionRecord, SectionService> {
     SectionController(SectionService service, DTOMapper<PromptSectionRecord> mapper) {
-        super(service, mapper);
+        super(EntityConfigs.Types.SECTIONS, service, mapper);
     }
 
     @GetMapping("/ofTemplate/{templateKey}")
