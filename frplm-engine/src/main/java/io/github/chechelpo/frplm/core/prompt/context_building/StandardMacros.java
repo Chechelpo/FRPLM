@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.core.prompt.context_building;
 import io.github.chechelpo.frplm.core.prompt.PromptPhase;
 import io.github.chechelpo.frplm.core.prompt.PromptPipelineSection;
 import io.github.chechelpo.frplm.core.prompt.building.PromptOrchestrator;
+import io.github.chechelpo.frplm.extensions.api.session.Session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import org.jspecify.annotations.NonNull;
@@ -16,7 +17,14 @@ public final class StandardMacros implements PromptPipelineSection {
     }
 
     @Override
-    public void run(@NonNull SessionImpl session, @NonNull PromptOrchestrator orchestrator) {
+    public void run(@NonNull PromptOrchestrator orchestrator) {
+        orchestrator.getSession()
+                .ifPresent(
+                        session -> run(session, orchestrator)
+                );
+    }
+
+    private void run(Session session, PromptOrchestrator orchestrator){
         orchestrator.appendAtMacro("user", session.getUserCharacter().getName());
         injectFormattedCharacters(session, orchestrator);
 
@@ -25,7 +33,7 @@ public final class StandardMacros implements PromptPipelineSection {
         orchestrator.appendAtMacro("world", session.getWorld().getName());
     }
 
-    void injectFormattedCharacters(SessionImpl session, PromptOrchestrator orchestrator){
+    private void injectFormattedCharacters(Session session, PromptOrchestrator orchestrator){
         SessionLocation location = session.getUserCharacter().getCurrentLocation();
         StringBuilder builder = new StringBuilder();
 
@@ -38,7 +46,7 @@ public final class StandardMacros implements PromptPipelineSection {
         orchestrator.appendAtMacro("formatted_characters", builder.toString());
     }
 
-    String getFormattedStringAndDescription(String name, String description){
+    private String getFormattedStringAndDescription(String name, String description){
         return """
                 <%s>
                 <name> %s </name>

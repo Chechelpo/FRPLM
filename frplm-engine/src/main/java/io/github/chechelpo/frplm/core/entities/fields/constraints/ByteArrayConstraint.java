@@ -16,6 +16,14 @@ public final class ByteArrayConstraint implements Constraint<byte[]> {
         this.maxLength = builder.maxLength;
     }
 
+    public Integer minLength() {
+        return minLength;
+    }
+
+    public Integer maxLength() {
+        return maxLength;
+    }
+
     public static @NotNull Builder builder() {
         return new Builder();
     }

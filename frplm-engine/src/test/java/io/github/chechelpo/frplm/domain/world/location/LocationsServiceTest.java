@@ -1,111 +1,95 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
-import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
-import io.github.chechelpo.frplm.domain.world.region.RegionTestContext;
-import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
+import io.github.chechelpo.frplm.domain.world.region.RegionService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.test_utils.fixtures.LocationFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.LorebookFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.RegionFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.WorldFixtures;
+import io.github.chechelpo.frplm.domain.world.core.WorldService;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 
-import java.util.List;
-
-import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
-import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @SpringBootTest
-@Sql(
-        scripts = "classpath:db/schema.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Import({LorebookTestContext.class, LocationTestContext.class, RegionTestContext.class})
 class LocationsServiceTest {
     @Autowired
-    LorebookTestContext lorebooks;
+    private WorldService worldService;
     @Autowired
-    LocationTestContext locations;
+    private LocationsService locationsService;
     @Autowired
-    RegionTestContext regions;
+    private LorebookService lorebookService;
+    @Autowired
+    private RegionService regionService;
+
+    @Autowired
+    private StableRecordCreator stableRecordCreator;
+
+    private LocationFixtures locationFixtures;
+    private WorldFixtures worldFixtures;
+    private RegionFixtures regionFixtures;
+    private LorebookFixtures lorebookFixtures;
 
     @BeforeEach
     void setUp() {
-        lorebooks.reload();
-        locations.reload();
+        worldFixtures = new WorldFixtures(worldService, "location-test");
+        locationFixtures = new LocationFixtures(
+                locationsService,
+                "location-test"
+        );
+        regionFixtures = new RegionFixtures(
+                regionService,
+                "location-test"
+        );
+        lorebookFixtures = new LorebookFixtures(
+                lorebookService,
+                "location-test"
+        );
+
+        stableRecordCreator.run();
     }
 
     @Test
-    void testLocationLorebookLifeCycle() {
-        /*
-        int locationAmount = 100;
-        List<WorldsRecord> worldsRecords = locations.worldTestContext.createWorlds(locationAmount).createdRecords();
-        List<EntityDataPayload<LocationsRecord>> locationsData = new ArrayList<>(locationAmount);
-        RegionRecord regionRecord = locations.regionTestContext.createRegions(1).getFirst();
-        long seed = 10;
+    @SimulithIntegrationTest
+    void testLocationLorebook_born_Updated_Killed_WithParent() {
+        WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
+        RegionRecord region = regionFixtures.addAndCreateTo(EntityDataPayload.of(REGION.WORLD_ID, world.getId()));
 
-        for (int i = 0; i < locationAmount; i++)
-            locationsData.add(EntityDataPayload.<LocationsRecord>builder()
-                    .set(LOCATIONS.WORLD_ID, worldsRecords.get(i).getId())
-                    .set(LOCATIONS.REGION_ID, regionRecord.getId())
-                    .set(LOCATIONS.NAME, TestText.randomText(seed + i, 0, 255))
-                    .build()
-            );
+        locationFixtures.addAndCreateList(
+                100,
+                i ->
+                        EntityDataPayload.<LocationsRecord>builder()
+                                .set(LOCATIONS.WORLD_ID, world.getId())
+                                .set(LOCATIONS.REGION_ID, region.getId())
+                                .set(LOCATIONS.NAME, "location " + i)
+        ).forEach(
+                created -> {
+                    // Create
+                    EntityKey<LorebooksRecord> lorebookKey = EntityKey.of(LOREBOOKS.ID, created.getLorebookId());
+                    lorebookFixtures.assertFieldEquals(created.getName(), LOREBOOKS.NAME, lorebookKey);
 
-        List<LocationsRecord> records = locationsData.stream().map(
-                data -> assertDoesNotThrow(() -> locations.service.createAndGet(data))
-        ).toList();
+                    // Update
+                    String newName = "newName of " + created.getName();
+                    locationsService.update(created, EntityDataPayload.of(LOCATIONS.NAME, newName));
+                    lorebookFixtures.assertFieldEquals(newName, LOREBOOKS.NAME, lorebookKey);
 
-        for (int i = 0; i < locationAmount; i++)
-            assertEquals(lorebooks.service.getLorebookOf(records.get(i)).getName(), records.get(i).getName());
-
-        for (int i = 0; i < locationAmount; i++) {
-            LocationsRecord record = records.get(i);
-            LorebooksRecord lorebook = lorebooks.service.getLorebookOf(record);
-
-            assertTrue(this.locations.service.delete(locations.service.keyOf(record)), "Error deleting location");
-            assertTrue(lorebooks.service.find(
-                    lorebooks.service.keyOf(lorebook)
-            ).isEmpty(), "Stale lorebook referencing location");
-        }*/
-    }
-
-    @Test
-    void cannotDeleteRegionIfParentOfLocations() {
-        int locationAmount = 3;
-        List<LocationsRecord> locationsRecords = locations.createAndGetTestLocationsOfSameWorld(locationAmount);
-        int worldId = locationsRecords.getFirst().getWorldId();
-
-        RegionRecord region = regions.service.createAndGet(EntityDataPayload.<RegionRecord>builder()
-                .set(REGION.NAME, "region")
-                .set(REGION.WORLD_ID, worldId)
-                .build()
+                    // Delete
+                    locationsService.delete(created);
+                    lorebookFixtures.assertDoesNotExist(lorebookKey);
+                }
         );
 
-        for (LocationsRecord loc : locationsRecords)
-            assertTrue(
-                    locations.service.update(
-                            locations.service.keyOf(loc),
-                            EntityDataPayload.of(LOCATIONS.REGION_ID, region.getId())
-                    ).success(),
-                    "Could not link location"
-            );
 
-
-        for (LocationsRecord loc : locationsRecords){
-            assertThrows(
-                    UnsupportedAction.class,
-                    () -> regions.service.delete(regions.service.keyOf(region))
-            );
-            locations.service.delete(locations.service.keyOf(loc));
-        }
-
-        assertDoesNotThrow(
-                () -> regions.service.delete(regions.service.keyOf(region))
-        );
     }
 }

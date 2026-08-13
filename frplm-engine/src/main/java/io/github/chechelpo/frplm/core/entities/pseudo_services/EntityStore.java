@@ -49,6 +49,9 @@ public abstract class EntityStore<R extends TableRecord<R>>
     public EntityConfigs.Types getType(){
         return this.type;
     }
+    public Table<R> getMainTable(){
+        return this.main_table;
+    }
 
     public Result<R> getAll(){
         Result<R> records = ctx.selectFrom(main_table)

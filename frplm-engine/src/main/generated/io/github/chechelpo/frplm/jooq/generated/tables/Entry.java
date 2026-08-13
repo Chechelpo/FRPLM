@@ -9,9 +9,11 @@ import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryKeywords.EntryKeywordsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryOutlet.EntryOutletPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryPrologCondition.EntryPrologConditionPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.EntryState.EntryStatePath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Keyword.KeywordPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 
 import java.util.Arrays;
@@ -298,12 +300,33 @@ public class Entry extends TableImpl<EntryRecord> {
         return _entryPrologCondition;
     }
 
+    private transient EntryStatePath _entryState;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.ENTRY_STATE</code>
+     * table
+     */
+    public EntryStatePath entryState() {
+        if (_entryState == null)
+            _entryState = new EntryStatePath(this, null, Keys.FK_STATE_TO_ENTRY.getInverseKey());
+
+        return _entryState;
+    }
+
     /**
      * Get the implicit many-to-many join path to the
      * <code>PUBLIC.KEYWORD</code> table
      */
     public KeywordPath keyword() {
         return entryKeywords().keyword();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.SESSIONS</code> table
+     */
+    public SessionsPath sessions() {
+        return entryState().sessions();
     }
 
     @Override

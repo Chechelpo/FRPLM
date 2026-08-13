@@ -53,10 +53,10 @@ final class LLMController extends EntityController<LlmConnectionRecord, LLMServi
 
         LlmConnectionRecord connection = service.find(key)
                 .orElseThrow("Could not find connection to test", Severity.USER);
-        ChatCompletionRequest request = ChatCompletionRequest.getTestMessage(
-                service.getValueOf(LLM_CONNECTION.MODEL, key)
-                        .orElseThrow(() -> new NotInitialized("Connection model not configured", Severity.USER))
-        );
+
+        String modelId = service.getValueOf(LLM_CONNECTION.MODEL, key);
+        if (modelId == null) throw new NotInitialized("Connection " + connection.getName() + " has no model id", Severity.USER);
+        ChatCompletionRequest request = ChatCompletionRequest.getTestMessage(modelId);
 
         log.debug("Testing connection");
         ChatCompletionResponse response =  textToTextClient.generate(request, connection).orElseThrow();

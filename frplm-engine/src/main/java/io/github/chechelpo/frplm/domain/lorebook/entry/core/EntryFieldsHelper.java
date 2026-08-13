@@ -19,7 +19,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY;
 @Component
 final class EntryFieldsHelper extends EntityControllerFieldValidator<EntryRecord> {
     EntryFieldsHelper() {
-        super(EntityConfigs.Types.ENTRIES);
+        super(EntityConfigs.Types.ENTRIES, ENTRY);
     }
 
     @Override

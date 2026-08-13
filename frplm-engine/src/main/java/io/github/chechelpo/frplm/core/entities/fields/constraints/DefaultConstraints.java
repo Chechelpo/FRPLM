@@ -1,5 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.fields.constraints;
 
+import org.jooq.DataType;
+import org.jooq.TableField;
 import org.jspecify.annotations.NonNull;
 
 import java.time.LocalDateTime;
@@ -8,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class DefaultConstraints {
+
     private DefaultConstraints() {
     }
 
@@ -41,7 +44,11 @@ public final class DefaultConstraints {
 
         register(String.class, StringConstraint.builder().build(), constraints);
 
-        register(LocalDateTime.class, LocalDateTimeConstraint.builder().build(), constraints);
+        register(
+                LocalDateTime.class,
+                LocalDateTimeConstraint.builder().build(),
+                constraints
+        );
 
         DEFAULT_CONSTRAINTS = Map.copyOf(constraints);
     }
@@ -65,9 +72,24 @@ public final class DefaultConstraints {
 
     @SuppressWarnings("unchecked")
     public static <T> @NonNull Constraint<T> getDefaultConstraintForClass(
-            Class<T> clazz
+            TableField<?, T> field
     ) {
-        Objects.requireNonNull(clazz, "clazz");
+        Objects.requireNonNull(field, "field is null");
+
+        DataType<T> dataType = field.getDataType();
+        Class<T> clazz = dataType.getType();
+
+        if (clazz == String.class && dataType.lengthDefined()) {
+            return (Constraint<T>) StringConstraint.builder()
+                    .setMaxLength(dataType.length())
+                    .build();
+        }
+
+        if (clazz == byte[].class && dataType.lengthDefined()) {
+            return (Constraint<T>) ByteArrayConstraint.builder()
+                    .maxLength(dataType.length())
+                    .build();
+        }
 
         Constraint<?> constraint = DEFAULT_CONSTRAINTS.get(clazz);
 

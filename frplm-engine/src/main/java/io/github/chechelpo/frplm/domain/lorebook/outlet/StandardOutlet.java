@@ -4,7 +4,7 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.utils.stable_records.StableRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.OutletRecord;
-import io.github.chechelpo.frplm.utils.macros.Macro;
+import io.github.chechelpo.frplm.utils.matching.Macro;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;

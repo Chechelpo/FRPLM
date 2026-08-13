@@ -145,6 +145,8 @@ public final class EntityKey<R extends TableRecord<R>> implements DataPayload<R>
         return EntityKey.<Rec>builder().set(field, value);
     }
 
+
+
     public static class Builder<R extends TableRecord<R>> {
         private final Map<TableField<R, ?>, Object> values = new HashMap<>();
         private boolean mutable;

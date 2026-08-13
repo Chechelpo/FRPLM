@@ -9,11 +9,13 @@ import java.util.*;
 
 public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements FieldValidator<R>
 {
+    protected final Table<R> table;
     protected final Set<TableField<R, ?>> requiredInstantiationFields = new HashSet<>();
     protected final Map<TableField<R, ?>, FieldInfo<R, ?>> fieldInfoMap = new HashMap<>();
     protected final Set<TableField<R, ?>> keys = new HashSet<>();
 
-    protected EntityFieldsValidator() {
+    protected EntityFieldsValidator(Table<R> table) {
+        this.table = table;
         getCustom().forEach(this::registerField);
 
         //noinspection unchecked
@@ -21,6 +23,23 @@ public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements
                 .map(TableField.class::cast)
                 .filter(field -> !fieldInfoMap.containsKey(field))
                 .forEach(field -> registerField(FieldInfo.builder(field).build()));
+    }
+
+
+    @Override
+    public Table<R> getTable() {
+        return this.table;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> FieldInfo<R, T> getInfoOf(TableField<R, T> field) {
+        return (FieldInfo<R,T>) fieldInfoMap.get(field);
+    }
+
+    @Override
+    public boolean isForeignKey(TableField<R, ?> field) {
+        return fieldInfoMap.get(field).isForeignKey;
     }
 
     protected abstract List<FieldInfo<R, ?>> getCustom();
@@ -187,11 +206,6 @@ public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements
 
 
     @Override
-    public Table<R> getTable() {
-        return fieldInfoMap.values().stream().toList().getFirst().field.getTable();
-    }
-
-    @Override
     public EntityKey<R> extractKeysFrom(EntityDataPayload<R> payload){
         EntityKey.Builder<R> builder = EntityKey.builder();
 
@@ -216,6 +230,11 @@ public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements
 
     public Set<TableField<R,?>> keyFields(){
         return keys;
+    }
+
+    @Override
+    public Set<TableField<R,?>> instantiationFields(){
+        return requiredInstantiationFields;
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

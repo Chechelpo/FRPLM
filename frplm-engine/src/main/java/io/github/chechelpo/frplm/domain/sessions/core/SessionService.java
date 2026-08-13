@@ -2,9 +2,9 @@ package io.github.chechelpo.frplm.domain.sessions.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
+import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
@@ -27,58 +27,44 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 @Service
 public class SessionService extends EntityService<SessionsRecord, SessionStore> {
     private final CharacterService characterService;
-    private final StartingLocationsService startingLocationsService;
 
     SessionService(
             SessionStore store,
             FieldValidator<SessionsRecord> validator,
             CharacterService characters,
-            EventBus eventBus, 
-            StartingLocationsService startingLocationsService
+            EventBus eventBus
     ) {
         super(store, validator, eventBus);
         this.characterService = characters;
-        this.startingLocationsService = startingLocationsService;
     }
 
     public EntityKey<SessionsRecord> keyOf(int sessionId){
         return EntityKey.of(SESSIONS.ID, sessionId);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Integer> getUserCharacterID(int sessionID) {
-        return this.getValueOf(SESSIONS.USER_PERSONA_ID, EntityKey.of(SESSIONS.ID, sessionID));
-    }
-    @Transactional(readOnly = true)
-    public Optional<Integer> getUserCharacterID(EntityKey<SessionsRecord> key){
-        return this.getValueOf(SESSIONS.USER_PERSONA_ID, key);
-    }
-
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<SessionsRecord> data, long operationID) {
-        EntityKey<CharactersRecord> characterKey = characterService.keyOf(data.require(SESSIONS.USER_PERSONA_ID));
-        boolean canBeUser =  characterService.getValueOf(
-                    CHARACTERS.CAN_BE_USER,
-                        characterKey
-            )
-                .orElseThrow(() -> new IllegalArgumentException("Character does not exist"));
+        CharactersRecord userCharacter = characterService.find(
+                EntityKey.<CharactersRecord>builder()
+                        .set(CHARACTERS.ID, data.requireNonNull(SESSIONS.USER_PERSONA_ID))
+                        .set(CHARACTERS.WORLD_ID, data.requireNonNull(SESSIONS.WORLD_ID))
+                        .build()
+        ).orElseThrow("Couldn't find user character", Severity.USER);
 
-        if (!canBeUser) throw new InvalidValue("Picked character can't be user");
-        List<LocationsRecord> thisStartingLocations = startingLocationsService
-                .startingLocationAt(characterKey, data.require(SESSIONS.WORLD_ID));
-
-        if (thisStartingLocations.isEmpty())
+        if (!userCharacter.getCanBeUser()) throw new InvalidValue("Picked character can't be user");
+        if (userCharacter.getStartingLocationId() == null)
             throw new InvalidValue("This character has no starting locations in this world");
+
         super.beforeCreate(data, operationID);
     }
 
     @TransactionalEventListener
     void onDeleteMessage(CRUDCommittedEvent.@NotNull DeletedEntity<?> rawEvent) {
-        if (rawEvent.type()!= EntityConfigs.Types.MESSAGES) return;
+        if (rawEvent.isNotEventOf(MESSAGES)) return;
 
         CRUDCommittedEvent.DeletedEntity<MessagesRecord> event = (CRUDCommittedEvent.DeletedEntity<MessagesRecord>) rawEvent;
         log.debug("Message deleted, updating tick num");
-        if (!store.decrementTickNum(event.key().require(MESSAGES.SESSION_ID))){
+        if (!store.decrementTickNum(event.key().requireNonNull(MESSAGES.SESSION_ID))){
             log.error("Couldn't decrement session tick after message deletion");
             throw new IllegalStateException("Couldn't decrement session tick after message deletion");
         }

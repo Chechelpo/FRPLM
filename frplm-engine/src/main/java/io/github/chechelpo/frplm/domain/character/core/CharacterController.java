@@ -11,24 +11,8 @@ import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.CHARA
 
 @RestController
 @RequestMapping(CHARACTERS_URL)
-public final class CharacterController extends EntityController<
-        CharactersRecord,
-        CharacterService
-        >
-{
-
+public final class CharacterController extends EntityController<CharactersRecord, CharacterService> {
     CharacterController(CharacterService service, EntityControllerFieldValidator<CharactersRecord> validator) {
         super(service, validator);
     }
-
-
-    @GetMapping("/startingAt")
-    ResponseEntity<EntityDTO[]> getStartingAt(@RequestParam int worldId, @RequestParam int locationId) {
-        return ResponseEntity.ok(
-                wrapEntities(
-                        service.getStartingAt(worldId, locationId)
-                )
-        );
-    }
-
 }

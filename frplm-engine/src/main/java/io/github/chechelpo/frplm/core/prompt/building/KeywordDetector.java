@@ -4,6 +4,7 @@ import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordServ
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.utils.collections.IntSetFactory;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
+import io.github.chechelpo.frplm.utils.matching.FlexiblePattern;
 import it.unimi.dsi.fastutil.ints.*;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 
 /** Detects all possible relevant keywords inside a series of strings */
 final class KeywordDetector {
+    private static final Pattern REGEX_META =
+            Pattern.compile("[\\\\.^$|?*+()\\[\\]{}]");
+
     public enum KeywordSource {
         DESCRIPTION,
         PROMPT_SECTION,
@@ -127,8 +131,8 @@ final class KeywordDetector {
     }
 
     /**
-     * @param keyword keyword to compile
-     * @return regex pattern that is case-insensitive and punctuation-insensitive
+     * @param keyword keyword or regex to compile
+     * @return pattern adjusted according to whether the input is regex-like or a plain keyword
      */
     @Contract(value = "_ -> new", pure = true)
     private static @NotNull Pattern compilePattern(String keyword) {
@@ -136,20 +140,7 @@ final class KeywordDetector {
             throw new IllegalArgumentException("Keyword cannot be null or blank");
         }
 
-        String body = Arrays.stream(keyword.trim().split("[^\\p{L}\\p{N}]+"))
-                .filter(token -> !token.isEmpty())
-                .map(Pattern::quote)
-                .collect(Collectors.joining("[^\\p{L}\\p{N}]+"));
-
-        String regex =
-                "(?<![\\p{L}\\p{N}])" +
-                        body +
-                        "(?![\\p{L}\\p{N}])";
-
-        return Pattern.compile(
-                regex,
-                Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE
-        );
+        return new FlexiblePattern(keyword).asPattern();
     }
 
     private static boolean keywordDetected(String text, @NotNull Pattern keyword) {

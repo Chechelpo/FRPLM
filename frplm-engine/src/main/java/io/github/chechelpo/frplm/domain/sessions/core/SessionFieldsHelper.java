@@ -13,7 +13,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 @Component
 final class SessionFieldsHelper extends EntityControllerFieldValidator<SessionsRecord> {
     SessionFieldsHelper() {
-        super(EntityConfigs.Types.SESSIONS);
+        super(EntityConfigs.Types.SESSIONS, SESSIONS);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package io.github.chechelpo.frplm.extensions;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
@@ -14,7 +13,7 @@ import io.github.chechelpo.frplm.domain.prompts.section.SectionService;
 import io.github.chechelpo.frplm.domain.prompts.template.TemplateService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
-import io.github.chechelpo.frplm.domain.sessions.movement.Movements;
+import io.github.chechelpo.frplm.domain.sessions.session_characters.SessionCharacterService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
@@ -36,7 +35,6 @@ public class EngineContextConfiguration {
 
 
             CharacterService characters,
-            StartingLocationsService startingLocations,
 
             WorldService worlds,
             RegionService regions,
@@ -61,7 +59,6 @@ public class EngineContextConfiguration {
 
 
                 characters,
-                startingLocations,
 
                 worlds,
                 regions,
@@ -82,12 +79,12 @@ public class EngineContextConfiguration {
 
     @Bean
     public SessionContext sessionContext(
-            Movements movements,
+            SessionCharacterService sessionCharacters,
             MessageService messages,
             SessionService session
     ) {
         return new SessionContext(
-                movements,
+                sessionCharacters,
                 messages,
                 session
         );

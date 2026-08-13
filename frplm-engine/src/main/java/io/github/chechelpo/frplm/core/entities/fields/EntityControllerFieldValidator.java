@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.core.entities.fields;
 
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidDTO;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
+import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
 
@@ -17,7 +18,8 @@ public abstract class EntityControllerFieldValidator<R extends TableRecord<R>> e
     private final List<DTOField<R, ?>> dtoNames;
     private final EntityConfigs.Types type;
 
-    protected EntityControllerFieldValidator(EntityConfigs.Types type) {
+    protected EntityControllerFieldValidator(EntityConfigs.Types type, Table<R> table) {
+        super(table);
         this.dtoNames = List.copyOf(getDTOStructure());
         this.type = type;
     }

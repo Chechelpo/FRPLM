@@ -5,5 +5,5 @@ import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 
 public interface PromptPipelineSection {
     PromptPhase requestPhase();
-    void run(SessionImpl session, PromptOrchestrator orchestrator);
+    void run(PromptOrchestrator orchestrator);
 }

@@ -19,7 +19,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_TEMPLATE;
 final class TemplateFieldsHelper
         extends EntityControllerFieldValidator<PromptTemplateRecord> {
     TemplateFieldsHelper() {
-        super(EntityConfigs.Types.PROMPT_TEMPLATES);
+        super(EntityConfigs.Types.PROMPT_TEMPLATES, PROMPT_TEMPLATE);
     }
 
     @Override

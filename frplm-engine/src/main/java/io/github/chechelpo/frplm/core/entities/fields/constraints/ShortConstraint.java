@@ -17,6 +17,14 @@ public final class ShortConstraint implements Constraint<Short> {
         this.max = builder.max;
     }
 
+    public Short min() {
+        return min;
+    }
+
+    public Short max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull Optional<String> returnReasonIfInvalid(

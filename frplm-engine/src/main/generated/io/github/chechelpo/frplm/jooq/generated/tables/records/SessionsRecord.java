@@ -102,6 +102,34 @@ public class SessionsRecord extends UpdatableRecordImpl<SessionsRecord> {
         return (Integer) get(5);
     }
 
+    /**
+     * Setter for <code>PUBLIC.SESSIONS.NEXT_CHARACTER_ID</code>.
+     */
+    public void setNextCharacterId(Integer value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.SESSIONS.NEXT_CHARACTER_ID</code>.
+     */
+    public Integer getNextCharacterId() {
+        return (Integer) get(6);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.SESSIONS.NEXT_LOCATION_ID</code>.
+     */
+    public void setNextLocationId(Integer value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.SESSIONS.NEXT_LOCATION_ID</code>.
+     */
+    public Integer getNextLocationId() {
+        return (Integer) get(7);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -125,7 +153,7 @@ public class SessionsRecord extends UpdatableRecordImpl<SessionsRecord> {
     /**
      * Create a detached, initialised SessionsRecord
      */
-    public SessionsRecord(Integer id, String name, Integer worldId, Integer promptId, Integer userPersonaId, Integer currentTick) {
+    public SessionsRecord(Integer id, String name, Integer worldId, Integer promptId, Integer userPersonaId, Integer currentTick, Integer nextCharacterId, Integer nextLocationId) {
         super(Sessions.SESSIONS);
 
         setId(id);
@@ -134,6 +162,8 @@ public class SessionsRecord extends UpdatableRecordImpl<SessionsRecord> {
         setPromptId(promptId);
         setUserPersonaId(userPersonaId);
         setCurrentTick(currentTick);
+        setNextCharacterId(nextCharacterId);
+        setNextLocationId(nextLocationId);
         resetChangedOnNotNull();
     }
 }

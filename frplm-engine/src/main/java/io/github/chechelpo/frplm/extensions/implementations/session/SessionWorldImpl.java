@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
@@ -16,8 +17,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSION_CHARACTERS;
 
 public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     private final SessionImpl session;
@@ -35,23 +38,9 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     MoveResult move(SessionCharacter character, LocationSnapshot location) {
         return move(require(character), (SessionLocationImpl) location);
     }
+
     private MoveResult move(SessionCharacterImpl character, SessionLocationImpl toLocation) {
-        if (isAtLocation(character, toLocation)) return MoveResult.alreadyAtLocation(character, toLocation);
-
-        SessionLocationImpl characterLocation = this.locationOf(character);
-        if (!isTraversable(characterLocation, toLocation))
-            return MoveResult.notNeighbours(character, characterLocation, toLocation);
-
-        boolean success = session.context().movements().move(
-                session.getRecord().getId(),
-                character.getRecord().getId(),
-                toLocation.getRecord().getId()
-        );
-
-        if (!success)
-            return new MoveResult.FailedMove(MoveResult.FailedMove.Type.UNKNOWN, character, characterLocation, toLocation, "unknown");
-        System.out.println("New location of character: " + locationOf(character).getName());
-        return MoveResult.success(character, characterLocation, toLocation);
+        throw new UnsupportedOperationException("A");
     }
 
     @Override
@@ -60,18 +49,7 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     }
 
     public boolean isAtLocation(@NotNull SessionCharacterImpl character, SessionLocationImpl location) {
-        CharactersRecord record = character.getRecord();
-
-        int currentLocationID;
-        try {
-            currentLocationID = session.context().movements().getLocationOf(
-                    character.getRecord(), session.getRecord()
-            ).getId();
-        } catch (EntityNotFound ignored) {
-            throw new RuntimeException("Character " + character + " does not have a current location");
-        }
-
-        return currentLocationID == location.getRecord().getId();
+        return Objects.equals(character.getRecord().getCurrentLocationId(), location.getRecord().getId());
     }
 
     @Contract("_ -> new")
@@ -100,7 +78,10 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     public SessionLocationImpl locationOf(@NotNull SessionCharacterImpl character) {
         try {
             return new SessionLocationImpl(
-                    session.context().movements().getLocationOf(character.getRecord(), session.getRecord()),
+                    context.locations().require(EntityKey.<LocationsRecord>builder()
+                            .set(LOCATIONS.ID, character.getRecord().getCurrentLocationId())
+                            .set(LOCATIONS.WORLD_ID, character.getRecord().getWorldId())
+                            .build()),
                     context,
                     this
             );
@@ -110,10 +91,14 @@ public final class SessionWorldImpl extends WorldImpl implements SessionWorld {
     }
 
     public List<SessionCharacter> getAtLocation(@NotNull SessionLocationImpl location) {
-        return Arrays
-                .stream(session.context().movements().getAtLocation(location.getRecord(), session.getRecord()))
-                .map(record -> (SessionCharacter) new SessionCharacterImpl(record, this.context, session, this))
-                .toList();
+        return session.context().sessionCharacters().getMatching(
+                        EntityDataPayload.<SessionCharactersRecord>builder()
+                                .set(SESSION_CHARACTERS.SESSION_ID, this.session.getRecord().getId())
+                                .set(SESSION_CHARACTERS.WORLD_ID, this.record.getId())
+                                .set(SESSION_CHARACTERS.CURRENT_LOCATION_ID, location.getRecord().getId())
+                                .build()
+                )
+                .map(record -> (SessionCharacter) new SessionCharacterImpl(record, this.context, session, this));
     }
 
     @Override

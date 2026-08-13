@@ -52,14 +52,6 @@ public class CharacterCoreTestContext implements DBReload {
                             .build()
             );
 
-            LorebooksRecord characterLorebook =
-                    entryTestContext.lorebooks.service.getLorebookOf(record);
-
-            entryTestContext.createEntriesForLorebook(
-                    characterLorebook,
-                    20,
-                    random.split()
-            );
 
             charactersData.add(record);
         }

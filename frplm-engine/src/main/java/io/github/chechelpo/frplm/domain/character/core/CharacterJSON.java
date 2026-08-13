@@ -6,6 +6,11 @@ public record CharacterJSON(
         String name,
         String description,
         Boolean can_be_user,
+
+        Integer Ttl,
+        Boolean is_static,
+        String reason_why,
+
         String welcome_message,
         LorebookJSON lorebook
 ){}

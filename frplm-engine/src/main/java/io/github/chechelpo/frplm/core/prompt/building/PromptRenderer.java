@@ -2,10 +2,7 @@ package io.github.chechelpo.frplm.core.prompt.building;
 
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -22,6 +19,10 @@ final class PromptRenderer {
         sections.stream().filter(SectionManager::isChatHistorySection).findAny()
                 .orElseThrow(() -> new IllegalStateException("There's no chat history section in this prompt"));
     }
+    public PromptRenderer(List<SectionManager> initialSections){
+        chatHistory = null;
+        this.sections.addAll(initialSections);
+    }
 
     List<ChatMessage> getChatHistory(){
         return chatHistory;
@@ -37,11 +38,12 @@ final class PromptRenderer {
 
     List<ChatCompletionMessage> render(MacroManager macroManager) {
         sections.forEach(
-                section -> section.injectAtDetectedMacros(macroManager)
+                section -> section.injectAtDetectedTargets(macroManager)
         );
 
         List<ChatCompletionMessage> orderedMessages =
                 new ArrayList<>(sections.size() + chatHistory.size());
+
 
         Map<Integer, List<SectionManager>> atDepthSections =
                 sections.stream()
@@ -63,7 +65,8 @@ final class PromptRenderer {
                                 orderedMessages.size(),
                                 orderedMessages.size() + chatHistory.size(),
                                 orderedMessages,
-                                atDepthSections
+                                atDepthSections,
+                                macroManager
                         );
                         return;
                     }
@@ -78,13 +81,36 @@ final class PromptRenderer {
             int chatHistoryStartOffset,
             int chatHistoryEndOffset,
             List<ChatCompletionMessage> orderedMessages,
-            Map<Integer, List<SectionManager>> atDepthSectionsByIndex
+            Map<Integer, List<SectionManager>> atDepthSectionsByIndex,
+            MacroManager macroManager
     ) {
-        chatHistory.forEach(chatMessage ->  orderedMessages.add(chatMessage.asChatCompletion()));
-        for (Map.Entry<Integer, List<SectionManager>> entry : atDepthSectionsByIndex.entrySet()){
-            int depth = Math.max(chatHistoryStartOffset, chatHistoryEndOffset - entry.getKey());
-            List<SectionManager> toInject = entry.getValue();
-            toInject.forEach(sec -> orderedMessages.add(depth, sec.asCompletionMessage()));
+        chatHistory.forEach(chatMessage -> {
+            ChatCompletionMessage message =
+                    chatMessage.asChatCompletion();
+
+            orderedMessages.add(
+                    new ChatCompletionMessage(
+                            message.role(),
+                            message.reasoning(),
+                            macroManager.replaceTargets(message.content())
+                    )
+            );
+        });
+
+        for (Map.Entry<Integer, List<SectionManager>> entry
+                : atDepthSectionsByIndex.entrySet()) {
+
+            int depth = Math.max(
+                    chatHistoryStartOffset,
+                    chatHistoryEndOffset - entry.getKey()
+            );
+
+            entry.getValue().forEach(
+                    sec -> orderedMessages.add(
+                            depth,
+                            sec.asCompletionMessage()
+                    )
+            );
         }
     }
 }

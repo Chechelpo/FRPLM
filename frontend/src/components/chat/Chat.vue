@@ -26,6 +26,7 @@ import ChatMessage from "@/components/chat/ChatMessage.vue";
 import ChatBar from "@/components/chat/ChatBar.vue";
 import ConfigSidebar from "@/components/chat/ConfigSidebar.vue";
 import SplitPanel from "@/components/utils/panels/SplitPanel.vue";
+import ExpandableSplitPanel from "@/components/utils/panels/ExpandableSplitPanel.vue";
 
 type ChatOperation =
     | "sending"
@@ -824,7 +825,7 @@ watch(
         </div>
       </div>
 
-      <SplitPanel
+      <ExpandableSplitPanel
           v-else
           storage-key="main-chat"
           class="chat-layout"
@@ -1001,7 +1002,7 @@ watch(
             </footer>
           </section>
         </template>
-      </SplitPanel>
+      </ExpandableSplitPanel>
     </main>
   </section>
 </template>

@@ -1,20 +1,23 @@
 package io.github.chechelpo.frplm.domain.world.region;
 
-import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
+import io.github.chechelpo.frplm.core.entities.fields.constraints.DoubleConstraint;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
 
 @Component
-final class RegionFields extends EntityControllerFieldValidator<RegionRecord> {
+public final class RegionFields
+        extends EntityControllerFieldValidator<RegionRecord> {
 
-    RegionFields() {
-        super(EntityConfigs.Types.REGIONS);
+    public RegionFields() {
+        super(EntityConfigs.Types.REGIONS, REGION);
     }
 
     @Override
@@ -48,29 +51,45 @@ final class RegionFields extends EntityControllerFieldValidator<RegionRecord> {
     @Override
     protected List<FieldInfo<RegionRecord, ?>> getCustom() {
         return List.of(
-                FieldInfo.builder(REGION.WORLD_ID)
-                        .key()
-                        .build(),
-
-                FieldInfo.builder(REGION.ID)
-                        .key()
-                        .build(),
-
-                FieldInfo.builder(REGION.PARENT_REGION_ID)
-                        .nullable()
-                        .build(),
-
+                // Application-level policy; not implied by the SQL schema.
                 FieldInfo.builder(REGION.LOREBOOK_ID)
                         .readOnly()
                         .build(),
 
-                FieldInfo.builder(REGION.NAME)
-                        .requireOnCreate()
+                // CHECK (width > 0)
+                FieldInfo.builder(REGION.WIDTH)
+                        .addCustomConstraint(value ->
+                                value > 0.0
+                                        ? Optional.empty()
+                                        : Optional.of("Width must be greater than 0")
+                        )
                         .build(),
 
-                FieldInfo.builder(REGION.DESCRIPTION)
+                // CHECK (height > 0)
+                FieldInfo.builder(REGION.HEIGHT)
+                        .addCustomConstraint(value ->
+                                value > 0.0
+                                        ? Optional.empty()
+                                        : Optional.of("Height must be greater than 0")
+                        )
+                        .build(),
+
+                // CHECK (
+                //     background_opacity >= 0.0
+                //     AND background_opacity <= 1.0
+                // )
+                FieldInfo.builder(REGION.BACKGROUND_OPACITY)
+                        .setConstraints(
+                                DoubleConstraint.builder()
+                                        .setMin(0.0)
+                                        .setMax(1.0)
+                        )
+                        .build(),
+
+                // CHECK (background_fit IN ('CONTAIN', 'COVER'))
+                FieldInfo.builder(REGION.BACKGROUND_FIT)
+                        .addAllowedValues("CONTAIN", "COVER")
                         .build()
         );
     }
 }
-

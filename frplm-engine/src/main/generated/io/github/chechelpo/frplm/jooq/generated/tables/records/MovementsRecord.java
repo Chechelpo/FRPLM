@@ -47,16 +47,16 @@ public class MovementsRecord extends UpdatableRecordImpl<MovementsRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.MOVEMENTS.CHARACTER_ID</code>.
+     * Setter for <code>PUBLIC.MOVEMENTS.SES_CHARACTER_ID</code>.
      */
-    public void setCharacterId(Integer value) {
+    public void setSesCharacterId(Integer value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.MOVEMENTS.CHARACTER_ID</code>.
+     * Getter for <code>PUBLIC.MOVEMENTS.SES_CHARACTER_ID</code>.
      */
-    public Integer getCharacterId() {
+    public Integer getSesCharacterId() {
         return (Integer) get(2);
     }
 
@@ -111,12 +111,12 @@ public class MovementsRecord extends UpdatableRecordImpl<MovementsRecord> {
     /**
      * Create a detached, initialised MovementsRecord
      */
-    public MovementsRecord(Integer sessionId, Integer atTick, Integer characterId, Integer worldId, Integer previousLocationId) {
+    public MovementsRecord(Integer sessionId, Integer atTick, Integer sesCharacterId, Integer worldId, Integer previousLocationId) {
         super(Movements.MOVEMENTS);
 
         setSessionId(sessionId);
         setAtTick(atTick);
-        setCharacterId(characterId);
+        setSesCharacterId(sesCharacterId);
         setWorldId(worldId);
         setPreviousLocationId(previousLocationId);
         resetChangedOnNotNull();

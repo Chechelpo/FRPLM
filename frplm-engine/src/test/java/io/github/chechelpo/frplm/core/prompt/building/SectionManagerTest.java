@@ -3,7 +3,8 @@ package io.github.chechelpo.frplm.core.prompt.building;
 import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
-import io.github.chechelpo.frplm.utils.macros.Macro;
+import io.github.chechelpo.frplm.utils.matching.Macro;
+import io.github.chechelpo.frplm.utils.matching.ReplacementTarget;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
@@ -82,12 +83,12 @@ class SectionManagerTest {
         MacroManager macroManager = mock(MacroManager.class);
 
         Macro macro = new Macro("macro");
-        Set<Macro> macros = Set.of(macro);
+        Set<ReplacementTarget> macros = Set.of(macro);
         String toInject = "toInject";
-        when(macroManager.getMacros()).thenReturn(macros);
-        when(macroManager.renderMacro(macro)).thenReturn(Optional.of(toInject));
+        when(macroManager.getTargets()).thenReturn(macros);
+        when(macroManager.renderTarget(macro)).thenReturn(Optional.of(toInject));
 
-        manager.injectAtDetectedMacros(macroManager);
+        manager.injectAtDetectedTargets(macroManager);
 
         assertEquals("content " + toInject, manager.getRenderedContent());
     }
@@ -103,14 +104,14 @@ class SectionManagerTest {
 
         Macro root = new Macro("macro");
         Macro nested = new Macro("nested");
-        Set<Macro> macros = Set.of(nested, root);
+        Set<ReplacementTarget> macros = Set.of(nested, root);
         String rootContent = "toInject {{nested}}";
         String nestedContent = "nested";
 
-        when(macroManager.getMacros()).thenReturn(macros);
-        when(macroManager.renderMacro(root)).thenReturn(Optional.of(rootContent));
-        when(macroManager.renderMacro(nested)).thenReturn(Optional.of(nestedContent));
-        manager.injectAtDetectedMacros(macroManager);
+        when(macroManager.getTargets()).thenReturn(macros);
+        when(macroManager.renderTarget(root)).thenReturn(Optional.of(rootContent));
+        when(macroManager.renderTarget(nested)).thenReturn(Optional.of(nestedContent));
+        manager.injectAtDetectedTargets(macroManager);
 
         assertEquals("content " + "toInject " + "nested", manager.getRenderedContent());
     }

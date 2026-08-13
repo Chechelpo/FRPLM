@@ -19,6 +19,14 @@ public final class LocalDateTimeConstraint
         this.maximum = builder.maximum;
     }
 
+    public @Nullable LocalDateTime minimum() {
+        return minimum;
+    }
+
+    public @Nullable LocalDateTime maximum() {
+        return maximum;
+    }
+
     public static @NotNull Builder builder() {
         return new Builder();
     }

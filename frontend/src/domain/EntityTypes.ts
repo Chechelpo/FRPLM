@@ -6,7 +6,6 @@ export enum EntityTypes{
 
     // Chars controllers
     CHARACTERS = "characters",
-    STARTING_LOCATIONS = `startingLocations`,
     CHARACTER_TAGS = `characterTags`,
 
     //Lorebooks
@@ -33,4 +32,7 @@ export enum EntityTypes{
     SESSIONS = "sessions",
     MESSAGES = "messages",
     CURRENT_LOCATION = "currentLocations",
+
+    //Session state
+    SESSION_CHARACTERS = "sessionCharacters"
 }

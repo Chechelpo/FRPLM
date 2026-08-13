@@ -5,7 +5,6 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.world.core.WorldJSON;
 import io.github.chechelpo.frplm.domain.world.core.WorldMapper;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.lorebook.entry.keywords.EntryKeywordService;
@@ -46,13 +45,25 @@ final class ImporterService {
     private final LocationsService locationsService;
     private final EdgeService edgeService;
     private final CharacterService characterService;
-    private final StartingLocationsService startingLocationsService;
     private final RegionService regionService;
     private final ObjectMapper objectMapper;
     private final EntityAssetStore<WorldsRecord, WorldSnapshot.Reference> worldAssetStore;
     private final EntityAssetStore<RegionRecord, RegionSnapshot.Reference> regionAssetStore;
 
-    ImporterService(LorebookMapper lorebookMapper, LorebookService lorebookService, EntryService entryService, EntryKeywordService entryKeywordService, WorldMapper worldMapper, WorldService worldService, LocationsService locationsService, EdgeService edgeService, CharacterService characterService, StartingLocationsService startingLocationsService, RegionService regionService, ObjectMapper objectMapper, @Qualifier("worldAssetStore") EntityAssetStore<WorldsRecord, WorldSnapshot.Reference> worldAssetStore, @Qualifier("regionAssetStore") EntityAssetStore<RegionRecord, RegionSnapshot.Reference> entityAssetStore) {
+    ImporterService(
+            LorebookMapper lorebookMapper,
+            LorebookService lorebookService,
+            EntryService entryService,
+            EntryKeywordService entryKeywordService,
+            WorldMapper worldMapper,
+            WorldService worldService,
+            LocationsService locationsService,
+            EdgeService edgeService,
+            CharacterService characterService,
+            RegionService regionService,
+            ObjectMapper objectMapper, @Qualifier("worldAssetStore") EntityAssetStore<WorldsRecord, WorldSnapshot.Reference> worldAssetStore,
+            @Qualifier("regionAssetStore") EntityAssetStore<RegionRecord, RegionSnapshot.Reference> entityAssetStore
+    ) {
         this.lorebookMapper = lorebookMapper;
         this.lorebookService = lorebookService;
         this.entryService = entryService;
@@ -62,7 +73,6 @@ final class ImporterService {
         this.locationsService = locationsService;
         this.edgeService = edgeService;
         this.characterService = characterService;
-        this.startingLocationsService = startingLocationsService;
         this.regionService = regionService;
         this.objectMapper = objectMapper;
         this.worldAssetStore = worldAssetStore;
@@ -91,8 +101,8 @@ final class ImporterService {
         worldAssetStore.storeAssetFromCreationOrder(worldOrder, world, reader);
         int worldId = world.getId();
 
-        Map<String, RegionRecord> regionsByName = executeRegions(worldOrder.regions(), worldId, reader);
-        executeLocationsAndCharacters(worldOrder.locations(), regionsByName, worldId);
+        executeRegions(worldOrder.regions(), worldId, reader);
+        executeLocationsAndCharacters(worldOrder.locations(), worldId);
         executeEdges(worldOrder.locationEdges(), worldId);
 
         return world;
@@ -117,16 +127,18 @@ final class ImporterService {
     }
 
     @Contract(mutates = "param1")
-    @NonNull Map<String, RegionRecord> executeRegions(@NonNull List<NewRegionOrder> regionOrders, int worldId, ZipReader reader) {
+    void executeRegions(@NonNull List<NewRegionOrder> regionOrders, int worldId, ZipReader reader) {
         Map<String, RegionRecord> regionsByName = new HashMap<>(regionOrders.size());
 
         List<RegionRecord> regionsWithParents = new ArrayList<>(regionOrders.size());
         for (NewRegionOrder regionOrder : regionOrders) {
             LorebooksRecord regionLorebook = executeLorebook(regionOrder.lorebookOrder());
 
-            regionOrder.payload().set(REGION.WORLD_ID, worldId);
-            regionOrder.payload().set(REGION.LOREBOOK_ID, regionLorebook.getId());
+            regionOrder.payload()
+                    .set(REGION.WORLD_ID, worldId)
+                    .set(REGION.LOREBOOK_ID, regionLorebook.getId());
             RegionRecord record = regionService.consume(regionOrder);
+
             regionAssetStore.storeAssetFromCreationOrder(regionOrder, record, reader);
             regionsByName.put(record.getName(), record);
             if (regionOrder.parentRegionName() != null) regionsWithParents.add(record);
@@ -155,44 +167,46 @@ final class ImporterService {
             i++;
             j++;
         }
-
-        return regionsByName;
     }
 
     void executeLocationsAndCharacters(
             @NonNull List<NewLocationOrder> locationOrders,
-            Map<String, RegionRecord> regions,
             int worldId
     ) {
         for (NewLocationOrder locationOrder : locationOrders) {
             LorebooksRecord locationLorebook = executeLorebook(locationOrder.lorebookOrder());
 
-            locationOrder.payload().set(LOCATIONS.WORLD_ID, worldId);
-            locationOrder.payload().set(LOCATIONS.LOREBOOK_ID, locationLorebook.getId());
+            locationOrder.payload()
+                    .set(LOCATIONS.WORLD_ID, worldId)
+                    .set(LOCATIONS.LOREBOOK_ID, locationLorebook.getId());
+
             if (locationOrder.parentRegionName() != null) {
-                locationOrder.payload().set(LOCATIONS.REGION_ID, regions.get(locationOrder.parentRegionName()).getId());
+                int regionId = regionService.getOneMatching(
+                        EntityDataPayload.<RegionRecord>builder()
+                                .set(REGION.NAME, locationOrder.parentRegionName())
+                                .set(REGION.WORLD_ID, worldId)
+                                .build()
+                ).resolve().getId();
+                locationOrder.payload().set(LOCATIONS.REGION_ID, regionId);
             }
 
-            LocationsRecord newLocation = locationsService.createAndGet(locationOrder.payload());
+            LocationsRecord newLocation = locationsService.consume(locationOrder);
 
             if (locationOrder.charactersStartingHere() == null) continue;
             for (NewCharacterOrder newCharacterOrder : locationOrder.charactersStartingHere()) {
-                CharactersRecord characterRecord = executeCharacter(newCharacterOrder, worldId);
-                startingLocationsService.createAndGet(EntityDataPayload.<StartingLocationsRecord>builder()
-                        .set(STARTING_LOCATIONS.WORLD_ID, worldId)
-                        .set(STARTING_LOCATIONS.LOCATION_ID, newLocation.getId())
-                        .set(STARTING_LOCATIONS.CHARACTER_ID, characterRecord.getId())
-                        .build()
-                );
+                executeCharacter(newCharacterOrder, worldId, newLocation.getId());
             }
         }
 
     }
 
-    @NonNull CharactersRecord executeCharacter(NewCharacterOrder newCharacterOrder, int worldId) {
+    @NonNull CharactersRecord executeCharacter(NewCharacterOrder newCharacterOrder, int worldId, int locationId) {
         LorebooksRecord characterLorebook = executeLorebook(newCharacterOrder.lorebook());
-        newCharacterOrder.payload().set(CHARACTERS.WORLD_ID, worldId);
-        newCharacterOrder.payload().set(CHARACTERS.LOREBOOK_ID, characterLorebook.getId());
+        newCharacterOrder.payload()
+                .set(CHARACTERS.WORLD_ID, worldId)
+                .set(CHARACTERS.STARTING_LOCATION_ID, locationId)
+                .set(CHARACTERS.LOREBOOK_ID, characterLorebook.getId());
+
         return characterService.consume(newCharacterOrder);
     }
 

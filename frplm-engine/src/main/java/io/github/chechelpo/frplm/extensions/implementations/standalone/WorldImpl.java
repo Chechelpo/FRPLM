@@ -1,5 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.extensions.api.standalone.*;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
@@ -8,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
+
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSnapshot {
     public WorldImpl(WorldsRecord record, ExtensionContext context) {
@@ -82,7 +85,25 @@ public class WorldImpl extends StandaloneEntity<WorldsRecord> implements WorldSn
     }
 
     @Override
+    public List<LocationSnapshot> getLocations() {
+        return context.locations().getMatching(EntityDataPayload.of(LOCATIONS.WORLD_ID, this.record.getId()))
+                .stream()
+                .map(record -> (LocationSnapshot) new LocationImpl(record, context))
+                .toList();
+    }
+
+    @Override
+    public List<CharacterSnapshot> getCharacters() {
+        return context.characters().getMatching(EntityDataPayload.of(CHARACTERS.WORLD_ID, this.record.getId())).stream()
+                .map(record -> (CharacterSnapshot) new CharacterImpl(record, context))
+                .toList();
+    }
+
+    @Override
     public LorebookSnapshot lorebook() {
-        return new LorebookImpl(context.lorebooks().getLorebookOf(getRecord()), context);
+        return new LorebookImpl(
+                context.lorebooks().require(EntityKey.of(LOREBOOKS.ID,record.getLorebookId())),
+                context
+        );
     }
 }

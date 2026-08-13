@@ -17,7 +17,6 @@ final class Readers {
             @NotNull EntityReader<ApiKeysRecord> secrets,
 
             @NotNull EntityReader<CharactersRecord> characters,
-            @NotNull EntityReader<StartingLocationsRecord> startingLocations,
 
             @NotNull EntityReader<WorldsRecord> worlds,
             @NotNull EntityReader<RegionRecord> regions,
@@ -43,7 +42,6 @@ final class Readers {
                     secrets,
 
                     characters,
-                    startingLocations,
 
                     worlds,
                     regions,

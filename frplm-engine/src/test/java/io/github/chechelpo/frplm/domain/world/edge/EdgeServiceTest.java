@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.domain.world.location.LocationTestContext;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
+import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,6 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATION_EDGES;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Sql(
-        scripts = "classpath:db/schema.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
 @Import({LocationTestContext.class, EdgeTestContext.class})
 class EdgeServiceTest {
     @Autowired
@@ -42,25 +39,7 @@ class EdgeServiceTest {
     }
 
     @Test
-    void linkingToSameLocationThrows() {
-        int testAmount = 100;
-        List<LocationsRecord> world1 = locations.createAndGetTestLocationsOfSameWorld(testAmount);
-
-        for (int i = 0; i < testAmount; i++) {
-            int finalI = i;
-            assertThrows(
-                    InvalidValue.class,
-                    () -> edgeService.createAndGet(EntityDataPayload.<LocationEdgesRecord>builder()
-                                    .set(LOCATION_EDGES.WORLD_ID, world1.get(finalI).getWorldId())
-                                    .set(LOCATION_EDGES.FROM_LOCATION_ID, world1.get(finalI).getId())
-                                    .set(LOCATION_EDGES.TO_LOCATION_ID, world1.get(finalI).getId())
-                                    .build()
-                            ));
-        }
-    }
-
-
-    @Test
+    @SimulithIntegrationTest
     void rejectsLinkingLocationsOfDifferentWorlds() {
         int testAmount = 100;
         List<LocationsRecord> world1 = locations.createAndGetTestLocationsOfSameWorld(testAmount);
@@ -88,6 +67,7 @@ class EdgeServiceTest {
     }
 
     @Test
+    @SimulithIntegrationTest
     void testNeighbours() {
         int testAmount = 100;
         List<LocationsRecord> createdRecords = locations.createAndGetTestLocationsOfSameWorld(testAmount);

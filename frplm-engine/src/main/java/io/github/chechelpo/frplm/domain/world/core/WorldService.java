@@ -57,27 +57,37 @@ public class WorldService extends EntityService<
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<WorldsRecord> data, long operationID) {
-        if (!data.assigns(WORLDS.LOREBOOK_ID)){
-            EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-            lorebookData.set(LOREBOOKS.NAME, data.require(WORLDS.NAME));
-            lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id);
-
-            data.set(
-                    Worlds.WORLDS.LOREBOOK_ID,
-                    lorebooks.createAndGet(
-                            lorebookData,
+        data.ifUnassignedGet(
+                WORLDS.LOREBOOK_ID,
+                () -> lorebooks.createAndGet(
+                            EntityDataPayload.<LorebooksRecord>builder()
+                                    .set(LOREBOOKS.NAME, data.requireNonNull(WORLDS.NAME))
+                                    .set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.WORLD_INFO.stable_id)
+                                    .build(),
                             Lorebooks.LOREBOOKS.ID
                     )
-            );
-        }
+        );
 
         super.beforeCreate(data, operationID);
     }
 
     @Override
+    protected void afterSuccessfulUpdate(WorldsRecord previousData, EntityKey<WorldsRecord> key, EntityDataPayload<WorldsRecord> updated, long operationID) {
+        updated.getAssignment(WORLDS.NAME)
+                .ifAssignedNotNull(
+                        newWorldName -> lorebooks.update(
+                                EntityKey.of(LOREBOOKS.ID, previousData.getLorebookId()),
+                                EntityDataPayload.of(LOREBOOKS.NAME, newWorldName)
+                        )
+                );
+
+        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
+    }
+
+    @Override
     protected void afterSuccessfulDelete(EntityKey<WorldsRecord> id, long operationID, WorldsRecord record) {
         lorebooks.delete(
-                lorebooks.keyOf(lorebooks.getLorebookOf(record))
+                EntityKey.of(LOREBOOKS.ID, record.getLorebookId())
         );
         super.afterSuccessfulDelete(id, operationID, record);
     }

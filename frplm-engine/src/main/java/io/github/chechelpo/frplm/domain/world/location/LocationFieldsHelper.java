@@ -17,7 +17,7 @@ final class LocationFieldsHelper
         extends EntityControllerFieldValidator<LocationsRecord> {
 
     LocationFieldsHelper() {
-        super(EntityConfigs.Types.LOCATIONS);
+        super(EntityConfigs.Types.LOCATIONS, LOCATIONS);
     }
 
     @Override

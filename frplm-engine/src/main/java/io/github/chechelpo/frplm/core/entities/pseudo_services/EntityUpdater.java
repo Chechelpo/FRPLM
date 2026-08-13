@@ -14,7 +14,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface EntityUpdater<R extends TableRecord<R>> {
-
+    default <T> UpdateResult<R> update(
+            TableField<R,T> field,
+            T value,
+            EntityKey<R> key
+    ){
+        return update(key, EntityDataPayload.of(field, value));
+    }
     UpdateResult<R> update(
             EntityKey<R> key,
             EntityDataPayload<R> update

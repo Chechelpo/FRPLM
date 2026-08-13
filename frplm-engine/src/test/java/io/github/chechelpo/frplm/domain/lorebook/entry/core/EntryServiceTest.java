@@ -87,9 +87,8 @@ class EntryServiceTest {
             Optional<Integer> newOutletID = lorebookTestContext.outlets.outletService.getOutletID(newOutlet);
             assertTrue(newOutletID.isPresent(), "Didn't register new outlet " + newOutlet);
 
-            Optional<Integer> actualOutletID = entryService.getValueOf(ENTRY.OUTLET, entryKey);
-            assertTrue(actualOutletID.isPresent());
-            assertEquals(actualOutletID.get(), newOutletID.get(), "Mismatch outletID");
+           Integer actualOutletID = entryService.getValueOf(ENTRY.OUTLET, entryKey);
+            assertEquals(actualOutletID, newOutletID.get(), "Mismatch outletID");
 
             i++;
         }

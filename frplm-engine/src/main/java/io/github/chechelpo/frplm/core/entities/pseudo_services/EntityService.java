@@ -35,10 +35,13 @@ public abstract class EntityService<
     protected final Store store;
     protected final Logger log;
     protected final FieldValidator<R> fieldValidator;
+
     private final EntityConfigs.Types entityType;
+    private final Table<R> mainTable;
 
     public EntityService(@NotNull Store store, FieldValidator<R> validator, @NotNull EventBus eventBus) {
         EntityConfigs.Types types = store.getType();
+        this.mainTable = store.getMainTable();
 
         REGISTERED_TYPES.add(types);
         this.entityType = types;
@@ -57,6 +60,10 @@ public abstract class EntityService<
     @Override
     public Table<R> getTable(){
         return fieldValidator.getTable();
+    }
+
+    public FieldValidator<R> getFieldValidator() {
+        return fieldValidator;
     }
 
     public EntityKey<R> keyOf(R record) {
@@ -92,7 +99,7 @@ public abstract class EntityService<
     protected void beforeCreate(EntityDataPayload<R> data, long operationID) {
         EntityKey<R> initialKey = fieldValidator.extractKeysFrom(data);
 
-        eventBus.publish(new CRUDDraftEvent.CreateEntityDraft<R>(this.entityType, operationID, initialKey, data));
+        eventBus.publish(new CRUDDraftEvent.CreateEntityDraft<R>(mainTable, operationID, initialKey, data));
         fieldValidator.validateDataCreationPayload(data).orElseThrow();
     }
 
@@ -140,7 +147,7 @@ public abstract class EntityService<
 
     protected void afterSuccessfulCreate(R data, long operationID) {
         eventBus.publish(
-                new CRUDCommittedEvent.CreatedEntity<R>(this.entityType, operationID, keyOf(data), data)
+                new CRUDCommittedEvent.CreatedEntity<R>(operationID, keyOf(data), data)
         );
     }
 
@@ -227,18 +234,6 @@ public abstract class EntityService<
     }
 
     @Transactional(readOnly = true)
-    public <T> Optional<T> getValueOf(TableField<R, T> field, EntityKey<R> key) {
-        Objects.requireNonNull(key);
-        Objects.requireNonNull(field);
-        fieldValidator.validateFullKey(key).orElseThrow("Error when fetching field " + field);
-        if (!exists(key)) {
-            log.error("Could not find {} with id {}", this.getType().getEntityType(), key);
-            return Optional.empty();
-        }
-        return Optional.ofNullable(store.get(field, key));
-    }
-
-    @Transactional(readOnly = true)
     public boolean exists(R record) {
         return exists(keyOf(record));
     }
@@ -266,9 +261,22 @@ public abstract class EntityService<
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeUpdate(@NotNull EntityKey<R> target, EntityDataPayload<R> data, long operationID) {
         fieldValidator.validateFullKey(target).orElseThrow();
-        eventBus.publish(new CRUDDraftEvent.UpdateEntityDraft<R>(entityType, operationID, target, data));
+        eventBus.publish(new CRUDDraftEvent.UpdateEntityDraft<R>(mainTable, operationID, target, data));
         fieldValidator.validateFullKey(target).orElseThrow();
         fieldValidator.validateDataPayload(data).orElseThrow();
+    }
+
+    @Transactional
+    public <T> UpdateResult<R> update(
+            TableField<R,T> field,
+            T value,
+            R record
+    ){
+        return update(keyOf(record), EntityDataPayload.of(field, value));
+    }
+    @Transactional
+    public UpdateResult<R> update(R target, EntityDataPayload<R> update) {
+        return update(keyOf(target), update);
     }
 
     @Transactional
@@ -282,6 +290,7 @@ public abstract class EntityService<
         log.trace("Updating entity {} with new data {}", target, update);
         beforeUpdate(target, update, operationID);
 
+        R record = store.get(target);
         try {
             boolean success = store.update(target, update);
             if (!success)
@@ -290,7 +299,7 @@ public abstract class EntityService<
             return new UpdateResult.Failure<>(target, update, e);
         }
 
-        afterSuccessfulUpdate(target, update, operationID);
+        afterSuccessfulUpdate(record, target, update, operationID);
         return new UpdateResult.Success<>(target, update);
     }
 
@@ -326,18 +335,6 @@ public abstract class EntityService<
 
         long operationID = eventBus.nextOperationID();
 
-        /*
-         * SELECT ... FOR UPDATE.
-         *
-         * This avoids the race in:
-         *
-         *     exists()
-         *     get()
-         *     update()
-         *
-         * Another transaction cannot modify or delete this row until the
-         * current transaction completes.
-         */
         Optional<T> currentValueResult =
                 store.getNumericValueForUpdate(field, entityKey);
 
@@ -372,7 +369,7 @@ public abstract class EntityService<
          * the calculated value.
          */
         T approvedValue = draftUpdate.require(field);
-
+        R record = store.get(entityKey);
         if (!Objects.equals(approvedValue, expectedValue)) {
             throw new IllegalStateException(
                     "An update listener changed the result of a numeric " +
@@ -397,10 +394,10 @@ public abstract class EntityService<
         );
 
         afterSuccessfulUpdate(
+                record,
                 entityKey,
                 EntityDataPayload.of(field, actualValue),
-                operationID
-        );
+                operationID);
 
         return Optional.of(actualValue);
     }
@@ -505,8 +502,8 @@ public abstract class EntityService<
         );
     }
 
-    protected void afterSuccessfulUpdate(EntityKey<R> key, EntityDataPayload<R> updated, long operationID) {
-        eventBus.publish(new CRUDCommittedEvent.UpdatedEntity<R>(this.entityType, operationID, key, updated));
+    protected void afterSuccessfulUpdate(R previousData, EntityKey<R> key, EntityDataPayload<R> updated, long operationID) {
+        eventBus.publish(new CRUDCommittedEvent.UpdatedEntity<R>(previousData, operationID, key, updated));
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -515,7 +512,13 @@ public abstract class EntityService<
     protected void beforeDelete(EntityKey<R> id, long operationID) {
         Objects.requireNonNull(id);
         fieldValidator.validateFullKey(id).orElseThrow("Error when deleting key");
-        eventBus.publish(new CRUDDraftEvent.DeleteEntityDraft<R>(this.entityType, operationID, id));
+        eventBus.publish(new CRUDDraftEvent.DeleteEntityDraft<R>(mainTable, operationID, id));
+    }
+
+    @Transactional
+    public boolean delete(R record){
+        Objects.requireNonNull(record);
+        return delete(keyOf(record));
     }
 
     @Transactional
@@ -537,6 +540,6 @@ public abstract class EntityService<
     }
 
     protected void afterSuccessfulDelete(EntityKey<R> id, long operationID, R record) {
-        eventBus.publish(new CRUDCommittedEvent.DeletedEntity<R>(this.entityType, operationID, id, record));
+        eventBus.publish(new CRUDCommittedEvent.DeletedEntity<R>(operationID, id, record));
     }
 }

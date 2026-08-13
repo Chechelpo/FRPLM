@@ -68,11 +68,6 @@ public final class EntityReaders {
         return record.characters();
     }
 
-
-    public @NonNull EntityReader<StartingLocationsRecord> startingLocations() {
-        return record.startingLocations();
-    }
-
     public @NonNull EntityReader<WorldsRecord> worlds() {
         return record.worlds();
     }

@@ -23,7 +23,7 @@ public final class WorldFieldsHelper
         extends EntityControllerFieldValidator<WorldsRecord> {
 
     WorldFieldsHelper() {
-        super(EntityConfigs.Types.WORLDS);
+        super(EntityConfigs.Types.WORLDS, WORLDS);
     }
 
     @Override

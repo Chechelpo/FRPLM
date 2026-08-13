@@ -33,31 +33,17 @@ public class KeywordRecord extends UpdatableRecordImpl<KeywordRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.KEYWORD.IS_REGEX</code>.
-     */
-    public void setIsRegex(Boolean value) {
-        set(1, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.KEYWORD.IS_REGEX</code>.
-     */
-    public Boolean getIsRegex() {
-        return (Boolean) get(1);
-    }
-
-    /**
      * Setter for <code>PUBLIC.KEYWORD.KEYWORD</code>.
      */
     public void setKeyword(String value) {
-        set(2, value);
+        set(1, value);
     }
 
     /**
      * Getter for <code>PUBLIC.KEYWORD.KEYWORD</code>.
      */
     public String getKeyword() {
-        return (String) get(2);
+        return (String) get(1);
     }
 
     // -------------------------------------------------------------------------
@@ -83,11 +69,10 @@ public class KeywordRecord extends UpdatableRecordImpl<KeywordRecord> {
     /**
      * Create a detached, initialised KeywordRecord
      */
-    public KeywordRecord(Integer id, Boolean isRegex, String keyword) {
+    public KeywordRecord(Integer id, String keyword) {
         super(Keyword.KEYWORD);
 
         setId(id);
-        setIsRegex(isRegex);
         setKeyword(keyword);
         resetChangedOnNotNull();
     }

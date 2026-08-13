@@ -16,7 +16,7 @@ import static io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection.LLM_
 final class LLMFieldsHelper extends EntityControllerFieldValidator<LlmConnectionRecord> {
 
     LLMFieldsHelper() {
-        super(EntityConfigs.Types.LLM_CONNECTION);
+        super(EntityConfigs.Types.LLM_CONNECTION, LLM_CONNECTION);
     }
 
     @Override

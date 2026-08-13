@@ -4,73 +4,53 @@ import ch.qos.logback.classic.Logger;
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
-import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Optional;
-
 import static io.github.chechelpo.frplm.domain.sessions.messages.MessageService.FIRST_MESSAGE_TICK_NUM;
-import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
-import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
 final class MessageEvents {
     private static final Logger log = (Logger) LoggerFactory.getLogger(MessageEvents.class);
     private final CharacterService characterService;
-    private final StartingLocationsService startingLocationsService;
     private final MessageService messageService;
 
-    MessageEvents(CharacterService characterService, StartingLocationsService startingLocationsService, MessageService messageService) {
+    MessageEvents(CharacterService characterService, MessageService messageService) {
         this.characterService = characterService;
-        this.startingLocationsService = startingLocationsService;
         this.messageService = messageService;
     }
-    private Optional<LocationsRecord> getStartingLocationByWorld(int userCharacterId, int worldId) {
-        List<LocationsRecord> result = startingLocationsService.startingLocationAt(
-                EntityKey.of(CHARACTERS.ID, userCharacterId),
-                worldId
-        );
-        if (result.isEmpty()) return Optional.empty();
-        else return Optional.of(result.getFirst());
-    }
+
     @EventListener
     void createFirstMessage(CRUDCommittedEvent.@NotNull CreatedEntity<?> rawEvent) {
-        if (rawEvent.type() != EntityConfigs.Types.SESSIONS) return;
+        if (rawEvent.isNotEventOf(SESSIONS)) return;
 
         CRUDCommittedEvent.CreatedEntity<SessionsRecord> event =
                 (CRUDCommittedEvent.CreatedEntity<SessionsRecord>) rawEvent;
         SessionsRecord session = event.record();
         log.debug("Registering first message for session {}", session.getId());
 
-        EntityKey<CharactersRecord> characterKey =
-                EntityKey.of(Characters.CHARACTERS.ID, session.getUserPersonaId());
-
-        String firstMessage = characterService.getValueOf(Characters.CHARACTERS.WELCOME_MESSAGE, characterKey)
-                    .orElse("This character has no welcome message");
-
-        LocationsRecord startingLocation = getStartingLocationByWorld(session.getUserPersonaId(), session.getWorldId())
-                .orElseThrow(() -> new EntityNotFound("Could not find starting location", Severity.SYSTEM));
+        CharactersRecord userCharacter = characterService.find(
+                EntityKey.<CharactersRecord>builder()
+                        .set(CHARACTERS.ID, session.getUserPersonaId())
+                        .set(CHARACTERS.WORLD_ID, session.getWorldId())
+                        .build()
+                ).orElseThrow("Could not find starting location", Severity.SYSTEM);
 
         messageService.createAndGet(EntityDataPayload.<MessagesRecord>builder()
-                .set(MESSAGES.SESSION_ID, session.getId())
+                .set(MESSAGES.SESSION_ID, SESSIONS.ID, session)
                 .set(MESSAGES.TICK_NUM, FIRST_MESSAGE_TICK_NUM)
                 .set(MESSAGES.ROLE, "assistant")
-                .set(MESSAGES.WORLD_ID, session.getWorldId())
-                .set(MESSAGES.LOCATION_ID, startingLocation.getId())
-                .set(MESSAGES.CONTENT, firstMessage)
+                .set(MESSAGES.WORLD_ID, SESSIONS.WORLD_ID, session)
+                .set(MESSAGES.LOCATION_ID, CHARACTERS.STARTING_LOCATION_ID, userCharacter)
+                .set(MESSAGES.CONTENT, CHARACTERS.WELCOME_MESSAGE, userCharacter)
                 .build()
         );
     }

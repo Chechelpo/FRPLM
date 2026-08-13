@@ -7,17 +7,18 @@ package io.github.chechelpo.frplm.jooq.generated;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiHosts;
 import io.github.chechelpo.frplm.jooq.generated.tables.ApiKeys;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Entry;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryKeywords;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryOutlet;
 import io.github.chechelpo.frplm.jooq.generated.tables.EntryPrologCondition;
+import io.github.chechelpo.frplm.jooq.generated.tables.EntryState;
 import io.github.chechelpo.frplm.jooq.generated.tables.Extension;
 import io.github.chechelpo.frplm.jooq.generated.tables.Keyword;
 import io.github.chechelpo.frplm.jooq.generated.tables.LlmConnection;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks;
+import io.github.chechelpo.frplm.jooq.generated.tables.Macros;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements;
 import io.github.chechelpo.frplm.jooq.generated.tables.Outlet;
@@ -26,10 +27,12 @@ import io.github.chechelpo.frplm.jooq.generated.tables.PrologPredicateArgument;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptSection;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptTemplate;
 import io.github.chechelpo.frplm.jooq.generated.tables.Region;
+import io.github.chechelpo.frplm.jooq.generated.tables.Replacers;
 import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionLorebook;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions;
-import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations;
 import io.github.chechelpo.frplm.jooq.generated.tables.Tags;
 import io.github.chechelpo.frplm.jooq.generated.tables.TestTable;
 import io.github.chechelpo.frplm.jooq.generated.tables.TokenizerCache;
@@ -72,11 +75,6 @@ public class Public extends SchemaImpl {
     public final Characters CHARACTERS = Characters.CHARACTERS;
 
     /**
-     * The table <code>PUBLIC.CURRENT_LOCATIONS</code>.
-     */
-    public final CurrentLocations CURRENT_LOCATIONS = CurrentLocations.CURRENT_LOCATIONS;
-
-    /**
      * The table <code>PUBLIC.ENTRY</code>.
      */
     public final Entry ENTRY = Entry.ENTRY;
@@ -95,6 +93,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.ENTRY_PROLOG_CONDITION</code>.
      */
     public final EntryPrologCondition ENTRY_PROLOG_CONDITION = EntryPrologCondition.ENTRY_PROLOG_CONDITION;
+
+    /**
+     * The table <code>PUBLIC.ENTRY_STATE</code>.
+     */
+    public final EntryState ENTRY_STATE = EntryState.ENTRY_STATE;
 
     /**
      * The table <code>PUBLIC.EXTENSION</code>.
@@ -125,6 +128,11 @@ public class Public extends SchemaImpl {
      * The table <code>PUBLIC.LOREBOOKS</code>.
      */
     public final Lorebooks LOREBOOKS = Lorebooks.LOREBOOKS;
+
+    /**
+     * The table <code>PUBLIC.MACROS</code>.
+     */
+    public final Macros MACROS = Macros.MACROS;
 
     /**
      * The table <code>PUBLIC.MESSAGES</code>.
@@ -167,6 +175,11 @@ public class Public extends SchemaImpl {
     public final Region REGION = Region.REGION;
 
     /**
+     * The table <code>PUBLIC.REPLACERS</code>.
+     */
+    public final Replacers REPLACERS = Replacers.REPLACERS;
+
+    /**
      * The table <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code>.
      */
     public final ResponseLocationChanges RESPONSE_LOCATION_CHANGES = ResponseLocationChanges.RESPONSE_LOCATION_CHANGES;
@@ -177,14 +190,19 @@ public class Public extends SchemaImpl {
     public final Responses RESPONSES = Responses.RESPONSES;
 
     /**
+     * The table <code>PUBLIC.SESSION_CHARACTERS</code>.
+     */
+    public final SessionCharacters SESSION_CHARACTERS = SessionCharacters.SESSION_CHARACTERS;
+
+    /**
+     * The table <code>PUBLIC.SESSION_LOREBOOK</code>.
+     */
+    public final SessionLorebook SESSION_LOREBOOK = SessionLorebook.SESSION_LOREBOOK;
+
+    /**
      * The table <code>PUBLIC.SESSIONS</code>.
      */
     public final Sessions SESSIONS = Sessions.SESSIONS;
-
-    /**
-     * The table <code>PUBLIC.STARTING_LOCATIONS</code>.
-     */
-    public final StartingLocations STARTING_LOCATIONS = StartingLocations.STARTING_LOCATIONS;
 
     /**
      * The table <code>PUBLIC.TAGS</code>.
@@ -225,17 +243,18 @@ public class Public extends SchemaImpl {
             ApiHosts.API_HOSTS,
             ApiKeys.API_KEYS,
             Characters.CHARACTERS,
-            CurrentLocations.CURRENT_LOCATIONS,
             Entry.ENTRY,
             EntryKeywords.ENTRY_KEYWORDS,
             EntryOutlet.ENTRY_OUTLET,
             EntryPrologCondition.ENTRY_PROLOG_CONDITION,
+            EntryState.ENTRY_STATE,
             Extension.EXTENSION,
             Keyword.KEYWORD,
             LlmConnection.LLM_CONNECTION,
             LocationEdges.LOCATION_EDGES,
             Locations.LOCATIONS,
             Lorebooks.LOREBOOKS,
+            Macros.MACROS,
             Messages.MESSAGES,
             Movements.MOVEMENTS,
             Outlet.OUTLET,
@@ -244,10 +263,12 @@ public class Public extends SchemaImpl {
             PromptSection.PROMPT_SECTION,
             PromptTemplate.PROMPT_TEMPLATE,
             Region.REGION,
+            Replacers.REPLACERS,
             ResponseLocationChanges.RESPONSE_LOCATION_CHANGES,
             Responses.RESPONSES,
+            SessionCharacters.SESSION_CHARACTERS,
+            SessionLorebook.SESSION_LOREBOOK,
             Sessions.SESSIONS,
-            StartingLocations.STARTING_LOCATIONS,
             Tags.TAGS,
             TestTable.TEST_TABLE,
             TokenizerCache.TOKENIZER_CACHE,

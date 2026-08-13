@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
+
 @Component
 public final class CharacterAssetStore extends EntityAssetStore<CharactersRecord, CharacterSnapshot.Reference> {
     CharacterAssetStore(AppDirectory directory) {
-        super(EntityConfigs.Types.CHARACTER, directory, EnumSet.of(AssetTypes.AVATAR));
+        super(CHARACTERS, directory, EnumSet.of(AssetTypes.AVATAR));
     }
 
     @Override

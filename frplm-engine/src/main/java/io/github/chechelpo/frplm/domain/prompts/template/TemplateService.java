@@ -85,9 +85,9 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     private void updateToMaxTokensConnection(@NotNull EntityDataPayload<PromptTemplateRecord> data) {
         data.set(PROMPT_TEMPLATE.MAX_TOKENS,
-                llmService.getValueOf(LLM_CONNECTION.MAX_TOKENS,
+                llmService.getNonNullValueOf(LLM_CONNECTION.MAX_TOKENS,
                         llmService.keyOf(data.require(PROMPT_TEMPLATE.CONNECTION_ID))
-                ).orElseThrow(() -> new UnexpectedException("Setting new connection ID with no maxTokens", Severity.USER))
+                )
         );
     }
 
@@ -113,11 +113,9 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
             throw new IllegalArgumentException("Target key must be non null if chat history budget is null or lorebook budget");
 
         if (chatHistoryBudget == null)
-            chatHistoryBudget = getValueOf(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, ofTemplate)
-                    .orElseThrow(() -> new EntityNotFound("No template with key: " + ofTemplate, Severity.SYSTEM));
+            chatHistoryBudget = getNonNullValueOf(PROMPT_TEMPLATE.CHAT_HISTORY_BUDGET, ofTemplate);
         if (lorebookBudget == null)
-            lorebookBudget = getValueOf(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, ofTemplate)
-                    .orElseThrow(() -> new EntityNotFound("No template with key: " + ofTemplate, Severity.SYSTEM));
+            lorebookBudget = getNonNullValueOf(PROMPT_TEMPLATE.LOREBOOKS_BUDGET, ofTemplate);
 
         if (lorebookBudget + chatHistoryBudget > 1D)
             throw new InvalidValue("Lorebook budget and history budget sum to more than 1", Severity.USER);
@@ -125,16 +123,17 @@ public class TemplateService extends EntityService<PromptTemplateRecord, Templat
 
     @TransactionalEventListener
     void updateToMaxTokens(CRUDCommittedEvent.@NotNull UpdatedEntity<?> rawEvent){
-        if (rawEvent.type() != EntityConfigs.Types.LLM_CONNECTION) return;
+        if (rawEvent.isNotEventOf(LLM_CONNECTION)) return;
 
+        //noinspection unchecked
         CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord> event =
                 (CRUDCommittedEvent.UpdatedEntity<LlmConnectionRecord>) rawEvent;
 
         if (!event.updatedData().assigns(LLM_CONNECTION.MAX_TOKENS)) return;
 
         this.store.updateMaxTokens(
-                event.target().require(LLM_CONNECTION.ID),
-                event.updatedData().require(LLM_CONNECTION.MAX_TOKENS)
+                event.target().requireNonNull(LLM_CONNECTION.ID),
+                event.updatedData().requireNonNull(LLM_CONNECTION.MAX_TOKENS)
         );
     }
 }

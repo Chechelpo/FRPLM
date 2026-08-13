@@ -6,9 +6,9 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ResponseLocationChangesRecord;
 
 import java.util.Arrays;
@@ -74,9 +74,10 @@ public class ResponseLocationChanges extends TableImpl<ResponseLocationChangesRe
     public final TableField<ResponseLocationChangesRecord, Short> RESPONSE_NUM = createField(DSL.name("RESPONSE_NUM"), SQLDataType.SMALLINT.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.RESPONSE_LOCATION_CHANGES.CHARACTER_ID</code>.
+     * The column
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES.SESSION_CHARACTER_ID</code>.
      */
-    public final TableField<ResponseLocationChangesRecord, Integer> CHARACTER_ID = createField(DSL.name("CHARACTER_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<ResponseLocationChangesRecord, Integer> SESSION_CHARACTER_ID = createField(DSL.name("SESSION_CHARACTER_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.RESPONSE_LOCATION_CHANGES.WORLD_ID</code>.
@@ -191,16 +192,17 @@ public class ResponseLocationChanges extends TableImpl<ResponseLocationChangesRe
         return _responses;
     }
 
-    private transient CharactersPath _characters;
+    private transient SessionCharactersPath _sessionCharacters;
 
     /**
-     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
+     * Get the implicit join path to the <code>PUBLIC.SESSION_CHARACTERS</code>
+     * table.
      */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER, null);
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER, null);
 
-        return _characters;
+        return _sessionCharacters;
     }
 
     @Override

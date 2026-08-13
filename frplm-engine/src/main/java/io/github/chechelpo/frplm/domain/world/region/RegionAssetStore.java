@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 
+import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
+
 @Component
 public final class RegionAssetStore extends EntityAssetStore<RegionRecord, RegionSnapshot.Reference> {
     RegionAssetStore(AppDirectory directory) {
-        super(EntityConfigs.Types.REGIONS, directory, EnumSet.of(AssetTypes.BACKGROUND));
+        super(REGION, directory, EnumSet.of(AssetTypes.BACKGROUND));
     }
 
     @Override

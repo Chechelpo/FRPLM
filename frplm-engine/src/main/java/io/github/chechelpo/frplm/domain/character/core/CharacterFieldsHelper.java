@@ -17,7 +17,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 @Component
 final class CharacterFieldsHelper extends EntityControllerFieldValidator<CharactersRecord> {
     CharacterFieldsHelper() {
-        super(EntityConfigs.Types.CHARACTER);
+        super(EntityConfigs.Types.CHARACTER, CHARACTERS);
     }
 
     @Contract(" -> new")
@@ -33,6 +33,13 @@ final class CharacterFieldsHelper extends EntityControllerFieldValidator<Charact
                         .requireOnCreate()
                         .build(),
 
+                FieldInfo.builder(CHARACTERS.STARTING_LOCATION_ID)
+                        .nullable()
+                        .build(),
+                FieldInfo.builder(CHARACTERS.IS_STATIC)
+                        .nullable()
+                        .build(),
+
                 FieldInfo.builder(Characters.CHARACTERS.LOREBOOK_ID)
                         .readOnly()
                         .build()
@@ -43,12 +50,20 @@ final class CharacterFieldsHelper extends EntityControllerFieldValidator<Charact
     @Override
     protected @NonNull @Unmodifiable List<DTOField<CharactersRecord,?>> getDTOStructure() {
         return List.of(
+                DTOField.of(CHARACTERS.WORLD_ID, "world_id"),
                 DTOField.of(CHARACTERS.ID, "id"),
+
+                DTOField.of(CHARACTERS.LOREBOOK_ID, "lorebook_id"),
+
                 DTOField.of(CHARACTERS.NAME, "name"),
                 DTOField.of(CHARACTERS.DESCRIPTION, "description"),
-                DTOField.of(CHARACTERS.WELCOME_MESSAGE, "welcome_message"),
                 DTOField.of(CHARACTERS.CAN_BE_USER, "can_be_user"),
-                DTOField.of(CHARACTERS.LOREBOOK_ID, "lorebook_id")
+                DTOField.of(CHARACTERS.WELCOME_MESSAGE, "welcome_message"),
+
+                DTOField.of(CHARACTERS.STARTING_LOCATION_ID, "starting_location_id"),
+                DTOField.of(CHARACTERS.IS_STATIC, "is_static"),
+                DTOField.of(CHARACTERS.REASON_WHY, "reason_why"),
+                DTOField.of(CHARACTERS.TTL, "ttl")
         );
     }
 }

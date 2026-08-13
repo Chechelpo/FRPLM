@@ -1,64 +1,66 @@
 package io.github.chechelpo.frplm.domain.world.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
-import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import io.github.chechelpo.frplm.test_utils.TestText;
+import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.WORLDS;
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-@Sql(
-        scripts = "classpath:db/schema.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Import({WorldTestContext.class, LorebookTestContext.class})
 class WorldServiceTest {
-    @Autowired WorldTestContext context;
-    @Autowired LorebookTestContext lorebookTestContext;
+    @Autowired
+    WorldService worldService;
+    @Autowired
+    LorebookService lorebookService;
+    @Autowired
+    private StableRecordCreator stableRecordCreator;
+
     @BeforeEach
     void setUp() {
-        context.reload();
+        stableRecordCreator.run();
     }
 
     @Test
-    public void testWorldLorebook(){
-        int worldAmount = 100;
+    @SimulithIntegrationTest
+    public void testWorldLorebook_born_Updated_Killed_WithParent(){
+        String worldName = "name";
+        WorldsRecord world = worldService.createAndGet(
+                EntityDataPayload.of(WORLDS.NAME, worldName)
+        );
+        assertEquals(worldName, world.getName());
+        // Create
+        var result = lorebookService.getOneMatching(
+                EntityDataPayload.of(LOREBOOKS.NAME, worldName)
+        );
+        assertTrue(result.isPresent());
+        assertEquals(worldName, result.resolve().getName());
 
-        List<EntityDataPayload<WorldsRecord>> worldDatas = new ArrayList<>(worldAmount);
-        long seed = 10;
+        // Update
+        String newName = "newName";
+        worldService.update(world, EntityDataPayload.of(WORLDS.NAME, newName));
+        world = worldService.getUpToDate(world).orElseThrow();
+        assertEquals(newName, world.getName());
 
-        for (int i = 0; i < worldAmount; i++)
-            worldDatas.add(EntityDataPayload.<WorldsRecord>builder()
-                    .set(WORLDS.NAME, TestText.randomText(seed + i, 0, 255))
-                    .build()
-            );
+        var updatedLorebook = lorebookService.find(EntityKey.of(LOREBOOKS.ID, world.getLorebookId()));
+        assertTrue(updatedLorebook.isFound());
+        assertEquals(newName, updatedLorebook.get().getName());
 
-        List<WorldsRecord> records = worldDatas.stream().map(
-                data -> assertDoesNotThrow(() -> context.service.createAndGet(data))
-        ).toList();
+        // Delete
+        assertTrue(worldService.delete(world));
 
-        for (int i = 0; i < worldAmount; i++)
-            assertEquals(lorebookTestContext.service.getLorebookOf(records.get(i)).getName(), records.get(i).getName());
+        var lorebook = lorebookService.find(
+                EntityKey.of(LOREBOOKS.ID, world.getLorebookId())
+        );
 
-        for (int i = 0; i < worldAmount; i++){
-            WorldsRecord record = records.get(i);
-            LorebooksRecord lorebook = lorebookTestContext.service.getLorebookOf(record);
-
-            assertTrue(this.context.service.delete(context.service.keyOf(record)), "Error deleting character");
-            assertFalse(lorebookTestContext.service.find(
-                    lorebookTestContext.service.keyOf(lorebook)
-            ).isFound(), "Stale lorebook referencing world");
-        }
+        assertFalse(lorebook.isFound());
     }
 }

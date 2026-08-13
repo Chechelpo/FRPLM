@@ -15,7 +15,7 @@ final class PrologPredicateFields
         extends EntityFieldsValidator<PrologPredicateRecord> {
 
     PrologPredicateFields() {
-        super();
+        super(PROLOG_PREDICATE);
     }
 
     @Override

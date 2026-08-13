@@ -17,6 +17,14 @@ public final class IntegerConstraint implements Constraint<Integer> {
         this.max = builder.max;
     }
 
+    public Integer min() {
+        return min;
+    }
+
+    public Integer max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull Optional<String> returnReasonIfInvalid(

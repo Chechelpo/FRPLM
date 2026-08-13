@@ -68,7 +68,6 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
         return store.getActiveOfLorebooks(lorebookIds);
     }
 
-
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<EntryRecord> data, long operationID) {
         EntityKey<LorebooksRecord> parentLorebookKey = lorebookKeyOf(data.require(Entry.ENTRY.LOREBOOK_ID));
@@ -80,8 +79,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
             log.error("Could not fetch entryID creating entry\n Assignments: {}", data.assignments());
             return new UnexpectedException("Could not fetch new entry ID", Severity.SYSTEM);
         });
-        int defaultOutletID = lorebooks.getValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, parentLorebookKey)
-                .orElseThrow(() -> new UnexpectedException("Could not fetch defaultOutletID from parent", Severity.SYSTEM));
+        int defaultOutletID = Objects.requireNonNull(lorebooks.getValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, parentLorebookKey));
 
         data.set(Entry.ENTRY.ENTRY_ID, newEntryID);
         data.set(ENTRY.OUTLET, defaultOutletID);
@@ -138,7 +136,7 @@ public class EntryService extends EntityService<EntryRecord, EntryStore> impleme
         return EntityDataPayload.<EntryRecord>builder()
                 .set(ENTRY.NAME, entry.getName())
                 .set(ENTRY.CONTENT, entry.getContent())
-                .set(ENTRY.OUTLET, lorebooks.getValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, lorebooks.keyOf(newLorebook)).orElseThrow())
+                .set(ENTRY.OUTLET, lorebooks.getNonNullValueOf(LOREBOOKS.DEFAULT_OUTLET_ID, lorebooks.keyOf(newLorebook)))
 
                 .set(ENTRY.ENABLED, entry.getEnabled())
                 .set(ENTRY.PROBABILITY, entry.getProbability())

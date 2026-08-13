@@ -16,12 +16,14 @@ import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRequest;
+import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PromptOrchestrator implements PromptBuilder {
@@ -52,6 +54,20 @@ public class PromptOrchestrator implements PromptBuilder {
         this.macroManager = new MacroManager(outletManager);
     }
 
+    public PromptOrchestrator(
+            @NonNull PromptBudgetManager tokensManager,
+            LorebookContext lorebookContext
+    ) {
+        session = null;
+
+        this.promptBuilder = new PromptRenderer(List.of());
+        this.tokensManager = tokensManager;
+
+        this.lorebookManager = new LorebookManagerImpl(lorebookContext.entries, lorebookContext.entryKeywords, tokensManager);
+        this.outletManager = new OutletManagerImpl(lorebookContext.outlets, lorebookManager);
+        this.macroManager = new MacroManager(outletManager);
+    }
+
     private static @NonNull ArrayList<PromptSectionEntitySnapshot> getSections(@NonNull PromptBudgetManager tokensManager, Session session) {
         return session.getPrompt()
                 .orElseThrow(notFound ->
@@ -64,6 +80,9 @@ public class PromptOrchestrator implements PromptBuilder {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public Optional<Session> getSession(){
+        return Optional.ofNullable(session);
+    }
 
     public PromptResult render(){
         lorebookManager.activateEntries(promptBuilder);

@@ -3,10 +3,10 @@ package io.github.chechelpo.frplm.core.entities.assets;
 import io.github.chechelpo.frplm.config.directories.AppDirectory;
 import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.extensions.api.standalone.StableReference;
-import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.IO.ZipReader;
 import io.github.chechelpo.frplm.utils.converters.WebpImageConverter;
 import io.github.chechelpo.frplm.utils.orders.CreationOrder;
+import org.jooq.Table;
 import org.jooq.TableRecord;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.FileSystemResource;
@@ -42,7 +42,7 @@ public abstract class EntityAssetStore<
     private static final String DEFAULT_CONTENT_TYPE =
             "application/octet-stream";
 
-    protected final EntityConfigs.Types entityType;
+    protected final Table<R> table;
 
     private final Path assetsDirectory;
     private final EnumSet<AssetTypes> allowedAssetTypes;
@@ -52,13 +52,13 @@ public abstract class EntityAssetStore<
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     protected EntityAssetStore(
-            EntityConfigs.Types type,
+            Table<R> table,
             AppDirectory directory,
             EnumSet<AssetTypes> allowedAssetTypes
     ) {
-        this.entityType = Objects.requireNonNull(
-                type,
-                "type"
+        this.table = Objects.requireNonNull(
+                table,
+                "table"
         );
 
         this.assetsDirectory = Objects.requireNonNull(
@@ -613,7 +613,7 @@ public abstract class EntityAssetStore<
                     "Asset type "
                             + type
                             + " is not supported by "
-                            + entityType
+                            + table
                             + ". Allowed asset types: "
                             + allowedAssetTypes
             );
@@ -794,7 +794,7 @@ public abstract class EntityAssetStore<
     void entityDeleted(
             CRUDCommittedEvent.DeletedEntity<?> rawDeletedEntity
     ) {
-        if (rawDeletedEntity.type() != entityType) {
+        if (rawDeletedEntity.isNotEventOf(this.table)) {
             return;
         }
 
@@ -809,7 +809,7 @@ public abstract class EntityAssetStore<
                     "Failed to delete assets for entity "
                             + event.key()
                             + " of type "
-                            + entityType,
+                            + table,
                     exception
             );
         }

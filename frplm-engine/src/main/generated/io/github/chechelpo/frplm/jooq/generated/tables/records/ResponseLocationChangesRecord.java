@@ -61,16 +61,18 @@ public class ResponseLocationChangesRecord extends UpdatableRecordImpl<ResponseL
     }
 
     /**
-     * Setter for <code>PUBLIC.RESPONSE_LOCATION_CHANGES.CHARACTER_ID</code>.
+     * Setter for
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES.SESSION_CHARACTER_ID</code>.
      */
-    public void setCharacterId(Integer value) {
+    public void setSessionCharacterId(Integer value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>PUBLIC.RESPONSE_LOCATION_CHANGES.CHARACTER_ID</code>.
+     * Getter for
+     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES.SESSION_CHARACTER_ID</code>.
      */
-    public Integer getCharacterId() {
+    public Integer getSessionCharacterId() {
         return (Integer) get(3);
     }
 
@@ -125,13 +127,13 @@ public class ResponseLocationChangesRecord extends UpdatableRecordImpl<ResponseL
     /**
      * Create a detached, initialised ResponseLocationChangesRecord
      */
-    public ResponseLocationChangesRecord(Integer sessionId, Integer tickNum, Short responseNum, Integer characterId, Integer worldId, Integer locationId) {
+    public ResponseLocationChangesRecord(Integer sessionId, Integer tickNum, Short responseNum, Integer sessionCharacterId, Integer worldId, Integer locationId) {
         super(ResponseLocationChanges.RESPONSE_LOCATION_CHANGES);
 
         setSessionId(sessionId);
         setTickNum(tickNum);
         setResponseNum(responseNum);
-        setCharacterId(characterId);
+        setSessionCharacterId(sessionCharacterId);
         setWorldId(worldId);
         setLocationId(locationId);
         resetChangedOnNotNull();

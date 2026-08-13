@@ -4,7 +4,8 @@ import io.github.chechelpo.frplm.extensions.api.prompts.PromptSection;
 import io.github.chechelpo.frplm.extensions.api.standalone.PromptSectionEntitySnapshot;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionMessage;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
-import io.github.chechelpo.frplm.utils.macros.Macro;
+import io.github.chechelpo.frplm.utils.matching.Macro;
+import io.github.chechelpo.frplm.utils.matching.ReplacementTarget;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 
@@ -57,22 +58,7 @@ final class SectionManager {
         return isChatHistorySection;
     }
 
-    void injectAtDetectedMacros(MacroManager macroManager){
-        this.renderedContent = unrenderedContent;
-
-        boolean replaced = true;
-        while (replaced) {
-            replaced = false;
-            for (Macro macro : macroManager.getMacros()){
-                Optional<String> toInject = macroManager.renderMacro(macro);
-                if (toInject.isPresent()) {
-                    Macro.ReplacementResult result = macro.replaceAt(renderedContent, toInject.get());
-                    this.renderedContent = result.newContent();
-                    replaced = result.injected();
-                }
-            }
-        }
+    void injectAtDetectedTargets(MacroManager macroManager){
+        this.renderedContent = macroManager.replaceTargets(this.unrenderedContent);
     }
-
-
 }

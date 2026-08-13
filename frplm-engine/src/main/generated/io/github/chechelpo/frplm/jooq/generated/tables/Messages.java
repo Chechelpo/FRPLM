@@ -6,10 +6,10 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
@@ -236,19 +236,6 @@ public class Messages extends TableImpl<MessagesRecord> {
         return _worlds;
     }
 
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_MESSAGE.getInverseKey());
-
-        return _currentLocations;
-    }
-
     private transient MovementsPath _movements;
 
     /**
@@ -273,6 +260,19 @@ public class Messages extends TableImpl<MessagesRecord> {
             _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_MESSAGES.getInverseKey());
 
         return _responses;
+    }
+
+    private transient SessionCharactersPath _sessionCharacters;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
+     */
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_MESSAGE.getInverseKey());
+
+        return _sessionCharacters;
     }
 
     @Override

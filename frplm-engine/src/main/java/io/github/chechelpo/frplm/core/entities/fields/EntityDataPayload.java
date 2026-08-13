@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class EntityDataPayload<R extends TableRecord<R>> implements DataPayload<R> {
     private final Map<TableField<R, ?>, Object> assignments;
@@ -18,8 +19,12 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
         this.assignments = new HashMap<>(assignments);
     }
 
-    public EntityDataPayload() {
+    EntityDataPayload() {
         this.assignments = new HashMap<>();
+    }
+
+    public static <Rec extends TableRecord<Rec>> @NotNull EntityDataPayload<Rec> empty(){
+        return new EntityDataPayload<>();
     }
 
     public static <Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder() {
@@ -44,6 +49,25 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
                 .set(field, value)
                 .build();
     }
+
+    public <T> void ifUnassignedSet(
+            TableField<R, T> field,
+            T value
+    ) {
+        if (!assigns(field)) {
+            set(field, value);
+        }
+    }
+
+    public <T> void ifUnassignedGet(
+            TableField<R, T> field,
+            Supplier<? extends T> supplier
+    ) {
+        if (!assigns(field)) {
+            set(field, supplier.get());
+        }
+    }
+
 
     @Override
     public boolean isEmpty() {
@@ -75,8 +99,9 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
         assignments.put(assignment.field, assignment.get());
     }
 
-    public <T> void set(TableField<R, T> field, T value) {
+    public <T> EntityDataPayload<R> set(TableField<R, T> field, T value) {
         assignments.put(field, value);
+        return this;
     }
 
     void unsafeSetValue(TableField<R, ?> field, Object value) {
@@ -143,6 +168,17 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
         return "Update object with assignments: \n " + assignments;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) return false;
+
+        if (this == obj) return true;
+        if (obj instanceof EntityDataPayload<?> payload)
+            return assignments.equals(payload.assignments);
+
+        return false;
+    }
+
     private static <Rec extends TableRecord<Rec>> void validateValues(
             @NotNull Map<TableField<Rec, ?>, Object> values
     ) {
@@ -165,6 +201,37 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
 
         public <T> @NotNull Builder<Rec> set(TableField<Rec, T> field, T value) {
             assignments.put(field, value);
+            return this;
+        }
+        public <T> @NotNull Builder<Rec> copyAll(DataPayload<Rec> other){
+            this.assignments.putAll(other.assignments());
+            return this;
+        }
+        public <O extends TableRecord<O>, T> @NotNull Builder<Rec> set(
+                TableField<Rec, T> toField,
+                TableField<O, T> fromField,
+                O other
+        ){
+            assignments.put(toField, other.getValue(fromField));
+            return this;
+        }
+
+        public <O extends TableRecord<O>, T>  Builder<Rec> set(
+                DataPayload<O> other,
+                TableField<O, T> fromField,
+                TableField<Rec,T> toField
+        ){
+            assignments.put(toField, other.require(fromField));
+            return this;
+        }
+
+        public <O extends TableRecord<O>,T> Builder<Rec> copyIfAssigned(
+                TableField<Rec, T> toField,
+                TableField<O, T> fromField,
+                DataPayload<O> other
+        ){
+            other.getAssignment(fromField)
+                    .ifAssigned(value -> assignments.put(toField, value));
             return this;
         }
         @NotNull Builder<Rec> unsafeSet(TableField<Rec, ?> field, Object value) {

@@ -6,16 +6,21 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
+import io.github.chechelpo.frplm.jooq.generated.tables.Macros.MacrosPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.ExtensionRecord;
 
 import java.util.Collection;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.JSON;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -94,6 +99,39 @@ public class Extension extends TableImpl<ExtensionRecord> {
         this(DSL.name("EXTENSION"), null);
     }
 
+    public <O extends Record> Extension(Table<O> path, ForeignKey<O, ExtensionRecord> childPath, InverseForeignKey<O, ExtensionRecord> parentPath) {
+        super(path, childPath, parentPath, EXTENSION);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class ExtensionPath extends Extension implements Path<ExtensionRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> ExtensionPath(Table<O> path, ForeignKey<O, ExtensionRecord> childPath, InverseForeignKey<O, ExtensionRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private ExtensionPath(Name alias, Table<ExtensionRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public ExtensionPath as(String alias) {
+            return new ExtensionPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public ExtensionPath as(Name alias) {
+            return new ExtensionPath(alias, this);
+        }
+
+        @Override
+        public ExtensionPath as(Table<?> alias) {
+            return new ExtensionPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -101,7 +139,20 @@ public class Extension extends TableImpl<ExtensionRecord> {
 
     @Override
     public UniqueKey<ExtensionRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_81;
+        return Keys.CONSTRAINT_8;
+    }
+
+    private transient MacrosPath _macros;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.MACROS</code>
+     * table
+     */
+    public MacrosPath macros() {
+        if (_macros == null)
+            _macros = new MacrosPath(this, null, Keys.FK_MACRO_TO_EXTENSION.getInverseKey());
+
+        return _macros;
     }
 
     @Override

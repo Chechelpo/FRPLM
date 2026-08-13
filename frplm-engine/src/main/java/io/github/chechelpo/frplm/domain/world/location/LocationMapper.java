@@ -93,9 +93,11 @@ final class LocationMapper extends ABSWireMapper<LocationsRecord, LocationJSON, 
 
                 fetchLorebook(record, zipBuilder),
 
-                characterService.getStartingAt(
-                                record.getWorldId(),
-                                record.getId()
+                characterService.getMatching(
+                        EntityDataPayload.<CharactersRecord>builder()
+                                .set(CHARACTERS.WORLD_ID, record.getWorldId())
+                                .set(CHARACTERS.STARTING_LOCATION_ID, record.getId())
+                                .build()
                         )
                         .stream()
                         .map(characterRecord ->

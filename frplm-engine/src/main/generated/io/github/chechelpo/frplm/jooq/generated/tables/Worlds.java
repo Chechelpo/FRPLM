@@ -7,7 +7,6 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges.LocationEdgesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
@@ -15,8 +14,8 @@ import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
 
 import java.util.Arrays;
@@ -256,35 +255,9 @@ public class Worlds extends TableImpl<WorldsRecord> {
      */
     public RegionPath region() {
         if (_region == null)
-            _region = new RegionPath(this, null, Keys.CONSTRAINT_8F.getInverseKey());
+            _region = new RegionPath(this, null, Keys.CONSTRAINT_8FD.getInverseKey());
 
         return _region;
-    }
-
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A5.getInverseKey());
-
-        return _currentLocations;
-    }
-
-    private transient StartingLocationsPath _startingLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.STARTING_LOCATIONS</code> table
-     */
-    public StartingLocationsPath startingLocations() {
-        if (_startingLocations == null)
-            _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08E.getInverseKey());
-
-        return _startingLocations;
     }
 
     private transient MovementsPath _movements;
@@ -298,6 +271,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E68.getInverseKey());
 
         return _movements;
+    }
+
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
+     * table
+     */
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, null, Keys.FK_CHARACTER_TO_WORLD.getInverseKey());
+
+        return _characters;
     }
 
     private transient LocationEdgesPath _locationEdges;
@@ -352,6 +338,19 @@ public class Worlds extends TableImpl<WorldsRecord> {
         return _responses;
     }
 
+    private transient SessionCharactersPath _sessionCharacters;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
+     */
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_WORLD.getInverseKey());
+
+        return _sessionCharacters;
+    }
+
     private transient SessionsPath _sessions;
 
     /**
@@ -363,19 +362,6 @@ public class Worlds extends TableImpl<WorldsRecord> {
             _sessions = new SessionsPath(this, null, Keys.FK_SESSIONS_TO_WORLD.getInverseKey());
 
         return _sessions;
-    }
-
-    private transient CharactersPath _characters;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
-     * table
-     */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, null, Keys.FK_TO_WORLD.getInverseKey());
-
-        return _characters;
     }
 
     @Override

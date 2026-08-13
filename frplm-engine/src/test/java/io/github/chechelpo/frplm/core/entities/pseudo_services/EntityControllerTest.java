@@ -408,7 +408,7 @@ class EntityControllerTest {
         assertSame(failure, thrown);
 
         verify(service, never())
-                .update(any(), any());
+                .update(any(EntityKey.class), any());
     }
 
     @Test

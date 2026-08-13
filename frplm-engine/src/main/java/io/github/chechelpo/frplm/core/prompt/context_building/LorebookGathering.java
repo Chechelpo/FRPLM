@@ -3,6 +3,7 @@ package io.github.chechelpo.frplm.core.prompt.context_building;
 import io.github.chechelpo.frplm.core.prompt.PromptPhase;
 import io.github.chechelpo.frplm.core.prompt.PromptPipelineSection;
 import io.github.chechelpo.frplm.core.prompt.building.PromptOrchestrator;
+import io.github.chechelpo.frplm.extensions.api.session.Session;
 import io.github.chechelpo.frplm.extensions.api.session.SessionLocation;
 import io.github.chechelpo.frplm.extensions.api.standalone.RegionSnapshot;
 import io.github.chechelpo.frplm.extensions.implementations.session.SessionImpl;
@@ -21,7 +22,12 @@ final class LorebookGathering implements PromptPipelineSection {
     }
 
     @Override
-    public void run(@NonNull SessionImpl session, @NonNull PromptOrchestrator orchestrator) {
+    public void run(PromptOrchestrator orchestrator) {
+        orchestrator.getSession()
+                .ifPresent(session -> run(session, orchestrator));
+    }
+
+    private void run(Session session, @NonNull PromptOrchestrator orchestrator) {
         addWorldLorebook(session, orchestrator);
 
         SessionLocation currentLocation = session.getUserCharacter().getCurrentLocation();
@@ -32,13 +38,17 @@ final class LorebookGathering implements PromptPipelineSection {
         addPresentCharactersLorebooks(currentLocation, orchestrator);
     }
 
-    void addWorldLorebook(SessionImpl session, PromptOrchestrator orchestrator){
+    void addWorldLorebook(Session session, PromptOrchestrator orchestrator){
         orchestrator.addLorebook(session.getWorld().lorebook());
     }
 
     void addPresentCharactersLorebooks(SessionLocation location, PromptOrchestrator orchestrator){
         location.getCharactersHere()
-                .forEach(character -> orchestrator.addLorebook(character.lorebook()));
+                .forEach(character -> {
+                    orchestrator.addLorebook(character.sessionLorebook());
+                    character.getPermanentCharacter()
+                            .ifPresent(permaCharacter -> orchestrator.addLorebook(permaCharacter.lorebook()));
+                });
     }
 
 

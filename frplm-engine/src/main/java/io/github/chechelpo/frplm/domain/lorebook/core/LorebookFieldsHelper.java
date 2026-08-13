@@ -15,7 +15,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.LOREBOOKS;
 @Component
 final class LorebookFieldsHelper extends EntityControllerFieldValidator<LorebooksRecord>{
     LorebookFieldsHelper() {
-        super(EntityConfigs.Types.LOREBOOKS);
+        super(EntityConfigs.Types.LOREBOOKS, LOREBOOKS);
     }
 
     @Override

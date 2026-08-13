@@ -1,7 +1,9 @@
 package io.github.chechelpo.frplm.core.prompt.building;
 
-import io.github.chechelpo.frplm.utils.macros.Macro;
+import io.github.chechelpo.frplm.utils.matching.FlexiblePattern;
+import io.github.chechelpo.frplm.utils.matching.Macro;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
+import io.github.chechelpo.frplm.utils.matching.ReplacementTarget;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
@@ -12,9 +14,10 @@ final class MacroManager {
     private static final int INITIAL_MACRO_CAPACITY = 20;
     private static final int INITIAL_PER_MACRO_CAPACITY = 20;
 
-    private final Map<Macro, List<String>> injections = new HashMap<>(INITIAL_MACRO_CAPACITY);
-    private final Map<Macro, String> rendered = new HashMap<>(INITIAL_MACRO_CAPACITY);
+    private final Map<ReplacementTarget, List<String>> injections = new HashMap<>(INITIAL_MACRO_CAPACITY);
+    private final Map<ReplacementTarget, String> rendered = new HashMap<>(INITIAL_MACRO_CAPACITY);
     private final OutletManagerImpl outletManager;
+    private boolean askedToRender = false;
 
     MacroManager(OutletManagerImpl outletManager) {
         this.outletManager = outletManager;
@@ -27,7 +30,12 @@ final class MacroManager {
         return injections.get(macro);
     }
 
+    private void requireNotRender(){
+        if (askedToRender) throw new IllegalStateException("Asked to inject after rendering a target");
+    }
+
     void addEntries(List<EntryRecord> entries) {
+        requireNotRender();
         Objects.requireNonNull(entries);
         Objects.requireNonNull(outletManager);
         entries.forEach(entry -> {
@@ -35,6 +43,17 @@ final class MacroManager {
                 appendAtMacro(outletManager.getOutletOf(entry), entry.getContent());
             }
         );
+    }
+
+    void replaceAt(String regex, String content){
+        replaceAt(new FlexiblePattern(regex), content);
+    }
+    void replaceAt(FlexiblePattern pattern, String content){
+        requireNotRender();
+        injections.computeIfAbsent(
+                pattern,
+                ignored -> new ArrayList<>()
+        ).add(content);
     }
 
     void appendAtMacro(String macro, String content){
@@ -63,7 +82,11 @@ final class MacroManager {
         injectAtMacro(new Macro(macro), content, atIndex);
     }
     void injectAtMacro(Macro macro, String content, int atIndex) {
-        if (atIndex == -1) appendAtMacro(macro, content);
+        requireNotRender();
+        if (atIndex == -1) {
+            appendAtMacro(macro, content);
+            return;
+        }
         Objects.requireNonNull(macro);
         Objects.requireNonNull(content);
 
@@ -81,18 +104,19 @@ final class MacroManager {
     }
 
     @Contract(pure = true)
-    @NonNull Set<Macro> getMacros(){
+    @NonNull Set<ReplacementTarget> getTargets(){
         return injections.keySet();
     }
 
-    @NotNull Optional<String> renderMacro(String macroName){
-        return renderMacro(new Macro(macroName));
+    @NotNull Optional<String> renderTarget(String macroName){
+        return renderTarget(new Macro(macroName));
     }
-    @NonNull Optional<String> renderMacro(Macro macro) {
-        Objects.requireNonNull(macro, "Requested macro to render is null");
 
+    @NonNull Optional<String> renderTarget(ReplacementTarget target) {
+        Objects.requireNonNull(target, "Requested target to render is null");
+        askedToRender = true;
         return Optional.ofNullable(rendered.computeIfAbsent(
-                macro,
+                target,
                 newMacro -> {
                     if (!injections.containsKey(newMacro)) return null;
                     List<String> contentToRender = injections.get(newMacro);
@@ -103,5 +127,35 @@ final class MacroManager {
                     return builder.toString();
                 }
         ));
+    }
+
+    String replaceTargets(String content) {
+        Objects.requireNonNull(content);
+
+        String result = content;
+
+        boolean replaced;
+        do {
+            replaced = false;
+
+            for (ReplacementTarget target : getTargets()) {
+                Optional<String> replacement = renderTarget(target);
+
+                if (replacement.isEmpty()) {
+                    continue;
+                }
+
+                ReplacementTarget.ReplacementResult replacementResult =
+                        target.replaceAt(result, replacement.get());
+
+                String newContent = replacementResult.newContent();
+
+                replaced |= !newContent.equals(result);
+
+                result = newContent;
+            }
+        } while (replaced);
+
+        return result;
     }
 }

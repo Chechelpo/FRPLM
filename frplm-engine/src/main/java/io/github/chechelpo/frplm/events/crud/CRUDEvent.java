@@ -1,9 +1,18 @@
 package io.github.chechelpo.frplm.events.crud;
 
-import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Table;
+import org.jooq.TableRecord;
 
-public sealed interface CRUDEvent permits CRUDCommittedEvent, CRUDDraftEvent {
+public sealed interface CRUDEvent<R extends TableRecord<R>> permits CRUDCommittedEvent, CRUDDraftEvent {
     long operationID();
-    @NotNull EntityConfigs.Types type();
+    @NotNull Table<R> table();
+
+    default boolean isEventOf(Table<?> table){
+        return table().equals(table);
+    }
+    default boolean isNotEventOf(Table<?> table){
+        return !isEventOf(table);
+    }
+
 }

@@ -47,73 +47,129 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     }
 
     /**
-     * Setter for <code>PUBLIC.CHARACTERS.NAME</code>.
-     */
-    public void setName(String value) {
-        set(2, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.NAME</code>.
-     */
-    public String getName() {
-        return (String) get(2);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
-     */
-    public void setDescription(String value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
-     */
-    public String getDescription() {
-        return (String) get(3);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
-     */
-    public void setCanBeUser(Boolean value) {
-        set(4, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
-     */
-    public Boolean getCanBeUser() {
-        return (Boolean) get(4);
-    }
-
-    /**
-     * Setter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
-     */
-    public void setWelcomeMessage(String value) {
-        set(5, value);
-    }
-
-    /**
-     * Getter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
-     */
-    public String getWelcomeMessage() {
-        return (String) get(5);
-    }
-
-    /**
      * Setter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public void setLorebookId(Integer value) {
-        set(6, value);
+        set(2, value);
     }
 
     /**
      * Getter for <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
      */
     public Integer getLorebookId() {
-        return (Integer) get(6);
+        return (Integer) get(2);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.NAME</code>.
+     */
+    public void setName(String value) {
+        set(3, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.NAME</code>.
+     */
+    public String getName() {
+        return (String) get(3);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
+     */
+    public void setDescription(String value) {
+        set(4, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.DESCRIPTION</code>.
+     */
+    public String getDescription() {
+        return (String) get(4);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
+     */
+    public void setCanBeUser(Boolean value) {
+        set(5, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.CAN_BE_USER</code>.
+     */
+    public Boolean getCanBeUser() {
+        return (Boolean) get(5);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
+     */
+    public void setWelcomeMessage(String value) {
+        set(6, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.WELCOME_MESSAGE</code>.
+     */
+    public String getWelcomeMessage() {
+        return (String) get(6);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.STARTING_LOCATION_ID</code>.
+     */
+    public void setStartingLocationId(Integer value) {
+        set(7, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.STARTING_LOCATION_ID</code>.
+     */
+    public Integer getStartingLocationId() {
+        return (Integer) get(7);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.IS_STATIC</code>.
+     */
+    public void setIsStatic(Boolean value) {
+        set(8, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.IS_STATIC</code>.
+     */
+    public Boolean getIsStatic() {
+        return (Boolean) get(8);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.REASON_WHY</code>.
+     */
+    public void setReasonWhy(String value) {
+        set(9, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.REASON_WHY</code>.
+     */
+    public String getReasonWhy() {
+        return (String) get(9);
+    }
+
+    /**
+     * Setter for <code>PUBLIC.CHARACTERS.TTL</code>.
+     */
+    public void setTtl(Integer value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for <code>PUBLIC.CHARACTERS.TTL</code>.
+     */
+    public Integer getTtl() {
+        return (Integer) get(10);
     }
 
     // -------------------------------------------------------------------------
@@ -139,16 +195,20 @@ public class CharactersRecord extends UpdatableRecordImpl<CharactersRecord> {
     /**
      * Create a detached, initialised CharactersRecord
      */
-    public CharactersRecord(Integer worldId, Integer id, String name, String description, Boolean canBeUser, String welcomeMessage, Integer lorebookId) {
+    public CharactersRecord(Integer worldId, Integer id, Integer lorebookId, String name, String description, Boolean canBeUser, String welcomeMessage, Integer startingLocationId, Boolean isStatic, String reasonWhy, Integer ttl) {
         super(Characters.CHARACTERS);
 
         setWorldId(worldId);
         setId(id);
+        setLorebookId(lorebookId);
         setName(name);
         setDescription(description);
         setCanBeUser(canBeUser);
         setWelcomeMessage(welcomeMessage);
-        setLorebookId(lorebookId);
+        setStartingLocationId(startingLocationId);
+        setIsStatic(isStatic);
+        setReasonWhy(reasonWhy);
+        setTtl(ttl);
         resetChangedOnNotNull();
     }
 }

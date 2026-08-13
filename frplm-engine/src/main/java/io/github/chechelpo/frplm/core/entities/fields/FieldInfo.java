@@ -46,6 +46,10 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
      */
     public final boolean isKey;
     /**
+     * Whether this field references a field in another table through a foreign key.
+     */
+    public final boolean isForeignKey;
+    /**
      * Whether this field can be set to null
      */
     public final boolean isNullable;
@@ -67,6 +71,7 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         this.isReadOnly = builder.key || builder.readOnly;
         this.isNullable = builder.isNullable;
         this.isKey = builder.key;
+        this.isForeignKey = builder.isForeignKey;
 
         /*
          * Explicit requireOnCreate() overrides inference.
@@ -113,6 +118,17 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
                 );
             }
         }
+    }
+
+    public Optional<List<T>> allowedValues() {
+        return allowedValues == null || allowedValues.isEmpty() ?
+                Optional.empty()
+                :
+                Optional.of(allowedValues.stream().toList());
+    }
+
+    public @NonNull Constraint<T> getConstraint() {
+        return this.constraint;
     }
 
     public DataPayload.Assignment<R, T> getApplicationDefaultValue() {
@@ -180,6 +196,7 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         private boolean require = false;
         private boolean readOnly = false;
         private boolean key;
+        private final boolean isForeignKey;
         private boolean isNullable;
 
         private Builder(TableField<R, T> field) {
@@ -187,6 +204,7 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
             var dataType = field.getDataType();
 
             this.key = isPrimaryKeyField(field);
+            this.isForeignKey = isForeignKeyField(field);
             this.coercer = CoercerCreator.getCoercerForClass(field.getType());
             this.isNullable = dataType.nullable();
 
@@ -275,7 +293,7 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
 
         public FieldInfo<R, T> build() {
             if (this.constraints == null)
-                this.constraints = DefaultConstraints.getDefaultConstraintForClass(field.getType());
+                this.constraints = DefaultConstraints.getDefaultConstraintForClass(field);
 
             return new FieldInfo<>(this);
         }
@@ -309,5 +327,16 @@ public final class FieldInfo<R extends TableRecord<R>, T> {
         return primaryKey != null
                 && primaryKey.getFields().stream()
                 .anyMatch(primaryKeyField -> primaryKeyField.equals(field));
+    }
+
+    private static boolean isForeignKeyField(TableField<?, ?> field) {
+        var table = field.getTable();
+        if (table == null) {
+            return false;
+        }
+
+        return table.getReferences().stream()
+                .flatMap(foreignKey -> foreignKey.getFields().stream())
+                .anyMatch(foreignKeyField -> foreignKeyField.equals(field));
     }
 }

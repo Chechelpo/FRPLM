@@ -2671,7 +2671,7 @@ const hostClass = computed(() => ({
                 <header class="world-graph__help-heading">
                     <div>
                         <strong>World graph controls</strong>
-                        <span>Actual v9 mouse, keyboard, menu, and viewer controls.</span>
+                        <span>Actual v10 mouse, keyboard, search, menu, and viewer controls.</span>
                     </div>
                     <button type="button" aria-label="Close controls help" title="Close controls help" @click="helpOpen = false">×</button>
                 </header>
@@ -2697,8 +2697,12 @@ const hostClass = computed(() => ({
                 :pending="search.isSearching.value"
                 :message="null"
                 :message-kind="search.messageKind.value"
+                :results="search.results.value"
+                :match-count="search.matchCount.value"
+                :max-height="Math.max(1, viewport.hostSize.height / 2)"
                 @update:model-value="updateSearchQuery"
                 @search="search.submit()"
+                @choose="search.chooseResult"
                 @clear="search.clearQuery"
             />
         </div>

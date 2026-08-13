@@ -42,24 +42,16 @@ public class EdgeService extends EntityService<LocationEdgesRecord, EdgeStore> {
         return this.store.getNeighboursOf(key);
     }
 
-    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
-    @Override
-    protected void beforeCreate(EntityDataPayload<LocationEdgesRecord> data, long operationID) {
-        if (Objects.equals(data.require(LOCATION_EDGES.FROM_LOCATION_ID), data.require(LOCATION_EDGES.TO_LOCATION_ID)))
-            throw new InvalidValue("Locations neighbours must have the same ID");
-
-        super.beforeCreate(data, operationID);
-    }
-
     /** @return edge exists ( thisLocation -> otherLocation ) || ( thisLocation <- otherLocation ) */
     @Transactional(readOnly = true)
     public boolean isNeighbour(@NotNull EntityKey<LocationsRecord> fromKey, @NotNull EntityKey<LocationsRecord> toKey) {
-        int thisWorldID = fromKey.getAssignment(LOCATIONS.WORLD_ID).orElseThrow();
-        int otherWorldID = toKey.getAssignment(LOCATIONS.WORLD_ID).orElseThrow();
+        int thisWorldID = fromKey.requireNonNull(LOCATIONS.WORLD_ID);
+        int otherWorldID = toKey.requireNonNull(LOCATIONS.WORLD_ID);
         if (thisWorldID != otherWorldID) return false;
 
-        return this.isNeighbour(thisWorldID, fromKey.require(LOCATIONS.ID), toKey.require(LOCATIONS.ID));
+        return this.isNeighbour(thisWorldID, fromKey.requireNonNull(LOCATIONS.ID), toKey.requireNonNull(LOCATIONS.ID));
     }
+
     public boolean isNeighbour(int worldID, int location1ID, int location2ID) {
         return super.exists(EntityKey.<LocationEdgesRecord>builder()
                 .set(LOCATION_EDGES.WORLD_ID, worldID)

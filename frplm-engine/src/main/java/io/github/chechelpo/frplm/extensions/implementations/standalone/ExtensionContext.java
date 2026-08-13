@@ -1,7 +1,6 @@
 package io.github.chechelpo.frplm.extensions.implementations.standalone;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
-import io.github.chechelpo.frplm.domain.character.starting_locations.StartingLocationsService;
 import io.github.chechelpo.frplm.domain.connection.api_hosts.HostService;
 import io.github.chechelpo.frplm.domain.connection.api_keys.SecretService;
 import io.github.chechelpo.frplm.domain.connection.llm.LLMService;
@@ -27,7 +26,6 @@ public record ExtensionContext(
 
 
         @NotNull CharacterService characters,
-        @NotNull StartingLocationsService startingLocations,
 
         @NotNull WorldService worlds,
         @NotNull RegionService regions,

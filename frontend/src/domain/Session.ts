@@ -237,6 +237,4 @@ export class Message extends ABSEntity<MessagesKey, MessageData>{
             }
         ).then(async response => (await response.json() as DTO[]).map(dto => new Character(dto, EntityTypes.CHARACTERS)))
     }
-
-
 }

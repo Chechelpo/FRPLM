@@ -154,7 +154,7 @@ public class PrologPredicateArgument extends TableImpl<PrologPredicateArgumentRe
 
     @Override
     public List<ForeignKey<PrologPredicateArgumentRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_8);
+        return Arrays.asList(Keys.CONSTRAINT_8F);
     }
 
     private transient PrologPredicatePath _prologPredicate;
@@ -165,7 +165,7 @@ public class PrologPredicateArgument extends TableImpl<PrologPredicateArgumentRe
      */
     public PrologPredicatePath prologPredicate() {
         if (_prologPredicate == null)
-            _prologPredicate = new PrologPredicatePath(this, Keys.CONSTRAINT_8, null);
+            _prologPredicate = new PrologPredicatePath(this, Keys.CONSTRAINT_8F, null);
 
         return _prologPredicate;
     }

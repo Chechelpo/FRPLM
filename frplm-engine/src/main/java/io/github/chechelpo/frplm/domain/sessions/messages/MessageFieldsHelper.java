@@ -16,7 +16,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
 @Lazy(false)
 final class MessageFieldsHelper extends EntityControllerFieldValidator<MessagesRecord> {
     MessageFieldsHelper() {
-        super(EntityConfigs.Types.MESSAGES);
+        super(EntityConfigs.Types.MESSAGES, MESSAGES);
     }
 
     @Override

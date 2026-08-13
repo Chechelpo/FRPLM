@@ -7,9 +7,11 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.TestTableRecord;
 
 import java.util.List;
 
+import static io.github.chechelpo.frplm.jooq.generated.Tables.TEST_TABLE;
+
 final class TestControllerFields extends EntityControllerFieldValidator<TestTableRecord> {
     TestControllerFields() {
-        super(EntityConfigs.Types.TEST_ENTITY);
+        super(EntityConfigs.Types.TEST_ENTITY, TEST_TABLE);
     }
 
     @Override

@@ -91,9 +91,8 @@ class EntityServiceTest {
                 .set(TEST_TABLE.SECOND_ID, secondId)
                 .build();
         int startCounter = 0;
-        Optional<Integer> supposedStartCounter = testService.getValueOf(TEST_TABLE.COUNTER, key);
-        assertTrue(supposedStartCounter.isPresent());
-        assertEquals(startCounter, supposedStartCounter.get(),
+        Integer supposedStartCounter = testService.getValueOf(TEST_TABLE.COUNTER, key);
+        assertEquals(startCounter, supposedStartCounter,
                 "Mismatch in expected default state of TestTable.counter");
 
         Optional<Integer> nextCounter = testService.incrementAndGet(TEST_TABLE.COUNTER, key);
@@ -101,17 +100,15 @@ class EntityServiceTest {
         assertEquals(startCounter + 1, nextCounter.get(),
                 "Mismatch in expected state of TestTable.counter after increment and get");
 
-        Optional<Integer> persistedCounter = testService.getValueOf(TEST_TABLE.COUNTER, key);
-        assertTrue(persistedCounter.isPresent());
-        assertEquals(startCounter + 1, persistedCounter.get(),
+        Integer persistedCounter = testService.getValueOf(TEST_TABLE.COUNTER, key);
+        assertEquals(startCounter + 1, persistedCounter,
                 "Counter was not persisted after increment");
 
         EntityKey<TestTableRecord> unknownKey = EntityKey.<TestTableRecord>builder()
                 .set(TEST_TABLE.FIRST_ID, 1020)
                 .set(TEST_TABLE.SECOND_ID, 12)
                 .build();
-        assertTrue(testService.getValueOf(TEST_TABLE.COUNTER, unknownKey).isEmpty(),
-                "Could increment value of unregistered entity");
+
         assertTrue(testService.find(unknownKey).isNotFound(),
                 "Created phantom record");
     }
@@ -137,17 +134,13 @@ class EntityServiceTest {
 
         int startCounter = 0;
 
-        Optional<Integer> supposedStartCounter =
+        Integer supposedStartCounter =
                 testService.getValueOf(TEST_TABLE.COUNTER, key);
 
-        assertTrue(
-                supposedStartCounter.isPresent(),
-                "Could not retrieve the initial counter value"
-        );
 
         assertEquals(
                 startCounter,
-                supposedStartCounter.get(),
+                supposedStartCounter,
                 "Mismatch in expected default state of TestTable.counter"
         );
 
@@ -165,17 +158,13 @@ class EntityServiceTest {
                 "Mismatch in expected state of TestTable.counter after decrement"
         );
 
-        Optional<Integer> persistedCounter =
+        Integer persistedCounter =
                 testService.getValueOf(TEST_TABLE.COUNTER, key);
 
-        assertTrue(
-                persistedCounter.isPresent(),
-                "Could not retrieve the persisted counter"
-        );
 
         assertEquals(
                 startCounter - 1,
-                persistedCounter.get(),
+                persistedCounter,
                 "Counter was not persisted after decrement"
         );
 
@@ -361,9 +350,8 @@ class EntityServiceTest {
                     .of(TEST_TABLE.DESCRIPTION, TestText.randomText(testAmount + 100 - i, 25, 2000));
             assertTrue(testService.update(key, newValue).success(), "Update failed for key: " + key);
 
-            Optional<String> possibleValue = testService.getValueOf(TEST_TABLE.DESCRIPTION, key);
-            assertTrue(possibleValue.isPresent(), "Could not find value for key " + key);
-            assertEquals(newValue.require(TEST_TABLE.DESCRIPTION), possibleValue.get(), "Mismatch after update");
+            String possibleValue = testService.getValueOf(TEST_TABLE.DESCRIPTION, key);
+            assertEquals(newValue.require(TEST_TABLE.DESCRIPTION), possibleValue, "Mismatch after update");
         }
         //Delete without issues
         keys.forEach(entityKey -> {

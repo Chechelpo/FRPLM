@@ -107,10 +107,21 @@ public interface FieldValidator<R extends TableRecord<R>> {
     }
 
     Table<R> getTable();
+    default boolean isNotKey(TableField<R,?> field){
+        return !isKey(field);
+    }
     boolean isKey(TableField<R, ?> field);
+
+    default boolean isNotForeignKey(TableField<R,?> field){
+        return !isForeignKey(field);
+    }
+    boolean isForeignKey(TableField<R,?> field);
     EntityKey<R> keyOf(R record);
 
     EntityKey<R> extractKeysFrom(EntityDataPayload<R> payload);
 
     Set<TableField<R,?>> ignoreFieldsOnCreationOrder();
+
+    <T> FieldInfo<R,T> getInfoOf(TableField<R,T> field);
+    Set<TableField<R,?>> instantiationFields();
 }

@@ -1,73 +1,77 @@
 package io.github.chechelpo.frplm.domain.character.core;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
-import io.github.chechelpo.frplm.domain.lorebook.core.LorebookTestContext;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
-import io.github.chechelpo.frplm.test_utils.TestText;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
+import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.test_utils.fixtures.*;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 
-import java.util.ArrayList;
-import java.util.List;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
-import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest()
-@Sql(
-        scripts = "classpath:db/schema.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Import({
-        LorebookTestContext.class,
-})
+@SpringBootTest
+@Import(EntityFixtureFactory.class)
 class CharacterServiceTest {
     @Autowired
-    LorebookTestContext lorebookTestContext;
+    EntityFixtureFactory factory;
     @Autowired
-    private CharacterService characterService;
-    @Autowired
-    private CharacterFieldsHelper characterFieldsHelper;
+    private StableRecordCreator stableRecordCreator;
+
+    private LorebookFixtures lorebookFixtures;
+
+    private WorldFixtures worldFixtures;
+    private RegionFixtures regionFixtures;
+    private LocationFixtures locationFixtures;
+    private CharacterFixtures characterFixtures;
 
     @BeforeEach
     void setUp() {
-        lorebookTestContext.reload();
+        String seed = "test-character";
+        lorebookFixtures = factory.lorebook(seed);
+
+        worldFixtures = factory.worlds(seed);
+        regionFixtures = factory.regions(seed);
+        locationFixtures = factory.locations(seed);
+        characterFixtures = factory.characters(seed);
+
+        stableRecordCreator.run();
     }
 
-
     @Test
-    void testCharacterLorebook() {
-        int characterAmount = 100;
+    @SimulithIntegrationTest
+    void testCharacterLorebook_creates_updates_deletes() {
+        WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
+        RegionRecord region = regionFixtures.addAndCreateTo(REGION.WORLD_ID, world.getId());
+        LocationsRecord location = locationFixtures.addAndCreateTo(
+                EntityDataPayload.<LocationsRecord>builder()
+                        .set(LOCATIONS.WORLD_ID, WORLDS.ID, world)
+                        .set(LOCATIONS.REGION_ID, REGION.ID, region)
+                        .build()
+        );
 
-        List<EntityDataPayload<CharactersRecord>> charactersData = new ArrayList<>(characterAmount);
-        long seed = 10;
+        characterFixtures.addAndCreateList(
+                100,
+                i -> EntityDataPayload.<CharactersRecord>builder()
+                        .set(CHARACTERS.WORLD_ID, WORLDS.ID, world)
+                        .set(CHARACTERS.NAME, "Character " + i)
+                        .set(CHARACTERS.STARTING_LOCATION_ID, LOCATIONS.ID, location)
+        ).forEach(
+                created -> {
+                    EntityKey<LorebooksRecord> lorebookKey = EntityKey.of(LOREBOOKS.ID, created.getLorebookId());
+                    lorebookFixtures.assertFieldEquals(created.getName(), LOREBOOKS.NAME, lorebookKey);
 
-        for (int i = 0; i < characterAmount; i++)
-            charactersData.add(EntityDataPayload.<CharactersRecord>builder()
-                    .set(CHARACTERS.NAME, TestText.randomText(seed + i, 0, 255))
-                    .build()
-            );
+                    String newName = "newName";
+                    characterFixtures.service().update(CHARACTERS.NAME, newName, created);
+                    lorebookFixtures.assertFieldEquals(newName, LOREBOOKS.NAME, lorebookKey);
 
-        List<CharactersRecord> records = charactersData.stream().map(
-                data -> assertDoesNotThrow(() -> characterService.createAndGet(data))
-        ).toList();
-
-        for (int i = 0; i < characterAmount; i++)
-            assertEquals(lorebookTestContext.service.getLorebookOf(records.get(i)).getName(), records.get(i).getName());
-
-        for (int i = 0; i < characterAmount; i++){
-            CharactersRecord record = records.get(i);
-            LorebooksRecord lorebook = lorebookTestContext.service.getLorebookOf(record);
-
-            assertTrue(this.characterService.delete(characterService.keyOf(record)), "Error deleting character");
-            assertFalse(lorebookTestContext.service.find(
-                    lorebookTestContext.service.keyOf(lorebook)
-            ).isFound(), "Stale lorebook referencing character");
-        }
+                    characterFixtures.service().delete(created);
+                    lorebookFixtures.assertDoesNotExist(lorebookKey);
+                }
+        );
     }
 }

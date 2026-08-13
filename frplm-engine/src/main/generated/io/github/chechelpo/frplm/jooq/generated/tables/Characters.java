@@ -6,12 +6,10 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 
@@ -73,6 +71,11 @@ public class Characters extends TableImpl<CharactersRecord> {
     public final TableField<CharactersRecord, Integer> ID = createField(DSL.name("ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
+     * The column <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
+     */
+    public final TableField<CharactersRecord, Integer> LOREBOOK_ID = createField(DSL.name("LOREBOOK_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
      * The column <code>PUBLIC.CHARACTERS.NAME</code>.
      */
     public final TableField<CharactersRecord, String> NAME = createField(DSL.name("NAME"), SQLDataType.VARCHAR(255).nullable(false), this, "");
@@ -93,9 +96,24 @@ public class Characters extends TableImpl<CharactersRecord> {
     public final TableField<CharactersRecord, String> WELCOME_MESSAGE = createField(DSL.name("WELCOME_MESSAGE"), SQLDataType.VARCHAR.nullable(false).defaultValue(DSL.field(DSL.raw("' '"), SQLDataType.VARCHAR)), this, "");
 
     /**
-     * The column <code>PUBLIC.CHARACTERS.LOREBOOK_ID</code>.
+     * The column <code>PUBLIC.CHARACTERS.STARTING_LOCATION_ID</code>.
      */
-    public final TableField<CharactersRecord, Integer> LOREBOOK_ID = createField(DSL.name("LOREBOOK_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<CharactersRecord, Integer> STARTING_LOCATION_ID = createField(DSL.name("STARTING_LOCATION_ID"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.IS_STATIC</code>.
+     */
+    public final TableField<CharactersRecord, Boolean> IS_STATIC = createField(DSL.name("IS_STATIC"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("FALSE"), SQLDataType.BOOLEAN)), this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.REASON_WHY</code>.
+     */
+    public final TableField<CharactersRecord, String> REASON_WHY = createField(DSL.name("REASON_WHY"), SQLDataType.VARCHAR, this, "");
+
+    /**
+     * The column <code>PUBLIC.CHARACTERS.TTL</code>.
+     */
+    public final TableField<CharactersRecord, Integer> TTL = createField(DSL.name("TTL"), SQLDataType.INTEGER.defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     private Characters(Name alias, Table<CharactersRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -176,7 +194,7 @@ public class Characters extends TableImpl<CharactersRecord> {
 
     @Override
     public List<ForeignKey<CharactersRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_672, Keys.FK_TO_WORLD);
+        return Arrays.asList(Keys.FK_CHARACTER_TO_LOREBOOK, Keys.FK_CHARACTER_TO_STARTING_LOCATION, Keys.FK_CHARACTER_TO_WORLD);
     }
 
     private transient LorebooksPath _lorebooks;
@@ -186,9 +204,21 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public LorebooksPath lorebooks() {
         if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_672, null);
+            _lorebooks = new LorebooksPath(this, Keys.FK_CHARACTER_TO_LOREBOOK, null);
 
         return _lorebooks;
+    }
+
+    private transient LocationsPath _locations;
+
+    /**
+     * Get the implicit join path to the <code>PUBLIC.LOCATIONS</code> table.
+     */
+    public LocationsPath locations() {
+        if (_locations == null)
+            _locations = new LocationsPath(this, Keys.FK_CHARACTER_TO_STARTING_LOCATION, null);
+
+        return _locations;
     }
 
     private transient WorldsPath _worlds;
@@ -198,61 +228,22 @@ public class Characters extends TableImpl<CharactersRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.FK_TO_WORLD, null);
+            _worlds = new WorldsPath(this, Keys.FK_CHARACTER_TO_WORLD, null);
 
         return _worlds;
     }
 
-    private transient StartingLocationsPath _startingLocations;
+    private transient SessionCharactersPath _sessionCharacters;
 
     /**
      * Get the implicit to-many join path to the
-     * <code>PUBLIC.STARTING_LOCATIONS</code> table
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
      */
-    public StartingLocationsPath startingLocations() {
-        if (_startingLocations == null)
-            _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B0.getInverseKey());
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_PERMANENT_CHARACTER.getInverseKey());
 
-        return _startingLocations;
-    }
-
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_TO_CHARACTER.getInverseKey());
-
-        return _currentLocations;
-    }
-
-    private transient MovementsPath _movements;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.MOVEMENTS</code>
-     * table
-     */
-    public MovementsPath movements() {
-        if (_movements == null)
-            _movements = new MovementsPath(this, null, Keys.FK_MOVEMENTS_TO_CHARACTERS.getInverseKey());
-
-        return _movements;
-    }
-
-    private transient ResponseLocationChangesPath _responseLocationChanges;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.RESPONSE_LOCATION_CHANGES</code> table
-     */
-    public ResponseLocationChangesPath responseLocationChanges() {
-        if (_responseLocationChanges == null)
-            _responseLocationChanges = new ResponseLocationChangesPath(this, null, Keys.FK_RESPONSE_LOCATIONS_TO_CHARACTER.getInverseKey());
-
-        return _responseLocationChanges;
+        return _sessionCharacters;
     }
 
     private transient SessionsPath _sessions;

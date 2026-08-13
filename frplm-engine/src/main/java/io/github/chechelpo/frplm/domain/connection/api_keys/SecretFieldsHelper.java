@@ -13,7 +13,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.API_KEYS;
 @Component
 final class SecretFieldsHelper extends EntityControllerFieldValidator<ApiKeysRecord> {
     SecretFieldsHelper() {
-        super(EntityConfigs.Types.API_KEYS);
+        super(EntityConfigs.Types.API_KEYS, API_KEYS);
     }
 
     @Override

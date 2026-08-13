@@ -1,7 +1,10 @@
 package io.github.chechelpo.frplm.domain.world.edge;
 
+import io.github.chechelpo.frplm.core.entities.fields.DataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.FieldActionResult;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationEdgesRecord;
 import org.springframework.stereotype.Component;
@@ -15,7 +18,7 @@ final class EdgeFieldsHelper
         extends EntityControllerFieldValidator<LocationEdgesRecord> {
 
     EdgeFieldsHelper() {
-        super(EntityConfigs.Types.EDGES);
+        super(EntityConfigs.Types.EDGES, LOCATION_EDGES);
     }
 
     @Override
@@ -61,5 +64,17 @@ final class EdgeFieldsHelper
                 FieldInfo.builder(LOCATION_EDGES.TRAVERSABLE)
                         .build()
         );
+    }
+
+    @Override
+    protected <D extends DataPayload<LocationEdgesRecord>> FieldActionResult<LocationEdgesRecord, D> validateCustom(D payload) {
+        if (payload.assigns(LOCATION_EDGES.FROM_LOCATION_ID) && payload.assigns(LOCATION_EDGES.TO_LOCATION_ID)){
+            int fromLocationId = payload.requireNonNull(LOCATION_EDGES.FROM_LOCATION_ID);
+            int toLocationId = payload.requireNonNull(LOCATION_EDGES.TO_LOCATION_ID);
+
+            if (fromLocationId == toLocationId)
+                throw new InvalidValue("Self edges are not allowed");
+        }
+        return super.validateCustom(payload);
     }
 }

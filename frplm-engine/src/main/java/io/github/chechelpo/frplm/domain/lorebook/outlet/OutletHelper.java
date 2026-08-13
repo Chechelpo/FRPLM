@@ -13,7 +13,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.OUTLET;
 @Component
 final class OutletHelper extends EntityControllerFieldValidator<OutletRecord> {
     OutletHelper() {
-        super(EntityConfigs.Types.OUTLET);
+        super(EntityConfigs.Types.OUTLET, OUTLET);
     }
 
     @Override

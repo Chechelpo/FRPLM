@@ -42,69 +42,49 @@ public class LocationsService extends EntityService<
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<LocationsRecord> data, long operationID) {
-        if (!data.assigns(LOCATIONS.LOREBOOK_ID)){
-            EntityDataPayload<LorebooksRecord> lorebookData = new EntityDataPayload<>();
-            lorebookData.set(LOREBOOKS.NAME, data.require(LOCATIONS.NAME));
-            lorebookData.set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.LOCATION_INFO.stable_id);
-
-            data.set(
-                    Locations.LOCATIONS.LOREBOOK_ID,
-                    lorebooks.createAndGet(
-                            lorebookData,
-                            Lorebooks.LOREBOOKS.ID
-                    )
-            );
-        }
-
-        EntityKey<WorldsRecord> worldKey = EntityKey.of(Worlds.WORLDS.ID, data.require(Locations.LOCATIONS.WORLD_ID));
-        int locationID = worlds.incrementAndGet(
-                Worlds.WORLDS.NEXT_LOCATION_ID,
-                worldKey
-        ).orElseThrow(() -> {
-                    log.error("Couldn't get the next location ID for world {}", data.require(Locations.LOCATIONS.WORLD_ID));
-                    return new UnexpectedException("Couldn't get the next location ID", Severity.SYSTEM);
-                }
+        data.ifUnassignedGet(
+                LOCATIONS.LOREBOOK_ID,
+                () -> lorebooks.createAndGet(
+                        EntityDataPayload.<LorebooksRecord>builder()
+                                .set(LOREBOOKS.NAME, data.requireNonNull(LOCATIONS.NAME))
+                                .set(LOREBOOKS.DEFAULT_OUTLET_ID, StandardOutlet.LOCATION_INFO.stable_id)
+                                .build(),
+                        LOREBOOKS.ID
+                )
         );
 
-        data.set(Locations.LOCATIONS.ID, locationID);
+        data.set(
+                LOCATIONS.ID,
+                worlds.incrementAndGet(
+                        Worlds.WORLDS.NEXT_LOCATION_ID,
+                        EntityKey.of(WORLDS.ID, data.requireNonNull(LOCATIONS.WORLD_ID))
+                ).orElseThrow(() -> {
+                            log.error("Couldn't get the next location ID for world {}", data.require(Locations.LOCATIONS.WORLD_ID));
+                            return new UnexpectedException("Couldn't get the next location ID", Severity.SYSTEM);
+                        }
+                )
+        );
 
         super.beforeCreate(data, operationID);
     }
 
     @Override
+    protected void afterSuccessfulUpdate(LocationsRecord previousData, EntityKey<LocationsRecord> key, EntityDataPayload<LocationsRecord> updated, long operationID) {
+        updated.getAssignment(LOCATIONS.NAME)
+                .ifAssignedNotNull(
+                        newName -> lorebooks.update(
+                                LOREBOOKS.NAME, newName,
+                                EntityKey.of(LOREBOOKS.ID, previousData.getLorebookId())
+                        )
+                );
+        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
+    }
+
+    @Override
     protected void afterSuccessfulDelete(EntityKey<LocationsRecord> id, long operationID, LocationsRecord record) {
         lorebooks.delete(
-                lorebooks.keyOf(lorebooks.getLorebookOf(record))
+                lorebooks.keyOf(record.getLorebookId())
         );
         super.afterSuccessfulDelete(id, operationID, record);
-    }
-
-    @Transactional(readOnly = true)
-    @CheckReturnValue
-    public @NotNull LocationsRecord getLocationBy(@NotNull CurrentLocationsRecord record) {
-        return store.get(
-                EntityKey.<LocationsRecord>builder()
-                        .set(LOCATIONS.WORLD_ID, record.getWorldId())
-                        .set(LOCATIONS.ID, record.getLocationId())
-                        .build()
-        );
-    }
-
-    @EventListener
-    void checkRegionDeletion(CRUDDraftEvent.DeleteEntityDraft<?> rawEvent){
-        if (rawEvent.type() != EntityConfigs.Types.REGIONS) return;
-
-        //noinspection unchecked
-        CRUDDraftEvent.DeleteEntityDraft<RegionRecord> event = (CRUDDraftEvent.DeleteEntityDraft<RegionRecord>) rawEvent;
-        int worldId = event.key().require(REGION.WORLD_ID);
-        int regionId = event.key().require(REGION.ID);
-
-        if (!store.getMatching(
-                EntityDataPayload.<LocationsRecord>builder()
-                        .set(LOCATIONS.WORLD_ID, worldId)
-                        .set(LOCATIONS.REGION_ID, regionId)
-                        .build())
-                .isEmpty()
-        ) throw new UnsupportedAction("This region still has associated locations", Severity.USER);
     }
 }

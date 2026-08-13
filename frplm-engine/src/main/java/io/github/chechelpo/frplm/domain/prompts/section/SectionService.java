@@ -101,16 +101,13 @@ public class SectionService extends EntityService<PromptSectionRecord, SectionSt
      * @implNote skips validation via calling the store directly.
      */
     @TransactionalEventListener
-    protected void addStandardSections(CRUDCommittedEvent.@NotNull CreatedEntity<?> createdTemplateEvent) {
-        if (createdTemplateEvent.type() != EntityConfigs.Types.PROMPT_TEMPLATES) return;
+    protected void addStandardSections(CRUDCommittedEvent.@NotNull CreatedEntity<?> rawEvent) {
+        if (rawEvent.isNotEventOf(PROMPT_TEMPLATE)) return;
 
         CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord> createdTemplateEntity =
-                (CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord>) createdTemplateEvent;
+                (CRUDCommittedEvent.CreatedEntity<PromptTemplateRecord>) rawEvent;
 
-        short promptID = createdTemplateEntity.key().getAssignment(PROMPT_TEMPLATE.ID)
-                .orElseThrow(ignored ->
-                        new UnexpectedException("Expected new record to assign prompt template id ", Severity.SYSTEM)
-                );
+        short promptID = createdTemplateEntity.key().requireNonNull(PROMPT_TEMPLATE.ID);
         log.debug("Inserting standard sections for {}", createdTemplateEntity.record().getValue(PROMPT_TEMPLATE.NAME));
         for (DefaultSections section : DefaultSections.values()) {
             this.store.createAndGet(

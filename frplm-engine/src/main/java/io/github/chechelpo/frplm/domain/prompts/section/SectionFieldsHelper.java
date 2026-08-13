@@ -15,7 +15,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.PROMPT_SECTION;
 @Component
 final class SectionFieldsHelper extends EntityControllerFieldValidator<PromptSectionRecord> {
     SectionFieldsHelper() {
-        super(EntityConfigs.Types.SECTIONS);
+        super(EntityConfigs.Types.SECTIONS, PROMPT_SECTION);
     }
 
     @Override

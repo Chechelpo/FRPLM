@@ -11,7 +11,9 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.API_HOSTS;
 
 @Component
 public final class HostFields extends EntityFieldsValidator<ApiHostsRecord> {
-    public HostFields() {}
+    public HostFields() {
+        super(API_HOSTS);
+    }
 
     @Override
     protected List<FieldInfo<ApiHostsRecord, ?>> getCustom() {

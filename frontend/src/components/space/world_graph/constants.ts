@@ -1,5 +1,5 @@
-export const DEFAULT_WORLD_WIDTH = 1920;
-export const DEFAULT_WORLD_HEIGHT = 1080;
+export const DEFAULT_WORLD_WIDTH = 1600;
+export const DEFAULT_WORLD_HEIGHT = 1000;
 
 /**
  * Region defaults are nominal screen-space creation targets at 100% zoom.

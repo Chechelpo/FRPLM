@@ -155,6 +155,6 @@ class SectionServiceTest {
         return sectionService.getValueOf(
                 PROMPT_SECTION.POSITION,
                 sectionService.keyOf(section)
-        ).orElseThrow(() -> new IllegalStateException("Couldn't find position of " + section.getName()));
+        );
     }
 }

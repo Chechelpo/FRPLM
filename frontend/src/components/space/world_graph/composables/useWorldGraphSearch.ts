@@ -1,6 +1,6 @@
 import {
     nextTick,
-    onBeforeUnmount,
+    onScopeDispose,
     ref,
     watch,
     type ComputedRef,
@@ -15,18 +15,24 @@ import type {
     WorldGraphData,
 } from "../types";
 import {
+    locationEntityKey,
     regionDepth,
     regionEntityKey,
     type RegionIndex,
 } from "../utils/geometry";
 import {
     entityVisibleAfterExpansion,
+    formatWorldGraphSearchParameter,
     mapWithConcurrency,
     nameMatchesSearch,
+    normalizeSearchText,
     parseWorldGraphSearch,
     requiredSearchExpansionRegions,
     searchLocationsByName,
     searchRegionsByName,
+    selectedEntityKey,
+    type WorldGraphSearchKind,
+    type WorldGraphSearchResult,
 } from "../utils/search";
 
 const CHARACTER_SEARCH_CONCURRENCY = 8;
@@ -49,9 +55,24 @@ export type WorldGraphSearchOptions = {
     dismissPopovers: () => void;
 };
 
-export type CharacterLocationSearchResult = {
-    locations: readonly Location[];
-    failedLookups: number;
+type ResolvedWorldGraphSearchResult = Readonly<{
+    result: WorldGraphSearchResult;
+    entities: readonly SelectedGraphEntity[];
+}>;
+
+type SearchResolution = Readonly<{
+    results: readonly ResolvedWorldGraphSearchResult[];
+    failedCharacterLookups: number;
+}>;
+
+type StartingCharacter = Awaited<
+    ReturnType<Location["getStartingHere"]>
+>[number];
+
+type CharacterBucket = {
+    key: string;
+    name: string;
+    locations: Map<string, Location>;
 };
 
 export function useWorldGraphSearch(
@@ -63,6 +84,8 @@ export function useWorldGraphSearch(
     const messageKind = ref<
         "success" | "error" | "neutral"
     >("neutral");
+    const results = ref<readonly WorldGraphSearchResult[]>([]);
+    const matchCount = ref<number | null>(null);
 
     /*
      * Only regions which were collapsed immediately before search expanded
@@ -70,11 +93,16 @@ export function useWorldGraphSearch(
      * undone when a query stops matching.
      */
     const searchExpandedRegions = new Map<string, Region>();
+    const resolvedResultsByKey = new Map<
+        string,
+        ResolvedWorldGraphSearchResult
+    >();
 
     let generation = 0;
     let debounceTimer:
         | ReturnType<typeof setTimeout>
         | null = null;
+    let suppressedQueryWatchValue: string | null = null;
 
     function cancelDebounce(): void {
         if (debounceTimer === null) return;
@@ -87,40 +115,115 @@ export function useWorldGraphSearch(
         messageKind.value = "neutral";
     }
 
-    function clearQuery(): void {
-        query.value = "";
-        clearMessage();
+    function setQueryWithoutScheduling(value: string): void {
+        if (query.value === value) return;
+        suppressedQueryWatchValue = value;
+        query.value = value;
     }
 
-    async function searchCharacterLocations(
+    function clearResolvedPresentation(
+        nextMatchCount: number | null = null,
+    ): void {
+        resolvedResultsByKey.clear();
+        results.value = [];
+        matchCount.value = nextMatchCount;
+    }
+
+    function setResolvedPresentation(
+        resolved: readonly ResolvedWorldGraphSearchResult[],
+    ): void {
+        resolvedResultsByKey.clear();
+        for (const item of resolved) {
+            resolvedResultsByKey.set(item.result.key, item);
+        }
+        results.value = resolved.map(item => item.result);
+        matchCount.value = resolved.length;
+    }
+
+    function locationContext(location: Location): string {
+        const regionId = location.get("region_id");
+        if (regionId === null) return "Location · no containing region";
+
+        const region = options.regionIndex.value.get(regionId);
+        return region === undefined
+            ? "Location · containing region unavailable"
+            : `Location · ${region.get("name")}`;
+    }
+
+    function regionContext(region: Region): string {
+        const parentId = region.get("parent_region_id");
+        if (parentId === null) return "Region · root";
+
+        const parent = options.regionIndex.value.get(parentId);
+        return parent === undefined
+            ? "Region · parent unavailable"
+            : `Region · inside ${parent.get("name")}`;
+    }
+
+    function characterId(character: StartingCharacter): number {
+        return (
+            character as unknown as {
+                get(field: "id"): number;
+            }
+        ).get("id");
+    }
+
+    function characterContext(
+        locations: readonly Location[],
+    ): string {
+        if (locations.length === 1) {
+            return `Character · starts at ${locations[0]?.get("name") ?? "unnamed location"}`;
+        }
+
+        const previewNames = locations
+            .slice(0, 3)
+            .map(location => location.get("name"));
+        const omitted = locations.length - previewNames.length;
+        return `Character · starts at ${locations.length} locations · ${previewNames.join(", ")}${omitted > 0 ? ` +${omitted}` : ""}`;
+    }
+
+    function compareResolvedResults(
+        left: ResolvedWorldGraphSearchResult,
+        right: ResolvedWorldGraphSearchResult,
+    ): number {
+        const byName = normalizeSearchText(left.result.name)
+            .localeCompare(normalizeSearchText(right.result.name));
+        return byName !== 0
+            ? byName
+            : left.result.key.localeCompare(right.result.key);
+    }
+
+    async function searchCharacterResults(
         term: string,
         expectedWorldId: number,
         expectedGeneration: number,
-    ): Promise<CharacterLocationSearchResult | null> {
+    ): Promise<SearchResolution | null> {
         let failedLookups = 0;
-        const results = await mapWithConcurrency(
+        const inspected = await mapWithConcurrency(
             options.graph.value.locations,
             CHARACTER_SEARCH_CONCURRENCY,
             async location => {
                 try {
-                    const characters =
-                        await location.getStartingHere();
-
-                    const matches = characters.some(
-                        character => nameMatchesSearch(
+                    const characters = (
+                        await location.getStartingHere()
+                    ).filter(character => (
+                        nameMatchesSearch(
                             character.get("name"),
                             term,
-                        ),
-                    );
+                        )
+                    ));
 
-                    return matches ? location : null;
+                    return {location, characters};
                 } catch (error) {
                     console.error(
                         "Unable to inspect a location's starting characters",
                         error,
                     );
                     failedLookups += 1;
-                    return null;
+                    return {
+                        location,
+                        characters: [] as StartingCharacter[],
+                    };
                 }
             },
         );
@@ -132,79 +235,122 @@ export function useWorldGraphSearch(
             return null;
         }
 
+        const buckets = new Map<string, CharacterBucket>();
+
+        for (const inspection of inspected) {
+            for (const character of inspection.characters) {
+                const key = `character:${characterId(character)}`;
+                let bucket = buckets.get(key);
+
+                if (bucket === undefined) {
+                    bucket = {
+                        key,
+                        name: character.get("name"),
+                        locations: new Map(),
+                    };
+                    buckets.set(key, bucket);
+                }
+
+                bucket.locations.set(
+                    locationEntityKey(inspection.location),
+                    inspection.location,
+                );
+            }
+        }
+
+        const resolved = [...buckets.values()].map(
+            (bucket): ResolvedWorldGraphSearchResult => {
+                const locations = [...bucket.locations.values()];
+                return {
+                    result: {
+                        key: bucket.key,
+                        kind: "character",
+                        name: bucket.name,
+                        context: characterContext(locations),
+                    },
+                    entities: locations.map(location => ({
+                        kind: "location" as const,
+                        location,
+                    })),
+                };
+            },
+        ).sort(compareResolvedResults);
+
         return {
-            locations: results.filter(
-                (location): location is Location =>
-                    location !== null,
-            ),
-            failedLookups,
+            results: resolved,
+            failedCharacterLookups: failedLookups,
         };
     }
 
-    async function resolveEntities(
-        kind: "character" | "location" | "region",
+    async function resolveResults(
+        kind: WorldGraphSearchKind,
         term: string,
         expectedWorldId: number,
         expectedGeneration: number,
-    ): Promise<{
-        entities: readonly SelectedGraphEntity[];
-        failedCharacterLookups: number;
-    } | null> {
+    ): Promise<SearchResolution | null> {
         if (kind === "location") {
             return {
-                entities: searchLocationsByName(
+                results: searchLocationsByName(
                     options.graph.value.locations,
                     term,
-                ).map(location => ({
-                    kind: "location" as const,
-                    location,
-                })),
+                ).map((location): ResolvedWorldGraphSearchResult => ({
+                    result: {
+                        key: locationEntityKey(location),
+                        kind: "location",
+                        name: location.get("name"),
+                        context: locationContext(location),
+                    },
+                    entities: [{kind: "location", location}],
+                })).sort(compareResolvedResults),
                 failedCharacterLookups: 0,
             };
         }
 
         if (kind === "region") {
             return {
-                entities: searchRegionsByName(
+                results: searchRegionsByName(
                     options.graph.value.regions,
                     term,
-                ).map(region => ({
-                    kind: "region" as const,
-                    region,
-                })),
+                ).map((region): ResolvedWorldGraphSearchResult => ({
+                    result: {
+                        key: regionEntityKey(region),
+                        kind: "region",
+                        name: region.get("name"),
+                        context: regionContext(region),
+                    },
+                    entities: [{kind: "region", region}],
+                })).sort(compareResolvedResults),
                 failedCharacterLookups: 0,
             };
         }
 
-        const characterResult =
-            await searchCharacterLocations(
-                term,
-                expectedWorldId,
-                expectedGeneration,
-            );
-
-        if (characterResult === null) return null;
-
-        return {
-            entities: characterResult.locations.map(
-                location => ({
-                    kind: "location" as const,
-                    location,
-                }),
-            ),
-            failedCharacterLookups:
-                characterResult.failedLookups,
-        };
+        return searchCharacterResults(
+            term,
+            expectedWorldId,
+            expectedGeneration,
+        );
     }
 
     function resultNoun(
-        kind: "character" | "location" | "region",
+        kind: WorldGraphSearchKind,
         count: number,
     ): string {
         if (kind === "region") {
             return count === 1 ? "region" : "regions";
         }
         return count === 1 ? "location" : "locations";
+    }
+
+    function resolvedEntities(
+        resolved: readonly ResolvedWorldGraphSearchResult[],
+    ): readonly SelectedGraphEntity[] {
+        const unique = new Map<string, SelectedGraphEntity>();
+        for (const item of resolved) {
+            for (const entity of item.entities) {
+                unique.set(selectedEntityKey(entity), entity);
+            }
+        }
+        return [...unique.values()];
     }
 
     async function synchronizeSearchExpansions(
@@ -298,6 +444,93 @@ export function useWorldGraphSearch(
         );
     }
 
+    async function applyResolvedResults(
+        kind: WorldGraphSearchKind,
+        resolved: readonly ResolvedWorldGraphSearchResult[],
+        failedCharacterLookups: number,
+        expectedWorldId: number,
+        expectedGeneration: number,
+    ): Promise<void> {
+        const entities = resolvedEntities(resolved);
+        const expansionRegions =
+            requiredSearchExpansionRegions(
+                entities,
+                options.regionIndex.value,
+            );
+
+        const expansionFailures =
+            await synchronizeSearchExpansions(
+                expansionRegions,
+                expectedWorldId,
+                expectedGeneration,
+            );
+
+        if (
+            generation !== expectedGeneration ||
+            options.worldId.value !== expectedWorldId
+        ) {
+            return;
+        }
+
+        const visibleEntities = entities.filter(
+            entity => entityVisibleAfterExpansion(
+                entity,
+                options.regionIndex.value,
+            ),
+        );
+
+        /*
+         * Multi-region search deliberately preserves the current viewport.
+         * Single region/location results focus. Character results retain the
+         * existing group-focus behavior because one character may start in
+         * more than one location.
+         */
+        const shouldFocus = kind === "character"
+            ? visibleEntities.length > 0
+            : resolved.length === 1 &&
+                visibleEntities.length === 1;
+
+        if (shouldFocus) {
+            options.focusEntities(visibleEntities);
+            /*
+             * Focusing a single tiny result may move it across the LOD
+             * threshold. Selection happens afterwards so LOD remains the
+             * authoritative interaction boundary instead of being bypassed.
+             */
+            await nextTick();
+        }
+
+        const selectedCount =
+            options.replaceSelection(visibleEntities);
+        const structurallyUnavailableCount =
+            entities.length - visibleEntities.length;
+        const lodCulledCount =
+            visibleEntities.length - selectedCount;
+        const qualifier = [
+            structurallyUnavailableCount > 0
+                ? `${structurallyUnavailableCount} remained hidden because its region could not be expanded`
+                : null,
+            lodCulledCount > 0
+                ? `${lodCulledCount} remained unselected because viewport LOD culled them`
+                : null,
+            expansionFailures > 0
+                ? `${expansionFailures} region expansion changes could not be saved`
+                : null,
+            failedCharacterLookups > 0
+                ? `${failedCharacterLookups} locations could not be checked`
+                : null,
+        ].filter(
+            (value): value is string => value !== null,
+        );
+
+        message.value = selectedCount === 0
+            ? "Matches were found, but none could be made visible."
+            : `Selected ${selectedCount} ${resultNoun(kind, selectedCount)}${qualifier.length > 0 ? `. ${qualifier.join("; ")}.` : "."}`;
+        messageKind.value = selectedCount > 0
+            ? "success"
+            : "error";
+    }
+
     async function submit(
         rawQuery = query.value,
     ): Promise<void> {
@@ -313,6 +546,7 @@ export function useWorldGraphSearch(
 
         try {
             if (!parsed.ok) {
+                clearResolvedPresentation();
                 await releaseAllSearchExpansions(
                     expectedWorldId,
                     expectedGeneration,
@@ -326,7 +560,7 @@ export function useWorldGraphSearch(
                 return;
             }
 
-            const resolved = await resolveEntities(
+            const resolved = await resolveResults(
                 parsed.query.kind,
                 parsed.query.term,
                 expectedWorldId,
@@ -334,11 +568,18 @@ export function useWorldGraphSearch(
             );
 
             if (resolved === null) return;
+            if (
+                generation !== expectedGeneration ||
+                options.worldId.value !== expectedWorldId
+            ) {
+                return;
+            }
+            setResolvedPresentation(resolved.results);
 
-            /* Location search intentionally refuses ambiguous multi-match. */
+            /* Location search remains selection-safe until one item is chosen. */
             if (
                 parsed.query.kind === "location" &&
-                resolved.entities.length > 1
+                resolved.results.length > 1
             ) {
                 await releaseAllSearchExpansions(
                     expectedWorldId,
@@ -346,12 +587,12 @@ export function useWorldGraphSearch(
                 );
                 options.replaceSelection([]);
                 message.value =
-                    `Found ${resolved.entities.length} locations. Refine the query until exactly one location matches.`;
+                    `Found ${resolved.results.length} locations. Choose one result or refine the query.`;
                 messageKind.value = "neutral";
                 return;
             }
 
-            if (resolved.entities.length === 0) {
+            if (resolved.results.length === 0) {
                 await releaseAllSearchExpansions(
                     expectedWorldId,
                     expectedGeneration,
@@ -365,87 +606,49 @@ export function useWorldGraphSearch(
                 return;
             }
 
-            const expansionRegions =
-                requiredSearchExpansionRegions(
-                    resolved.entities,
-                    options.regionIndex.value,
-                );
-
-            const expansionFailures =
-                await synchronizeSearchExpansions(
-                    expansionRegions,
-                    expectedWorldId,
-                    expectedGeneration,
-                );
-
+            await applyResolvedResults(
+                parsed.query.kind,
+                resolved.results,
+                resolved.failedCharacterLookups,
+                expectedWorldId,
+                expectedGeneration,
+            );
+        } finally {
             if (
-                generation !== expectedGeneration ||
-                options.worldId.value !== expectedWorldId
+                generation === expectedGeneration &&
+                options.worldId.value === expectedWorldId
             ) {
-                return;
+                isSearching.value = false;
             }
+        }
+    }
 
-            const visibleEntities = resolved.entities.filter(
-                entity => entityVisibleAfterExpansion(
-                    entity,
-                    options.regionIndex.value,
-                ),
+    async function chooseResult(
+        resultKey: string,
+    ): Promise<void> {
+        const chosen = resolvedResultsByKey.get(resultKey);
+        if (chosen === undefined) return;
+
+        cancelDebounce();
+        const expectedGeneration = ++generation;
+        const expectedWorldId = options.worldId.value;
+
+        setQueryWithoutScheduling(
+            formatWorldGraphSearchParameter(chosen.result),
+        );
+        setResolvedPresentation([chosen]);
+        isSearching.value = true;
+        clearMessage();
+        options.dismissPopovers();
+
+        try {
+            await applyResolvedResults(
+                chosen.result.kind,
+                [chosen],
+                0,
+                expectedWorldId,
+                expectedGeneration,
             );
-
-            /*
-             * Multi-region search deliberately preserves the current
-             * viewport. Single-region and single-location search focus the
-             * sole target; character search retains v6's group-focus feature.
-             */
-            const shouldFocus =
-                parsed.query.kind === "character" ||
-                (
-                    parsed.query.kind === "region"
-                        ? resolved.entities.length === 1 &&
-                            visibleEntities.length === 1
-                        : visibleEntities.length === 1
-                );
-
-            if (shouldFocus) {
-                options.focusEntities(visibleEntities);
-                /*
-                 * Focusing a single tiny result may move it across the LOD
-                 * threshold. Selection happens afterwards so LOD remains the
-                 * authoritative interaction boundary instead of being
-                 * bypassed for search results.
-                 */
-                await nextTick();
-            }
-
-            const selectedCount =
-                options.replaceSelection(visibleEntities);
-            const structurallyUnavailableCount =
-                resolved.entities.length - visibleEntities.length;
-            const lodCulledCount =
-                visibleEntities.length - selectedCount;
-            const qualifier = [
-                structurallyUnavailableCount > 0
-                    ? `${structurallyUnavailableCount} remained hidden because its region could not be expanded`
-                    : null,
-                lodCulledCount > 0
-                    ? `${lodCulledCount} remained unselected because viewport LOD culled them`
-                    : null,
-                expansionFailures > 0
-                    ? `${expansionFailures} region expansion changes could not be saved`
-                    : null,
-                resolved.failedCharacterLookups > 0
-                    ? `${resolved.failedCharacterLookups} locations could not be checked`
-                    : null,
-            ].filter(
-                (value): value is string => value !== null,
-            );
-
-            message.value = selectedCount === 0
-                ? "Matches were found, but none could be made visible."
-                : `Selected ${selectedCount} ${resultNoun(parsed.query.kind, selectedCount)}${qualifier.length > 0 ? `. ${qualifier.join("; ")}.` : "."}`;
-            messageKind.value = selectedCount > 0
-                ? "success"
-                : "error";
         } finally {
             if (
                 generation === expectedGeneration &&
@@ -461,9 +664,10 @@ export function useWorldGraphSearch(
     ): void {
         cancelDebounce();
 
-        /* Invalidate any in-flight character lookup immediately. */
+        /* Invalidate in-flight work and stale suggestions immediately. */
         generation += 1;
         isSearching.value = false;
+        clearResolvedPresentation();
 
         debounceTimer = setTimeout(() => {
             debounceTimer = null;
@@ -471,23 +675,41 @@ export function useWorldGraphSearch(
         }, WORLD_GRAPH_SEARCH_DEBOUNCE_MS);
     }
 
+    async function clearQuery(): Promise<void> {
+        cancelDebounce();
+        setQueryWithoutScheduling("");
+        clearResolvedPresentation();
+        clearMessage();
+        await submit("");
+    }
+
     function resetForWorldChange(): void {
         cancelDebounce();
         generation += 1;
-        query.value = "";
+        setQueryWithoutScheduling("");
         isSearching.value = false;
         searchExpandedRegions.clear();
+        clearResolvedPresentation();
         clearMessage();
     }
 
     watch(
         query,
-        value => scheduleSubmit(value),
+        value => {
+            if (suppressedQueryWatchValue === value) {
+                suppressedQueryWatchValue = null;
+                return;
+            }
+
+            suppressedQueryWatchValue = null;
+            scheduleSubmit(value);
+        },
     );
 
-    onBeforeUnmount(() => {
+    onScopeDispose(() => {
         cancelDebounce();
         generation += 1;
+        resolvedResultsByKey.clear();
     });
 
     return {
@@ -495,7 +717,10 @@ export function useWorldGraphSearch(
         isSearching,
         message,
         messageKind,
+        results,
+        matchCount,
         submit,
+        chooseResult,
         clearQuery,
         clearMessage,
         resetForWorldChange,

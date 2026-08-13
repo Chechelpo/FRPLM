@@ -17,7 +17,6 @@ class ReadersConfiguration {
 
 
             EntityReader<CharactersRecord> characters,
-            EntityReader<StartingLocationsRecord> startingLocations,
 
             EntityReader<WorldsRecord> worlds,
             EntityReader<RegionRecord> regions,
@@ -42,7 +41,6 @@ class ReadersConfiguration {
                 secrets,
 
                 characters,
-                startingLocations,
 
                 worlds,
                 regions,

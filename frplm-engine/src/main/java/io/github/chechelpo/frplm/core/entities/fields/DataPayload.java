@@ -9,9 +9,11 @@ import org.jooq.TableField;
 import org.jooq.TableRecord;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -54,9 +56,30 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
             if (assigned) return this.value;
             return defaultValue;
         }
+        public @Nullable T orElseGet(Supplier<T> constructor){
+            if (assigned) return this.value;
+            return constructor.get();
+        }
+        public Assignment<R,T> ifUnassignedRun(Runnable runnable){
+            if (isUnassigned()) runnable.run();
+            return this;
+        }
         public <Q> Optional<Q> map(Function<T, Q> mapper){
             if (assigned) return Optional.of(mapper.apply(value));
             return Optional.empty();
+        }
+
+        public Assignment<R, T> ifAssigned(Consumer<T> action){
+            if (isAssigned())
+                action.accept(this.value);
+
+            return this;
+        }
+        public Assignment<R,T> ifAssignedNotNull(Consumer<T> action) {
+            if (isAssigned() && this.value != null)
+                action.accept(this.value);
+
+            return this;
         }
 
         public <E extends Exception> @Nullable T orElseThrow(Function<TableField<R, T>, E> exceptionProvider) throws E {
@@ -94,7 +117,34 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
     default <T> @Nullable T require(TableField<R,T> field){
         return getAssignment(field).orElseThrow();
     }
+
+
     <T> Assignment<R, T> getAssignment(TableField<R, T> field);
+
+    default boolean assignsAny(Collection<? extends TableField<R,?>> fields){
+        boolean fail = false;
+
+        for (var field : fields) if (!assigns(field)) return fail;
+
+        return !fail;
+    }
+
+    default void requireAssignments(Collection<? extends TableField<R, ?>> fields, boolean nonNull){
+        for (TableField<R, ?> field : fields)
+            requireAssignment(field, nonNull);
+    }
+    default void requireAssignment(TableField<R, ?> field, boolean nonNull) {
+        Assignment<R, ?> assignment = getAssignment(field);
+
+        if (assignment.isUnassigned()
+                || (nonNull && assignment.get() == null)) {
+            throw new ExpectedField(
+                    "Expected field " + field.getName() + " to be assigned",
+                    Severity.USER
+            );
+        }
+    }
+
     boolean assigns(TableField<R, ?> field);
     /** @return a new TableRecord object with the same values as this */
     default R toRecord(Supplier<? extends R> constructor) {

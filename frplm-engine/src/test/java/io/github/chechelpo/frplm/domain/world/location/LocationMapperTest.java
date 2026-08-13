@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.domain.world.location;
 
 import io.github.chechelpo.frplm.core.dispatch.readers.EntityReaders;
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.mappers.EntityWireMapper;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
@@ -17,6 +18,7 @@ import io.github.chechelpo.frplm.utils.orders.NewCharacterOrder;
 import io.github.chechelpo.frplm.utils.orders.NewLocationOrder;
 import io.github.chechelpo.frplm.utils.orders.NewLorebookOrder;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.SQLDialect;
 import org.jooq.impl.DSL;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,11 +77,7 @@ class LocationMapperTest {
         RegionRecord parent = new RegionRecord();
         String parentName = "parent";
         parent.set(REGION.NAME, parentName);
-        when(readers.regions().find(EntityKey.<RegionRecord>builder()
-                        .set(REGION.ID, parentId)
-                        .set(REGION.WORLD_ID, worldId)
-                        .build()
-                )
+        when(readers.regions().find(any(EntityKey.class))
         ).thenReturn(EntityReader.RecordFindResult.found(null, parent));
 
         LorebooksRecord lorebooksRecord = new LorebooksRecord();
@@ -88,7 +86,7 @@ class LocationMapperTest {
                 .thenReturn(new LorebookJSON(null,null,null));
 
         CharactersRecord character = new CharactersRecord();
-        when(characterService.getStartingAt(worldId, 1)).thenReturn(List.of(character));
+        when(characterService.getMatching(any(EntityDataPayload.class))).thenReturn((Result) List.of(character));
         when(characterMapper.jsonRecordsFrom(any(List.class), any(ZipBuilder.class))).thenReturn(List.of());
 
         NewLocationOrder locationOrder = mapper.orderFrom(mapper.jsonRecordFrom(location, null));

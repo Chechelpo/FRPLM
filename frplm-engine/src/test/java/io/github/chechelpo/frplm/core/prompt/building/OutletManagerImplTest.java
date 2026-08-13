@@ -5,7 +5,7 @@ import io.github.chechelpo.frplm.domain.lorebook.outlet.OutletServiceTestFactory
 import io.github.chechelpo.frplm.extensions.api.prompts.OutletManager;
 import io.github.chechelpo.frplm.extensions.api.standalone.LorebookSnapshot;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.EntryRecord;
-import io.github.chechelpo.frplm.utils.macros.Macro;
+import io.github.chechelpo.frplm.utils.matching.Macro;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

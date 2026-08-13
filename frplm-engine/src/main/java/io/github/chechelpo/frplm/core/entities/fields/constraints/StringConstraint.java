@@ -17,6 +17,14 @@ public final class StringConstraint implements Constraint<String> {
         this.maxLength = builder.maxLength;
     }
 
+    public int minLength() {
+        return minLength;
+    }
+
+    public int maxLength() {
+        return maxLength;
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull Optional<String> returnReasonIfInvalid(

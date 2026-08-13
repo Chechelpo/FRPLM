@@ -29,6 +29,14 @@ export type WorldGraphSearchParseResult =
     | {ok: true; query: WorldGraphSearchQuery}
     | {ok: false; message: string};
 
+/** Presentation-safe search item consumed by the bottom-left combobox. */
+export type WorldGraphSearchResult = Readonly<{
+    key: string;
+    kind: WorldGraphSearchKind;
+    name: string;
+    context: string;
+}>;
+
 const SEARCH_PATTERN = /^\s*(character|location|region)\s*:\s*(.*?)\s*$/i;
 
 export function normalizeSearchText(value: string): string {
@@ -75,6 +83,36 @@ export function parseWorldGraphSearch(
             term,
         },
     };
+}
+
+export function formatWorldGraphSearchParameter(
+    result: Pick<WorldGraphSearchResult, "kind" | "name">,
+): string {
+    return `${result.kind}:${result.name}`;
+}
+
+/**
+ * Circular keyboard traversal for the result list. Keeping this arithmetic
+ * outside the component makes the ArrowUp/ArrowDown contract deterministic.
+ */
+export function nextWorldGraphSearchResultIndex(
+    currentIndex: number,
+    resultCount: number,
+    direction: -1 | 1,
+): number {
+    if (!Number.isInteger(resultCount) || resultCount <= 0) return -1;
+
+    const normalizedCurrent = Number.isInteger(currentIndex) &&
+        currentIndex >= 0 &&
+        currentIndex < resultCount
+        ? currentIndex
+        : direction > 0
+            ? -1
+            : 0;
+
+    return (
+        normalizedCurrent + direction + resultCount
+    ) % resultCount;
 }
 
 export function nameMatchesSearch(

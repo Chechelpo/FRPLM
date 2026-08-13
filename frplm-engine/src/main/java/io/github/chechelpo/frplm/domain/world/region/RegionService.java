@@ -60,13 +60,26 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
     protected void beforeUpdate(@NotNull EntityKey<RegionRecord> target, EntityDataPayload<RegionRecord> data, long operationID) {
         if (data.assigns(REGION.PARENT_REGION_ID) && data.require(REGION.PARENT_REGION_ID) != null) {
             if (updateCreatesCycle(
-                    target.require(REGION.WORLD_ID),
-                    target.require(REGION.ID),
-                    data.require(REGION.PARENT_REGION_ID))
+                    target.requireNonNull(REGION.WORLD_ID),
+                    target.requireNonNull(REGION.ID),
+                    data.requireNonNull(REGION.PARENT_REGION_ID))
             ) throw new InvalidValue("This parent region assignment will create a cycle");
         }
         super.beforeUpdate(target, data, operationID);
     }
+
+    @Override
+    protected void afterSuccessfulUpdate(RegionRecord previousData, EntityKey<RegionRecord> key, EntityDataPayload<RegionRecord> updated, long operationID) {
+        updated.getAssignment(REGION.NAME)
+                .ifAssignedNotNull(
+                        newName -> lorebookService.update(
+                                LOREBOOKS.NAME, newName,
+                                EntityKey.of(LOREBOOKS.ID, previousData.getLorebookId())
+                        )
+                );
+        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
+    }
+
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     private boolean updateCreatesCycle(int worldId, int fromRegionId, int newParent) {
         RegionRecord currentRegion = this.find(getKey(worldId, newParent))
@@ -78,16 +91,6 @@ public class RegionService extends EntityService<RegionRecord, RegionStore> {
         }
 
         return false;
-    }
-
-    @Override
-    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
-    protected void beforeDelete(EntityKey<RegionRecord> id, long operationID) {
-        RegionRecord toDelete = this.find(id).orElseThrow(Severity.USER);
-        if (!getDepthOneChildrenOf(toDelete).isEmpty())
-            throw new UnsupportedAction("Cannot delete a region when it has children", Severity.EXPECTED);
-
-        super.beforeDelete(id, operationID);
     }
 
     @Override

@@ -68,10 +68,10 @@ public class PromptService {
 
         PromptOrchestrator orchestrator = getPromptOrchestrator(session);
 
-        steps.getOrDefault(PromptPhase.CONTEXT_BUILDING, List.of()).forEach(step -> step.run(session, orchestrator));
+        steps.getOrDefault(PromptPhase.CONTEXT_BUILDING, List.of()).forEach(step -> step.run(orchestrator));
         extension.runPrePromptGeneration(session, orchestrator);
-        steps.getOrDefault(PromptPhase.CONTEXT_PROCESSING, List.of()).forEach(step -> step.run(session, orchestrator));
-        steps.getOrDefault(PromptPhase.PRE_RENDER, List.of()).forEach(step -> step.run(session, orchestrator));
+        steps.getOrDefault(PromptPhase.CONTEXT_PROCESSING, List.of()).forEach(step -> step.run(orchestrator));
+        steps.getOrDefault(PromptPhase.PRE_RENDER, List.of()).forEach(step -> step.run(orchestrator));
 
         return orchestrator.render();
     }

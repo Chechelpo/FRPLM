@@ -18,6 +18,14 @@ public final class FloatConstraint implements Constraint<Float> {
         this.max = builder.max;
     }
 
+    public Float min() {
+        return min;
+    }
+
+    public Float max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public Optional<String> returnReasonIfInvalid(@NotNull Float value) {

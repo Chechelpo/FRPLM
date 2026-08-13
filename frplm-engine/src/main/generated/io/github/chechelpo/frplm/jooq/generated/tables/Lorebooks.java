@@ -12,6 +12,9 @@ import io.github.chechelpo.frplm.jooq.generated.tables.EntryKeywords.EntryKeywor
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Outlet.OutletPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionLorebook.SessionLorebookPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 
@@ -209,19 +212,6 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
         return _locations;
     }
 
-    private transient CharactersPath _characters;
-
-    /**
-     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
-     * table
-     */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, null, Keys.CONSTRAINT_672.getInverseKey());
-
-        return _characters;
-    }
-
     private transient RegionPath _region;
 
     /**
@@ -230,7 +220,7 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
      */
     public RegionPath region() {
         if (_region == null)
-            _region = new RegionPath(this, null, Keys.CONSTRAINT_8FD.getInverseKey());
+            _region = new RegionPath(this, null, Keys.CONSTRAINT_8FDB.getInverseKey());
 
         return _region;
     }
@@ -248,6 +238,19 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
         return _worlds;
     }
 
+    private transient CharactersPath _characters;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
+     * table
+     */
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, null, Keys.FK_CHARACTER_TO_LOREBOOK.getInverseKey());
+
+        return _characters;
+    }
+
     private transient EntryPath _entry;
 
     /**
@@ -258,6 +261,40 @@ public class Lorebooks extends TableImpl<LorebooksRecord> {
             _entry = new EntryPath(this, null, Keys.FK_ENTRY_TO_LOREBOOK.getInverseKey());
 
         return _entry;
+    }
+
+    private transient SessionCharactersPath _sessionCharacters;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
+     */
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_MEMORY_LOREBOOK.getInverseKey());
+
+        return _sessionCharacters;
+    }
+
+    private transient SessionLorebookPath _sessionLorebook;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_LOREBOOK</code> table
+     */
+    public SessionLorebookPath sessionLorebook() {
+        if (_sessionLorebook == null)
+            _sessionLorebook = new SessionLorebookPath(this, null, Keys.FK_SESLOREBOOK_TO_LOREBOOK.getInverseKey());
+
+        return _sessionLorebook;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.SESSIONS</code> table
+     */
+    public SessionsPath sessions() {
+        return sessionLorebook().sessions();
     }
 
     @Override

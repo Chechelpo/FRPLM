@@ -18,6 +18,14 @@ public final class DoubleConstraint implements Constraint<Double> {
         this.max = builder.max;
     }
 
+    public Double min() {
+        return min;
+    }
+
+    public Double max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public Optional<String> returnReasonIfInvalid(@NotNull Double value) {

@@ -1,142 +1,103 @@
 package io.github.chechelpo.frplm.domain.world.region;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
+import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
+import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.exceptions.runtime.InvalidValue;
-import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
+import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.test_utils.fixtures.LorebookFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.RegionFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.WorldFixtures;
+import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.jdbc.Sql;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.chechelpo.frplm.jooq.generated.Tables.REGION;
-import static org.junit.jupiter.api.Assertions.*;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
-@Sql(
-        scripts = "classpath:db/schema.sql",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-@Import(RegionTestContext.class)
 class RegionServiceTest {
     @Autowired
-    RegionTestContext testContext;
+    private WorldService worldService;
+    @Autowired
+    private RegionService regionService;
+    @Autowired
+    private StableRecordCreator stableRecordCreator;
+    @Autowired
+    private LorebookService lorebookService;
+
+    private WorldFixtures worldFixture;
+    private RegionFixtures regionFixtures;
+    private LorebookFixtures lorebookFixtures;
 
     @BeforeEach
     void setUp() {
-        testContext.reload();
+        worldFixture = new WorldFixtures(worldService, "region-test");
+        regionFixtures = new RegionFixtures(regionService, "region-test");
+        lorebookFixtures = new LorebookFixtures(lorebookService, "region-test");
+        stableRecordCreator.run();
+    }
+
+    @Test
+    @SimulithIntegrationTest
+    void regionLorebook_creates_updates_deletes_with_parent(){
+        WorldsRecord world = worldFixture.addAndCreateTo(EntityDataPayload.empty());
+
+        regionFixtures.addAndCreateList(
+                100,
+                i -> EntityDataPayload.<RegionRecord>builder()
+                        .set(REGION.WORLD_ID, world.getId())
+                        .set(REGION.NAME, "Region " + i)
+        ).forEach(
+                createdRegion -> {
+                    EntityKey<LorebooksRecord> lorebookKey = EntityKey.of(LOREBOOKS.ID, createdRegion.getLorebookId());
+                    lorebookFixtures.assertFieldEquals(createdRegion.getName(), LOREBOOKS.NAME, lorebookKey);
+
+                    String newName = "newName";
+                    regionService.update(
+                            REGION.NAME, newName,
+                            createdRegion
+                    );
+                    RegionRecord updatedRecord = regionService.requireUpToDate(createdRegion);;
+                    assertEquals(newName, updatedRecord.getName());
+
+                    lorebookFixtures.assertFieldEquals(newName, LOREBOOKS.NAME, lorebookKey);
+                    regionService.delete(createdRegion);
+
+                    lorebookFixtures.assertDoesNotExist(lorebookKey);
+                }
+        );
     }
 
     @Test
     void update_cannotCreateCycles() {
-        WorldsRecord world = testContext.worlds.createWorlds(1).createdRecords().getFirst();
-        int worldId = world.getId();
-        int regionNum = 100;
+        WorldsRecord world = worldFixture.addAndCreateTo(EntityDataPayload.of(WORLDS.NAME, "world"));
 
-        List<RegionRecord> createdRegions = new ArrayList<>(regionNum);
-        for (int i = 0; i < regionNum; i++) {
-            createdRegions.add(
-                    testContext.service.createAndGet( //This throws cause of smthn on full test runs. not quite sure why.
-                    EntityDataPayload.<RegionRecord>builder()    // When you test it in isolation, it's fine
-                            .set(REGION.WORLD_ID, worldId)
-                            .set(REGION.NAME, "Region number " + i)
-                            .build()
-            ));
-        }
-
-        // Simple test
-        RegionRecord first = createdRegions.getFirst();
-        RegionRecord secondRegion = createdRegions.get(1);
-
-        assertDoesNotThrow(
-                () -> testContext.service.update(testContext.service.keyOf(secondRegion),
-                        EntityDataPayload.of(REGION.PARENT_REGION_ID, first.getId())
-                ),
-                "Could not link second with first"
+        List<RegionRecord> regions =  regionFixtures.addAndCreateList(
+                3,
+                i -> EntityDataPayload.<RegionRecord>builder()
+                        .set(REGION.NAME, "Region " + i)
+                        .set(REGION.WORLD_ID, world.getId())
         );
+        RegionRecord parent = regions.getFirst();
+        RegionRecord child = regions.get(1);
+        RegionRecord asshole = regions.get(2);
+
+        regionFixtures.makeParent(parent, child);
+        regionFixtures.makeParent(child, asshole);
+
         assertThrows(
                 InvalidValue.class,
-                () -> testContext.service.update(testContext.service.keyOf(first),
-                        EntityDataPayload.of(REGION.PARENT_REGION_ID, secondRegion.getId())
-                ),
-                "Could create cycle"
-        );
-        testContext.service.update(testContext.service.keyOf(secondRegion),
-                EntityDataPayload.of(REGION.PARENT_REGION_ID, null)
-        );
-
-        for (int i = createdRegions.size() - 1; i > 0; i--) {
-            RegionRecord childRegion = createdRegions.get(i);
-            RegionRecord parentRegion = createdRegions.get(i - 1);
-
-            assertDoesNotThrow(
-                    () -> testContext.service.update(testContext.service.keyOf(childRegion),
-                            EntityDataPayload.of(REGION.PARENT_REGION_ID, parentRegion.getId()))
-            );
-        }
-
-        RegionRecord lastRegion = createdRegions.getLast();
-        assertThrows(
-                InvalidValue.class,
-                () -> testContext.service.update(
-                        testContext.service.keyOf(first),
-                        EntityDataPayload.of(REGION.PARENT_REGION_ID, lastRegion.getId())
-                )
-        );
-    }
-
-    @Test
-    void delete_CannotDeleteRegionIfHasChildrenRegions() {
-        WorldsRecord world = testContext.worlds.createWorlds(1).createdRecords().getFirst();
-        int worldId = world.getId();
-
-        RegionRecord parent = testContext.service.createAndGet(EntityDataPayload.<RegionRecord>builder()
-                .set(REGION.NAME, "parent")
-                .set(REGION.WORLD_ID, worldId)
-                .build()
-        );
-        RegionRecord childRegion1 = testContext.service.createAndGet(EntityDataPayload.<RegionRecord>builder()
-                .set(REGION.NAME, "child 1")
-                .set(REGION.WORLD_ID, worldId)
-                .build()
-        );
-        RegionRecord childRegion2 = testContext.service.createAndGet(EntityDataPayload.<RegionRecord>builder()
-                .set(REGION.NAME, "child 2")
-                .set(REGION.WORLD_ID, worldId)
-                .build()
-        );
-
-        assertDoesNotThrow(
-                () -> testContext.service.update(
-                        testContext.service.keyOf(childRegion1),
-                        EntityDataPayload.of(REGION.PARENT_REGION_ID, parent.getId())
-                )
-        );
-        assertDoesNotThrow(
-                () -> testContext.service.update(
-                        testContext.service.keyOf(childRegion2),
-                        EntityDataPayload.of(REGION.PARENT_REGION_ID, parent.getId())
-                )
-        );
-
-        assertThrows(
-                UnsupportedAction.class,
-                () -> testContext.service.delete(testContext.service.keyOf(parent))
-        );
-        testContext.service.update(testContext.service.keyOf(childRegion1), EntityDataPayload.of(REGION.PARENT_REGION_ID, null));
-        assertThrows(
-                UnsupportedAction.class,
-                () -> testContext.service.delete(testContext.service.keyOf(parent))
-        );
-        testContext.service.update(testContext.service.keyOf(childRegion2), EntityDataPayload.of(REGION.PARENT_REGION_ID, null));
-        assertDoesNotThrow(
-                () -> testContext.service.delete(testContext.service.keyOf(parent))
+                () -> regionFixtures.makeParent(asshole, parent)
         );
     }
 }

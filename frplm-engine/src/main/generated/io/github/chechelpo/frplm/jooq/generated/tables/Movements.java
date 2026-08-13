@@ -6,9 +6,9 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Locations.LocationsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Sessions.SessionsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
@@ -71,9 +71,9 @@ public class Movements extends TableImpl<MovementsRecord> {
     public final TableField<MovementsRecord, Integer> AT_TICK = createField(DSL.name("AT_TICK"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
-     * The column <code>PUBLIC.MOVEMENTS.CHARACTER_ID</code>.
+     * The column <code>PUBLIC.MOVEMENTS.SES_CHARACTER_ID</code>.
      */
-    public final TableField<MovementsRecord, Integer> CHARACTER_ID = createField(DSL.name("CHARACTER_ID"), SQLDataType.INTEGER.nullable(false), this, "");
+    public final TableField<MovementsRecord, Integer> SES_CHARACTER_ID = createField(DSL.name("SES_CHARACTER_ID"), SQLDataType.INTEGER.nullable(false), this, "");
 
     /**
      * The column <code>PUBLIC.MOVEMENTS.WORLD_ID</code>.
@@ -210,16 +210,17 @@ public class Movements extends TableImpl<MovementsRecord> {
         return _messages;
     }
 
-    private transient CharactersPath _characters;
+    private transient SessionCharactersPath _sessionCharacters;
 
     /**
-     * Get the implicit join path to the <code>PUBLIC.CHARACTERS</code> table.
+     * Get the implicit join path to the <code>PUBLIC.SESSION_CHARACTERS</code>
+     * table.
      */
-    public CharactersPath characters() {
-        if (_characters == null)
-            _characters = new CharactersPath(this, Keys.FK_MOVEMENTS_TO_CHARACTERS, null);
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, Keys.FK_MOVEMENTS_TO_CHARACTERS, null);
 
-        return _characters;
+        return _sessionCharacters;
     }
 
     @Override

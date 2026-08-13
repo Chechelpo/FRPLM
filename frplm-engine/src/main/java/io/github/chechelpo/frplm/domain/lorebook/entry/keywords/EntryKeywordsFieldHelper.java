@@ -13,7 +13,7 @@ import static io.github.chechelpo.frplm.jooq.generated.Tables.ENTRY_KEYWORDS;
 @Component
 final class EntryKeywordsFieldHelper extends EntityControllerFieldValidator<EntryKeywordsRecord> {
     EntryKeywordsFieldHelper() {
-        super(EntityConfigs.Types.ENTRY_KEYWORDS);
+        super(EntityConfigs.Types.ENTRY_KEYWORDS, ENTRY_KEYWORDS);
     }
 
     @Override

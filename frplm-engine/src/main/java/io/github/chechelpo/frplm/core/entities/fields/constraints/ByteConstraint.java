@@ -17,6 +17,14 @@ public final class ByteConstraint implements Constraint<Byte> {
         this.max = builder.max;
     }
 
+    public Byte min() {
+        return min;
+    }
+
+    public Byte max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull Optional<String> returnReasonIfInvalid(

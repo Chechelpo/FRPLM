@@ -20,6 +20,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -46,14 +47,12 @@ public abstract class EntityAssetController<R extends TableRecord<R>> {
     ) {
         R record = findEntity(keyParams);
 
-        EntityAssetStore.ReadableAsset asset;
-
+        Optional<EntityAssetStore.ReadableAsset> optionalAsset;
         try {
-            asset = assetStore.findReadable(
+            optionalAsset = assetStore.findReadable(
                             record,
                             AssetTypes.requireValue(name)
-                    )
-                    .orElseThrow(() -> new EntityNotFound("Asset not found: " + name, Severity.EXPECTED));
+                    );
         } catch (IOException exception) {
             throw new ResponseStatusException(
                     INTERNAL_SERVER_ERROR,
@@ -62,6 +61,9 @@ public abstract class EntityAssetController<R extends TableRecord<R>> {
             );
         }
 
+        if (optionalAsset.isEmpty()) return ResponseEntity.noContent().build();
+
+        EntityAssetStore.ReadableAsset asset = optionalAsset.get();
         MediaType mediaType = parseMediaType(asset.contentType());
 
         return ResponseEntity.ok()

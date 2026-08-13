@@ -7,11 +7,15 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
 import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Entry.EntryPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.EntryState.EntryStatePath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.PromptTemplate.PromptTemplatePath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionLorebook.SessionLorebookPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 
@@ -92,6 +96,16 @@ public class Sessions extends TableImpl<SessionsRecord> {
      * The column <code>PUBLIC.SESSIONS.CURRENT_TICK</code>.
      */
     public final TableField<SessionsRecord, Integer> CURRENT_TICK = createField(DSL.name("CURRENT_TICK"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>PUBLIC.SESSIONS.NEXT_CHARACTER_ID</code>.
+     */
+    public final TableField<SessionsRecord, Integer> NEXT_CHARACTER_ID = createField(DSL.name("NEXT_CHARACTER_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>PUBLIC.SESSIONS.NEXT_LOCATION_ID</code>.
+     */
+    public final TableField<SessionsRecord, Integer> NEXT_LOCATION_ID = createField(DSL.name("NEXT_LOCATION_ID"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
 
     private Sessions(Name alias, Table<SessionsRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -212,19 +226,6 @@ public class Sessions extends TableImpl<SessionsRecord> {
         return _worlds;
     }
 
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.CONSTRAINT_A.getInverseKey());
-
-        return _currentLocations;
-    }
-
     private transient MovementsPath _movements;
 
     /**
@@ -236,6 +237,19 @@ public class Sessions extends TableImpl<SessionsRecord> {
             _movements = new MovementsPath(this, null, Keys.CONSTRAINT_E6.getInverseKey());
 
         return _movements;
+    }
+
+    private transient EntryStatePath _entryState;
+
+    /**
+     * Get the implicit to-many join path to the <code>PUBLIC.ENTRY_STATE</code>
+     * table
+     */
+    public EntryStatePath entryState() {
+        if (_entryState == null)
+            _entryState = new EntryStatePath(this, null, Keys.FK_ENTRYSTATE_TO_SESSION.getInverseKey());
+
+        return _entryState;
     }
 
     private transient MessagesPath _messages;
@@ -251,6 +265,32 @@ public class Sessions extends TableImpl<SessionsRecord> {
         return _messages;
     }
 
+    private transient SessionCharactersPath _sessionCharacters;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
+     */
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_SESSION.getInverseKey());
+
+        return _sessionCharacters;
+    }
+
+    private transient SessionLorebookPath _sessionLorebook;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_LOREBOOK</code> table
+     */
+    public SessionLorebookPath sessionLorebook() {
+        if (_sessionLorebook == null)
+            _sessionLorebook = new SessionLorebookPath(this, null, Keys.FK_SESLOREBOOK_TO_SESSION.getInverseKey());
+
+        return _sessionLorebook;
+    }
+
     private transient ResponsesPath _responses;
 
     /**
@@ -262,6 +302,22 @@ public class Sessions extends TableImpl<SessionsRecord> {
             _responses = new ResponsesPath(this, null, Keys.FK_TO_SESSION.getInverseKey());
 
         return _responses;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the <code>PUBLIC.ENTRY</code>
+     * table
+     */
+    public EntryPath entry() {
+        return entryState().entry();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>PUBLIC.LOREBOOKS</code> table
+     */
+    public LorebooksPath lorebooks() {
+        return sessionLorebook().lorebooks();
     }
 
     @Override

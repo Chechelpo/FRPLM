@@ -1,14 +1,8 @@
-import {
-    computed,
-    onBeforeUnmount,
-    shallowRef,
-    watch,
-    type ComputedRef,
-    type Ref,
-} from "vue";
+import {computed, type ComputedRef, onBeforeUnmount, type Ref, shallowRef, watch,} from "vue";
 import type {Region, World} from "@/domain/World";
 import type {BackgroundTarget, WorldGraphData} from "../types";
 import {regionEntityKey} from "../utils/geometry";
+import {EntityAssetType} from "@/core/ABSEntity";
 
 export function backgroundTargetKey(target: BackgroundTarget): string {
     return target.kind === "world"
@@ -129,12 +123,12 @@ export function useWorldGraphBackgrounds(
     }
 
     async function uploadTarget(target: BackgroundTarget, file: File | Blob): Promise<void> {
-        if (target.kind === "world") await target.world.postAsset("background", file, true);
+        if (target.kind === "world") await target.world.postAsset(EntityAssetType.BACKGROUND, file, true);
         else await target.region.saveBackground(file, true);
     }
 
     async function deleteTarget(target: BackgroundTarget): Promise<void> {
-        if (target.kind === "world") await target.world.deleteAsset("background");
+        if (target.kind === "world") await target.world.deleteAsset(EntityAssetType.BACKGROUND);
         else await target.region.deleteBackground();
     }
 
@@ -156,7 +150,7 @@ export function useWorldGraphBackgrounds(
             else replaceRegionUrl(key, url);
             return true;
         } catch (error) {
-            console.error("Unable to load a graph background", error);
+            console.debug("Unable to load a graph background", error);
             return false;
         }
     }
@@ -295,7 +289,7 @@ export async function fetchGraphBackgroundBlob(
     target: BackgroundTarget,
 ): Promise<Blob | null> {
     return target.kind === "world"
-        ? target.world.getAsset("background")
+        ? target.world.getAsset(EntityAssetType.BACKGROUND)
         : target.region.fetchBackground();
 }
 

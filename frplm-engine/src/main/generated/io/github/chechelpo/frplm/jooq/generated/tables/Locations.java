@@ -6,7 +6,7 @@ package io.github.chechelpo.frplm.jooq.generated.tables;
 
 import io.github.chechelpo.frplm.jooq.generated.Keys;
 import io.github.chechelpo.frplm.jooq.generated.Public;
-import io.github.chechelpo.frplm.jooq.generated.tables.CurrentLocations.CurrentLocationsPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.Characters.CharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.LocationEdges.LocationEdgesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Lorebooks.LorebooksPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Messages.MessagesPath;
@@ -14,7 +14,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.Movements.MovementsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Region.RegionPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.ResponseLocationChanges.ResponseLocationChangesPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Responses.ResponsesPath;
-import io.github.chechelpo.frplm.jooq.generated.tables.StartingLocations.StartingLocationsPath;
+import io.github.chechelpo.frplm.jooq.generated.tables.SessionCharacters.SessionCharactersPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.Worlds.WorldsPath;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 
@@ -233,30 +233,17 @@ public class Locations extends TableImpl<LocationsRecord> {
         return _worlds;
     }
 
-    private transient StartingLocationsPath _startingLocations;
+    private transient CharactersPath _characters;
 
     /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.STARTING_LOCATIONS</code> table
+     * Get the implicit to-many join path to the <code>PUBLIC.CHARACTERS</code>
+     * table
      */
-    public StartingLocationsPath startingLocations() {
-        if (_startingLocations == null)
-            _startingLocations = new StartingLocationsPath(this, null, Keys.CONSTRAINT_B08.getInverseKey());
+    public CharactersPath characters() {
+        if (_characters == null)
+            _characters = new CharactersPath(this, null, Keys.FK_CHARACTER_TO_STARTING_LOCATION.getInverseKey());
 
-        return _startingLocations;
-    }
-
-    private transient CurrentLocationsPath _currentLocations;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>PUBLIC.CURRENT_LOCATIONS</code> table
-     */
-    public CurrentLocationsPath currentLocations() {
-        if (_currentLocations == null)
-            _currentLocations = new CurrentLocationsPath(this, null, Keys.FK_CURRENT_LOCATIONS_LOCATION.getInverseKey());
-
-        return _currentLocations;
+        return _characters;
     }
 
     private transient LocationEdgesPath _fkLocationEdgesFromlocationid;
@@ -337,6 +324,19 @@ public class Locations extends TableImpl<LocationsRecord> {
             _responses = new ResponsesPath(this, null, Keys.FK_RESPONSES_LOCATIONS.getInverseKey());
 
         return _responses;
+    }
+
+    private transient SessionCharactersPath _sessionCharacters;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>PUBLIC.SESSION_CHARACTERS</code> table
+     */
+    public SessionCharactersPath sessionCharacters() {
+        if (_sessionCharacters == null)
+            _sessionCharacters = new SessionCharactersPath(this, null, Keys.FK_SESCHARACTER_TO_LOCATION.getInverseKey());
+
+        return _sessionCharacters;
     }
 
     @Override

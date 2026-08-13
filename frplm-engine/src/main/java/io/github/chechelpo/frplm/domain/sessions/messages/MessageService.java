@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
+import io.github.chechelpo.frplm.domain.sessions.session_characters.SessionCharacterService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.EntityNotFound;
@@ -27,17 +28,23 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     public static final int FIRST_MESSAGE_TICK_NUM = 1;
     private final SessionService sessionService;
     private final ResponseService responseService;
+    private final SessionCharacterService sessionCharacterService;
 
     MessageService(
             MessageStore store,
             EventBus eventBus,
             FieldValidator<MessagesRecord> validator,
             SessionService sessionService,
-            ResponseService responseService
-    ) {
+            ResponseService responseService,
+            SessionCharacterService sessionCharacterService) {
         super(store, validator, eventBus);
         this.sessionService = sessionService;
         this.responseService = responseService;
+        this.sessionCharacterService = sessionCharacterService;
+    }
+
+    private SessionsRecord getSession(int sessionId){
+        return sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow();
     }
 
     public MessagesRecord getLastMessageOf(@NotNull SessionsRecord record) {
@@ -98,8 +105,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
      * Ignored if it's a user message. Ignored if the active response is already this response.
      */
     void validateActiveResponse(EntityKey<MessagesRecord> target, short active_response) {
-        int sessionId = target.require(MESSAGES.SESSION_ID);
-        int tick_num = target.require(MESSAGES.TICK_NUM);
+        int sessionId = target.requireNonNull(MESSAGES.SESSION_ID);
+        int tick_num = target.requireNonNull(MESSAGES.TICK_NUM);
         MessagesRecord record = this.find(target)
                 .orElseThrow(notFound -> {
                     log.error("No message found for session id {} tick num {}", sessionId, tick_num);
@@ -139,14 +146,14 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     }
 
     @Override
-    protected void afterSuccessfulUpdate(EntityKey<MessagesRecord> key, EntityDataPayload<MessagesRecord> updated, long operationID) {
+    protected void afterSuccessfulUpdate(MessagesRecord previousData, EntityKey<MessagesRecord> key, EntityDataPayload<MessagesRecord> updated, long operationID) {
         if (
                 !updated.assigns(MESSAGES.ACTIVE_RESPONSE) &&
                         updated.assigns(MESSAGES.LOCATION_ID) || updated.assigns(MESSAGES.CONTENT) || updated.assigns(MESSAGES.TIME)
         )
             updateActiveResponse(key, updated);
 
-        super.afterSuccessfulUpdate(key, updated, operationID);
+        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
     }
 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
@@ -154,12 +161,17 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         ResponsesRecord currentActiveResponse = this.getActiveResponseOf(target);
         EntityDataPayload<ResponsesRecord> changed = EntityDataPayload.<ResponsesRecord>builder().build();
 
-        if (data.assigns(MESSAGES.LOCATION_ID))
-            changed.set(RESPONSES.LOCATION_ID, data.require(MESSAGES.LOCATION_ID));
-        if (data.assigns(MESSAGES.CONTENT)) changed.set(RESPONSES.CONTENT, data.require(MESSAGES.CONTENT));
-        if (data.assigns(MESSAGES.REASONING))
-            changed.set(RESPONSES.REASONING, data.require(MESSAGES.REASONING));
-        if (data.assigns(MESSAGES.TIME)) changed.set(RESPONSES.ADVANCES_TIME_BY, data.require(MESSAGES.TIME));
+        data.getAssignment(MESSAGES.LOCATION_ID)
+                .ifAssignedNotNull(locationId -> changed.set(RESPONSES.LOCATION_ID, locationId));
+
+        data.getAssignment(MESSAGES.CONTENT)
+                .ifAssignedNotNull(content -> changed.set(RESPONSES.CONTENT, content));
+
+        data.getAssignment(MESSAGES.REASONING)
+                .ifAssignedNotNull(reasoning -> changed.set(RESPONSES.REASONING, reasoning));
+
+        data.getAssignment(MESSAGES.TIME)
+                .ifAssignedNotNull(time -> changed.set(RESPONSES.ADVANCES_TIME_BY, time));
 
         responseService.update(responseService.keyOf(currentActiveResponse), changed)
                 .orElseThrow("Couldn't update active response of message: " + target);
@@ -175,12 +187,23 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
                 MESSAGES.TICK_NUM,
                 sessionService.incrementAndGet(
                                 SESSIONS.CURRENT_TICK,
-                                sessionService.keyOf(data.require(MESSAGES.SESSION_ID))
+                                sessionService.keyOf(data.requireNonNull(MESSAGES.SESSION_ID))
                         )
                         .orElseThrow(() -> {
                             log.error("Could not fetch next message tick for new message \n {}", data.assignments());
                             return new EntityNotFound("Could not fetch tick for new message", Severity.SYSTEM);
                         })
+        );
+
+        SessionsRecord sessionRecord = this.getSession(data.requireNonNull(MESSAGES.SESSION_ID));
+        data.ifUnassignedGet(
+                MESSAGES.LOCATION_ID,
+                () -> sessionCharacterService.getOneMatching(
+                        EntityDataPayload.<SessionCharactersRecord>builder()
+                                .set(SESSION_CHARACTERS.SESSION_ID, sessionRecord.getId())
+                                .set(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID, sessionRecord.getUserPersonaId())
+                                .build()
+                ).resolve().getCurrentLocationId()
         );
 
         super.beforeCreate(data, operationID);
@@ -222,14 +245,11 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
         if (!exists(messageKey))
             throw new EntityNotFound("No message with this id found when registering response", Severity.SYSTEM);
-        ChatCompletionRole messageRole = ChatCompletionRole.fromWireValue(getValueOf(MESSAGES.ROLE, messageKey)
-                .orElseThrow(() -> new UnexpectedException("Could find message but not its role", Severity.SYSTEM))
-        );
+        ChatCompletionRole messageRole = ChatCompletionRole.fromWireValue(getNonNullValueOf(MESSAGES.ROLE, messageKey));
         if (messageRole != ChatCompletionRole.ASSISTANT)
             throw new InvalidValue("Tried to register a new response of a user message");
 
-        int world_id = sessionService.getValueOf(SESSIONS.WORLD_ID, sessionService.keyOf(sessionId))
-                .orElseThrow(() -> new EntityNotFound("Could not session with id " + sessionId, Severity.SYSTEM));
+        int world_id = sessionService.getNonNullValueOf(SESSIONS.WORLD_ID, sessionService.keyOf(sessionId));
         registerNewResponse(EntityDataPayload.<ResponsesRecord>builder()
                 .set(RESPONSES.SESSION_ID, sessionId)
                 .set(RESPONSES.TICK_NUM, tick_num)

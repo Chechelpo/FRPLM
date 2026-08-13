@@ -10,11 +10,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 
+import static io.github.chechelpo.frplm.jooq.generated.Tables.LOCATIONS;
+
 @Component
 public final class LocationAssetStore extends EntityAssetStore<LocationsRecord, LocationSnapshot.Reference> {
     LocationAssetStore(AppDirectory directory) {
         super(
-                EntityConfigs.Types.LOCATIONS,
+                LOCATIONS,
                 directory,
                 EnumSet.of(AssetTypes.BACKGROUND)
         );

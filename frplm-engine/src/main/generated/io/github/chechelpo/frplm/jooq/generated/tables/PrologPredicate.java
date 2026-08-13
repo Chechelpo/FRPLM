@@ -194,7 +194,7 @@ public class PrologPredicate extends TableImpl<PrologPredicateRecord> {
      */
     public PrologPredicateArgumentPath prologPredicateArgument() {
         if (_prologPredicateArgument == null)
-            _prologPredicateArgument = new PrologPredicateArgumentPath(this, null, Keys.CONSTRAINT_8.getInverseKey());
+            _prologPredicateArgument = new PrologPredicateArgumentPath(this, null, Keys.CONSTRAINT_8F.getInverseKey());
 
         return _prologPredicateArgument;
     }

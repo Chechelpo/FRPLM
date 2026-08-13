@@ -45,7 +45,7 @@ public final class LorebookMapper extends ABSWireMapper<LorebooksRecord, Loreboo
         return new LorebookJSON(
                 record.getName(),
                 fetchDefaultOutlet(record),
-                entityReaders.entries().getMatching(EntityKey.of(ENTRY.LOREBOOK_ID, record.getId()))
+                entityReaders.entries().getMatching(EntityDataPayload.of(ENTRY.LOREBOOK_ID, record.getId()))
                         .stream()
                         .map(entryRecord -> entryMapper.jsonRecordFrom(entryRecord, zipBuilder))
                         .toList()

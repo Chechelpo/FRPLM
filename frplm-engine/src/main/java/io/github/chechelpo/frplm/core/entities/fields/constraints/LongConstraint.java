@@ -17,6 +17,14 @@ public final class LongConstraint implements Constraint<Long> {
         this.max = builder.max;
     }
 
+    public Long min() {
+        return min;
+    }
+
+    public Long max() {
+        return max;
+    }
+
     @Override
     @Contract(pure = true)
     public @NotNull Optional<String> returnReasonIfInvalid(

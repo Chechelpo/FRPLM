@@ -50,6 +50,7 @@ public final class ChatMessageImpl extends StandaloneEntity<MessagesRecord> impl
         return new ChatMessage.Reference(this.record.getSessionId(), this.record.getTickNum());
     }
 
+
     @Override
     public String toString() {
         return """

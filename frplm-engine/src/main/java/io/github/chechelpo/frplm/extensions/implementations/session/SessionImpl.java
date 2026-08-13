@@ -1,8 +1,11 @@
 package io.github.chechelpo.frplm.extensions.implementations.session;
 
+import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.extensions.implementations.standalone.ExtensionContext;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionCharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.extensions.api.session.ChatMessage;
 import io.github.chechelpo.frplm.extensions.api.session.Session;
@@ -16,6 +19,8 @@ import org.jspecify.annotations.NonNull;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSION_CHARACTERS;
 
 /// # Session
 /// API interface of a session snapshot
@@ -41,7 +46,13 @@ public final class SessionImpl implements Session {
         this.context = standaloneContext;
         this.world = new SessionWorldImpl(standaloneContext.worlds().getWorldOf(this.record), this, standaloneContext);
         this.userCharacter = new SessionCharacterImpl(
-                standaloneContext.characters().getUserCharacter(this.record),
+                sessionContext.sessionCharacters().getOneMatching(
+                        EntityDataPayload.<SessionCharactersRecord>builder()
+                                .set(SESSION_CHARACTERS.SESSION_ID, record.getId())
+                                .set(SESSION_CHARACTERS.WORLD_ID, record.getWorldId())
+                                .set(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID, record.getUserPersonaId())
+                                .build()
+                ).resolve(),
                 context,
                 this,
                 this.world

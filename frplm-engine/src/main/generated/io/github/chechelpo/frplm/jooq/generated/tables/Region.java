@@ -210,7 +210,7 @@ public class Region extends TableImpl<RegionRecord> {
 
     @Override
     public UniqueKey<RegionRecord> getPrimaryKey() {
-        return Keys.CONSTRAINT_8FDB;
+        return Keys.CONSTRAINT_8FDB1;
     }
 
     @Override
@@ -220,7 +220,7 @@ public class Region extends TableImpl<RegionRecord> {
 
     @Override
     public List<ForeignKey<RegionRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CONSTRAINT_8F, Keys.CONSTRAINT_8FD, Keys.FK_REGION_PARENT);
+        return Arrays.asList(Keys.CONSTRAINT_8FD, Keys.CONSTRAINT_8FDB, Keys.FK_REGION_PARENT);
     }
 
     private transient WorldsPath _worlds;
@@ -230,7 +230,7 @@ public class Region extends TableImpl<RegionRecord> {
      */
     public WorldsPath worlds() {
         if (_worlds == null)
-            _worlds = new WorldsPath(this, Keys.CONSTRAINT_8F, null);
+            _worlds = new WorldsPath(this, Keys.CONSTRAINT_8FD, null);
 
         return _worlds;
     }
@@ -242,7 +242,7 @@ public class Region extends TableImpl<RegionRecord> {
      */
     public LorebooksPath lorebooks() {
         if (_lorebooks == null)
-            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_8FD, null);
+            _lorebooks = new LorebooksPath(this, Keys.CONSTRAINT_8FDB, null);
 
         return _lorebooks;
     }

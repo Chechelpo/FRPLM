@@ -8,8 +8,10 @@ import io.github.chechelpo.frplm.exceptions.runtime.UnexpectedException;
 import io.github.chechelpo.frplm.extensions.api.utils.FindResult;
 import io.github.chechelpo.frplm.utils.ValidationResult;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jooq.*;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -156,6 +158,30 @@ public interface EntityReader<R extends TableRecord<R>> {
     default R require(EntityKey<R> target){
         return find(target).orElseThrow();
     }
+
+    default <T> @Nullable T getValueOf(TableField<R,T> field, EntityKey<R> target) {
+        return find(target)
+                .orElseThrow()
+                .get(field);
+    }
+    default <T> @NotNull T getNonNullValueOf(TableField<R,T> field, EntityKey<R> target){
+        T value = find(target)
+                .orElseThrow()
+                .get(field);
+        if (value == null)
+            throw new UnexpectedException("Expected " + field.getName() + " to not be null", Severity.SYSTEM);
+
+        return value;
+    }
+
+    default RecordFindResult<R> getUpToDate(R record){
+        return find(keyOf(record));
+    }
+    default R requireUpToDate(R record){
+        return getUpToDate(record).orElseThrow();
+    }
+    EntityKey<R> keyOf(R record);
+
     RecordFindResult<R> find(EntityKey<R> target);
 
     Result<R> getAll();
