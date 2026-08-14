@@ -2,6 +2,9 @@ package io.github.chechelpo.frplm.test_utils.fixtures;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
+import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
+import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
+import io.github.chechelpo.frplm.domain.sessions.session_characters.SessionCharacterService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
@@ -17,14 +20,28 @@ public class EntityFixtureFactory {
     private final RegionService regionService;
     private final CharacterService characterService;
     private final EdgeService edgeService;
+    private final SessionService sessionService;
+    private final SessionCharacterService sessionCharacterService;
+    private final MessageService messageService;
 
-    public EntityFixtureFactory(LorebookService lorebookService, WorldService worldService, LocationsService locationsService, RegionService regionService, CharacterService characterService, EdgeService edgeService) {
+    public EntityFixtureFactory(
+            LorebookService lorebookService,
+            WorldService worldService,
+            LocationsService locationsService,
+            RegionService regionService,
+            CharacterService characterService,
+            EdgeService edgeService,
+            SessionService sessionService,
+            SessionCharacterService sessionCharacterService, MessageService messageService) {
         this.lorebookService = lorebookService;
         this.worldService = worldService;
         this.locationsService = locationsService;
         this.regionService = regionService;
         this.characterService = characterService;
         this.edgeService = edgeService;
+        this.sessionService = sessionService;
+        this.sessionCharacterService = sessionCharacterService;
+        this.messageService = messageService;
     }
 
     public LorebookFixtures lorebook(String seed){
@@ -58,6 +75,30 @@ public class EntityFixtureFactory {
     public CharacterFixtures characters(String seed){
         return new CharacterFixtures(
                 characterService,
+                this,
+                seed
+        );
+    }
+
+    public SessionCharacterFixture sesCharacters(String seed){
+        return new SessionCharacterFixture(
+                sessionCharacterService,
+                this,
+                seed
+        );
+    }
+
+    public SessionFixtures sessions(String seed){
+        return new SessionFixtures(
+                sessionService,
+                this,
+                seed
+        );
+    }
+
+    public MessageFixtures messages(String seed){
+        return new MessageFixtures(
+                messageService,
                 this,
                 seed
         );

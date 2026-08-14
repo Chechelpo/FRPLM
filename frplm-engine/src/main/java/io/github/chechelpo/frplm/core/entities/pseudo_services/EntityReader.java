@@ -24,7 +24,6 @@ public interface EntityReader<R extends TableRecord<R>> {
      * @return an error message if the key is invalid
      */
     ValidationResult validateKeyStructure(EntityKey<R> key);
-
     Table<R> getTable();
 
     sealed interface RecordFindResult<R extends TableRecord<R>> extends FindResult<
@@ -199,6 +198,7 @@ public interface EntityReader<R extends TableRecord<R>> {
             OneMatchingResult.MoreThanOne {
 
         EntityDataPayload<R> target();
+        String toDebugString();
 
         default boolean isEmpty() {
             return this instanceof Empty<R>;
@@ -335,6 +335,11 @@ public interface EntityReader<R extends TableRecord<R>> {
             public Empty {
                 Objects.requireNonNull(target, "target");
             }
+
+            @Override
+            public String toDebugString() {
+                return "No entity found with target: \n" + target;
+            }
         }
 
         record Present<R extends TableRecord<R>>(
@@ -345,6 +350,11 @@ public interface EntityReader<R extends TableRecord<R>> {
             public Present {
                 Objects.requireNonNull(target, "target");
                 Objects.requireNonNull(value, "value");
+            }
+
+            @Override
+            public String toDebugString() {
+                return "Entity found";
             }
         }
 
@@ -361,6 +371,11 @@ public interface EntityReader<R extends TableRecord<R>> {
                             "matchCount must be at least 2"
                     );
                 }
+            }
+
+            @Override
+            public String toDebugString() {
+                return "Expected only an entity, got %s instead. Target: \n%s".formatted(matchCount, target);
             }
         }
     }

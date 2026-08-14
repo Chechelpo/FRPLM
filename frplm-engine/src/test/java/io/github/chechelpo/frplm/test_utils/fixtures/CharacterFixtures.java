@@ -4,16 +4,11 @@ import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.RegionRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.WorldsRecord;
-import it.unibo.tuprolog.core.Cons;
 import org.jooq.TableField;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -23,15 +18,15 @@ public class CharacterFixtures extends EntityFixtures<CharactersRecord, Characte
 
     CharacterFixtures(CharacterService service, EntityFixtureFactory fixtureFactory, @NonNull String seed) {
         super(service, fixtureFactory, seed);
-        this.worldFixtures = fixtureFactory.worlds(seed);
-        this.locationFixtures = fixtureFactory.locations(seed);
+        this.worldFixtures = fixtureFactory.worlds(seed + "-worlds");
+        this.locationFixtures = fixtureFactory.locations(seed + "-locations");
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<CharactersRecord>>> getFunctionsToAssignForeignFields(
+    protected DoActions<CharactersRecord> getFunctionsToAssignForeignFields(
             EntityDataPayload<CharactersRecord> sample
     ) {
-        List<Consumer<EntityDataPayload<CharactersRecord>>> consumers = new ArrayList<>(2);
+        DoActions<CharactersRecord> consumers = DoActions.instantiate(2);
 
         sample.getAssignment(CHARACTERS.WORLD_ID)
                 .ifUnassignedRun(
@@ -47,7 +42,7 @@ public class CharacterFixtures extends EntityFixtures<CharactersRecord, Characte
         sample.getAssignment(CHARACTERS.STARTING_LOCATION_ID)
                 .ifUnassignedRun(
                         () -> {
-                            LocationsRecord location = locationFixtures.addAndCreateTo(
+                            LocationsRecord location = locationFixtures.createOne(
                                     LOCATIONS.WORLD_ID, sample.requireNonNull(CHARACTERS.WORLD_ID)
                             );
                             consumers.add(

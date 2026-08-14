@@ -9,11 +9,7 @@ import org.jetbrains.annotations.Contract;
 import org.jooq.TableField;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -29,10 +25,11 @@ public class LocationFixtures extends EntityFixtures<LocationsRecord, LocationsS
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<LocationsRecord>>> getFunctionsToAssignForeignFields(
+    protected DoActions<LocationsRecord> getFunctionsToAssignForeignFields(
             EntityDataPayload<LocationsRecord> sample
     ) {
-        List<Consumer<EntityDataPayload<LocationsRecord>>> consumers = new ArrayList<>(2);
+        DoActions<LocationsRecord> consumers = DoActions.instantiate(2);
+
         sample.getAssignment(LOCATIONS.WORLD_ID)
                 .ifUnassignedRun(
                         () -> {
@@ -47,7 +44,7 @@ public class LocationFixtures extends EntityFixtures<LocationsRecord, LocationsS
         sample.getAssignment(LOCATIONS.REGION_ID)
                 .ifUnassignedRun(
                         () -> {
-                            RegionRecord region = regionFixtures.addAndCreateTo(REGION.WORLD_ID, sample.requireNonNull(LOCATIONS.WORLD_ID));
+                            RegionRecord region = regionFixtures.createOne(REGION.WORLD_ID, sample.requireNonNull(LOCATIONS.WORLD_ID));
                             consumers.add(
                                     payload ->
                                             payload.set(LOCATIONS.REGION_ID, region.getId())

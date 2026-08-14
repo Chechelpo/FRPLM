@@ -5,6 +5,7 @@ import org.jooq.TableField;
 import org.jooq.TableRecord;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,4 +52,26 @@ public final class Asserts {
                         }
                 );
     }
+
+    public static  <R extends TableRecord<R>, O extends TableRecord<O>> void assertEqualsTwoRecords(
+            R expected,
+            O actual,
+            Map<TableField<R, ?>, TableField<O, ?>> compareFields
+    ) {
+        compareFields.entrySet().stream()
+                .filter(field -> !compareFields.containsKey(field.getKey()))
+                .forEach(
+                        fieldPair -> {
+                            assertEquals(
+                                    expected.get(fieldPair.getKey()),
+                                    actual.get(fieldPair.getValue()),
+                                    """
+                                            Mismatch on field %s vs %s
+                                            """.formatted(fieldPair.getKey(), fieldPair.getValue())
+                            );
+                        }
+                );
+    }
+
+
 }

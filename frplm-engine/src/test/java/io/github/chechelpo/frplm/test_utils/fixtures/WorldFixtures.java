@@ -17,8 +17,8 @@ public class WorldFixtures extends EntityFixtures<WorldsRecord, WorldService> {
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<WorldsRecord>>> getFunctionsToAssignForeignFields(EntityDataPayload<WorldsRecord> sample) {
-        return List.of();
+    protected DoActions<WorldsRecord> getFunctionsToAssignForeignFields(EntityDataPayload<WorldsRecord> sample) {
+        return DoActions.instantiate(1);
     }
 
     @Override

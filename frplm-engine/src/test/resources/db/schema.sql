@@ -745,8 +745,6 @@ CREATE TABLE IF NOT EXISTS SESSION_CHARACTERS
     CONSTRAINT pk_session_character PRIMARY KEY (session_id, id),
 
     CONSTRAINT fk_sesCharacter_to_session FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE,
-    CONSTRAINT fk_sesCharacter_to_message FOREIGN KEY (session_id, last_moved_tick_num) REFERENCES
-        messages (session_id, tick_num),
 
     CONSTRAINT fk_sesCharacter_to_world FOREIGN KEY (world_id) REFERENCES WORLDS (id) ON DELETE CASCADE,
     CONSTRAINT fk_sesCharacter_to_location FOREIGN KEY (world_id, current_location_id) REFERENCES
@@ -754,6 +752,8 @@ CREATE TABLE IF NOT EXISTS SESSION_CHARACTERS
 
     CONSTRAINT fk_sesCharacter_to_permanent_character FOREIGN KEY (world_id, permanent_character_id)
         REFERENCES CHARACTERS (world_id, id) ON DELETE SET NULL,
+    CONSTRAINT uq_perm_character_per_session
+        UNIQUE (session_id, permanent_character_id),
 
     CONSTRAINT fk_sesCharacter_to_memory_lorebook FOREIGN KEY (session_lorebook_id) REFERENCES LOREBOOKS (id)
 );

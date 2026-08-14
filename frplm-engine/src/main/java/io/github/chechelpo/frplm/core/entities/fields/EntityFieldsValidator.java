@@ -115,7 +115,7 @@ public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements
                         field,
                         payload
                 );
-            if (fieldInfoMap.get(field).isReadOnly)
+            if (isEditing && fieldInfoMap.get(field).isReadOnly)
                 return FieldActionResult.readOnlyField(field, payload);
             
             Optional<FieldActionResult.WrongValue<R, D, ?>> valueAssignmentError =

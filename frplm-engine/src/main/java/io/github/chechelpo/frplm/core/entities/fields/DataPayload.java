@@ -9,10 +9,7 @@ import org.jooq.TableField;
 import org.jooq.TableRecord;
 import org.jspecify.annotations.NonNull;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -121,14 +118,15 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
 
     <T> Assignment<R, T> getAssignment(TableField<R, T> field);
 
-    default boolean assignsAny(Collection<? extends TableField<R,?>> fields){
-        boolean fail = false;
+    default boolean assignsAny(Collection<? extends TableField<R, ?>> fields) {
+        for (var field : fields) {
+            if (assigns(field)) {
+                return true;
+            }
+        }
 
-        for (var field : fields) if (!assigns(field)) return fail;
-
-        return !fail;
+        return false;
     }
-
     default void requireAssignments(Collection<? extends TableField<R, ?>> fields, boolean nonNull){
         for (TableField<R, ?> field : fields)
             requireAssignment(field, nonNull);
@@ -174,4 +172,78 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
     void consume(Assignment<R, ?> assignment);
 
     boolean isEmpty();
+
+    default @NotNull String tableString() {
+        Map<TableField<R, ?>, ?> assignments = this.assignments();
+        if (assignments.isEmpty()) {
+            return "EntityDataPayload {}";
+        }
+
+        List<String> fields = assignments.keySet().stream()
+                .map(field -> field.getName())
+                .toList();
+
+        List<String> values = assignments.values().stream()
+                .map(this::formatValue)
+                .toList();
+
+        int firstColumnWidth = "EntityDataPayload".length();
+
+        int[] columnWidths = new int[fields.size()];
+
+        for (int i = 0; i < fields.size(); i++) {
+            columnWidths[i] = Math.max(
+                    fields.get(i).length(),
+                    values.get(i).length()
+            );
+        }
+
+        StringBuilder separator = new StringBuilder();
+        separator.append("+").append("-".repeat(firstColumnWidth + 2));
+
+        for (int width : columnWidths) {
+            separator.append("+").append("-".repeat(width + 2));
+        }
+
+        separator.append("+");
+
+        StringBuilder out = new StringBuilder();
+
+        out.append(separator).append('\n');
+
+        out.append(String.format("| %-" + firstColumnWidth + "s ", "EntityDataPayload"));
+
+        for (int i = 0; i < fields.size(); i++) {
+            out.append(String.format(
+                    "| %-" + columnWidths[i] + "s ",
+                    fields.get(i)
+            ));
+        }
+
+        out.append("|\n");
+        out.append(separator).append('\n');
+
+        out.append(String.format("| %-" + firstColumnWidth + "s ", ""));
+
+        for (int i = 0; i < values.size(); i++) {
+            out.append(String.format(
+                    "| %-" + columnWidths[i] + "s ",
+                    values.get(i)
+            ));
+        }
+
+        out.append("|\n");
+        out.append(separator);
+
+        return out.toString();
+    }
+
+    default String formatValue(Object value) {
+        return switch (value) {
+            case null -> "null";
+            case CharSequence charSequence -> "\"" + value + "\"";
+            case Character c -> "'" + value + "'";
+            default -> String.valueOf(value);
+        };
+    }
 }

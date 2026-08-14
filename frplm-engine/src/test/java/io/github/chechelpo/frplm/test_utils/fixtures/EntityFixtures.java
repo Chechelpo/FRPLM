@@ -1,10 +1,10 @@
 package io.github.chechelpo.frplm.test_utils.fixtures;
 
+import ch.qos.logback.classic.Level;
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
 import io.github.chechelpo.frplm.core.entities.fields.FieldValidator;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.test_utils.randomMakers.RandomValuesGenerators;
 import org.jetbrains.annotations.Contract;
 import org.jooq.TableField;
@@ -24,19 +24,37 @@ public abstract class EntityFixtures<R extends TableRecord<R>, S extends EntityS
     private final S service;
     private final RandomValuesGenerators<R> generator;
     private final Set<TableField<R, ?>> doNotGenerateFields;
+    protected final String seed;
 
     EntityFixtures(S service, EntityFixtureFactory fixtures, @NonNull String seed) {
+        this.seed = service.getTable().getUnqualifiedName() + seed;
         this.service = service;
+        service.setLogLevel(Level.DEBUG);
         this.generator = new RandomValuesGenerators<>(seed, service.getFieldValidator());
         this.doNotGenerateFields = doNotGenerateFields();
     }
 
     protected abstract Set<TableField<R, ?>> doNotGenerateFields();
 
-    protected abstract List<Consumer<EntityDataPayload<R>>>  getFunctionsToAssignForeignFields(
+    protected record DoActions<R extends TableRecord<R>>(List<Consumer<EntityDataPayload<R>>> consumers){
+        @Contract("_ -> new")
+        protected static <R extends TableRecord<R>> @NonNull DoActions<R> instantiate(int amount){
+            return new DoActions<>(new ArrayList<>(amount));
+        }
+        protected void add(Consumer<EntityDataPayload<R>> consumer){
+            consumers.add(consumer);
+        }
+        protected void run(List<EntityDataPayload<R>> payloads){
+            consumers.forEach(payloads::forEach);
+        }
+    }
+    protected abstract DoActions<R> getFunctionsToAssignForeignFields(
             EntityDataPayload<R> sample
     );
 
+    public final R getUpdatedRecord(R record){
+        return service().requireUpToDate(record);
+    }
     public final S service() {
         return service;
     }
@@ -66,14 +84,20 @@ public abstract class EntityFixtures<R extends TableRecord<R>, S extends EntityS
                 );
     }
 
-    public final <T> R addAndCreateTo(TableField<R,T> field, T value){
+    public final R createOne(){
+        return addAndCreateTo(EntityDataPayload.empty());
+    }
+    public final R createOne(EntityDataPayload<R> payload){
+        return addAndCreateTo(payload);
+    }
+    public final <T> R createOne(TableField<R,T> field, T value){
         return addAndCreateTo(EntityDataPayload.of(field, value));
     }
 
     public final R addAndCreateTo(EntityDataPayload<R> initialData) {
         addUntilFullPayloadIgnoringKeys(initialData);
         getFunctionsToAssignForeignFields(initialData)
-                .forEach(consumer -> consumer.accept(initialData));
+                .consumers.forEach(consumer -> consumer.accept(initialData));
 
         return service.createAndGet(initialData);
     }
@@ -91,7 +115,7 @@ public abstract class EntityFixtures<R extends TableRecord<R>, S extends EntityS
 
         EntityDataPayload<R> sample = toCreate.getFirst();
         getFunctionsToAssignForeignFields(sample)
-                .forEach(toCreate::forEach);
+                .run(toCreate);
 
         return toCreate.stream()
                 .map(this::addAndCreateTo)

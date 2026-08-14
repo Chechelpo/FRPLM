@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public interface EntityUpdater<R extends TableRecord<R>> {
+    EntityKey<R> keyOf(R record);
     default <T> UpdateResult<R> update(
             TableField<R,T> field,
             T value,
@@ -21,10 +22,30 @@ public interface EntityUpdater<R extends TableRecord<R>> {
     ){
         return update(key, EntityDataPayload.of(field, value));
     }
+    default UpdateResult<R> update(
+            EntityDataPayload<R> payload,
+            R record
+    ){
+        return update(keyOf(record), payload);
+    }
+    default <T> UpdateResult<R> update(
+            TableField<R,T> field,
+            T value,
+            R record
+    ){
+        return update(field, value, keyOf(record));
+    }
+
     UpdateResult<R> update(
             EntityKey<R> key,
             EntityDataPayload<R> update
     );
+    default UpdateResult<R> updateOrThrow(
+            EntityKey<R> key,
+            EntityDataPayload<R> update
+    ){
+        return update(key, update).orElseThrow();
+    }
 
     sealed interface UpdateResult<R extends TableRecord<R>>
             permits UpdateResult.Success,

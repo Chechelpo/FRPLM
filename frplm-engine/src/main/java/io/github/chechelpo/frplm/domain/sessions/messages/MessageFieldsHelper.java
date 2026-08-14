@@ -1,7 +1,10 @@
 package io.github.chechelpo.frplm.domain.sessions.messages;
 
+import io.github.chechelpo.frplm.core.entities.fields.DataPayload;
+import io.github.chechelpo.frplm.core.entities.fields.FieldActionResult;
 import io.github.chechelpo.frplm.core.entities.fields.FieldInfo;
 import io.github.chechelpo.frplm.core.entities.fields.EntityControllerFieldValidator;
+import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
 import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.extensions.api.utils.openai_compatible.ChatCompletionRole;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
@@ -87,5 +90,15 @@ final class MessageFieldsHelper extends EntityControllerFieldValidator<MessagesR
                 FieldInfo.builder(MESSAGES.RESPONSE_NUM)
                         .build()
         );
+    }
+
+    @Override
+    protected <D extends DataPayload<MessagesRecord>> FieldActionResult<MessagesRecord, D> validateCustom(D payload) {
+        if (payload.assigns(MESSAGES.REQUEST_JSON) && payload.assigns(MESSAGES.ROLE))
+            if (!payload.requireNonNull(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue()))
+                return FieldActionResult.wrongValue("Can't assign request json to user messages",  MESSAGES.ROLE, null, payload);
+
+
+        return FieldActionResult.success(payload);
     }
 }

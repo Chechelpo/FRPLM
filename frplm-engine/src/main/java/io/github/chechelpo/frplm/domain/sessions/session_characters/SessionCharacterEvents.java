@@ -6,6 +6,9 @@ import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionCharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import org.jooq.Result;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +17,9 @@ import java.util.List;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @Component
-public class SessionCharacterEvents {
+final class SessionCharacterEvents {
 
+    private static final Logger log = LoggerFactory.getLogger(SessionCharacterEvents.class);
     private final CharacterService characterService;
     private final SessionCharacterService sessionCharacterService;
 
@@ -45,6 +49,7 @@ public class SessionCharacterEvents {
                         EntityDataPayload.<SessionCharactersRecord>builder()
                                 .set(SESSION_CHARACTERS.SESSION_ID, SESSIONS.ID, newSession)
                                 .set(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID, CHARACTERS.ID, character)
+                                .set(SESSION_CHARACTERS.LAST_MOVED_TICK_NUM, SESSIONS.CURRENT_TICK, newSession)
                                 .set(SESSION_CHARACTERS.WORLD_ID, CHARACTERS.WORLD_ID, character)
                                 .set(SESSION_CHARACTERS.NAME, CHARACTERS.NAME, character)
                                 .set(SESSION_CHARACTERS.DESCRIPTION, CHARACTERS.DESCRIPTION, character)
@@ -59,19 +64,16 @@ public class SessionCharacterEvents {
         if (rawEvent.isNotEventOf(CHARACTERS)) return;
 
         CRUDCommittedEvent.UpdatedEntity<CharactersRecord> event = (CRUDCommittedEvent.UpdatedEntity<CharactersRecord>) rawEvent;
+        Result<SessionCharactersRecord> instances =
+                sessionCharacterService.instancesOf(event.previousData());
         EntityDataPayload<CharactersRecord> data = event.updatedData();
+        log.debug("Instances: {}",sessionCharacterService.instancesOf(event.previousData()));
         if (!data.assignsAny(List.of(CHARACTERS.NAME, CHARACTERS.DESCRIPTION))) return;
 
-        int worldId = event.previousData().getWorldId();
-        int characterId = event.target().requireNonNull(CHARACTERS.ID);
-
-        sessionCharacterService.getMatching(
-                EntityDataPayload.<SessionCharactersRecord>builder()
-                        .set(SESSION_CHARACTERS.WORLD_ID, worldId)
-                        .set(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID, characterId)
-                        .build()
-        ).forEach(
+        sessionCharacterService.instancesOf(event.previousData())
+                .forEach(
                 sessionCharacter -> {
+                    log.debug("Instance of:\n{} \n is: \n{}", event.previousData(), sessionCharacter);
                     if (sessionCharacter.getKeepUpdated())
                         sessionCharacterService.update(
                                 sessionCharacterService.keyOf(sessionCharacter),
@@ -79,7 +81,7 @@ public class SessionCharacterEvents {
                                         .copyIfAssigned(SESSION_CHARACTERS.NAME, CHARACTERS.NAME, data)
                                         .copyIfAssigned(SESSION_CHARACTERS.DESCRIPTION, CHARACTERS.DESCRIPTION, data)
                                         .build()
-                        );
+                        ).orElseThrow("Couldn't keep instance of character up to date");
                 }
         );
     }

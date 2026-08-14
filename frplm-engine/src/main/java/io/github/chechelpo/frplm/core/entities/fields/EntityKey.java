@@ -99,15 +99,7 @@ public final class EntityKey<R extends TableRecord<R>> implements DataPayload<R>
         return false;
     }
 
-    public @NotNull String toString(){
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (Map.Entry<TableField<R, ?>, Object> e : values.entrySet()) {
-            sb.append(e.getKey().getName()).append(" = ").append(e.getValue()).append(", ");
-        }
-        sb.append("}");
-        return sb.toString();
-    }
+
 
     @Contract("-> new")
     public static <Rec extends TableRecord<Rec>> @NotNull Builder<Rec> builder(){
@@ -151,8 +143,39 @@ public final class EntityKey<R extends TableRecord<R>> implements DataPayload<R>
         private final Map<TableField<R, ?>, Object> values = new HashMap<>();
         private boolean mutable;
         public Builder(){}
+
+        public Builder<R> copyFrom(DataPayload<R> payload){
+            this.values.putAll(payload.assignments());
+            return this;
+        }
         public Builder<R> setAll(@NotNull Map<TableField<R, ?>, Object> values){
             this.values.putAll(values);
+            return this;
+        }
+
+        public <O extends TableRecord<O>, T> Builder<R> set(
+                TableField<R,T> toField,
+                TableField<R,O> fromField,
+                O record
+        ){
+            this.values.put(toField, record.get(fromField));
+            return this;
+        }
+
+        public <O extends TableRecord<O>, T> Builder<R> set(
+                TableField<R, T> toField,
+                TableField<O, T> fromField,
+                DataPayload<O> payload
+        ){
+            this.values.put(toField, payload.require(fromField));
+            return this;
+        }
+        public <O extends TableRecord<O>, T> Builder<R> setNonNull(
+                TableField<R, T> toField,
+                TableField<O, T> fromField,
+                DataPayload<O> payload
+        ){
+            this.values.put(toField, payload.requireNonNull(fromField));
             return this;
         }
         public <T> Builder<R> set(TableField<R, T> field, T value){

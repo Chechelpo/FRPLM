@@ -30,14 +30,16 @@ public class RegionFixtures extends EntityFixtures<RegionRecord, RegionService> 
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<RegionRecord>>> getFunctionsToAssignForeignFields(EntityDataPayload<RegionRecord> sample) {
+    protected DoActions<RegionRecord> getFunctionsToAssignForeignFields(EntityDataPayload<RegionRecord> sample) {
         var assignment = sample.getAssignment(REGION.WORLD_ID);
-        if (assignment.isAssigned()) return List.of();
+        if (assignment.isAssigned()) return DoActions.instantiate(0);
 
         WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
-        return List.of(
+        DoActions<RegionRecord> actions = DoActions.instantiate(1);
+        actions.add(
                 payload -> payload.set(REGION.WORLD_ID, world.getId())
         );
+        return actions;
     }
 
     public void makeParent(@NonNull RegionRecord parent, @NonNull RegionRecord child){

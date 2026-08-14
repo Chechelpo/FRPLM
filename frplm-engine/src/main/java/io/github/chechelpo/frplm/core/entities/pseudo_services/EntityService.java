@@ -11,7 +11,6 @@ import io.github.chechelpo.frplm.events.crud.CRUDCommittedEvent;
 import io.github.chechelpo.frplm.events.crud.CRUDDraftEvent;
 import io.github.chechelpo.frplm.exceptions.Severity;
 import io.github.chechelpo.frplm.exceptions.runtime.*;
-import io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs;
 import io.github.chechelpo.frplm.utils.ValidationResult;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +58,10 @@ public abstract class EntityService<
 
     public EntityKey<R> keyOf(R record) {
         return fieldValidator.keyOf(record);
+    }
+
+    public void setLogLevel(Level level){
+        this.log.setLevel(level);
     }
 
     public List<EntityKey<R>> keysOf(List<R> records) {
@@ -156,7 +159,7 @@ public abstract class EntityService<
         Objects.requireNonNull(key);
         long operationID = eventBus.nextOperationID();
         beforeRetrieve(key, operationID);
-        log.debug("Finding record with id {}", key);
+        log.debug("Finding record with id \n{}", key.tableString());
 
         R record = store.get(key);
         if (record == null) return new RecordFindResult.NotFound<>(key);
@@ -278,7 +281,7 @@ public abstract class EntityService<
         if (!exists(target)) return new UpdateResult.NoSuchEntity<>(RecordFindResult.notFound(target), update);
 
         long operationID = eventBus.nextOperationID();
-        log.trace("Updating entity {} with new data {}", target, update);
+        log.debug("Updating entity {} with new data \n{}", target, update.tableString());
         beforeUpdate(target, update, operationID);
 
         R record = store.get(target);
@@ -493,7 +496,7 @@ public abstract class EntityService<
     }
 
     protected void afterSuccessfulUpdate(R previousData, EntityKey<R> key, EntityDataPayload<R> updated, long operationID) {
-        eventBus.publish(new CRUDCommittedEvent.UpdatedEntity<R>(previousData, operationID, key, updated));
+        eventBus.publish(new CRUDCommittedEvent.UpdatedEntity<>(previousData, operationID, key, updated));
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -16,8 +16,8 @@ public class EdgesFixtures extends EntityFixtures<LocationEdgesRecord, EdgeServi
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<LocationEdgesRecord>>> getFunctionsToAssignForeignFields(EntityDataPayload<LocationEdgesRecord> sample) {
-        return List.of();
+    protected DoActions<LocationEdgesRecord> getFunctionsToAssignForeignFields(EntityDataPayload<LocationEdgesRecord> sample) {
+        return null;
     }
 
     @Override

@@ -20,8 +20,8 @@ public class LorebookFixtures extends EntityFixtures<LorebooksRecord, LorebookSe
     }
 
     @Override
-    protected List<Consumer<EntityDataPayload<LorebooksRecord>>> getFunctionsToAssignForeignFields(EntityDataPayload<LorebooksRecord> sample) {
-        return List.of();
+    protected DoActions<LorebooksRecord> getFunctionsToAssignForeignFields(EntityDataPayload<LorebooksRecord> sample) {
+        return DoActions.instantiate(1);
     }
 
     @Override

@@ -13,29 +13,34 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import static io.github.chechelpo.frplm.jooq.generated.Tables.CHARACTERS;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 public final class SessionFixtures extends EntityFixtures<SessionsRecord, SessionService> {
     private final CharacterFixtures characterFixtures;
     SessionFixtures(SessionService service, EntityFixtureFactory fixtures, @NonNull String seed) {
         super(service, fixtures, seed);
-        this.characterFixtures = fixtures.characters(seed);
+        this.characterFixtures = fixtures.characters(seed + "-characters");
     }
 
     @Override
     protected @NonNull @Unmodifiable Set<TableField<SessionsRecord, ?>> doNotGenerateFields() {
-        return Set.of();
+        return Set.of(SESSIONS.USER_PERSONA_ID, SESSIONS.NEXT_CHARACTER_ID, SESSIONS.NEXT_LOCATION_ID);
     }
 
     @Override
-    protected @NonNull List<Consumer<EntityDataPayload<SessionsRecord>>> getFunctionsToAssignForeignFields(
+    protected @NonNull DoActions<SessionsRecord> getFunctionsToAssignForeignFields(
             EntityDataPayload<SessionsRecord> sample
     ) {
-        List<Consumer<EntityDataPayload<SessionsRecord>>> consumers = new ArrayList<>(1);
+        DoActions<SessionsRecord> consumers = DoActions.instantiate(1);
         sample.getAssignment(SESSIONS.USER_PERSONA_ID)
                 .ifUnassignedRun(
                         () -> {
-                            CharactersRecord character = characterFixtures.addAndCreateTo(EntityDataPayload.empty());
+                            CharactersRecord character = characterFixtures.addAndCreateTo(
+                                    EntityDataPayload.<CharactersRecord>builder()
+                                            .copyIfAssigned(CHARACTERS.WORLD_ID, SESSIONS.WORLD_ID, sample)
+                                            .build()
+                            );
                             consumers.add(
                                     payload -> payload
                                             .set(SESSIONS.WORLD_ID, character.getWorldId())

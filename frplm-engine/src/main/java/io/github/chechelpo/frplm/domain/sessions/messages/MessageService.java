@@ -36,14 +36,15 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
             FieldValidator<MessagesRecord> validator,
             SessionService sessionService,
             ResponseService responseService,
-            SessionCharacterService sessionCharacterService) {
+            SessionCharacterService sessionCharacterService
+    ) {
         super(store, validator, eventBus);
         this.sessionService = sessionService;
         this.responseService = responseService;
         this.sessionCharacterService = sessionCharacterService;
     }
 
-    private SessionsRecord getSession(int sessionId){
+    private SessionsRecord getSession(int sessionId) {
         return sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow();
     }
 
@@ -78,28 +79,13 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")
     protected void beforeUpdate(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data, long operationID) {
         if (data.assigns(MESSAGES.ACTIVE_RESPONSE)) {
-            validateActiveResponse(target, data.require(MESSAGES.ACTIVE_RESPONSE));
+            validateActiveResponse(target, data.requireNonNull(MESSAGES.ACTIVE_RESPONSE));
             applyActiveResponseValues(target, data);
         }
-        //throwIfAssignsPromptButIsUserMessage(data);
-        //throwIfAssignsReasoningButIsUserMessage(data);
 
         super.beforeUpdate(target, data, operationID);
     }
 
-    private static void throwIfAssignsReasoningButIsUserMessage(EntityDataPayload<MessagesRecord> data) {
-        if (
-                data.assigns(MESSAGES.REASONING) &&
-                        !data.require(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
-        ) throw new InvalidValue("Can't assign reasoning to a user message");
-    }
-
-    private static void throwIfAssignsPromptButIsUserMessage(EntityDataPayload<MessagesRecord> data) {
-        if (
-                data.assigns(MESSAGES.REQUEST_JSON) &&
-                        !data.require(MESSAGES.ROLE).equals(ChatCompletionRole.ASSISTANT.wireValue())
-        ) throw new InvalidValue("Can't assign request_json to a user message");
-    }
 
     /**
      * Ignored if it's a user message. Ignored if the active response is already this response.
@@ -131,18 +117,19 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
     @Contract(mutates = "param2")
     private void applyActiveResponseValues(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
-        ResponsesRecord newActiveResponse = responseService.find(EntityKey.<ResponsesRecord>builder()
-                .set(RESPONSES.SESSION_ID, target.require(MESSAGES.SESSION_ID))
-                .set(RESPONSES.TICK_NUM, target.require(MESSAGES.TICK_NUM))
-                .set(RESPONSES.RESPONSE_NUM, data.require(MESSAGES.ACTIVE_RESPONSE))
+        ResponsesRecord newActiveResponse = responseService.require(EntityKey.<ResponsesRecord>builder()
+                .setNonNull(RESPONSES.SESSION_ID, MESSAGES.SESSION_ID, target)
+                .setNonNull(RESPONSES.TICK_NUM, MESSAGES.TICK_NUM, target)
+                .setNonNull(RESPONSES.RESPONSE_NUM, MESSAGES.ACTIVE_RESPONSE, data)
                 .build()
-        ).orElseThrow(notFound -> new EntityNotFound("Not Found when applying active response: " + notFound.toString(), Severity.SYSTEM));
+        );
 
-        data.set(MESSAGES.CONTENT, newActiveResponse.getContent());
-        data.set(MESSAGES.ACTIVE_RESPONSE, newActiveResponse.getResponseNum());
-        data.set(MESSAGES.REASONING, newActiveResponse.getReasoning());
-        data.set(MESSAGES.LOCATION_ID, newActiveResponse.getLocationId());
-        data.set(MESSAGES.TIME, newActiveResponse.getAdvancesTimeBy());
+        data
+                .set(MESSAGES.CONTENT, RESPONSES.CONTENT, newActiveResponse)
+                .set(MESSAGES.ACTIVE_RESPONSE, RESPONSES.RESPONSE_NUM, newActiveResponse)
+                .set(MESSAGES.REASONING, RESPONSES.REASONING, newActiveResponse)
+                .set(MESSAGES.LOCATION_ID, RESPONSES.LOCATION_ID, newActiveResponse)
+                .set(MESSAGES.TIME, RESPONSES.ADVANCES_TIME_BY, newActiveResponse);
     }
 
     @Override
@@ -180,8 +167,6 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<MessagesRecord> data, long operationID) {
         applyDefaultsOfLastMessage(data);
-        throwIfAssignsPromptButIsUserMessage(data);
-        throwIfAssignsReasoningButIsUserMessage(data);
 
         data.set(
                 MESSAGES.TICK_NUM,
@@ -285,8 +270,8 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
      */
     @Override
     protected void beforeDelete(@NotNull EntityKey<MessagesRecord> id, long operationID) {
-        int sessionId = id.require(MESSAGES.SESSION_ID);
-        int requestedTick = id.require(MESSAGES.TICK_NUM);
+        int sessionId = id.requireNonNull(MESSAGES.SESSION_ID);
+        int requestedTick = id.requireNonNull(MESSAGES.TICK_NUM);
 
         MessagesRecord lastMessage = getLastMessageOf(sessionId);
         int lastTick = lastMessage.getTickNum();
@@ -307,7 +292,7 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
     }
 
     private void applyDefaultsOfLastMessage(@NotNull EntityDataPayload<MessagesRecord> data) {
-        MessagesRecord lastMessage = getLastMessageOf(data.require(MESSAGES.SESSION_ID));
+        MessagesRecord lastMessage = getLastMessageOf(data.requireNonNull(MESSAGES.SESSION_ID));
         if (lastMessage != null) {
             log.trace("Applying last message defaults");
             if (!data.assigns(MESSAGES.LOCATION_ID))

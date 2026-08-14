@@ -164,11 +164,6 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
     }
 
     @Override
-    public String toString() {
-        return "Update object with assignments: \n " + assignments;
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
 
@@ -191,6 +186,15 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
                 );
             }
         });
+    }
+
+    public <O extends TableRecord<O>, T> @NotNull EntityDataPayload<R> set(
+            TableField<R, T> toField,
+            TableField<O, T> fromField,
+            O other
+    ){
+        assignments.put(toField, other.getValue(fromField));
+        return this;
     }
 
     public static final class Builder<Rec extends TableRecord<Rec>> {
@@ -280,13 +284,5 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
     }
 
 
-    private static String formatValue(Object value) {
-        return switch (value) {
-            case null -> "null";
-            case CharSequence charSequence -> "\"" + value + "\"";
-            case Character c -> "'" + value + "'";
-            default -> String.valueOf(value);
-        };
 
-    }
 }
