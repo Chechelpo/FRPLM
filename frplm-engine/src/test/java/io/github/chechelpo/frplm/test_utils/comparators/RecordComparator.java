@@ -22,18 +22,18 @@ public class RecordComparator<E extends TableRecord<E>, A extends TableRecord<A>
                 boolean isEqual
         ) implements Comparison<E,A,T> {
             @Override
-            public void assertComparison(E expected, A ignored){
+            public void assertComparison(E ignored, A actual){
                 if (isEqual)
                     Assertions.assertEquals(
                             expectedValue,
-                            expected.get(field),
-                            "Mismatch in value of %s for \n%s".formatted(field.getName(), expected)
+                            actual.get(field),
+                            "Mismatch in value of %s for \n%s".formatted(field.getName(), actual)
                     );
                 else
                     Assertions.assertNotEquals(
                             expectedValue,
-                            expected.get(field),
-                            "Mismatch in value of %s for \n%s".formatted(field.getName(), expected)
+                            actual.get(field),
+                            "Mismatch in value of %s for \n%s".formatted(field.getName(), actual)
                     );
             }
         }

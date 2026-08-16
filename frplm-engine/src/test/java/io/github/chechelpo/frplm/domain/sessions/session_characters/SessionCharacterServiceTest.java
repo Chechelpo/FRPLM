@@ -153,8 +153,6 @@ class SessionCharacterServiceTest {
                     ).orElseThrow();
             permCharacter = characterFixtures.getUpdatedRecord(permCharacter);
             sesCharacter = sesCharacterFixture.getUpdatedRecord(sesCharacter);
-            System.out.println(sesCharacter);
-            System.out.println(sesCharacterFixture.service().getAll());
             assertEquals(sndNewName, sesCharacter.getName());
             characterFixtures.service()
                     .update(
@@ -164,6 +162,11 @@ class SessionCharacterServiceTest {
             sesCharacter = sesCharacterFixture.getUpdatedRecord(sesCharacter);
             assertEquals(sndNewDescription, sesCharacter.getDescription());
         }
+    }
+
+    @Test
+    void rejectsUntraversableMovements(){
+        
     }
 
 }

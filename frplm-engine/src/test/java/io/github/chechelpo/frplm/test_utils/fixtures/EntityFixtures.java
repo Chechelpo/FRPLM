@@ -24,10 +24,8 @@ public abstract class EntityFixtures<R extends TableRecord<R>, S extends EntityS
     private final S service;
     private final RandomValuesGenerators<R> generator;
     private final Set<TableField<R, ?>> doNotGenerateFields;
-    protected final String seed;
 
     EntityFixtures(S service, EntityFixtureFactory fixtures, @NonNull String seed) {
-        this.seed = service.getTable().getUnqualifiedName() + seed;
         this.service = service;
         service.setLogLevel(Level.DEBUG);
         this.generator = new RandomValuesGenerators<>(seed, service.getFieldValidator());

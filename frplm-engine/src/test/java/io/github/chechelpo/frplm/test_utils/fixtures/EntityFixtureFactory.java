@@ -9,7 +9,10 @@ import io.github.chechelpo.frplm.domain.world.core.WorldService;
 import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.domain.world.location.LocationsService;
 import io.github.chechelpo.frplm.domain.world.region.RegionService;
+import org.jooq.Table;
 import org.springframework.boot.test.context.TestComponent;
+
+import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
 @TestComponent
 public class EntityFixtureFactory {
@@ -48,35 +51,35 @@ public class EntityFixtureFactory {
         return new LorebookFixtures(
                 lorebookService,
                 this,
-                seed
+                getCollisionFreeSeed(LOREBOOKS, seed)
         );
     }
     public WorldFixtures worlds(String seed){
         return new WorldFixtures(
                 worldService,
                 this,
-                seed
+                getCollisionFreeSeed(WORLDS, seed)
         );
     }
     public LocationFixtures locations(String seed){
         return new LocationFixtures(
                 locationsService,
                 this,
-                seed
+                getCollisionFreeSeed(LOCATIONS, seed)
         );
     }
     public RegionFixtures regions(String seed){
         return new RegionFixtures(
                 regionService,
                 this,
-                seed
+                getCollisionFreeSeed(REGION, seed)
         );
     }
     public CharacterFixtures characters(String seed){
         return new CharacterFixtures(
                 characterService,
                 this,
-                seed
+                getCollisionFreeSeed(CHARACTERS, seed)
         );
     }
 
@@ -84,7 +87,7 @@ public class EntityFixtureFactory {
         return new SessionCharacterFixture(
                 sessionCharacterService,
                 this,
-                seed
+                getCollisionFreeSeed(SESSION_CHARACTERS, seed)
         );
     }
 
@@ -92,7 +95,7 @@ public class EntityFixtureFactory {
         return new SessionFixtures(
                 sessionService,
                 this,
-                seed
+                getCollisionFreeSeed(SESSIONS, seed)
         );
     }
 
@@ -100,7 +103,7 @@ public class EntityFixtureFactory {
         return new MessageFixtures(
                 messageService,
                 this,
-                seed
+                getCollisionFreeSeed(MESSAGES, seed)
         );
     }
 
@@ -108,7 +111,11 @@ public class EntityFixtureFactory {
         return new EdgesFixtures(
                 edgeService,
                 this,
-                seed
+                getCollisionFreeSeed(LOCATION_EDGES, seed)
         );
+    }
+
+    private String getCollisionFreeSeed(Table<?> forTable, String baseSeed){
+        return forTable.getUnqualifiedName() + "-" + baseSeed;
     }
 }

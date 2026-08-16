@@ -118,6 +118,9 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
 
     <T> Assignment<R, T> getAssignment(TableField<R, T> field);
 
+    default boolean doesNotAssignAny(Collection<? extends TableField<R,?>> fields){
+        return !assignsAny(fields);
+    }
     default boolean assignsAny(Collection<? extends TableField<R, ?>> fields) {
         for (var field : fields) {
             if (assigns(field)) {
@@ -127,6 +130,7 @@ public sealed interface DataPayload<R extends TableRecord<R>> permits EntityKey,
 
         return false;
     }
+
     default void requireAssignments(Collection<? extends TableField<R, ?>> fields, boolean nonNull){
         for (TableField<R, ?> field : fields)
             requireAssignment(field, nonNull);

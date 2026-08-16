@@ -7,12 +7,11 @@ import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityReader;
 import io.github.chechelpo.frplm.core.entities.pseudo_services.EntityService;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
+import io.github.chechelpo.frplm.domain.world.edge.EdgeService;
 import io.github.chechelpo.frplm.events.EventBus;
 import io.github.chechelpo.frplm.exceptions.Severity;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.MovementsRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionCharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.exceptions.runtime.UnsupportedAction;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Result;
 import org.jspecify.annotations.NonNull;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.parser.Entity;
 import java.util.List;
+import java.util.Objects;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
 
@@ -28,6 +28,7 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
     private final LorebookService lorebookService;
     private final EntityReader<CharactersRecord> characterReader;
     private final SessionService sessionService;
+    private final EdgeService edgeService;
 
     SessionCharacterService(
             @NonNull SessionCharacterStore store,
@@ -35,13 +36,19 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
             @NotNull EventBus eventBus,
             LorebookService lorebookService,
             EntityReader<CharactersRecord> characterReader,
-            SessionService sessionService
+            SessionService sessionService,
+            EdgeService edgeService
     ) {
         super(store, validator, eventBus);
         this.lorebookService = lorebookService;
         this.characterReader = characterReader;
         this.sessionService = sessionService;
+        this.edgeService = edgeService;
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // UTILS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     public SessionCharactersRecord getCharacterOf(int sessionId, CharactersRecord characterRecord){
         return this.getOneMatching(
@@ -61,6 +68,11 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
                         .build()
         );
     }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // CREATION
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     @Override
     protected void beforeCreate(EntityDataPayload<SessionCharactersRecord> data, long operationID) {
         data.getAssignment(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID)
@@ -110,6 +122,41 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
                 .set(SESSION_CHARACTERS.NAME, record.getName())
                 .set(SESSION_CHARACTERS.CURRENT_LOCATION_ID, record.getStartingLocationId())
                 .set(SESSION_CHARACTERS.DESCRIPTION, record.getDescription());
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // UPDATE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Override
+    protected void beforeUpdate(@NotNull EntityKey<SessionCharactersRecord> target, EntityDataPayload<SessionCharactersRecord> data, long operationID) {
+        super.beforeUpdate(target, data, operationID);
+
+        data.getAssignment(SESSION_CHARACTERS.CURRENT_LOCATION_ID)
+                .ifAssigned(
+                        newLocationId -> {
+                            SessionCharactersRecord previousCharacter = this.require(target);
+                            if (Objects.equals(newLocationId, previousCharacter.getCurrentLocationId()))
+                                return;
+
+                            var findResult = edgeService.find(
+                                    EntityKey.<LocationEdgesRecord>builder()
+                                            .set(LOCATION_EDGES.WORLD_ID, previousCharacter.getWorldId())
+                                            .set(LOCATION_EDGES.FROM_LOCATION_ID, previousCharacter.getCurrentLocationId())
+                                            .set(LOCATION_EDGES.TO_LOCATION_ID, newLocationId)
+                                            .build()
+                            ).orElseThrow(
+                                    "Edge from location id %s to %s does not exist".formatted(previousCharacter.getCurrentLocationId(), newLocationId),
+                                    Severity.SYSTEM
+                            );
+
+                            if (!findResult.getTraversable())
+                                throw new UnsupportedAction(
+                                        "Edge from location id %s to %s is non-traversable".formatted(previousCharacter.getCurrentLocationId(), newLocationId),
+                                        Severity.USER
+                                );
+                        }
+                );
     }
 
     @Override

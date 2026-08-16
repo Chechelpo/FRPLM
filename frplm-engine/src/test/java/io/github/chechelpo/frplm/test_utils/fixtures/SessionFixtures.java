@@ -43,8 +43,8 @@ public final class SessionFixtures extends EntityFixtures<SessionsRecord, Sessio
                             );
                             consumers.add(
                                     payload -> payload
-                                            .set(SESSIONS.WORLD_ID, character.getWorldId())
-                                            .set(SESSIONS.USER_PERSONA_ID, character.getId())
+                                            .ifUnassignedSet(SESSIONS.WORLD_ID, character.getWorldId())
+                                            .ifUnassignedSet(SESSIONS.USER_PERSONA_ID, character.getId())
                             );
                         }
                 );

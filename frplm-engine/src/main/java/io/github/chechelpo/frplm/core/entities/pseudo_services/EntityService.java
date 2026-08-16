@@ -106,9 +106,8 @@ public abstract class EntityService<
         try {
             result = store.createAndGet(data);
         } catch (Exception e) {
-            log.error("Error creating entity with data {} \n {} \n Trace: \n", data.prettyPrint(), e.getMessage());
-            e.printStackTrace();
-            throw new UnexpectedException("New entity creation failed with data:  " + data, Severity.SYSTEM);
+            log.error("Error creating entity with data {} \n {} \n Trace: \n", data.tableString(), e.getMessage());
+            throw new UnexpectedException("New entity creation failed with data:  \n" + data.tableString(), Severity.SYSTEM);
         }
 
         afterSuccessfulCreate(result, operationID);
@@ -150,7 +149,10 @@ public abstract class EntityService<
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     protected void beforeRetrieve(@Nullable EntityKey<R> key, long operationID) {
-        if (key != null) fieldValidator.validateFullKey(key).orElseThrow();
+        if (key != null)
+            fieldValidator.validateFullKey(key)
+                    .ifUnknownFieldThrow("Non key field")
+                    .orElseThrow("Error while checking key while retrieving: \n" + key.tableString());
     }
 
     @Override
@@ -288,9 +290,9 @@ public abstract class EntityService<
         try {
             boolean success = store.update(target, update);
             if (!success)
-                return new UpdateResult.Failure<>(target, update, new IllegalStateException("Unexpected exception"));
+                return new UpdateResult.Failure<>(target, record, update, new IllegalStateException("Unexpected exception"));
         } catch (Exception e) {
-            return new UpdateResult.Failure<>(target, update, e);
+            return new UpdateResult.Failure<>(target, record, update, e);
         }
 
         afterSuccessfulUpdate(record, target, update, operationID);

@@ -21,6 +21,9 @@ public final class SessionCharacterFields extends EntityControllerFieldValidator
         return List.of(
                 FieldInfo.builder(SESSION_CHARACTERS.SESSION_ID)
                         .requireOnCreate()
+                        .build(),
+                FieldInfo.builder(SESSION_CHARACTERS.WORLD_ID)
+                        .readOnly()
                         .build()
                 );
     }

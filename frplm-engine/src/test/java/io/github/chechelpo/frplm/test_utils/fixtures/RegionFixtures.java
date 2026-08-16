@@ -37,7 +37,7 @@ public class RegionFixtures extends EntityFixtures<RegionRecord, RegionService> 
         WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
         DoActions<RegionRecord> actions = DoActions.instantiate(1);
         actions.add(
-                payload -> payload.set(REGION.WORLD_ID, world.getId())
+                payload -> payload.ifUnassignedSet(REGION.WORLD_ID, world.getId())
         );
         return actions;
     }

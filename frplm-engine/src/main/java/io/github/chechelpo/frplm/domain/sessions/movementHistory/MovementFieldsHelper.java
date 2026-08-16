@@ -11,7 +11,7 @@ import java.util.List;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.MOVEMENTS;
 
 @Component
-public final class MovementFieldsHelper extends EntityFieldsValidator<MovementsRecord> {
+final class MovementFieldsHelper extends EntityFieldsValidator<MovementsRecord> {
     MovementFieldsHelper() {
         super(MOVEMENTS);
     }

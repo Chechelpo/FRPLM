@@ -6,6 +6,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
+import io.github.chechelpo.frplm.test_utils.comparators.RecordComparator;
 import io.github.chechelpo.frplm.test_utils.fixtures.CharacterFixtures;
 import io.github.chechelpo.frplm.test_utils.fixtures.EntityFixtureFactory;
 import io.github.chechelpo.frplm.test_utils.fixtures.MessageFixtures;
@@ -38,7 +39,7 @@ class MessageEventsTest {
 
     @Test
     @SimulithIntegrationTest
-    void testFirstMessageCreation(){
+    void testWelcome_MessageCreation(){
         String seed = "test-message-creation";
 
         CharacterFixtures characterFixtures = fixtureFactory.characters(seed);
@@ -64,7 +65,10 @@ class MessageEventsTest {
         assertEquals(1, messages.size());
         MessagesRecord firstMessage = messages.getFirst();
 
-        assertEquals(userCharacter.getWelcomeMessage(), firstMessage.getContent());
-        assertEquals(userCharacter.getStartingLocationId(), firstMessage.getLocationId());
+        RecordComparator.compare(userCharacter, firstMessage)
+                .equals(CHARACTERS.WELCOME_MESSAGE, MESSAGES.CONTENT)
+                .equals(CHARACTERS.STARTING_LOCATION_ID, MESSAGES.LOCATION_ID)
+                .equals(CHARACTERS.WORLD_ID, MESSAGES.WORLD_ID)
+                .execute();
     }
 }

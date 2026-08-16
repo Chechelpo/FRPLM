@@ -62,27 +62,29 @@ final class SessionCharacterEvents {
     @EventListener
     public void onPermanentUpdate(CRUDCommittedEvent.UpdatedEntity<?> rawEvent) {
         if (rawEvent.isNotEventOf(CHARACTERS)) return;
+        //noinspection unchecked
+        internalOnPermanentUpdate(
+                (CRUDCommittedEvent.UpdatedEntity<CharactersRecord>) rawEvent
+        );
+    }
 
-        CRUDCommittedEvent.UpdatedEntity<CharactersRecord> event = (CRUDCommittedEvent.UpdatedEntity<CharactersRecord>) rawEvent;
-        Result<SessionCharactersRecord> instances =
-                sessionCharacterService.instancesOf(event.previousData());
+    private void internalOnPermanentUpdate(CRUDCommittedEvent.UpdatedEntity<CharactersRecord> event){
         EntityDataPayload<CharactersRecord> data = event.updatedData();
-        log.debug("Instances: {}",sessionCharacterService.instancesOf(event.previousData()));
-        if (!data.assignsAny(List.of(CHARACTERS.NAME, CHARACTERS.DESCRIPTION))) return;
+        if (data.doesNotAssignAny(List.of(CHARACTERS.NAME, CHARACTERS.DESCRIPTION))) return;
 
         sessionCharacterService.instancesOf(event.previousData())
                 .forEach(
-                sessionCharacter -> {
-                    log.debug("Instance of:\n{} \n is: \n{}", event.previousData(), sessionCharacter);
-                    if (sessionCharacter.getKeepUpdated())
-                        sessionCharacterService.update(
-                                sessionCharacterService.keyOf(sessionCharacter),
-                                EntityDataPayload.<SessionCharactersRecord>builder()
-                                        .copyIfAssigned(SESSION_CHARACTERS.NAME, CHARACTERS.NAME, data)
-                                        .copyIfAssigned(SESSION_CHARACTERS.DESCRIPTION, CHARACTERS.DESCRIPTION, data)
-                                        .build()
-                        ).orElseThrow("Couldn't keep instance of character up to date");
-                }
-        );
+                        sessionCharacter -> {
+                            log.debug("Instance of:\n{} \n is: \n{}", event.previousData(), sessionCharacter);
+                            if (sessionCharacter.getKeepUpdated())
+                                sessionCharacterService.update(
+                                        sessionCharacterService.keyOf(sessionCharacter),
+                                        EntityDataPayload.<SessionCharactersRecord>builder()
+                                                .copyIfAssigned(SESSION_CHARACTERS.NAME, CHARACTERS.NAME, data)
+                                                .copyIfAssigned(SESSION_CHARACTERS.DESCRIPTION, CHARACTERS.DESCRIPTION, data)
+                                                .build()
+                                ).orElseThrow("Couldn't keep instance of character up to date");
+                        }
+                );
     }
 }

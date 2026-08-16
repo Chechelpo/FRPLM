@@ -44,6 +44,10 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         this.sessionCharacterService = sessionCharacterService;
     }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // UTILS
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     private SessionsRecord getSession(int sessionId) {
         return sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow();
     }
@@ -75,94 +79,30 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         return store.getRange(sessionId, from, to);
     }
 
-    @Override
-    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
-    protected void beforeUpdate(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data, long operationID) {
-        if (data.assigns(MESSAGES.ACTIVE_RESPONSE)) {
-            validateActiveResponse(target, data.requireNonNull(MESSAGES.ACTIVE_RESPONSE));
-            applyActiveResponseValues(target, data);
-        }
-
-        super.beforeUpdate(target, data, operationID);
+    @Transactional(readOnly = true)
+    public List<MessagesRecord> getMessages(@NotNull SessionsRecord session) {
+        return this.getMatching(EntityKey.of(MESSAGES.SESSION_ID, session.getId()));
     }
 
-
-    /**
-     * Ignored if it's a user message. Ignored if the active response is already this response.
-     */
-    void validateActiveResponse(EntityKey<MessagesRecord> target, short active_response) {
-        int sessionId = target.requireNonNull(MESSAGES.SESSION_ID);
-        int tick_num = target.requireNonNull(MESSAGES.TICK_NUM);
-        MessagesRecord record = this.find(target)
-                .orElseThrow(notFound -> {
-                    log.error("No message found for session id {} tick num {}", sessionId, tick_num);
-                    return new EntityNotFound("Message not found when setting active response " + notFound.toString(), Severity.EXPECTED);
-                });
-
-        if (record.getRole().equals(ChatCompletionRole.USER.wireValue())) {
-            log.debug("Attempted changing the response number of a user message");
-            return;
-        }
-        if (record.getActiveResponse() == active_response) {
-            log.debug("Response {} of message (session: {} , tick: {}) is already active", active_response, sessionId, tick_num);
-            return;
-        }
-
-        int maxResponseNum = record.getResponseNum();
-        if (maxResponseNum < active_response) {
-            log.error("Max number response is {} yet attempted to change to {}", maxResponseNum, active_response);
-            throw new InvalidValue("There's no response with number " + active_response);
-        }
+    @Transactional(readOnly = true)
+    public ResponsesRecord getActiveResponseOf(@NotNull EntityKey<MessagesRecord> key) {
+        MessagesRecord record = this.find(key).orElseThrow(Severity.SYSTEM);
+        return getActiveResponseOf(record);
     }
 
-    @Contract(mutates = "param2")
-    private void applyActiveResponseValues(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
-        ResponsesRecord newActiveResponse = responseService.require(EntityKey.<ResponsesRecord>builder()
-                .setNonNull(RESPONSES.SESSION_ID, MESSAGES.SESSION_ID, target)
-                .setNonNull(RESPONSES.TICK_NUM, MESSAGES.TICK_NUM, target)
-                .setNonNull(RESPONSES.RESPONSE_NUM, MESSAGES.ACTIVE_RESPONSE, data)
-                .build()
-        );
-
-        data
-                .set(MESSAGES.CONTENT, RESPONSES.CONTENT, newActiveResponse)
-                .set(MESSAGES.ACTIVE_RESPONSE, RESPONSES.RESPONSE_NUM, newActiveResponse)
-                .set(MESSAGES.REASONING, RESPONSES.REASONING, newActiveResponse)
-                .set(MESSAGES.LOCATION_ID, RESPONSES.LOCATION_ID, newActiveResponse)
-                .set(MESSAGES.TIME, RESPONSES.ADVANCES_TIME_BY, newActiveResponse);
+    public ResponsesRecord getActiveResponseOf(@NotNull MessagesRecord record) {
+        return responseService.find(
+                EntityKey.<ResponsesRecord>builder()
+                        .set(RESPONSES.SESSION_ID, record.getSessionId())
+                        .set(RESPONSES.TICK_NUM, record.getTickNum())
+                        .set(RESPONSES.RESPONSE_NUM, record.getActiveResponse())
+                        .build()
+        ).orElseThrow("Couldn't find active response of message: \n" + record, Severity.SYSTEM);
     }
 
-    @Override
-    protected void afterSuccessfulUpdate(MessagesRecord previousData, EntityKey<MessagesRecord> key, EntityDataPayload<MessagesRecord> updated, long operationID) {
-        if (
-                !updated.assigns(MESSAGES.ACTIVE_RESPONSE) &&
-                        updated.assigns(MESSAGES.LOCATION_ID) || updated.assigns(MESSAGES.CONTENT) || updated.assigns(MESSAGES.TIME)
-        )
-            updateActiveResponse(key, updated);
-
-        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
-    }
-
-    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
-    private void updateActiveResponse(EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
-        ResponsesRecord currentActiveResponse = this.getActiveResponseOf(target);
-        EntityDataPayload<ResponsesRecord> changed = EntityDataPayload.<ResponsesRecord>builder().build();
-
-        data.getAssignment(MESSAGES.LOCATION_ID)
-                .ifAssignedNotNull(locationId -> changed.set(RESPONSES.LOCATION_ID, locationId));
-
-        data.getAssignment(MESSAGES.CONTENT)
-                .ifAssignedNotNull(content -> changed.set(RESPONSES.CONTENT, content));
-
-        data.getAssignment(MESSAGES.REASONING)
-                .ifAssignedNotNull(reasoning -> changed.set(RESPONSES.REASONING, reasoning));
-
-        data.getAssignment(MESSAGES.TIME)
-                .ifAssignedNotNull(time -> changed.set(RESPONSES.ADVANCES_TIME_BY, time));
-
-        responseService.update(responseService.keyOf(currentActiveResponse), changed)
-                .orElseThrow("Couldn't update active response of message: " + target);
-    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // CREATE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Override
     protected void beforeCreate(@NotNull EntityDataPayload<MessagesRecord> data, long operationID) {
@@ -207,11 +147,9 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         super.afterSuccessfulCreate(data, operationID);
     }
 
-    @Transactional
-    public void registerNewResponse(int sessionId, int tick_num, String content) {
-        registerNewResponse(sessionId, tick_num, content, null);
-    }
-
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // New response registration
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /**
      * Rejects new responses for:
      * <pre>
@@ -265,6 +203,99 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
         ).orElseThrow();
     }
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // UPDATE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Override
+    protected void beforeUpdate(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data, long operationID) {
+        if (data.assigns(MESSAGES.ACTIVE_RESPONSE)) {
+            validateActiveResponse(target, data.requireNonNull(MESSAGES.ACTIVE_RESPONSE));
+            applyActiveResponseValues(target, data);
+        }
+
+        super.beforeUpdate(target, data, operationID);
+    }
+
+    @Override
+    protected void afterSuccessfulUpdate(MessagesRecord previousData, EntityKey<MessagesRecord> key, EntityDataPayload<MessagesRecord> updated, long operationID) {
+        if (
+                !updated.assigns(MESSAGES.ACTIVE_RESPONSE) &&
+                        updated.assignsAny(List.of(MESSAGES.LOCATION_ID, MESSAGES.CONTENT, MESSAGES.TIME))
+        )
+            updateActiveResponse(key, updated);
+
+        super.afterSuccessfulUpdate(previousData, key, updated, operationID);
+    }
+
+    /**
+     * Ignored if it's a user message. Ignored if the active response is already this response.
+     */
+    void validateActiveResponse(EntityKey<MessagesRecord> target, short active_response) {
+        int sessionId = target.requireNonNull(MESSAGES.SESSION_ID);
+        int tick_num = target.requireNonNull(MESSAGES.TICK_NUM);
+        MessagesRecord record = this.find(target)
+                .orElseThrow(notFound -> {
+                    log.error("No message found for session id {} tick num {}", sessionId, tick_num);
+                    return new EntityNotFound("Message not found when setting active response " + notFound.toString(), Severity.EXPECTED);
+                });
+
+        if (record.getRole().equals(ChatCompletionRole.USER.wireValue())) {
+            log.debug("Attempted changing the response number of a user message");
+            return;
+        }
+        if (record.getActiveResponse() == active_response) {
+            log.debug("Response {} of message (session: {} , tick: {}) is already active", active_response, sessionId, tick_num);
+            return;
+        }
+
+        int maxResponseNum = record.getResponseNum();
+        if (maxResponseNum < active_response) {
+            log.error("Max number response is {} yet attempted to change to {}", maxResponseNum, active_response);
+            throw new InvalidValue("There's no response with number " + active_response);
+        }
+    }
+
+    @Contract(mutates = "param2")
+    private void applyActiveResponseValues(@NotNull EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
+        ResponsesRecord newActiveResponse = responseService.require(EntityKey.<ResponsesRecord>builder()
+                .setNonNull(RESPONSES.SESSION_ID, MESSAGES.SESSION_ID, target)
+                .setNonNull(RESPONSES.TICK_NUM, MESSAGES.TICK_NUM, target)
+                .setNonNull(RESPONSES.RESPONSE_NUM, MESSAGES.ACTIVE_RESPONSE, data)
+                .build()
+        );
+
+        data
+                .set(MESSAGES.CONTENT, RESPONSES.CONTENT, newActiveResponse)
+                .set(MESSAGES.ACTIVE_RESPONSE, RESPONSES.RESPONSE_NUM, newActiveResponse)
+                .set(MESSAGES.REASONING, RESPONSES.REASONING, newActiveResponse)
+                .set(MESSAGES.LOCATION_ID, RESPONSES.LOCATION_ID, newActiveResponse)
+                .set(MESSAGES.TIME, RESPONSES.ADVANCES_TIME_BY, newActiveResponse);
+    }
+
+    @SuppressWarnings("SpringTransactionalMethodCallsInspection")
+    private void updateActiveResponse(EntityKey<MessagesRecord> target, EntityDataPayload<MessagesRecord> data) {
+        ResponsesRecord currentActiveResponse = this.getActiveResponseOf(target);
+        EntityDataPayload<ResponsesRecord> changed = EntityDataPayload.<ResponsesRecord>builder().build();
+
+        data.getAssignment(MESSAGES.LOCATION_ID)
+                .ifAssignedNotNull(locationId -> changed.set(RESPONSES.LOCATION_ID, locationId));
+
+        data.getAssignment(MESSAGES.CONTENT)
+                .ifAssignedNotNull(content -> changed.set(RESPONSES.CONTENT, content));
+
+        data.getAssignment(MESSAGES.REASONING)
+                .ifAssignedNotNull(reasoning -> changed.set(RESPONSES.REASONING, reasoning));
+
+        data.getAssignment(MESSAGES.TIME)
+                .ifAssignedNotNull(time -> changed.set(RESPONSES.ADVANCES_TIME_BY, time));
+
+        responseService.update(responseService.keyOf(currentActiveResponse), changed)
+                .orElseThrow("Couldn't update active response of message: " + target);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // DELETE
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     /**
      * Simply checks if this message is the last one before deleting
      */
@@ -293,53 +324,13 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
 
     private void applyDefaultsOfLastMessage(@NotNull EntityDataPayload<MessagesRecord> data) {
         MessagesRecord lastMessage = getLastMessageOf(data.requireNonNull(MESSAGES.SESSION_ID));
-        if (lastMessage != null) {
-            log.trace("Applying last message defaults");
-            if (!data.assigns(MESSAGES.LOCATION_ID))
-                data.set(MESSAGES.LOCATION_ID, lastMessage.getLocationId());
+        if (lastMessage == null) return;
 
-            if (!data.assigns(MESSAGES.TIME))
-                data.set(MESSAGES.TIME, lastMessage.getTime());
+        log.trace("Applying last message defaults");
+        data
+                .ifUnassignedSet(MESSAGES.LOCATION_ID, lastMessage.getLocationId())
+                .ifUnassignedSet(MESSAGES.TIME, lastMessage.getTime())
+                .ifUnassignedSet(MESSAGES.WORLD_ID, lastMessage.getWorldId());
 
-            if (!data.assigns(MESSAGES.WORLD_ID))
-                data.set(MESSAGES.WORLD_ID, lastMessage.getWorldId());
-            else if (!Objects.equals(data.require(MESSAGES.WORLD_ID), lastMessage.getWorldId())) {
-                log.error("WORLD ID mismatch: \n last: {} vs \n new: {}",
-                        lastMessage.getWorldId(),
-                        data.require(MESSAGES.WORLD_ID)
-                );
-                throw new IllegalArgumentException("World id mismatch");
-            }
-        }
-    }
-
-
-    @Transactional(readOnly = true)
-    public List<MessagesRecord> getMessages(@NotNull SessionsRecord session) {
-        return this.getMatching(EntityKey.of(MESSAGES.SESSION_ID, session.getId()));
-    }
-
-    @Transactional(readOnly = true)
-    public ResponsesRecord getActiveResponseOf(@NotNull EntityKey<MessagesRecord> key) {
-        MessagesRecord record = this.find(key).orElseThrow(Severity.SYSTEM);
-        return getActiveResponseOf(record);
-    }
-
-    public ResponsesRecord getActiveResponseOf(@NotNull MessagesRecord record) {
-        return responseService.find(
-                EntityKey.<ResponsesRecord>builder()
-                        .set(RESPONSES.SESSION_ID, record.getSessionId())
-                        .set(RESPONSES.TICK_NUM, record.getTickNum())
-                        .set(RESPONSES.RESPONSE_NUM, record.getActiveResponse())
-                        .build()
-        ).orElseThrow("Couldn't find active response of message: \n" + record, Severity.SYSTEM);
-    }
-
-    public boolean isFirstMessage(@NotNull MessagesRecord record) {
-        return record.getTickNum() == FIRST_MESSAGE_TICK_NUM;
-    }
-
-    public boolean isFirstMessage(int tickNum) {
-        return tickNum == FIRST_MESSAGE_TICK_NUM;
     }
 }

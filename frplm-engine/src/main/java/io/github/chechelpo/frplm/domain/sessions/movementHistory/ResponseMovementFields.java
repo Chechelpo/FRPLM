@@ -11,11 +11,10 @@ import java.util.List;
 import static io.github.chechelpo.frplm.jooq.generated.Tables.RESPONSE_LOCATION_CHANGES;
 
 @Component
-public class ResponseMovementFields extends EntityFieldsValidator<ResponseLocationChangesRecord> {
-    protected ResponseMovementFields() {
+final class ResponseMovementFields extends EntityFieldsValidator<ResponseLocationChangesRecord> {
+    ResponseMovementFields() {
         super(RESPONSE_LOCATION_CHANGES);
     }
-
     @Override
     protected List<FieldInfo<ResponseLocationChangesRecord, ?>> getCustom() {
         return List.of();

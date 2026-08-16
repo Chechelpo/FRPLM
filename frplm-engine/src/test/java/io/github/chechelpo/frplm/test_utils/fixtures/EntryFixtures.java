@@ -36,7 +36,7 @@ public class EntryFixtures extends EntityFixtures<EntryRecord, EntryService> {
                             LorebooksRecord lorebook = lorebookFixtures.addAndCreateTo(EntityDataPayload.empty());
                             doActions.add(
                                     payload ->
-                                            payload.set(ENTRY.LOREBOOK_ID, LOREBOOKS.ID, lorebook)
+                                            payload.ifUnassignedSet(ENTRY.LOREBOOK_ID, lorebook.getId())
                             );
                         }
                 );

@@ -50,13 +50,14 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
                 .build();
     }
 
-    public <T> void ifUnassignedSet(
+    public <T> EntityDataPayload<R> ifUnassignedSet(
             TableField<R, T> field,
             T value
     ) {
         if (!assigns(field)) {
             set(field, value);
         }
+        return this;
     }
 
     public <T> void ifUnassignedGet(
@@ -68,6 +69,17 @@ public final class EntityDataPayload<R extends TableRecord<R>> implements DataPa
         }
     }
 
+    public <T, O extends TableRecord<O>> EntityDataPayload<R> ifAssignedSet(
+            TableField<R,T> toField,
+            TableField<O,T> fromField,
+            DataPayload<O> other
+    ){
+        other.getAssignment(fromField)
+                .ifAssigned(
+                        value -> this.assignments.put(toField, value)
+                );
+        return this;
+    }
 
     @Override
     public boolean isEmpty() {

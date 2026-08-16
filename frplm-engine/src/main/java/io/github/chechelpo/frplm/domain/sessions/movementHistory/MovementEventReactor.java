@@ -39,11 +39,15 @@ class MovementEventReactor {
 
         int characterId = event.target().requireNonNull(SESSION_CHARACTERS.ID);
         int sessionId = event.target().requireNonNull(SESSION_CHARACTERS.SESSION_ID);
+        int previousLocationId = event.previousData().getCurrentLocationId();
         int nextLocationId = event.updatedData().requireNonNull(SESSION_CHARACTERS.CURRENT_LOCATION_ID);
 
         SessionsRecord session = sessionService.find(EntityKey.of(SESSIONS.ID, sessionId)).orElseThrow();
         MessagesRecord currentMessage = messageService.getLastMessageOf(sessionId);
         ResponsesRecord activeResponse = messageService.getActiveResponseOf(currentMessage);
+
+        if (session.getWorldId() != event.previousData().getWorldId())
+            throw new IllegalStateException("Invalid world state");
 
         EntityKey<MovementsRecord> key = EntityKey.<MovementsRecord>builder()
                 .set(MOVEMENTS.SESSION_ID, sessionId)
@@ -55,12 +59,10 @@ class MovementEventReactor {
                 .ifNotFound(ignored ->
                             movementsService.createAndGet(
                                     EntityDataPayload.<MovementsRecord>builder()
-                                            .set(MOVEMENTS.SESSION_ID, sessionId)
-                                            .set(MOVEMENTS.AT_TICK, currentMessage.getTickNum())
-                                            .set(MOVEMENTS.SES_CHARACTER_ID, characterId)
+                                            .copyAll(key)
 
                                             .set(MOVEMENTS.WORLD_ID, session.getWorldId())
-                                            .set(MOVEMENTS.PREVIOUS_LOCATION_ID, event.previousData().getCurrentLocationId())
+                                            .set(MOVEMENTS.PREVIOUS_LOCATION_ID, previousLocationId)
 
                                             .build()
                             )
@@ -78,6 +80,7 @@ class MovementEventReactor {
                         responseMovementService.createAndGet(
                                 EntityDataPayload.<ResponseLocationChangesRecord>builder()
                                         .copyAll(responseKey)
+                                        .set(RESPONSE_LOCATION_CHANGES.WORLD_ID, session.getWorldId())
                                         .set(RESPONSE_LOCATION_CHANGES.LOCATION_ID, nextLocationId)
                                         .build()
                         )
@@ -85,8 +88,12 @@ class MovementEventReactor {
                 .ifFound(
                         ignored -> responseMovementService.update(
                                 responseKey,
-                                EntityDataPayload.of(RESPONSE_LOCATION_CHANGES.LOCATION_ID, nextLocationId)
+                                EntityDataPayload.<ResponseLocationChangesRecord>builder()
+                                        .set(RESPONSE_LOCATION_CHANGES.LOCATION_ID, nextLocationId)
+                                        .set(RESPONSE_LOCATION_CHANGES.WORLD_ID, session.getWorldId())
+                                        .build()
                         )
+                                .orElseThrow()
                 );
     }
 

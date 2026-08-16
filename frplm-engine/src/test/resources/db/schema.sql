@@ -717,7 +717,6 @@ CREATE TABLE IF NOT EXISTS responses
     CONSTRAINT fk_responses_to_world FOREIGN KEY (world_id) REFERENCES WORLDS (id) ON DELETE CASCADE,
     CONSTRAINT fk_responses_locations FOREIGN KEY (world_id, location_id) REFERENCES LOCATIONS (world_id, id),
 
-    CONSTRAINT chk_tick_num_valid CHECK (tick_num >= 0),
     CONSTRAINT chck_response_num_valid CHECK (response_num >= 0)
 );
 

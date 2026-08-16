@@ -10,17 +10,18 @@ import org.jspecify.annotations.NonNull;
 import java.util.Set;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.MESSAGES;
+import static io.github.chechelpo.frplm.jooq.generated.Tables.SESSIONS;
 
 public class MessageFixtures extends EntityFixtures<MessagesRecord, MessageService> {
     private final SessionFixtures sessionFixtures;
     MessageFixtures(MessageService service, EntityFixtureFactory fixtures, @NonNull String seed) {
         super(service, fixtures, seed);
-        sessionFixtures = fixtures.sessions(this.seed);
+        sessionFixtures = fixtures.sessions(seed);
     }
 
     @Override
     protected Set<TableField<MessagesRecord, ?>> doNotGenerateFields() {
-        return Set.of(MESSAGES.RESPONSE_NUM, MESSAGES.ACTIVE_RESPONSE, MESSAGES.REQUEST_JSON);
+        return Set.of(MESSAGES.TICK_NUM,MESSAGES.RESPONSE_NUM, MESSAGES.ACTIVE_RESPONSE, MESSAGES.REQUEST_JSON);
     }
 
     @Override
@@ -30,10 +31,14 @@ public class MessageFixtures extends EntityFixtures<MessagesRecord, MessageServi
         sample.getAssignment(MESSAGES.SESSION_ID)
                 .ifUnassignedRun(
                         () -> {
-                            SessionsRecord session = sessionFixtures.createOne();
+                            SessionsRecord session = sessionFixtures.createOne(
+                                    EntityDataPayload.<SessionsRecord>builder()
+                                            .copyIfAssigned(SESSIONS.WORLD_ID, MESSAGES.WORLD_ID, sample)
+                                            .build()
+                            );
                             actions.add(
                                     payload ->
-                                            payload.set(MESSAGES.SESSION_ID, session.getId())
+                                            payload.ifUnassignedSet(MESSAGES.SESSION_ID, session.getId())
                             );
                         }
                 );

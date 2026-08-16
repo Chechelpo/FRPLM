@@ -18,8 +18,8 @@ public class CharacterFixtures extends EntityFixtures<CharactersRecord, Characte
 
     CharacterFixtures(CharacterService service, EntityFixtureFactory fixtureFactory, @NonNull String seed) {
         super(service, fixtureFactory, seed);
-        this.worldFixtures = fixtureFactory.worlds(seed + "-worlds");
-        this.locationFixtures = fixtureFactory.locations(seed + "-locations");
+        this.worldFixtures = fixtureFactory.worlds(seed);
+        this.locationFixtures = fixtureFactory.locations(seed);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class CharacterFixtures extends EntityFixtures<CharactersRecord, Characte
                             WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
                             sample.set(CHARACTERS.WORLD_ID, world.getId());
                             consumers.add(
-                                    payload -> payload.set(CHARACTERS.WORLD_ID, world.getId())
+                                    payload -> payload.ifUnassignedSet(CHARACTERS.WORLD_ID, world.getId())
                             );
                         }
                 );
@@ -47,8 +47,9 @@ public class CharacterFixtures extends EntityFixtures<CharactersRecord, Characte
                             );
                             consumers.add(
                                     payload ->
-                                            payload.set(CHARACTERS.WORLD_ID, location.getWorldId())
-                                                    .set(CHARACTERS.STARTING_LOCATION_ID, location.getId())
+                                            payload
+                                                    .ifUnassignedSet(CHARACTERS.WORLD_ID, location.getWorldId())
+                                                    .ifUnassignedSet(CHARACTERS.STARTING_LOCATION_ID, location.getId())
                             );
                         }
                 );

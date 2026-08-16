@@ -127,10 +127,10 @@ public interface EntityReader<R extends TableRecord<R>> {
              * message or a {@code log.debug(...)} line.
              */
             public String toDebugString() {
-                return "No %s entity found; \nkey=%s"
+                return "No %s entity found; \nkey=\n%s"
                         .formatted(
                                 target == null || target.isEmpty() ? "" : recordTypeName(),
-                                target
+                                target == null ? "null key" : target.tableString()
                         );
             }
 

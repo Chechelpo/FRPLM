@@ -36,7 +36,7 @@ public class LocationFixtures extends EntityFixtures<LocationsRecord, LocationsS
                             WorldsRecord world = worldFixtures.addAndCreateTo(EntityDataPayload.empty());
                             consumers.add(
                                     payload ->
-                                            payload.set(LOCATIONS.WORLD_ID, world.getId())
+                                            payload.ifUnassignedSet(LOCATIONS.WORLD_ID, world.getId())
                             );
                         }
                 );
@@ -47,7 +47,7 @@ public class LocationFixtures extends EntityFixtures<LocationsRecord, LocationsS
                             RegionRecord region = regionFixtures.createOne(REGION.WORLD_ID, sample.requireNonNull(LOCATIONS.WORLD_ID));
                             consumers.add(
                                     payload ->
-                                            payload.set(LOCATIONS.REGION_ID, region.getId())
+                                            payload.ifUnassignedSet(LOCATIONS.REGION_ID, region.getId())
                             );
                         }
                 );
