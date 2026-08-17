@@ -143,7 +143,7 @@ public sealed interface FieldActionResult<R extends TableRecord<R>, D extends Da
 
         @Override
         public String debugString() {
-            return "Payload is missing field " + field.getName() + ". Payload: \n" + payload.toString();
+            return "Payload is missing field " + field.getName() + ".\nPayload: \n" + payload.tableString();
         }
     }
 

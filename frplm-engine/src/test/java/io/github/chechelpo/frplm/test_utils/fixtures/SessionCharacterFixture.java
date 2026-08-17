@@ -2,6 +2,7 @@ package io.github.chechelpo.frplm.test_utils.fixtures;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.domain.sessions.session_characters.SessionCharacterService;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.LocationsRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionCharactersRecord;
 import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
 import org.jetbrains.annotations.Contract;
@@ -37,8 +38,8 @@ public final class SessionCharacterFixture extends EntityFixtures<SessionCharact
                     EntityDataPayload<SessionsRecord> sessionPayload = EntityDataPayload.empty();
                     if (sample.assigns(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID))
                         sessionPayload.set(SESSIONS.WORLD_ID, sample.requireNonNull(SESSION_CHARACTERS.WORLD_ID));
-                    sessionPayload
-                            .ifAssignedSet(SESSIONS.WORLD_ID, SESSION_CHARACTERS.WORLD_ID, sample);
+                    sessionPayload.ifAssignedSet(SESSIONS.WORLD_ID, SESSION_CHARACTERS.WORLD_ID, sample);
+
                     SessionsRecord session = sessionFixtures.createOne(sessionPayload);
 
                     actions.add(
@@ -66,5 +67,14 @@ public final class SessionCharacterFixture extends EntityFixtures<SessionCharact
                 );*/
 
         return actions;
+    }
+
+    public void move(SessionCharactersRecord character, LocationsRecord toLocation) {
+        if (character.getWorldId() != toLocation.getWorldId())
+            throw new IllegalStateException("Mismatch in world");
+        service().update(
+                SESSION_CHARACTERS.CURRENT_LOCATION_ID, toLocation.getId(),
+                character
+        ).orElseThrow();
     }
 }

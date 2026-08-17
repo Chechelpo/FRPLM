@@ -1,6 +1,7 @@
 package io.github.chechelpo.frplm.core.entities.fields;
 
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Named;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableRecord;
@@ -191,8 +192,17 @@ public abstract class EntityFieldsValidator<R extends TableRecord<R>> implements
 
         if (!payload.assignments().keySet().containsAll(requiredInstantiationFields))
             return FieldActionResult.missingField(
-                    "Missing creation fields.\n Expected: %s \nGot: %s"
-                            .formatted(requiredInstantiationFields, payload.assignments().keySet()),
+                    "Missing creation fields.\n     Expected: %s \n     Got: %s"
+                            .formatted(
+                                    requiredInstantiationFields
+                                            .stream()
+                                            .map(Named::getUnqualifiedName)
+                                            .toList(),
+                                    payload.assignments()
+                                            .keySet()
+                                            .stream()
+                                            .map(Named::getUnqualifiedName)
+                                            .toList()),
                     requiredInstantiationFields.stream()
                             .filter(instField -> !payload.assigns(instField))
                             .findFirst().get(),

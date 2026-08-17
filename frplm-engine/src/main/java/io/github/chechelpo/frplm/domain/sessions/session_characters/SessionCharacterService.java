@@ -59,6 +59,14 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
                         .build()
         ).resolve();
     }
+    public SessionCharactersRecord getUserCharacterOf(SessionsRecord session){
+        return this.getOneMatching(
+                EntityDataPayload.<SessionCharactersRecord>builder()
+                        .set(SESSION_CHARACTERS.SESSION_ID, session.getId())
+                        .set(SESSION_CHARACTERS.PERMANENT_CHARACTER_ID, session.getUserPersonaId())
+                        .build()
+        ).resolve();
+    }
 
     public Result<SessionCharactersRecord> instancesOf(CharactersRecord charactersRecord){
         return this.getMatching(
@@ -138,6 +146,11 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
                             SessionCharactersRecord previousCharacter = this.require(target);
                             if (Objects.equals(newLocationId, previousCharacter.getCurrentLocationId()))
                                 return;
+                            SessionsRecord session = sessionService.require(
+                                    EntityKey.<SessionsRecord>builder()
+                                            .set(SESSIONS.ID, previousCharacter.getSessionId())
+                                            .build()
+                            );
 
                             var findResult = edgeService.find(
                                     EntityKey.<LocationEdgesRecord>builder()
@@ -149,7 +162,7 @@ public class SessionCharacterService extends EntityService<SessionCharactersReco
                                     "Edge from location id %s to %s does not exist".formatted(previousCharacter.getCurrentLocationId(), newLocationId),
                                     Severity.SYSTEM
                             );
-
+                            data.set(SESSION_CHARACTERS.LAST_MOVED_TICK_NUM, session.getCurrentTick());
                             if (!findResult.getTraversable())
                                 throw new UnsupportedAction(
                                         "Edge from location id %s to %s is non-traversable".formatted(previousCharacter.getCurrentLocationId(), newLocationId),

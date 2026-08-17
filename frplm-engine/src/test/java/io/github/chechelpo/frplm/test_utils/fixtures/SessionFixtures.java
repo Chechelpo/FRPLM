@@ -36,15 +36,16 @@ public final class SessionFixtures extends EntityFixtures<SessionsRecord, Sessio
         sample.getAssignment(SESSIONS.USER_PERSONA_ID)
                 .ifUnassignedRun(
                         () -> {
-                            CharactersRecord character = characterFixtures.addAndCreateTo(
+                            CharactersRecord userCharacter = characterFixtures.addAndCreateTo(
                                     EntityDataPayload.<CharactersRecord>builder()
                                             .copyIfAssigned(CHARACTERS.WORLD_ID, SESSIONS.WORLD_ID, sample)
+                                            .set(CHARACTERS.CAN_BE_USER, true)
                                             .build()
                             );
                             consumers.add(
                                     payload -> payload
-                                            .ifUnassignedSet(SESSIONS.WORLD_ID, character.getWorldId())
-                                            .ifUnassignedSet(SESSIONS.USER_PERSONA_ID, character.getId())
+                                            .ifUnassignedSet(SESSIONS.WORLD_ID, userCharacter.getWorldId())
+                                            .ifUnassignedSet(SESSIONS.USER_PERSONA_ID, userCharacter.getId())
                             );
                         }
                 );

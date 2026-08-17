@@ -160,26 +160,42 @@ public class MessageService extends EntityService<MessagesRecord, MessageStore> 
      * @apiNote to existing message
      */
     @Transactional
-    public void registerNewResponse(int sessionId, int tick_num, String content, String reasoning) {
-        EntityKey<MessagesRecord> messageKey = EntityKey.<MessagesRecord>builder()
-                .set(MESSAGES.SESSION_ID, sessionId)
-                .set(MESSAGES.TICK_NUM, tick_num)
-                .build();
+    public void registerNewResponse(
+            int sessionId,
+            int tickNum,
+            String content,
+            String reasoning
+    ) {
+        EntityKey<MessagesRecord> messageKey =
+                EntityKey.<MessagesRecord>builder()
+                        .set(MESSAGES.SESSION_ID, sessionId)
+                        .set(MESSAGES.TICK_NUM, tickNum)
+                        .build();
 
-        if (!exists(messageKey))
-            throw new EntityNotFound("No message with this id found when registering response", Severity.SYSTEM);
-        ChatCompletionRole messageRole = ChatCompletionRole.fromWireValue(getNonNullValueOf(MESSAGES.ROLE, messageKey));
-        if (messageRole != ChatCompletionRole.ASSISTANT)
-            throw new InvalidValue("Tried to register a new response of a user message");
+        MessagesRecord message = find(messageKey)
+                .orElseThrow("No message found when registering response", Severity.SYSTEM);
 
-        int world_id = sessionService.getNonNullValueOf(SESSIONS.WORLD_ID, sessionService.keyOf(sessionId));
-        registerNewResponse(EntityDataPayload.<ResponsesRecord>builder()
-                .set(RESPONSES.SESSION_ID, sessionId)
-                .set(RESPONSES.TICK_NUM, tick_num)
-                .set(RESPONSES.REASONING, reasoning)
-                .set(RESPONSES.WORLD_ID, world_id)
-                .set(RESPONSES.CONTENT, content)
-                .build());
+        List<MessagesRecord> messages = getMatching(
+                EntityKey.of(MESSAGES.SESSION_ID, sessionId)
+        );
+        MessagesRecord previousMessage = messages.get(messages.size() - 2);
+
+        if (!message.getRole().equals(ChatCompletionRole.ASSISTANT.wireValue())) {
+            throw new InvalidValue(
+                    "Tried to register a new response of a user message"
+            );
+        }
+
+        registerNewResponse(
+                EntityDataPayload.<ResponsesRecord>builder()
+                        .set(RESPONSES.SESSION_ID, sessionId)
+                        .set(RESPONSES.TICK_NUM, tickNum)
+                        .set(RESPONSES.WORLD_ID, message.getWorldId())
+                        .set(RESPONSES.LOCATION_ID, previousMessage.getLocationId())
+                        .set(RESPONSES.CONTENT, content)
+                        .set(RESPONSES.REASONING, reasoning)
+                        .build()
+        );
     }
 
     @SuppressWarnings("SpringTransactionalMethodCallsInspection")

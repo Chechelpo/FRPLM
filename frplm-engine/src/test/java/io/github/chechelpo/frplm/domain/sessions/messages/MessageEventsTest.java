@@ -2,22 +2,19 @@ package io.github.chechelpo.frplm.domain.sessions.messages;
 
 import io.github.chechelpo.frplm.core.entities.fields.EntityDataPayload;
 import io.github.chechelpo.frplm.core.entities.fields.EntityKey;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.CharactersRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.MessagesRecord;
-import io.github.chechelpo.frplm.jooq.generated.tables.records.SessionsRecord;
+import io.github.chechelpo.frplm.jooq.generated.tables.records.*;
 import io.github.chechelpo.frplm.test_annotations.SimulithIntegrationTest;
 import io.github.chechelpo.frplm.test_utils.comparators.RecordComparator;
-import io.github.chechelpo.frplm.test_utils.fixtures.CharacterFixtures;
-import io.github.chechelpo.frplm.test_utils.fixtures.EntityFixtureFactory;
-import io.github.chechelpo.frplm.test_utils.fixtures.MessageFixtures;
-import io.github.chechelpo.frplm.test_utils.fixtures.SessionFixtures;
+import io.github.chechelpo.frplm.test_utils.fixtures.*;
 import io.github.chechelpo.frplm.utils.stable_records.StableRecordCreator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Import;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.chechelpo.frplm.jooq.generated.Tables.*;
@@ -31,6 +28,10 @@ class MessageEventsTest {
     private StableRecordCreator stableRecordCreator;
     @Autowired
     private EntityFixtureFactory fixtureFactory;
+    @Autowired
+    private MessageSource messageSource;
+    @Autowired
+    private MessageService messageService;
 
     @BeforeEach
     void setUp() {
@@ -70,5 +71,47 @@ class MessageEventsTest {
                 .equals(CHARACTERS.STARTING_LOCATION_ID, MESSAGES.LOCATION_ID)
                 .equals(CHARACTERS.WORLD_ID, MESSAGES.WORLD_ID)
                 .execute();
+    }
+
+    @Test
+    @SimulithIntegrationTest
+    void onUserCharacterMovement_UpdateMessageLocation(){
+        String seed = "user-character-movement";
+        SessionFixtures sessionFixtures = fixtureFactory.sessions(seed);
+        SessionCharacterFixture sessionCharacterFixture = fixtureFactory.sesCharacters(seed);
+        LocationFixtures locationFixtures = fixtureFactory.locations(seed);
+        EdgesFixtures edgesFixtures = fixtureFactory.edges(seed);
+
+        SessionsRecord session = sessionFixtures.createOne();
+        SessionCharactersRecord character = sessionCharacterFixture.service().getUserCharacterOf(session);
+
+        List<LocationsRecord> locations = new ArrayList<>(locationFixtures.addAndCreateList(
+                10,
+                i -> EntityDataPayload.<LocationsRecord>builder()
+                        .set(LOCATIONS.WORLD_ID, session.getWorldId())
+                        .set(LOCATIONS.NAME, "Location " + i)
+                )
+        );
+        locations.addFirst(locationFixtures.service().require(
+                EntityKey.<LocationsRecord>builder()
+                        .set(LOCATIONS.WORLD_ID, session.getWorldId())
+                        .set(LOCATIONS.ID, character.getCurrentLocationId())
+                        .build()
+        ));
+        edgesFixtures.linkLinear(locations);
+
+        locations.forEach(
+                newLocation -> {
+                    sessionCharacterFixture.move(character, newLocation);
+                    MessagesRecord lastMessage = messageService.getLastMessageOf(session);
+                    SessionCharactersRecord updatedChar = sessionCharacterFixture.getUpdatedRecord(character);
+
+                    RecordComparator.compare(updatedChar, lastMessage)
+                            .equals(SESSION_CHARACTERS.SESSION_ID, MESSAGES.SESSION_ID)
+                            .equals(SESSION_CHARACTERS.WORLD_ID, MESSAGES.WORLD_ID)
+                            .equals(SESSION_CHARACTERS.CURRENT_LOCATION_ID, MESSAGES.LOCATION_ID)
+                            .execute();
+                }
+        );
     }
 }
