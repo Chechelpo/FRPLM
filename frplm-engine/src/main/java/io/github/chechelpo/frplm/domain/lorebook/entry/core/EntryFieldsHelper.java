@@ -116,6 +116,11 @@ final class EntryFieldsHelper extends EntityControllerFieldValidator<EntryRecord
                 // Injection Options
                 FieldInfo.builder(Entry.ENTRY.POSITION)
                         .nullable()
+                        .setConstraints(
+                                ShortConstraint.builder()
+                                        .setMin((short) 0)
+                                        .build()
+                        )
                         .build(),
 
                 // Activation strategy

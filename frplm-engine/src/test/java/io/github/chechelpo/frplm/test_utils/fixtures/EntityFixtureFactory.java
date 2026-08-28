@@ -2,7 +2,9 @@ package io.github.chechelpo.frplm.test_utils.fixtures;
 
 import io.github.chechelpo.frplm.domain.character.core.CharacterService;
 import io.github.chechelpo.frplm.domain.lorebook.core.LorebookService;
+import io.github.chechelpo.frplm.domain.lorebook.entry.core.EntryService;
 import io.github.chechelpo.frplm.domain.sessions.core.SessionService;
+import io.github.chechelpo.frplm.domain.sessions.entry_state.EntryStateService;
 import io.github.chechelpo.frplm.domain.sessions.messages.MessageService;
 import io.github.chechelpo.frplm.domain.sessions.session_characters.SessionCharacterService;
 import io.github.chechelpo.frplm.domain.world.core.WorldService;
@@ -26,6 +28,8 @@ public class EntityFixtureFactory {
     private final SessionService sessionService;
     private final SessionCharacterService sessionCharacterService;
     private final MessageService messageService;
+    private final EntryService entryService;
+    private final EntryStateService entryStateService;
 
     public EntityFixtureFactory(
             LorebookService lorebookService,
@@ -35,7 +39,11 @@ public class EntityFixtureFactory {
             CharacterService characterService,
             EdgeService edgeService,
             SessionService sessionService,
-            SessionCharacterService sessionCharacterService, MessageService messageService) {
+            SessionCharacterService sessionCharacterService,
+            MessageService messageService,
+            EntryService entryService,
+            EntryStateService entryStateService
+    ) {
         this.lorebookService = lorebookService;
         this.worldService = worldService;
         this.locationsService = locationsService;
@@ -45,6 +53,8 @@ public class EntityFixtureFactory {
         this.sessionService = sessionService;
         this.sessionCharacterService = sessionCharacterService;
         this.messageService = messageService;
+        this.entryService = entryService;
+        this.entryStateService = entryStateService;
     }
 
     public LorebookFixtures lorebook(String seed){
@@ -112,6 +122,22 @@ public class EntityFixtureFactory {
                 edgeService,
                 this,
                 getCollisionFreeSeed(LOCATION_EDGES, seed)
+        );
+    }
+
+    public EntryFixtures entries(String seed){
+        return new EntryFixtures(
+                entryService,
+                this,
+                getCollisionFreeSeed(ENTRY, seed)
+        );
+    }
+
+    public EntryStateFixtures entryStates(String seed){
+        return new EntryStateFixtures(
+                entryStateService,
+                this,
+                getCollisionFreeSeed(ENTRY_STATE, seed)
         );
     }
 
