@@ -1,13 +1,18 @@
-import type { Character } from "../../src/domain/Characters";
-import type { World, Location, Region } from "../../src/domain/World";
-import type { Entry, Lorebook } from "../../src/domain/Lorebook";
-import type { Tag } from "../../src/domain/Tag";
-import type { LLMConnection } from "../../src/domain/Connection";
-import type { PromptSection, PromptTemplate } from "../../src/domain/Prompts";
-import type { fetchOne, fetch_all, createEntity, deleteEntity } from "../../src/core/ABSEntity";
-import type { EntityTypes } from "../../src/domain/EntityTypes";
-import {FrplmComponentRegistry} from "./components";
+// src/HostSdkBindings.ts
+import type { Character } from "./domain/Characters.js";
+import type { World, Location, Region } from "./domain/World.js";
+import type { Entry, Lorebook } from "./domain/Lorebook.js";
+import type { Tag } from "./domain/Tag.js";
+import type { LLMConnection } from "./domain/Connection.js";
+import type { PromptSection, PromptTemplate } from "./domain/Prompts.js";
+import type { fetchOne, fetch_all, createEntity, deleteEntity } from "./core/ABSEntity.js";
+import type { EntityTypes } from "./domain/EntityTypes.js";
+import { FrplmComponentRegistry } from "./components.js";
 
+/**
+ * The bindings the host application publishes on `window.FrplmHost`
+ * so that extension panels can interact with the application.
+ */
 export interface FrplmHostBindings {
     entities: {
         Character: typeof Character;
@@ -31,6 +36,11 @@ export interface FrplmHostBindings {
     EntityTypes: typeof EntityTypes;
 }
 
+/**
+ * The bindings the host application publishes on
+ * `window.FrplmExtension`. Extension panels call these helpers to
+ * persist their configuration and surface notifications.
+ */
 export interface FrplmExtensionBindings {
     getConfig: (id: string) => Promise<any>;
     saveConfig: (id: string, config: any) => Promise<boolean>;

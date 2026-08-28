@@ -1,39 +1,47 @@
 {
   "name": "@frplm/host-sdk",
-  "version": "0.1.6-alpha.4",
+  "version": "0.2.0",
   "private": false,
   "type": "module",
-  "description": "FRPLM host SDK types for frontend extension panels.",
+  "description": "FRPLM domain SDK: framework-agnostic types, domain entities and pure-TS utilities. No Vue or UI components. Owned and versioned by the project owner; treated as a stable contract by every extension panel.",
   "license": "MIT",
-
-  "types": "./dist-sdk/sdk/src/sdk-index.d.ts",
-
+  "types": "./dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "types": "./dist-sdk/sdk/src/sdk-index.d.ts",
-      "default": "./dist-sdk/sdk/src/sdk-index.d.ts"
-    },
-    "./assets/*": "./dist-sdk/assets/*"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
-
   "scripts": {
-    "build": "rm -rf dist-sdk && tsc -p tsconfig.json && tsc-alias -p tsconfig.json && cp -R src/assets dist-sdk/assets",
-    "pack:check": "npm run build && npm pack --dry-run"
+    "clean": "rm -rf dist",
+    "build:types": "tsc -p tsconfig.json",
+    "build:js": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && npm run build:types && npm run build:js",
+    "test": "npm run build && node --experimental-strip-types --test tests/*.test.ts",
+    "test:source": "node --experimental-strip-types --test tests/*.test.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-
+  "peerDependencies": {
+    "vue": "^3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": false
+    }
+  },
   "devDependencies": {
     "typescript": "^5.9.3",
-    "tsc-alias": "^1.8.16"
+    "vitest": "^4.1.11",
+    "vue": "^3.5.25"
   },
-
   "files": [
-    "dist-sdk"
+    "dist"
   ],
-
   "engines": {
     "node": ">=20.19.0"
   },
-
   "publishConfig": {
     "access": "public",
     "tag": "alpha"

@@ -11,10 +11,7 @@ import io.github.chechelpo.frplm.jooq.generated.tables.records.LorebooksRecord;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static io.github.chechelpo.frplm.extensions.api.utils.EntityConfigs.API_BASE;
 
@@ -38,11 +35,13 @@ final class PromptController {
             EntityDTO[] activatedEntries,
             ChatCompletionRequest rawRequest
     ) {}
+
+
     @GetMapping(
             value = "/new/{sessionID}",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    ResponseEntity<PromptDTO> getPrompt(@PathVariable int sessionID) throws EntityNotFound {
+    ResponseEntity<PromptDTO> getPrompt(@PathVariable int sessionID, @RequestBody Intentions intentions) throws EntityNotFound {
         PromptResult newPrompt = promptService.getNewPrompt(sessionID);
         return ResponseEntity.ok(
                 new PromptDTO(

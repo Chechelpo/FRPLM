@@ -1,25 +1,28 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "strict": true,
-
-    "baseUrl": "..",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "noImplicitOverride": true,
 
     "declaration": true,
-    "emitDeclarationOnly": true,
-    "rootDir": "..",
-    "outDir": "./dist-sdk",
+    "declarationMap": true,
+    "sourceMap": true,
+    "emitDeclarationOnly": false,
 
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+
+    "types": ["vue"]
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "tests"]
 }

@@ -1,0 +1,943 @@
+/*
+ * src/assets/edit-box.css
+ * Reusable editor surface.
+ *
+ * Basic structure:
+ *
+ * <section class="edit-box edit-box--accent">
+ *   <header class="edit-box__header">
+ *     <div class="edit-box__header-main">
+ *       <span class="edit-box__eyebrow">Category</span>
+ *
+ *       <div class="edit-box__title-row">
+ *         <h2 class="edit-box__title">Title</h2>
+ *         <span class="edit-box__count">4</span>
+ *       </div>
+ *
+ *       <p class="edit-box__description">Description</p>
+ *     </div>
+ *
+ *     <div class="edit-box__actions">...</div>
+ *   </header>
+ *
+ *   <div class="edit-box__body">...</div>
+ *
+ *   <footer class="edit-box__footer">...</footer>
+ * </section>
+ */
+
+/* ==========================================================================
+ * Component-local tokens
+ * ======================================================================= */
+
+.edit-box {
+    --edit-box-accent: var(--c-primary);
+    --edit-box-accent-strong: var(--c-primary-strong);
+
+    --edit-box-surface: var(--c-surface);
+    --edit-box-surface-alt: var(--c-surface-2);
+    --edit-box-surface-raised: var(--c-surface-raised);
+
+    --edit-box-border: var(--c-border);
+    --edit-box-text: var(--c-fg);
+    --edit-box-muted: var(--c-muted);
+
+    --edit-box-radius: var(--radius-lg);
+    --edit-box-padding: var(--space-4);
+
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
+    color: rgb(var(--edit-box-text));
+    font-family: var(--font-primary);
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgb(var(--edit-box-surface-raised) / 0.78),
+                    rgb(var(--edit-box-surface) / 0.92) 48%,
+                    rgb(var(--edit-box-surface-alt) / 0.74)
+            );
+
+    border: 1px solid rgb(var(--edit-box-border) / 0.34);
+    border-radius: var(--edit-box-radius);
+
+    box-shadow:
+            0 10px 30px rgb(var(--c-shadow) / 0.09),
+            0 3px 8px rgb(var(--c-shadow) / 0.05),
+            inset 0 1px 0 rgb(255 255 255 / 0.48);
+
+    overflow: hidden;
+
+    transition:
+            border-color var(--duration-normal) var(--ease-standard),
+            box-shadow var(--duration-normal) var(--ease-standard),
+            transform var(--duration-normal) var(--ease-standard);
+}
+
+/* Decorative accent line across the upper edge. */
+.edit-box::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 2;
+
+    height: 3px;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    rgb(var(--edit-box-accent-strong) / 0.35),
+                    rgb(var(--edit-box-accent)),
+                    rgb(var(--edit-box-accent-strong) / 0.35)
+            );
+
+    pointer-events: none;
+}
+
+.edit-box:hover {
+    border-color: rgb(var(--edit-box-accent) / 0.38);
+
+    box-shadow:
+            0 14px 34px rgb(var(--c-shadow) / 0.11),
+            0 4px 10px rgb(var(--c-shadow) / 0.06),
+            inset 0 1px 0 rgb(255 255 255 / 0.52);
+}
+
+.edit-box:focus-within {
+    border-color: rgb(var(--edit-box-accent) / 0.58);
+
+    box-shadow:
+            0 0 0 var(--focus-ring-width)
+            rgb(var(--focus-ring-color) / 0.13),
+            0 14px 34px rgb(var(--c-shadow) / 0.11),
+            inset 0 1px 0 rgb(255 255 255 / 0.52);
+}
+
+/* ==========================================================================
+ * Variants
+ * ======================================================================= */
+
+.edit-box--accent {
+    --edit-box-accent: var(--c-accent);
+    --edit-box-accent-strong: var(--c-accent-2);
+}
+
+.edit-box--primary {
+    --edit-box-accent: var(--c-primary);
+    --edit-box-accent-strong: var(--c-primary-strong);
+}
+
+.edit-box--danger {
+    --edit-box-accent: var(--c-danger);
+    --edit-box-accent-strong: var(--c-danger-strong);
+}
+
+.edit-box--success {
+    --edit-box-accent: var(--c-success);
+    --edit-box-accent-strong: var(--c-success-strong);
+}
+
+.edit-box--warning {
+    --edit-box-accent: var(--c-warning);
+    --edit-box-accent-strong: var(--c-warning-strong);
+}
+
+.edit-box--info {
+    --edit-box-accent: var(--c-info);
+    --edit-box-accent-strong: var(--c-info-strong);
+}
+
+.edit-box--compact {
+    --edit-box-padding: var(--space-3);
+    --edit-box-radius: var(--radius-md);
+}
+
+.edit-box--flat {
+    box-shadow:
+            0 2px 6px rgb(var(--c-shadow) / 0.05),
+            inset 0 1px 0 rgb(255 255 255 / 0.35);
+}
+
+.edit-box--transparent {
+    background: rgb(var(--edit-box-surface) / 0.32);
+    backdrop-filter: blur(10px);
+}
+
+.edit-box--disabled {
+    opacity: 0.58;
+    pointer-events: none;
+}
+
+.edit-box--no-accent::before {
+    display: none;
+}
+
+/* ==========================================================================
+ * Header
+ * ======================================================================= */
+
+.edit-box__header {
+    position: relative;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+
+    min-width: 0;
+    box-sizing: border-box;
+
+    padding:
+            calc(var(--edit-box-padding) + 0.15rem)
+            var(--edit-box-padding)
+            var(--edit-box-padding);
+
+    background:
+            linear-gradient(
+                    135deg,
+                    rgb(var(--edit-box-surface-raised) / 0.7),
+                    rgb(var(--edit-box-surface-alt) / 0.42)
+            );
+
+    border-bottom: 1px solid rgb(var(--edit-box-border) / 0.24);
+}
+
+.edit-box__header::after {
+    content: "";
+
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+
+    height: 1px;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    transparent,
+                    rgb(var(--edit-box-accent) / 0.26),
+                    transparent
+            );
+
+    pointer-events: none;
+}
+
+.edit-box__header-main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.edit-box__header-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: rgb(var(--edit-box-accent-strong));
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgb(var(--edit-box-accent) / 0.2),
+                    rgb(var(--edit-box-accent) / 0.08)
+            );
+
+    border: 1px solid rgb(var(--edit-box-accent) / 0.28);
+    border-radius: var(--radius-md);
+
+    box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / 0.42),
+            0 3px 8px rgb(var(--c-shadow) / 0.06);
+}
+
+.edit-box__header-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.edit-box__eyebrow {
+    display: block;
+
+    margin: 0 0 var(--space-1);
+
+    color: rgb(var(--edit-box-accent-strong));
+
+    font-size: 0.67rem;
+    font-weight: 800;
+    line-height: 1.1;
+
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.edit-box__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    min-width: 0;
+}
+
+.edit-box__title {
+    min-width: 0;
+    margin: 0;
+
+    color: rgb(var(--c-fg-strong));
+
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 750;
+    line-height: 1.25;
+
+    overflow-wrap: anywhere;
+}
+
+.edit-box__description {
+    max-width: 50rem;
+
+    margin:
+            var(--space-2)
+            0
+            0;
+
+    color: rgb(var(--edit-box-muted));
+
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+.edit-box__actions {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+/* Editable title wrapper, such as ShortTextBox. */
+.edit-box__title-control {
+    width: min(100%, 34rem);
+    min-width: 8rem;
+}
+
+.edit-box__title-control :where(input, textarea) {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+
+    color: rgb(var(--c-fg-strong));
+
+    font-family: var(--font-primary);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 750;
+}
+
+/* ==========================================================================
+ * Badges and counters
+ * ======================================================================= */
+
+.edit-box__count,
+.edit-box__badge {
+    min-width: 1.7rem;
+    min-height: 1.45rem;
+    box-sizing: border-box;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+
+    padding: 0.2rem 0.5rem;
+
+    color: rgb(var(--edit-box-accent-strong));
+
+    background: rgb(var(--edit-box-accent) / 0.14);
+    border: 1px solid rgb(var(--edit-box-accent) / 0.27);
+    border-radius: var(--radius-round);
+
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
+
+    white-space: nowrap;
+}
+
+.edit-box__badge--neutral {
+    color: rgb(var(--c-muted));
+
+    background: rgb(var(--c-muted) / 0.09);
+    border-color: rgb(var(--c-muted) / 0.18);
+}
+
+.edit-box__badge--success {
+    color: rgb(var(--c-success-strong));
+
+    background: rgb(var(--c-success) / 0.12);
+    border-color: rgb(var(--c-success) / 0.25);
+}
+
+.edit-box__badge--warning {
+    color: rgb(var(--c-warning-strong));
+
+    background: rgb(var(--c-warning) / 0.13);
+    border-color: rgb(var(--c-warning) / 0.27);
+}
+
+.edit-box__badge--danger {
+    color: rgb(var(--c-danger-strong));
+
+    background: rgb(var(--c-danger) / 0.1);
+    border-color: rgb(var(--c-danger) / 0.23);
+}
+
+/* ==========================================================================
+ * Body
+ * ======================================================================= */
+
+.edit-box__body {
+    min-width: 0;
+    box-sizing: border-box;
+
+    padding: var(--edit-box-padding);
+}
+
+.edit-box__body--flush {
+    padding: 0;
+}
+
+.edit-box__body--dense {
+    padding: var(--space-3);
+}
+
+.edit-box__body--scrollable {
+    max-height: min(70dvh, 50rem);
+    overflow: auto;
+    overscroll-behavior: contain;
+
+    scrollbar-width: thin;
+    scrollbar-color:
+            rgb(var(--edit-box-accent) / 0.5)
+            transparent;
+}
+
+.edit-box__body--scrollable::-webkit-scrollbar {
+    width: 0.65rem;
+    height: 0.65rem;
+}
+
+.edit-box__body--scrollable::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.edit-box__body--scrollable::-webkit-scrollbar-thumb {
+    background: rgb(var(--edit-box-accent) / 0.4);
+    border: 2px solid transparent;
+    border-radius: var(--radius-round);
+    background-clip: padding-box;
+}
+
+.edit-box__body--scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--edit-box-accent) / 0.62);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+/* ==========================================================================
+ * Toolbar
+ * ======================================================================= */
+
+.edit-box__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+
+    min-width: 0;
+
+    margin-bottom: var(--space-4);
+    padding: var(--space-3);
+
+    background: rgb(var(--edit-box-surface-raised) / 0.44);
+    border: 1px solid rgb(var(--edit-box-border) / 0.22);
+    border-radius: var(--radius-md);
+
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.3);
+}
+
+.edit-box__toolbar-main {
+    flex: 1 1 18rem;
+    min-width: 0;
+}
+
+.edit-box__toolbar-actions {
+    flex: 0 0 auto;
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+/* ==========================================================================
+ * Sections inside an editor
+ * ======================================================================= */
+
+.edit-box__section {
+    min-width: 0;
+
+    padding: var(--space-4);
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgb(var(--edit-box-surface-raised) / 0.48),
+                    rgb(var(--edit-box-surface-alt) / 0.28)
+            );
+
+    border: 1px solid rgb(var(--edit-box-border) / 0.2);
+    border-radius: var(--radius-md);
+
+    box-shadow:
+            inset 0 1px 0 rgb(255 255 255 / 0.3),
+            0 4px 12px rgb(var(--c-shadow) / 0.04);
+}
+
+.edit-box__section + .edit-box__section {
+    margin-top: var(--space-3);
+}
+
+.edit-box__section--accent {
+    border-color: rgb(var(--edit-box-accent) / 0.25);
+
+    background:
+            linear-gradient(
+                    145deg,
+                    rgb(var(--edit-box-accent) / 0.075),
+                    rgb(var(--edit-box-surface-raised) / 0.48)
+            );
+}
+
+.edit-box__section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    margin-bottom: var(--space-3);
+}
+
+.edit-box__section-heading {
+    min-width: 0;
+}
+
+.edit-box__section-title {
+    margin: 0;
+
+    color: rgb(var(--c-fg-strong));
+
+    font-size: 0.9rem;
+    font-weight: 750;
+    line-height: 1.3;
+}
+
+.edit-box__section-description {
+    margin: var(--space-1) 0 0;
+
+    color: rgb(var(--edit-box-muted));
+
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+ * Layout helpers
+ * ======================================================================= */
+
+.edit-box__stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    min-width: 0;
+}
+
+.edit-box__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+
+    min-width: 0;
+}
+
+.edit-box__grid {
+    display: grid;
+    grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(min(100%, 16rem), 1fr)
+    );
+
+    gap: var(--space-3);
+
+    min-width: 0;
+}
+
+.edit-box__content {
+    min-width: 0;
+}
+
+.edit-box__divider {
+    width: 100%;
+    height: 1px;
+
+    margin: var(--space-4) 0;
+
+    background:
+            linear-gradient(
+                    90deg,
+                    transparent,
+                    rgb(var(--edit-box-border) / 0.38),
+                    transparent
+            );
+
+    border: 0;
+}
+
+/* ==========================================================================
+ * Footer
+ * ======================================================================= */
+
+.edit-box__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+
+    min-width: 0;
+    box-sizing: border-box;
+
+    padding:
+            var(--space-3)
+            var(--edit-box-padding);
+
+    background: rgb(var(--edit-box-surface-alt) / 0.34);
+    border-top: 1px solid rgb(var(--edit-box-border) / 0.22);
+}
+
+/* ==========================================================================
+ * Generic actions
+ * ======================================================================= */
+
+.edit-box__action {
+    min-height: 2.25rem;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    padding: 0.45rem 0.8rem;
+
+    color: rgb(var(--c-fg));
+
+    background: rgb(var(--edit-box-surface-raised) / 0.66);
+    border: 1px solid rgb(var(--edit-box-border) / 0.28);
+    border-radius: var(--radius-sm);
+
+    font-family: var(--font-primary);
+    font-size: 0.78rem;
+    font-weight: 750;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+            color var(--duration-fast) var(--ease-standard),
+            background-color var(--duration-fast) var(--ease-standard),
+            border-color var(--duration-fast) var(--ease-standard),
+            box-shadow var(--duration-fast) var(--ease-standard),
+            transform var(--duration-fast) var(--ease-standard);
+}
+
+.edit-box__action:hover {
+    background: rgb(var(--edit-box-surface-hover) / 0.9);
+    border-color: rgb(var(--edit-box-accent) / 0.45);
+
+    box-shadow: 0 3px 9px rgb(var(--c-shadow) / 0.07);
+}
+
+.edit-box__action:active {
+    transform: scale(0.97);
+}
+
+.edit-box__action:focus-visible {
+    outline: var(--focus-ring-width) solid
+    rgb(var(--focus-ring-color) / 0.32);
+
+    outline-offset: 2px;
+}
+
+.edit-box__action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.edit-box__action--accent {
+    color: rgb(var(--c-on-accent));
+
+    background: rgb(var(--edit-box-accent) / 0.2);
+    border-color: rgb(var(--edit-box-accent) / 0.38);
+}
+
+.edit-box__action--accent:hover {
+    background: rgb(var(--edit-box-accent) / 0.3);
+    border-color: rgb(var(--edit-box-accent) / 0.58);
+}
+
+.edit-box__action--danger {
+    color: rgb(var(--c-danger-strong));
+
+    background: rgb(var(--c-danger) / 0.1);
+    border-color: rgb(var(--c-danger) / 0.25);
+}
+
+.edit-box__action--danger:hover {
+    color: rgb(var(--c-on-danger));
+
+    background: rgb(var(--c-danger) / 0.88);
+    border-color: rgb(var(--c-danger));
+}
+
+/* ==========================================================================
+ * Empty, loading and error states
+ * ======================================================================= */
+
+.edit-box__state {
+    min-height: 8rem;
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+
+    padding: var(--space-6);
+
+    color: rgb(var(--edit-box-muted));
+    text-align: center;
+
+    background: rgb(var(--edit-box-surface-raised) / 0.34);
+    border: 1px dashed rgb(var(--edit-box-border) / 0.38);
+    border-radius: var(--radius-md);
+}
+
+.edit-box__state--vertical {
+    flex-direction: column;
+}
+
+.edit-box__state--error {
+    color: rgb(var(--c-danger-strong));
+
+    background: rgb(var(--c-danger) / 0.055);
+    border-color: rgb(var(--c-danger) / 0.28);
+}
+
+.edit-box__state--warning {
+    color: rgb(var(--c-warning-strong));
+
+    background: rgb(var(--c-warning) / 0.065);
+    border-color: rgb(var(--c-warning) / 0.3);
+}
+
+.edit-box__state--success {
+    color: rgb(var(--c-success-strong));
+
+    background: rgb(var(--c-success) / 0.06);
+    border-color: rgb(var(--c-success) / 0.27);
+}
+
+.edit-box__state-content {
+    min-width: 0;
+}
+
+.edit-box__state-title {
+    display: block;
+
+    margin: 0 0 var(--space-1);
+
+    color: rgb(var(--c-fg-strong));
+
+    font-size: 0.88rem;
+    font-weight: 800;
+}
+
+.edit-box__state--error .edit-box__state-title {
+    color: rgb(var(--c-danger-strong));
+}
+
+.edit-box__state-description {
+    max-width: 32rem;
+    margin: 0;
+
+    color: currentColor;
+
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.edit-box__state-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+
+    display: grid;
+    place-items: center;
+
+    color: rgb(var(--edit-box-accent-strong));
+
+    background: rgb(var(--edit-box-accent) / 0.12);
+    border: 1px solid rgb(var(--edit-box-accent) / 0.22);
+    border-radius: 50%;
+}
+
+.edit-box__state-icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.edit-box__state--error .edit-box__state-icon {
+    color: rgb(var(--c-danger-strong));
+
+    background: rgb(var(--c-danger) / 0.1);
+    border-color: rgb(var(--c-danger) / 0.23);
+}
+
+/* ==========================================================================
+ * Loading indicator
+ * ======================================================================= */
+
+.edit-box__spinner {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+
+    border: 2px solid rgb(var(--edit-box-accent) / 0.22);
+    border-top-color: rgb(var(--edit-box-accent-strong));
+    border-radius: 50%;
+
+    animation: edit-box-spinner 700ms linear infinite;
+}
+
+@keyframes edit-box-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================================
+ * Nested editor boxes
+ * ======================================================================= */
+
+.edit-box .edit-box {
+    --edit-box-radius: var(--radius-md);
+
+    box-shadow:
+            0 5px 16px rgb(var(--c-shadow) / 0.06),
+            inset 0 1px 0 rgb(255 255 255 / 0.34);
+}
+
+.edit-box .edit-box::before {
+    height: 2px;
+}
+
+/* ==========================================================================
+ * Responsive behavior
+ * ======================================================================= */
+
+@media (max-width: 700px) {
+    .edit-box {
+        --edit-box-padding: var(--space-3);
+    }
+
+    .edit-box__header {
+        gap: var(--space-3);
+    }
+
+    .edit-box__description {
+        font-size: 0.79rem;
+    }
+
+    .edit-box__toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .edit-box__toolbar-main {
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .edit-box__toolbar-actions {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-box__header {
+        flex-direction: column;
+    }
+
+    .edit-box__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .edit-box__title-control {
+        min-width: 0;
+    }
+
+    .edit-box__row {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+
+/* ==========================================================================
+ * Reduced motion
+ * ======================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .edit-box,
+    .edit-box__action,
+    .edit-box__spinner {
+        transition: none;
+        animation: none;
+    }
+}

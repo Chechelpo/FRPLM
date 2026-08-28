@@ -1,0 +1,213 @@
+@import "theme.css";
+@import "edit-box.css";
+
+/* ==========================================================================
+ * Global document reset
+ * ======================================================================= */
+
+html,
+body,
+#app {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+}
+
+html {
+  font-family: var(--font-primary);
+  color: rgb(var(--c-fg));
+
+  background: rgb(var(--c-page));
+}
+
+body {
+  min-width: 20rem;
+
+  color: rgb(var(--c-fg));
+
+  background:
+          radial-gradient(
+                  circle at 15% 0%,
+                  rgb(var(--c-accent) / 0.11),
+                  transparent 28rem
+          ),
+          linear-gradient(
+                  145deg,
+                  rgb(var(--c-page)),
+                  rgb(var(--c-page-secondary))
+          );
+
+  background-attachment: fixed;
+}
+
+#app {
+  max-width: none;
+  box-sizing: border-box;
+  padding: 0;
+
+  font-weight: 400;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  box-sizing: border-box;
+}
+
+/* ==========================================================================
+ * Selection and focus
+ * ======================================================================= */
+
+::selection {
+  color: rgb(var(--c-on-accent));
+  background: rgb(var(--c-accent) / 0.56);
+}
+
+:focus-visible {
+  outline-color: rgb(var(--focus-ring-color));
+}
+
+/* ==========================================================================
+ * Legacy aliases
+ *
+ * These preserve compatibility with existing components while directing them
+ * through the new theme.
+ * ======================================================================= */
+
+:root {
+  --primary: rgb(var(--c-primary));
+  --primary-accent: rgb(var(--c-accent));
+  --primary-background: rgb(var(--c-page));
+
+  --danger-color: rgb(var(--c-danger));
+  --danger-text: rgb(var(--c-on-danger));
+
+  --secondary-background: rgb(var(--c-page-secondary));
+
+  --primary-text: var(--font-primary);
+  --muted-text: rgb(var(--c-muted));
+
+  --transparency: 50;
+}
+
+/* ==========================================================================
+ * General text
+ * ======================================================================= */
+
+.muted-text {
+  color: rgb(var(--c-muted));
+
+  font-family: var(--font-primary);
+  font-weight: 400;
+}
+
+/* ==========================================================================
+ * General surfaces
+ * ======================================================================= */
+
+.std-Background {
+  background: rgb(var(--c-page));
+}
+
+/*
+ * Avoid applying filter: blur() directly to content containers.
+ * That also blurs all descendants.
+ *
+ * Use this class when a blurred decorative background is actually required.
+ */
+.std-Background--blurred {
+  position: relative;
+  isolation: isolate;
+}
+
+.std-Background--blurred::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+
+  background: rgb(var(--c-page) / 0.82);
+  filter: blur(6px);
+}
+
+/* ==========================================================================
+ * Legacy wide button
+ * ======================================================================= */
+
+.wide-button {
+  width: 100%;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0.55rem 0.85rem;
+
+  color: rgb(var(--c-on-accent));
+
+  background: rgb(var(--c-primary) / 0.16);
+  border: 1px solid rgb(var(--c-accent) / 0.48);
+  border-radius: var(--radius-md);
+
+  font-family: var(--font-primary);
+  font-weight: 750;
+  text-align: center;
+
+  cursor: pointer;
+
+  transition:
+          background-color var(--duration-fast) var(--ease-standard),
+          border-color var(--duration-fast) var(--ease-standard),
+          box-shadow var(--duration-fast) var(--ease-standard),
+          transform var(--duration-fast) var(--ease-standard);
+}
+
+.wide-button:hover {
+  background: rgb(var(--c-accent) / 0.28);
+  border-color: rgb(var(--c-accent) / 0.72);
+
+  box-shadow: 0 4px 12px rgb(var(--c-shadow) / 0.09);
+}
+
+.wide-button:active {
+  transform: scale(0.985);
+}
+
+.wide-button:focus-visible {
+  outline: var(--focus-ring-width) solid
+  rgb(var(--focus-ring-color) / 0.32);
+
+  outline-offset: 2px;
+}
+
+.wide-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@frplm/frontend",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "FRPLM host application. Vue 3 + Vite SPA that consumes @frplm/host-sdk (domain) and @frplm/ui (primitive editor components). Maintained by AI agents.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --experimental-strip-types --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@frplm/host-sdk": "*",
+    "@frplm/ui": "*",
+    "@vueuse/core": "^14.1.0",
+    "dompurify": "^3.4.8",
+    "markdown-it": "^14.2.0",
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vite-plugin-vue-devtools": "^8.0.5"
+  }
+}

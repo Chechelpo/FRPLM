@@ -1,54 +1,25 @@
+// vite.config.ts
 import { resolve } from "node:path";
-
 import vue from "@vitejs/plugin-vue";
-import cssInjectedByJsPlugin
-    from "vite-plugin-css-injected-by-js";
-
 import { defineConfig } from "vite";
 
-const uiRoot =
-    import.meta.dirname;
-
-const frontendRoot =
-    resolve(
-        uiRoot,
-        ".."
-    );
-
-const frontendSourceRoot =
-    resolve(
-        frontendRoot,
-        "src"
-    );
+const uiRoot = import.meta.dirname;
 
 export default defineConfig({
     plugins: [
         vue(),
-
-        cssInjectedByJsPlugin({
-            topExecutionPriority: true,
-            styleId: "frplm-ui-styles"
-        })
     ],
 
     resolve: {
-        alias: [
-            {
-                find: "@",
-                replacement:
-                frontendSourceRoot
-            }
-        ],
-
         dedupe: [
-            "vue"
-        ]
+            "vue",
+        ],
     },
 
     build: {
         outDir: resolve(
             uiRoot,
-            "dist"
+            "dist",
         ),
 
         emptyOutDir: true,
@@ -56,20 +27,22 @@ export default defineConfig({
         lib: {
             entry: resolve(
                 uiRoot,
-                "src/index.ts"
+                "src/index.ts",
             ),
 
             formats: [
-                "es"
+                "es",
             ],
 
-            fileName: "index"
+            fileName: "index",
+
+            cssFileName: "style",
         },
 
         rollupOptions: {
             external: [
-                "vue"
-            ]
-        }
-    }
+                "vue",
+            ],
+        },
+    },
 });

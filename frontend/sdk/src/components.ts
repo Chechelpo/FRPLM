@@ -1,3 +1,13 @@
+// src/components.ts
+/**
+ * Component registry consumed by host applications to expose the FRPLM
+ * primitive editors to extension panels.
+ *
+ * The SDK only declares the custom-element tag names here; the actual
+ * custom-element definitions and Vue components live in the
+ * `@frplm/ui` package, which the host registers at runtime via
+ * `registerPrimitiveEditors()`.
+ */
 export const FRPLM_COMPONENT_TAGS = {
     AutoCompleteBox:
         "frplm-auto-complete-box",
